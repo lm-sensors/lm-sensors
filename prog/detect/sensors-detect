@@ -1092,6 +1092,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm90_detect(3, @_); },
      },
      {
+       name => "Maxim MAX6654/MAX6690",
+       driver => "to-be-written", # probably lm90
+       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+       i2c_detect => sub { lm90_detect(4, @_); },
+     },
+     {
        name => "Maxim MAX6657/MAX6658/MAX6659",
        driver => "lm90",
        i2c_addrs => [0x4c],
@@ -1126,6 +1132,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "tmp401",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect(9, @_); },
+     },
+     {
+       name => "National Semiconductor LM95231",
+       driver => "to-be-written",
+       i2c_addrs => [0x2b, 0x19, 0x2a],
+       i2c_detect => sub { lm95231_detect(@_); },
      },
      {
        name => "National Semiconductor LM63",
@@ -1170,6 +1182,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "lm90",
        i2c_addrs => [0x4c..0x4d],
        i2c_detect => sub { lm90_detect(5, @_); },
+     },
+     {
+       name => "Analog Devices ADT7481",
+       driver => "to-be-written",
+       i2c_addrs => [0x4c, 0x4b],
+       i2c_detect => sub { adt7481_detect(@_); },
      },
      {
        name => "Analog Devices ADM1029",
@@ -3957,7 +3975,7 @@ sub lm83_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
+#   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032, 4 = MAX6654/MAX6690,
 #    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681,
 #    8 = W83L771W/G, 9 = TI TMP401)
 # $_[1]: A reference to the file descriptor to access this chip.
@@ -4003,6 +4021,13 @@ sub lm90_detect
     return if $rate > 0x0a;
     return if $mid != 0x41;     # Analog Devices
     return 6 if ($cid & 0xf0) == 0x40; # ADM1032
+  }
+  if ($chip == 4) {
+    return if ($conf & 0x07) != 0;
+    return if $rate > 0x07;
+    return if $mid != 0x4d;     # Maxim
+    return if $cid != 0x08;     # MAX6654/MAX6690
+    return 8;
   }
   if ($chip == 5) {
     return if ($conf & 0x1b) != 0;
@@ -4071,6 +4096,51 @@ sub max6657_detect
   return if $cid != $rate;    # No register, returns previous value
 
   return 5;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+# $_[1]: Address
+# Returns: undef if not detected, 6 if detected.
+# Registers used:
+#   0x03: Configuration
+#   0xfe: Manufacturer ID
+#   0xff: Revision ID
+sub lm95231_detect
+{
+  my ($file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+  my $cid = i2c_smbus_read_byte_data($file, 0xff);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+
+  return if ($conf & 0x89) != 0;
+  return if $mid != 0x01;     # National Semiconductor
+  return if $cid != 0xa1;     # LM95231
+
+  return 6;
+}
+
+# $_[0]: A reference to the file descriptor to access this chip.
+# $_[1]: Address
+# Returns: undef if not detected, 6 if detected.
+# Registers used:
+#   0x03: Configuration 1
+#   0x24: Configuration 2
+#   0x3d: Manufacturer ID
+#   0x3e: Device ID
+sub adt7481_detect
+{
+  my ($file, $addr) = @_;
+  my $mid = i2c_smbus_read_byte_data($file, 0x3d);
+  my $cid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $conf1 = i2c_smbus_read_byte_data($file, 0x03);
+  my $conf2 = i2c_smbus_read_byte_data($file, 0x24);
+
+  return if ($conf1 & 0x10) != 0;
+  return if ($conf2 & 0x7f) != 0;
+  return if $mid != 0x41;     # Analog Devices
+  return if $cid != 0x81;     # ADT7481
+
+  return 6;
 }
 
 # $_[0]: Chip to detect

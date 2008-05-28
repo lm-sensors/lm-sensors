@@ -6,6 +6,9 @@ SVN-HEAD
                   Add SMSC EMC6D103 support
                   Improve MAX6657, MAX6658, MAX6659 detection
                   Cache the byte data reads (#2326)
+                  Add Maxim MAX6654/MAX6690 support
+                  Add National Semiconductor LM95231 support
+                  Add Analog Devices ADT7481 support
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
