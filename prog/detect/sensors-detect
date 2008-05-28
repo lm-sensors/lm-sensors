@@ -2211,6 +2211,17 @@ sub isa_read_byte
   return inb($_[1]);
 }
 
+# $_[0]: Base address
+# $_[1]: Register to read
+# Returns: read value
+# This one can be used for any ISA chip with index register at
+# offset 5 and data register at offset 6.
+sub isa_read_i5d6
+{
+  my ($addr, $reg) = @_;
+  return isa_read_byte($addr + 5, $addr + 6, $reg);
+}
+
 #################
 # AUTODETECTION #
 #################
@@ -3554,19 +3565,19 @@ sub lm78_isa_detect
     outb($addr+5, $val);
     return;
   }
-  my $readproc = sub { isa_read_byte($addr + 5, $addr + 6, @_) };
-  return unless (&$readproc(0x40) & 0x80) == 0x00;
-  my $reg = &$readproc(0x49);
+
+  return unless (isa_read_i5d6($addr, 0x40) & 0x80) == 0x00;
+  my $reg = isa_read_i5d6($addr, 0x49);
   return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                 ($chip == 1 and $reg == 0x40) or
                 ($chip == 2 and ($reg & 0xfe) == 0xc0);
 
   # Explicitly prevent misdetection of Winbond chips
-  $reg = &$readproc(0x4f);
+  $reg = isa_read_i5d6($addr, 0x4f);
   return if $reg == 0xa3 || $reg == 0x5c;
 
   # Explicitly prevent misdetection of ITE chips
-  $reg = &$readproc(0x58);
+  $reg = isa_read_i5d6($addr, 0x58);
   return if $reg == 0x90;
 
   return 6;
@@ -3581,10 +3592,10 @@ sub lm78_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
-  return 0 unless &$readproc(0x48) == $i2c_addr;
+
+  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
-    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
+    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
   }
   return 1;
 }
@@ -4596,10 +4607,10 @@ sub w83781d_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
-  return 0 unless &$readproc(0x48) == $i2c_addr;
+
+  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
-    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
+    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
   }
   return 1;
 }
@@ -4622,13 +4633,12 @@ sub w83781d_isa_detect
     return;
   }
 
-  my $read_proc = sub { isa_read_byte($addr + 5, $addr + 6, @_) };
-  $reg1 = &$read_proc(0x4e);
-  $reg2 = &$read_proc(0x4f);
+  $reg1 = isa_read_i5d6($addr, 0x4e);
+  $reg2 = isa_read_i5d6($addr, 0x4f);
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
                 (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
   return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = &$read_proc(0x58);
+  $reg1 = isa_read_i5d6($addr, 0x58);
   return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
   return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
 
@@ -4984,10 +4994,10 @@ sub ite_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
-  return 0 unless &$readproc(0x48) == $i2c_addr;
+
+  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
   for ($i = 0x30; $i <= 0x45; $i++) {
-    return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
+    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
   }
   return 1;
 }
