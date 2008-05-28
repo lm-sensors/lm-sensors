@@ -2166,14 +2166,14 @@ sub any_list_match
 
 sub initialize_ioports
 {
-  sysopen (IOPORTS, "/dev/port", O_RDWR)
+  sysopen(IOPORTS, "/dev/port", O_RDWR)
     or die "/dev/port: $!\n";
-  binmode IOPORTS;
+  binmode(IOPORTS);
 }
 
 sub close_ioports
 {
-  close (IOPORTS)
+  close(IOPORTS)
     or print "Warning: $!\n";
 }
 
@@ -2182,10 +2182,10 @@ sub close_ioports
 sub inb
 {
   my ($res, $nrchars);
-  sysseek IOPORTS, $_[0], 0 or return -1;
-  $nrchars = sysread IOPORTS, $res, 1;
+  sysseek(IOPORTS, $_[0], 0) or return -1;
+  $nrchars = sysread(IOPORTS, $res, 1);
   return -1 if not defined $nrchars or $nrchars != 1;
-  $res = unpack "C", $res;
+  $res = unpack("C", $res);
   return $res;
 }
 
@@ -2194,9 +2194,9 @@ sub inb
 # Returns: -1 on failure, 0 on success.
 sub outb
 {
-  my $towrite = pack "C", $_[1];
-  sysseek IOPORTS, $_[0], 0 or return -1;
-  my $nrchars = syswrite IOPORTS, $towrite, 1;
+  my $towrite = pack("C", $_[1]);
+  sysseek(IOPORTS, $_[0], 0) or return -1;
+  my $nrchars = syswrite(IOPORTS, $towrite, 1);
   return -1 if not defined $nrchars or $nrchars != 1;
   return 0;
 }
@@ -2207,8 +2207,8 @@ sub outb
 # Returns: read value
 sub isa_read_byte
 {
-  outb $_[0], $_[2];
-  return inb $_[1];
+  outb($_[0], $_[2]);
+  return inb($_[1]);
 }
 
 # $_[0]: Address register
@@ -2218,8 +2218,8 @@ sub isa_read_byte
 # Returns: nothing
 sub isa_write_byte
 {
-  outb $_[0], $_[2];
-  outb $_[1], $_[3];
+  outb($_[0], $_[2]);
+  outb($_[1], $_[3]);
 }
 
 #################
@@ -2242,7 +2242,7 @@ sub initialize_conf
       $sysfs_root = $1;
     }
   }
-  close INPUTFILE;
+  close(INPUTFILE);
 
   my $use_udev = 0;
   if (open(*INPUTFILE, '/etc/udev/udev.conf')) {
@@ -2255,7 +2255,7 @@ sub initialize_conf
         last;
       }
     }
-    close INPUTFILE;
+    close(INPUTFILE);
   }
 
   if (!$use_udev) {
@@ -2341,7 +2341,7 @@ sub initialize_cpu_list
     }
   }
   push @cpu, $entry if scalar keys(%{$entry}); # Last entry
-  close INPUTFILE;
+  close(INPUTFILE);
 }
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
@@ -2524,7 +2524,7 @@ sub initialize_proc_pci
 
 sub adapter_pci_detection_sis_96x
 {
-  my $driver="";
+  my $driver = "";
 
   # first, determine which driver if any...
   if (kernel_version_at_least(2, 6, 0)) {
@@ -2675,10 +2675,10 @@ use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
 sub i2c_get_funcs($)
 {
   my $file = shift;
-  my $funcs = pack "L", 0; # Allocate space
+  my $funcs = pack("L", 0); # Allocate space
 
-  ioctl $file, IOCTL_I2C_FUNCS, $funcs or return -1;
-  $funcs = unpack "L", $funcs;
+  ioctl($file, IOCTL_I2C_FUNCS, $funcs) or return -1;
+  $funcs = unpack("L", $funcs);
 
   return $funcs;
 }
@@ -2695,7 +2695,7 @@ sub i2c_set_slave_addr
   @i2c_byte_cache = ();
 
   $addr += 0; # Make sure it's a number not a string
-  ioctl $file, IOCTL_I2C_SLAVE, $addr or return 0;
+  ioctl($file, IOCTL_I2C_SLAVE, $addr) or return 0;
   return 1;
 }
 
@@ -2715,10 +2715,10 @@ sub i2c_set_slave_addr
 sub i2c_smbus_access
 {
   my ($file, $read_write, $command, $size, $data) = @_;
-  my $data_array = pack "C32", @$data;
-  my $ioctl_data = pack "C2x2Ip", ($read_write, $command, $size, $data_array);
-  ioctl $file, IOCTL_I2C_SMBUS, $ioctl_data or return 0;
-  @{$_[4]} = unpack "C32", $data_array;
+  my $data_array = pack("C32", @$data);
+  my $ioctl_data = pack("C2x2Ip", $read_write, $command, $size, $data_array);
+  ioctl($file, IOCTL_I2C_SMBUS, $ioctl_data) or return 0;
+  @{$_[4]} = unpack("C32", $data_array);
   return 1;
 }
 
@@ -2729,7 +2729,7 @@ sub i2c_smbus_write_quick
 {
   my ($file, $value) = @_;
   my @data;
-  i2c_smbus_access $file, $value, 0, SMBUS_QUICK, \@data
+  i2c_smbus_access($file, $value, 0, SMBUS_QUICK, \@data)
          or return -1;
   return 0;
 }
@@ -2740,7 +2740,7 @@ sub i2c_smbus_read_byte
 {
   my ($file) = @_;
   my @data;
-  i2c_smbus_access $file, SMBUS_READ, 0, SMBUS_BYTE, \@data
+  i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, \@data)
          or return -1;
   return $data[0];
 }
@@ -2758,7 +2758,7 @@ sub i2c_smbus_read_byte_data
   if (!$nocache && exists $i2c_byte_cache[$command]) {
     return $i2c_byte_cache[$command];
   }
-  i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data
+  i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data)
          or return -1;
   return ($i2c_byte_cache[$command] = $data[0]);
 }
@@ -2776,7 +2776,7 @@ sub i2c_smbus_read_word_data
 {
   my ($file, $command) = @_;
   my @data;
-  i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data
+  i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data)
          or return -1;
   return $data[0] + 256 * $data[1];
 }
@@ -2919,7 +2919,7 @@ sub add_i2c_to_chips_detected
       push @entry_addrs, @{$detected_entry->{i2c_sub_addrs}}
                if exists $detected_entry->{i2c_sub_addrs};
       if ($detected_entry->{i2c_devnr} == $datahash->{i2c_devnr} and
-          any_list_match \@entry_addrs, \@hash_addrs) {
+          any_list_match(\@entry_addrs, \@hash_addrs)) {
         if ($detected_entry->{conf} >= $datahash->{conf}) {
           $put_in_detected = 0;
         }
@@ -2951,7 +2951,7 @@ sub add_i2c_to_chips_detected
         push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
              if exists $detected_ref->[$i]->{i2c_sub_addrs};
         if ($detected_ref->[$i]->{i2c_devnr} == $datahash->{i2c_devnr} and
-            any_list_match \@entry_addrs, \@hash_addrs) {
+            any_list_match(\@entry_addrs, \@hash_addrs)) {
           push @$misdetected_ref, $detected_ref->[$i]
             unless $chipdriver eq $main_entry->{driver};
           splice @$detected_ref, $i, 1;
@@ -2981,7 +2981,7 @@ sub add_isa_to_chips_detected
       $main_entry, $isalias);
 
   # First determine where the hash has to be added.
-  $isalias=0;
+  $isalias = 0;
   for ($i = 0; $i < @chips_detected; $i++) {
     last if ($chips_detected[$i]->{driver} eq $chipdriver);
   }
@@ -3008,8 +3008,8 @@ sub add_isa_to_chips_detected
       open(local *FILE, "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}") or
         print("Can't open $dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
         next;
-      binmode FILE;
-      i2c_set_slave_addr \*FILE, $new_misdetected_ref->[$i]->{i2c_addr} or
+      binmode(FILE);
+      i2c_set_slave_addr(\*FILE, $new_misdetected_ref->[$i]->{i2c_addr}) or
            print("Can't set I2C address for ",
                  "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
@@ -3030,8 +3030,8 @@ sub add_isa_to_chips_detected
       open(local *FILE, "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}") or
         print("Can't open $dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
         next;
-      binmode FILE;
-      i2c_set_slave_addr \*FILE, $new_detected_ref->[$i]->{i2c_addr} or
+      binmode(FILE);
+      i2c_set_slave_addr(\*FILE, $new_detected_ref->[$i]->{i2c_addr}) or
            print("Can't set I2C address for ",
                  "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
            next;
@@ -3039,7 +3039,7 @@ sub add_isa_to_chips_detected
                           $new_detected_ref->[$i]->{i2c_addr})) {
         $new_detected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
         ($datahash) = splice (@$new_detected_ref, $i, 1);
-        $isalias=1;
+        $isalias = 1;
         last;
       }
     }
@@ -3122,7 +3122,7 @@ sub scan_adapter
 
   open(local *FILE, "$dev_i2c$adapter_nr") or
     (print "Can't open $dev_i2c$adapter_nr\n"), return;
-  binmode FILE;
+  binmode(FILE);
 
   # Can we probe this adapter?
   $funcs = i2c_get_funcs(\*FILE);
@@ -3197,7 +3197,7 @@ sub scan_adapter
 
     $| = 1;
     foreach $chip (@chip_ids) {
-      if (exists $chip->{i2c_addrs} and contains $addr, @{$chip->{i2c_addrs}}) {
+      if (exists $chip->{i2c_addrs} and contains($addr, @{$chip->{i2c_addrs}})) {
         printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
         if (($conf, @chips) = &{$chip->{i2c_detect}} (\*FILE, $addr)) {
           if ($chip->{driver} eq "not-a-sensor") {
@@ -3230,7 +3230,7 @@ sub scan_adapter
             my @chips_copy = @chips;
             $new_hash->{i2c_sub_addrs} = \@chips_copy;
           }
-          add_i2c_to_chips_detected $chip->{driver}, $new_hash;
+          add_i2c_to_chips_detected($chip->{driver}, $new_hash);
         } else {
           print "No\n";
         }
@@ -3257,8 +3257,8 @@ sub scan_isa_bus
                        isa_addr => $addr,
                        chipname => $chip->{name}
                      };
-      $new_hash = add_isa_to_chips_detected $chip->{alias_detect}, $chip->{driver},
-                                            $new_hash;
+      $new_hash = add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
+                                            $new_hash);
       if ($new_hash) {
         printf "    Alias of the chip on I2C bus `%s', address 0x%04x\n",
                         $new_hash->{i2c_adap}, $new_hash->{i2c_addr};
@@ -3377,8 +3377,8 @@ sub probe_superio($$$)
                    isa_addr => $addr,
                    chipname => $chip->{name}
                  };
-  add_isa_to_chips_detected $chip->{alias_detect}, $chip->{driver},
-                                        $new_hash;
+  add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
+                                        $new_hash);
 }
 
 # Detection routine for non-standard SMSC Super I/O chips
@@ -3535,7 +3535,7 @@ sub chip_special_cases
 sub mtp008_detect
 {
   my ($file, $addr) = @_;
-  return if (i2c_smbus_read_byte_data($file, 0x58)) != 0xac;
+  return if i2c_smbus_read_byte_data($file, 0x58) != 0xac;
   return (8);
 }
 
@@ -3567,17 +3567,17 @@ sub lm78_detect
 sub lm78_isa_detect
 {
   my ($chip, $addr) = @_;
-  my $val = inb ($addr + 1);
-  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or
-            inb ($addr + 7) != $val;
+  my $val = inb($addr + 1);
+  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+            inb($addr + 7) != $val;
 
   $val = inb($addr + 5);
   outb($addr + 5, ~$val & 0x7f);
-  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5, $val);
     return;
   }
-  my $readproc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
+  my $readproc = sub { isa_read_byte($addr + 5, $addr + 6, @_) };
   return unless (&$readproc(0x40) & 0x80) == 0x00;
   my $reg = &$readproc(0x49);
   return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
@@ -3604,7 +3604,7 @@ sub lm78_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
   return 0 unless &$readproc(0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
     return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
@@ -4446,7 +4446,7 @@ sub lm85_detect
 sub lm87_detect
 {
   my ($file, $addr) = @_;
-  return if (i2c_smbus_read_byte_data($file, 0x3e)) != 0x02;
+  return if i2c_smbus_read_byte_data($file, 0x3e) != 0x02;
   return if (i2c_smbus_read_byte_data($file, 0x3f) & 0xfc) != 0x04;
   return (7);
 }
@@ -4619,7 +4619,7 @@ sub w83781d_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
   return 0 unless &$readproc(0x48) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
     return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
@@ -4634,18 +4634,18 @@ sub w83781d_isa_detect
 {
   my ($chip, $addr) = @_;
   my ($reg1, $reg2);
-  my $val = inb ($addr + 1);
-  return if inb ($addr + 2) != $val or inb ($addr + 3) != $val or
-            inb ($addr + 7) != $val;
+  my $val = inb($addr + 1);
+  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+            inb($addr + 7) != $val;
 
   $val = inb($addr + 5);
   outb($addr+5, ~$val & 0x7f);
-  if ((inb ($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
     outb($addr+5, $val);
     return;
   }
 
-  my $read_proc = sub { isa_read_byte $addr + 5, $addr + 6, @_ };
+  my $read_proc = sub { isa_read_byte($addr + 5, $addr + 6, @_) };
   $reg1 = &$read_proc(0x4e);
   $reg2 = &$read_proc(0x4f);
   return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
@@ -4895,8 +4895,8 @@ sub adm1021_detect
     return if ($lhi & 0x80) or ($rhi & 0x80);
     # Low limits over high limits
     if ($chip != 5) { # LM84 doesn't have low limits
-      $llo-=256 if ($llo & 0x80);
-      $rlo-=256 if ($rlo & 0x80);
+      $llo -= 256 if ($llo & 0x80);
+      $rlo -= 256 if ($rlo & 0x80);
       return if ($llo > $lhi) or ($rlo > $rhi);
     }
   }
@@ -5007,7 +5007,7 @@ sub ite_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
-  my $readproc = sub { isa_read_byte $isa_addr + 5, $isa_addr + 6, @_ };
+  my $readproc = sub { isa_read_byte($isa_addr + 5, $isa_addr + 6, @_) };
   return 0 unless &$readproc(0x48) == $i2c_addr;
   for ($i = 0x30; $i <= 0x45; $i++) {
     return 0 unless &$readproc($i) == i2c_smbus_read_byte_data($file, $i);
@@ -5345,13 +5345,13 @@ sub smartbatt_detect
 # For KCS, use the STATUS register. For SMIC, use the FLAGS register.
 sub ipmi_kcs_detect
 {
-  return if inb (0x0ca3) == 0xff;
+  return if inb(0x0ca3) == 0xff;
   return (4);
 }
 
 sub ipmi_smic_detect
 {
-  return if inb (0x0cab) == 0xff;
+  return if inb(0x0cab) == 0xff;
   return (4);
 }
 
@@ -5641,7 +5641,7 @@ sub generate_modprobes
          }
       }
       if (exists $detection->{isa_addr}) {
-           $isa=1;
+           $isa = 1;
       }
       if ($chip->{driver} eq "bmcsensors" ||
           $chip->{driver} eq "ipmisensors") {
@@ -5692,7 +5692,7 @@ sub generate_modprobes
            last;
          }
        }
-       close INPUTFILE;
+       close(INPUTFILE);
        #check return value from modprobe in case modprobe -l isn't supported
        if ((($? >> 8) == 0) && ! $modulefound) {
          $modprobes .= "# Warning: the required module $chip->{driver} is not currently installed\n".
@@ -5726,15 +5726,15 @@ sub generate_modprobes
     next if not (@probelist or @optionlist);
     $configfile = "# hwmon module options\n" unless defined $configfile;
     $configfile .= "options $chip->{driver}";
-    $configfile .= sprintf " ignore=%d,0x%02x", shift @optionlist,
-                                               shift @optionlist
+    $configfile .= sprintf(" ignore=%d,0x%02x", shift @optionlist,
+                                               shift @optionlist)
                   if @optionlist;
-    $configfile .= sprintf ",%d,0x%02x", shift @optionlist, shift @optionlist
+    $configfile .= sprintf(",%d,0x%02x", shift @optionlist, shift @optionlist)
                   while @optionlist;
-    $configfile .= sprintf " probe=%d,0x%02x", shift @probelist,
-                                              shift @probelist
+    $configfile .= sprintf(" probe=%d,0x%02x", shift @probelist,
+                                              shift @probelist)
                   if @probelist;
-    $configfile .= sprintf ",%d,0x%02x", shift @probelist, shift @probelist
+    $configfile .= sprintf(",%d,0x%02x", shift @probelist, shift @probelist)
                   while @probelist;
     $configfile .= "\n";
   }
@@ -5759,13 +5759,13 @@ sub main
   }
 
   initialize_kernel_version();
-  initialize_conf;
-  initialize_proc_pci;
-  initialize_modules_list;
+  initialize_conf();
+  initialize_proc_pci();
+  initialize_modules_list();
   # make sure any special case chips are added to the chip_ids list before
   # making the support modules list
   chip_special_cases();
-  initialize_modules_supported;
+  initialize_modules_supported();
   initialize_cpu_list();
 
   print "# sensors-detect revision $revision\n\n";
@@ -5781,7 +5781,7 @@ sub main
 
   print "We can start with probing for (PCI) I2C or SMBus adapters.\n";
   print "Do you want to probe now? (YES/no): ";
-  @adapters = adapter_pci_detection
+  @adapters = adapter_pci_detection()
                         if ($did_adapter_detection = not <STDIN> =~ /\s*[Nn]/);
   print "\n";
 
@@ -5797,7 +5797,7 @@ sub main
       } else {
         print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
         unless (<STDIN> =~ /^\s*[Nn]/) {
-          if (system ("modprobe", $adapter)) {
+          if (system("modprobe", $adapter)) {
             print "Loading failed... skipping.\n";
           } else {
             print "Module loaded successfully.\n";
@@ -5819,7 +5819,7 @@ sub main
     print "Do you want to load `i2c-dev' now? (YES/no): ";
     if (<STDIN> =~ /^\s*n/i) {
       print "Well, you will know best.\n";
-    } elsif (system "modprobe", "i2c-dev") {
+    } elsif (system("modprobe", "i2c-dev")) {
       print "Loading failed, expect problems later on.\n";
     } else {
       print "Module loaded successfully.\n";
@@ -5852,11 +5852,11 @@ sub main
             "or hexadecimal (like 0x33).\n",
             "Addresses: ";
       $inp2 = <STDIN>;
-      chop $inp2;
+      chop($inp2);
       @not_to_scan = parse_not_to_scan(0x03, 0x77, $inp2);
     }
-    scan_adapter $dev_nr, $adap, $i2c_adapters[$dev_nr]->{'driver'},
-                 \@not_to_scan   unless $inp =~ /^\s*[Nn]/;
+    scan_adapter($dev_nr, $adap, $i2c_adapters[$dev_nr]->{'driver'},
+                 \@not_to_scan) unless $inp =~ /^\s*[Nn]/;
   }
   print "\n";
 
@@ -5929,11 +5929,11 @@ sub main
     }
     if (@{$chip->{detected}}) {
       print "  Detects correctly:\n";
-      print_chips_report $chip->{detected};
+      print_chips_report($chip->{detected});
     }
     if (@{$chip->{misdetected}}) {
       print "  Misdetects:\n";
-      print_chips_report $chip->{misdetected};
+      print_chips_report($chip->{misdetected});
     }
   }
   print "\n";
@@ -5948,7 +5948,7 @@ sub main
     $_ = <STDIN>;
     if (($have_modprobe_d and not m/^\s*n/i) or m/^\s*y/i) {
       unless ($have_modprobe_d) {
-        mkdir '/etc/modprobe.d', 0777
+        mkdir('/etc/modprobe.d', 0777)
           or die "Sorry, can't create /etc/modprobe.d ($!)";
       }
       open(local *MODPROBE_D, ">/etc/modprobe.d/lm_sensors")
@@ -5973,7 +5973,7 @@ sub main
   $_ = <STDIN>;
   if (($have_sysconfig and not m/^\s*n/i) or m/^\s*y/i) {
     unless ($have_sysconfig) {
-      mkdir '/etc/sysconfig', 0777
+      mkdir('/etc/sysconfig', 0777)
         or die "Sorry, can't create /etc/sysconfig ($!)";
     }
     open(local *SYSCONFIG, ">/etc/sysconfig/lm_sensors")
