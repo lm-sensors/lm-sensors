@@ -45,8 +45,9 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 # CONSTANT DECLARATIONS #
 #########################
 
+use constant NO_CACHE => 1;
 use vars qw(@pci_adapters @chip_ids $i2c_addresses_to_scan @superio_ids
-            @cpu_ids $revision);
+            @cpu_ids $revision @i2c_byte_cache);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -2689,6 +2690,10 @@ sub i2c_get_funcs($)
 sub i2c_set_slave_addr
 {
   my ($file, $addr) = @_;
+
+  # Reset register data cache
+  @i2c_byte_cache = ();
+
   $addr += 0; # Make sure it's a number not a string
   ioctl $file, IOCTL_I2C_SLAVE, $addr or return 0;
   return 1;
@@ -2743,13 +2748,19 @@ sub i2c_smbus_read_byte
 # $_[0]: Reference to an opened filehandle
 # $_[1]: Command byte (usually register number)
 # Returns: -1 on failure, the read byte on success.
+# Read byte data values are cached by default. As we keep reading the
+# same registers over and over again in the detection functions, and
+# SMBus can be slow, caching results in a big performance boost.
 sub i2c_smbus_read_byte_data
 {
-  my ($file, $command) = @_;
+  my ($file, $command, $nocache) = @_;
   my @data;
+  if (!$nocache && exists $i2c_byte_cache[$command]) {
+    return $i2c_byte_cache[$command];
+  }
   i2c_smbus_access $file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data
          or return -1;
-  return $data[0];
+  return ($i2c_byte_cache[$command] = $data[0]);
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -3632,15 +3643,15 @@ sub lm75_detect
   my $cur = i2c_smbus_read_byte_data($file, 0x00);
   my $conf = i2c_smbus_read_byte_data($file, 0x01);
 
-  my $hyst = i2c_smbus_read_byte_data($file, 0x02);
+  my $hyst = i2c_smbus_read_byte_data($file, 0x02, NO_CACHE);
   my $maxreg = $chip == 1 ? 0x0f : 0x07;
   for $i (0x04 .. $maxreg) {
-    return if i2c_smbus_read_byte_data($file, $i) != $hyst;
+    return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $hyst;
   }
 
-  my $os = i2c_smbus_read_byte_data($file, 0x03);
+  my $os = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
   for $i (0x04 .. $maxreg) {
-    return if i2c_smbus_read_byte_data($file, $i) != $os;
+    return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $os;
   }
 
   if ($chip == 0) {
@@ -3696,13 +3707,13 @@ sub lm77_detect
   my $hyst = i2c_smbus_read_byte_data($file, 0x02);
   my $os = i2c_smbus_read_byte_data($file, 0x03);
 
-  my $low = i2c_smbus_read_byte_data($file, 0x04);
-  return if i2c_smbus_read_byte_data($file, 0x06) != $low;
-  return if i2c_smbus_read_byte_data($file, 0x07) != $low;
+  my $low = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
+  return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $low;
+  return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $low;
 
-  my $high = i2c_smbus_read_byte_data($file, 0x05);
-  return if i2c_smbus_read_byte_data($file, 0x06) != $high;
-  return if i2c_smbus_read_byte_data($file, 0x07) != $high;
+  my $high = i2c_smbus_read_byte_data($file, 0x05, NO_CACHE);
+  return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $high;
+  return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $high;
 
   for ($i = 8; $i <= 248; $i += 40) {
     return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
@@ -4053,20 +4064,20 @@ sub lm90_detect
 sub max6657_detect
 {
   my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
-  my $cid = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+  my $mid = i2c_smbus_read_byte_data($file, 0xfe, NO_CACHE);
+  my $cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
+  my $conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
 
   return if $mid != 0x4d;     # Maxim
   return if ($conf & 0x1f) != 0x0d; # No low nibble,
                                     # returns previous low nibble
   return if $cid != 0x4d;     # No register, returns previous value
 
-  my $rate = i2c_smbus_read_byte_data($file, 0x04);
+  my $rate = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
   return if $rate > 0x09;
 
-  $cid = i2c_smbus_read_byte_data($file, 0xff);
-  $conf = i2c_smbus_read_byte_data($file, 0x03);
+  $cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
+  $conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
   return if ($conf & 0x0f) != $rate; # No low nibble,
                                      # returns previous low nibble
   return if $cid != $rate;    # No register, returns previous value
