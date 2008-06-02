@@ -338,7 +338,8 @@ function UpdateFanSpeeds {
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
 			# Sleep while still handling signals
-			read < <(exec sleep 1)
+			sleep 1 &
+			wait $!
 		  fi
 		fi
 		echo $pwmval > $pwmo # write new value to pwm output
@@ -376,5 +377,6 @@ while true
 do
 	UpdateFanSpeeds
 	# Sleep while still handling signals
-	read < <(exec sleep $INTERVAL)
+	sleep $INTERVAL &
+	wait $!
 done
