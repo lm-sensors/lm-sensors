@@ -4669,7 +4669,7 @@ sub mozart_detect
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        9 = W83627EHF 10 = W83627DHG)
+#                        9 = W83627EHF 10, = W83627DHG)
 # $_[1]: ISA address
 # $_[2]: I2C file handle
 # $_[3]: I2C address
@@ -4677,9 +4677,10 @@ sub w83781d_alias_detect
 {
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
+  my $max = ($chip == 9 || $chip == 10) ? 0x3e : 0x3d;
 
   return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
-  for ($i = 0x2b; $i <= 0x3d; $i ++) {
+  for ($i = 0x2b; $i <= $max; $i ++) {
     return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
   }
   return 1;
