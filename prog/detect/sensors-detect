@@ -5545,7 +5545,6 @@ sub vt1211_alias_detect
   my ($chip, $isa_addr, $file, $i2c_addr) = @_;
   my $i;
   return 0 unless (inb($isa_addr + 0x48) & 0x7f) == $i2c_addr;
-  return 0 unless (i2c_smbus_read_byte_data($file, 0x48) & 0x7f) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i ++) {
     return 0 unless inb($isa_addr + $i) == i2c_smbus_read_byte_data($file, $i);
   }
