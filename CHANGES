@@ -10,6 +10,7 @@ SVN-HEAD
                   Add Maxim MAX6654/MAX6690 support
                   Add National Semiconductor LM95231 support
                   Add Analog Devices ADT7481 support
+                  Refactor alias detection functions
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
