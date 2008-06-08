@@ -3536,13 +3536,13 @@ sub chip_special_cases
 
 # $_[0]: A reference to the file descriptor to access this chip.
 # $_[1]: Address
-# Returns: undef if not detected, (7) if detected.
+# Returns: undef if not detected, (3) if detected.
 # Registers used: 0x58
 sub mtp008_detect
 {
   my ($file, $addr) = @_;
   return if i2c_smbus_read_byte_data($file, 0x58) != 0xac;
-  return (8);
+  return (3);
 }
 
 # $_[0]: Chip to detect (0 = LM78, 1 = LM78-J, 2 = LM79)
