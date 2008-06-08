@@ -4291,7 +4291,7 @@ sub andigilog_detect
   }
 
   if ($chip == 2) {
-    return if $cid != 0x6C;
+    return if ($cid != 0x6C && $cid != 0x6D);
     return 5;
   }
 
