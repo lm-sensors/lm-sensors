@@ -1238,6 +1238,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm1022_detect(2, @_); },
      },
      {
+       name => "Texas Instruments THMC51",
+       driver => "to-be-written", # thmc50
+       i2c_addrs => [0x2e], # At least (no datasheet)
+       i2c_detect => sub { adm1022_detect(3, @_); },
+     },
+     {
        name => "VIA VT1211 (I2C)",
        driver => "use-isa-instead",
        i2c_addrs => [0x2d],
@@ -4773,7 +4779,8 @@ sub adm9240_detect
   return (7);
 }
 
-# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50, 2 = ADM1028)
+# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50, 2 = ADM1028,
+#                        3 = THMC51)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, (8) if detected.
@@ -4789,14 +4796,16 @@ sub adm1022_detect
   $reg = i2c_smbus_read_byte_data($file, 0x3e);
   return unless ($chip == 0 and $reg == 0x41) or
                 ($chip == 1 and $reg == 0x49) or
-                ($chip == 2 and $reg == 0x41);
+                ($chip == 2 and $reg == 0x41) or
+                ($chip == 3 and $reg == 0x49);
   $reg = i2c_smbus_read_byte_data($file, 0x40);
   return if ($reg & 0x10);			# Soft Reset always reads 0
   return if ($chip != 0 and ($reg & 0x80));	# Reserved on THMC50 and ADM1028
   $reg = i2c_smbus_read_byte_data($file, 0x3f) & 0xf0;
   return unless ($chip == 0 and $reg == 0xc0) or
                 ($chip == 1 and $reg == 0xc0) or
-                ($chip == 2 and $reg == 0xd0);
+                ($chip == 2 and $reg == 0xd0) or
+                ($chip == 3 and $reg == 0xd0);
   return (8);
 }
 
