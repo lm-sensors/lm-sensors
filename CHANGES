@@ -25,6 +25,7 @@ SVN-HEAD
                           Avoid SMBus word transactions where possible
                           Add Dallas DS1631 detection
                           Fix Andigilog aSC7621 support
+                          Fix Analog Devices ADT7461 support
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support

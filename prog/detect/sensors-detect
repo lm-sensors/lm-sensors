@@ -3988,7 +3988,7 @@ sub lm90_detect
     return if ($conf & 0x1b) != 0;
     return if $rate > 0x0a;
     return if $mid != 0x41;     # Analog Devices
-    return 8 if $cid == 0x61;   # ADT7461
+    return 8 if $cid == 0x51;   # ADT7461
   }
   if ($chip == 6) {
     return if ($conf & 0x3f) != 0;
