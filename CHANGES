@@ -13,6 +13,7 @@ SVN-HEAD
                   Refactor alias detection functions
                   Fix Andigilog aSC7621 support
                   Add Texas Instruments THMC51 support
+                  Fix Analog Devices ADT7461 support
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
