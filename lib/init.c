@@ -17,8 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "sensors.h"
 #include "data.h"
 #include "proc.h"
@@ -38,6 +40,31 @@ static void free_set(sensors_set set);
 static void free_compute(sensors_compute compute);
 static void free_ignore(sensors_ignore ignore);
 
+/* Wrapper around sensors_yyparse(), which clears the locale so that
+   the decimal numbers are always parsed properly. */
+static int sensors_parse(void)
+{
+  int res;
+  char *locale;
+
+  /* Remember the current locale and clear it */
+  locale = setlocale(LC_ALL, NULL);
+  if (locale) {
+    locale = strdup(locale);
+    setlocale(LC_ALL, "C");
+  }
+
+  res = sensors_yyparse();
+
+  /* Restore the old locale */
+  if (locale) {
+    setlocale(LC_ALL, locale);
+    free(locale);
+  }
+
+  return res;
+}
+
 int sensors_init(FILE *input)
 {
   int res;
@@ -51,7 +78,7 @@ int sensors_init(FILE *input)
   }
   if ((res = sensors_scanner_init(input)))
     return -SENSORS_ERR_PARSE;
-  if ((res = sensors_yyparse()))
+  if ((res = sensors_parse()))
     return -SENSORS_ERR_PARSE;
   if ((res = sensors_substitute_busses()))
     return res;

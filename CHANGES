@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN-HEAD
   Library: Don't choke on unrecognized devices, part 2
+           Parse the configuration file in C locale (#2312)
   Module asb100: Remove some dead code (2.6 backport)
   Module i2c-amd756: Fix functionality flags (2.6 backport)
   Module i2c-amd756-s4882: Fix an error path (2.6 backport)
