@@ -424,7 +424,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 					kind = lm99;
 				else if (address == 0x4C
 				 && (chip_id & 0xF0) == 0x10) /* LM86 */
-					kind = lm99;
+					kind = lm86;
 			}
 		} else
 		if (man_id == 0x41) { /* Analog Devices */

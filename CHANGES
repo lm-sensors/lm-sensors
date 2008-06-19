@@ -11,6 +11,7 @@ SVN-HEAD
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Module i2c-sis5595: Minor cleanups (2.6 backport)
   Module lm75: Fix an incorrect comment (2.6 backport)
+  Module lm90: Fix LM86 detection (#2335)
   Module w83l785ts: Don't ask user to report failures (2.6 backport)
   Program fancontrol: Don't use named pipes when we don't need them (#2319)
   Program sensord: Add lm90, adm1032, lm99, lm86, max6657, adt7461 support
