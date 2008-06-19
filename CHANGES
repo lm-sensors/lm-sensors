@@ -15,6 +15,7 @@ SVN-HEAD
   Module w83l785ts: Don't ask user to report failures (2.6 backport)
   Program fancontrol: Don't use named pipes when we don't need them (#2319)
   Program sensord: Add lm90, adm1032, lm99, lm86, max6657, adt7461 support
+                   Fix adm1021, adm1023 support with 2.6 kernel (#2334)
   Program sensors-detect: New device ID for the SMSC SCH5317
                           Add SMSC SCH5127 detection
                           Add National Semiconductor LM64 detection
