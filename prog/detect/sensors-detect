@@ -901,7 +901,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Winbond W83L786NR/NG/R/G",
-       driver => "to-be-written",
+       driver => "w83l786ng",
        i2c_addrs => [0x2e, 0x2f],
        i2c_detect => sub { w83l784r_detect(2, @_); },
      },

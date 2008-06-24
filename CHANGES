@@ -15,6 +15,7 @@ SVN-HEAD
                   Add Texas Instruments THMC51 support
                   Fix Analog Devices ADT7461 support
                   Add VIA C7 support
+                  Fix Winbond W83L786NR/NG/R/G support (#2336)
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
