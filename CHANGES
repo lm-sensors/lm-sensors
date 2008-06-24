@@ -30,6 +30,7 @@ SVN-HEAD
                           Fix Andigilog aSC7621 support
                           Fix Analog Devices ADT7461 support
                           Add VIA C7 support
+                          Fix Winbond W83L786NR/NG/R/G support (#2336)
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support
