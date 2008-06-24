@@ -29,6 +29,7 @@ SVN-HEAD
                           Add Dallas DS1631 detection
                           Fix Andigilog aSC7621 support
                           Fix Analog Devices ADT7461 support
+                          Add VIA C7 support
 
 2.10.6 "Welcome Home Lina" (20080306)
   Library: Fix fschrc and fschmd support

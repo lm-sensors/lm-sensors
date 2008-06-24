@@ -2048,6 +2048,11 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
     driver => "to-be-written",
     detect => sub { intel_amb_detect(); },
   },
+  {
+    name => "VIA C7 thermal and voltage sensors",
+    driver => "c7temp",
+    detect => sub { c7temp_detect(); },
+  },
 );
 
 #######################
@@ -5481,6 +5486,21 @@ sub coretemp_detect
 				 $probecpu->{'model'} == 15 ||
 				 $probecpu->{'model'} == 0x16 ||
 				 $probecpu->{'model'} == 0x17)) {
+			return 9;
+		}
+	}
+	return;
+}
+
+# Returns: undef if not detected, (9) if detected.
+sub c7temp_detect
+{
+	my $probecpu;
+	foreach $probecpu (@cpu) {
+		if ($probecpu->{'vendor_id'} eq 'CentaurHauls' &&
+				$probecpu->{'cpu family'} == 6 &&
+				($probecpu->{'model'} == 0xa ||
+				 $probecpu->{'model'} == 0xd)) {
 			return 9;
 		}
 	}
