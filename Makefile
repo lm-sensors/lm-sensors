@@ -319,8 +319,12 @@ user_install::
 all :: user
 install :: all user_install
 ifeq ($(DESTDIR),)
-	-if [ -r $(MODPREF)/build/System.map -a -x /sbin/depmod ] ; then \
-	  /sbin/depmod -a -F $(MODPREF)/build/System.map $(KERNELVERSION) ; \
+	-if [ -x /sbin/depmod ] ; then \
+	  if [ -r $(MODPREF)/build/System.map ] ; then \
+	    /sbin/depmod -a -F $(MODPREF)/build/System.map $(KERNELVERSION) ; \
+	  elif [ "$(KERNELVERSION)" = "`uname -r`"  ] ; then \
+	    /sbin/depmod -a ; \
+	  fi \
 	fi
 else
 	@echo "*** This is a \`staged' install using \"$(DESTDIR)\" as prefix."
