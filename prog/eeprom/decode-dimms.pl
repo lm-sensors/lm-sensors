@@ -1092,7 +1092,7 @@ if ($opt_body)
 printh 'Memory Serial Presence Detect Decoder',
 'By Philip Edelbrock, Christian Zuckschwerdt, Burkart Lingner,
 Jean Delvare and others
-Version 2.10.2';
+Version 2.10.6';
 
 
 my $dimm_count=0;
