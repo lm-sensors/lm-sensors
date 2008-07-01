@@ -1,7 +1,7 @@
 lm_sensors CHANGES file
 -----------------------
 
-SVN-HEAD
+2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
            Parse the configuration file in C locale (#2312)
   Makefile: Fallback to simple depmod if System.map can't be found
