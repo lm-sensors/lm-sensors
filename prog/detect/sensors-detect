@@ -1110,7 +1110,19 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { max6657_detect(@_); },
      },
      {
-       name => "Maxim MAX6648/MAX6692",
+       name => "Maxim MAX6646",
+       driver => "to-be-written",
+       i2c_addrs => [0x4d],
+       i2c_detect => sub { lm90_detect(6, @_); },
+     },
+     {
+       name => "Maxim MAX6647",
+       driver => "to-be-written",
+       i2c_addrs => [0x4e],
+       i2c_detect => sub { lm90_detect(6, @_); },
+     },
+     {
+       name => "Maxim MAX6648/MAX6649/MAX6692",
        driver => "to-be-written",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect(6, @_); },
@@ -3970,8 +3982,8 @@ sub lm83_detect
 
 # $_[0]: Chip to detect
 #   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032, 4 = MAX6654/MAX6690,
-#    5 = ADT7461, 6 = MAX6648/MAX6692, 7 = MAX6680/MAX6681,
-#    8 = W83L771W/G, 9 = TI TMP401)
+#    5 = ADT7461, 6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
+#    7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TI TMP401)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 6 or 8 if detected.

@@ -16,6 +16,7 @@ SVN-HEAD
                   Fix Analog Devices ADT7461 support
                   Add VIA C7 support
                   Fix Winbond W83L786NR/NG/R/G support (#2336)
+                  Add Maxim MAX6646/MAX6647/MAX6649 support
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
