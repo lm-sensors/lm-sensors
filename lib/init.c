@@ -171,14 +171,14 @@ void free_label(sensors_label label)
 void free_set(sensors_set set)
 {
   free(set.name);
-  free_expr(set.value);
+  sensors_free_expr(set.value);
 }
 
 void free_compute(sensors_compute compute)
 {
   free(compute.name);
-  free_expr(compute.from_proc);
-  free_expr(compute.to_proc);
+  sensors_free_expr(compute.from_proc);
+  sensors_free_expr(compute.to_proc);
 }
 
 void free_ignore(sensors_ignore ignore)
@@ -186,15 +186,15 @@ void free_ignore(sensors_ignore ignore)
   free(ignore.name);
 }
 
-void free_expr(sensors_expr *expr)
+void sensors_free_expr(sensors_expr *expr)
 {
   if ((expr->kind) == sensors_kind_var)
     free(expr->data.var);
   else if ((expr->kind) == sensors_kind_sub) {
     if (expr->data.subexpr.sub1)
-      free_expr(expr->data.subexpr.sub1);
+      sensors_free_expr(expr->data.subexpr.sub1);
     if (expr->data.subexpr.sub2)
-      free_expr(expr->data.subexpr.sub2);
+      sensors_free_expr(expr->data.subexpr.sub2);
   }
   free(expr);
 }

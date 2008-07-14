@@ -22,6 +22,6 @@
 
 #include "data.h"
 
-void free_expr(sensors_expr *expr);
+void sensors_free_expr(sensors_expr *expr);
 
 #endif /* def LIB_SENSORS_INIT_H */

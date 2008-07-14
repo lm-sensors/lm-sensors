@@ -170,7 +170,7 @@ set_statement:	  SET function_name expression
 		    if (!current_chip) {
 		      sensors_yyerror("Set statement before first chip statement");
 		      free($2);
-		      free_expr($3);
+		      sensors_free_expr($3);
 		      YYERROR;
 		    }
 		    new_el.lineno = $1;
@@ -185,8 +185,8 @@ compute_statement:	  COMPUTE function_name expression ',' expression
 			    if (!current_chip) {
 			      sensors_yyerror("Compute statement before first chip statement");
 			      free($2);
-			      free_expr($3);
-			      free_expr($5);
+			      sensors_free_expr($3);
+			      sensors_free_expr($5);
 			      YYERROR;
 			    }
 			    new_el.lineno = $1;

@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  Library: Avoid namespace pollution
   
 
 2.10.7 (20080701)
