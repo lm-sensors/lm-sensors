@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  libsensors: Avoid namespace pollution
   fancontrol: Don't use named pipes when we don't need them (#2319)
   sensors-detect: Add Intel SCH (bus) support
                   Add SMSC EMC6D103 support
