@@ -1666,6 +1666,11 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	devid => 0x77,
       },
       {
+	name => "SMSC EMC2700LPC Super IO",
+	# no datasheet
+	devid => 0x67,
+      },
+      {
 	name => "SMSC FDC37B72x Super IO",
 	driver => "not-a-sensor",
 	devid => 0x4c,
@@ -1906,6 +1911,16 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	devid => 0x3c,
 	logdev => 0x0b,
 	alias_detect => sub { vt1211_alias_detect(@_); },
+      },
+      {
+	name => "VIA VT1212 Super IO Lite",   # in 100 pin TQFP package
+	driver => "not-a-sensor",
+	devid => 0x3e,
+      },
+      {
+	name => "VIA VT1212 Super IO Lite",   # in 48 pin LQFP package
+	driver => "not-a-sensor",
+	devid => 0x3f,
       },
       {
 	name => "Winbond W83627HF/F/HG/G Super IO Sensors",

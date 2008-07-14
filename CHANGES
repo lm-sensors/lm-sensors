@@ -18,6 +18,8 @@ SVN-HEAD
                   Add VIA C7 support
                   Fix Winbond W83L786NR/NG/R/G support (#2336)
                   Add Maxim MAX6646/MAX6647/MAX6649 support
+                  Add VIA VT1212 support
+                  Add SMSC EMC2700LPC support
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
