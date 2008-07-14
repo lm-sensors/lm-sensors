@@ -3,7 +3,8 @@ lm_sensors CHANGES file
 
 SVN-HEAD
   Library: Avoid namespace pollution
-  
+  Program sensors-detect: Add VIA VT1212 support
+                          Add SMSC EMC2700LPC support
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
