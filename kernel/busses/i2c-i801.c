@@ -290,9 +290,7 @@ static int i801_transaction(void)
 
 	if (temp & 0x08) {
 		result = -1;
-		dev_err(I801_dev, "Bus collision! SMBus may be locked "
-			"until next hard reset. (sorry!)\n");
-		/* Clock stops and slave is stuck in mid-transmission */
+		dev_err(I801_dev, "Lost arbitration\n");
 	}
 
 	if (temp & 0x04) {
@@ -405,7 +403,7 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 				"Error: Failed bus transaction\n");
 		} else if (temp & 0x08) {
 			result = -1;
-			dev_err(I801_dev, "Bus collision!\n");
+			dev_err(I801_dev, "Lost arbitration\n");
 		} else if (temp & 0x04) {
 			result = -1;
 			dev_dbg(I801_dev, "Error: no response!\n");
