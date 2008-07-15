@@ -43,13 +43,6 @@
 #include "sensors_compat.h"
 
 
-struct sd {
-	const unsigned short mfr;
-	const unsigned short dev;
-	const unsigned char fn;
-	const char *name;
-};
-
 /* PIIX4 SMBus address offsets */
 #define SMBHSTSTS (0 + piix4_smba)
 #define SMBHSLVSTS (1 + piix4_smba)
@@ -102,8 +95,6 @@ MODULE_PARM_DESC(force_addr,
 		 "Forcibly enable the PIIX4 at the given address. "
 		 "EXTREMELY DANGEROUS!");
 
-static int piix4_transaction(void);
-
 static unsigned short piix4_smba = 0;
 static struct pci_driver piix4_driver;
 
@@ -152,7 +143,7 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 		pci_read_config_word(PIIX4_dev, SMBBA, &piix4_smba);
 		piix4_smba &= 0xfff0;
 		if(piix4_smba == 0) {
-			printk(KERN_ERR "i2c-piix4.o: SMB base address "
+			printk(KERN_ERR "i2c-piix4.o: SMBus base address "
 				"uninitialized - upgrade BIOS or use "
 				"force_addr=0xaddr\n");
 			return -ENODEV;
@@ -160,7 +151,7 @@ static int __devinit piix4_setup(struct pci_dev *PIIX4_dev,
 	}
 
 	if (!request_region(piix4_smba, SMBIOSIZE, piix4_driver.name)) {
-		printk(KERN_ERR "i2c-piix4.o: SMB region 0x%x already in "
+		printk(KERN_ERR "i2c-piix4.o: SMBus region 0x%x already in "
 			"use!\n", piix4_smba);
 		return -ENODEV;
 	}
