@@ -255,11 +255,6 @@ static int i801_transaction(void)
 	int result = 0;
 	int timeout = 0;
 
-	dev_dbg(I801_dev, "Transaction (pre): CNT=%02x, CMD=%02x, "
-		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
-		inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		inb_p(SMBHSTDAT1));
-
 	/* Make sure the SMBus host is ready to start transmitting */
 	/* 0x1f = Failed, Bus_Err, Dev_Err, Intr, Host_Busy */
 	if ((temp = (0x1f & inb_p(SMBHSTSTS))) != 0x00) {
@@ -312,10 +307,6 @@ static int i801_transaction(void)
 		dev_dbg(I801_dev, "Failed reset at end of transaction "
 			"(%02x)\n", temp);
 	}
-	dev_dbg(I801_dev, "Transaction (post): CNT=%02x, CMD=%02x, "
-		"ADD=%02x, DAT0=%02x, DAT1=%02x\n", inb_p(SMBHSTCNT),
-		inb_p(SMBHSTCMD), inb_p(SMBHSTADD), inb_p(SMBHSTDAT0),
-		inb_p(SMBHSTDAT1));
 	return result;
 }
 
@@ -361,11 +352,6 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 		else
 			smbcmd = I801_BLOCK_DATA;
 		outb_p(smbcmd | ENABLE_INT9, SMBHSTCNT);
-
-		dev_dbg(I801_dev, "Block (pre %d): CNT=%02x, CMD=%02x, "
-			"ADD=%02x, DAT0=%02x, BLKDAT=%02x\n", i,
-			inb_p(SMBHSTCNT), inb_p(SMBHSTCMD), inb_p(SMBHSTADD),
-			inb_p(SMBHSTDAT0), inb_p(SMBBLKDAT));
 
 		/* Make sure the SMBus host is ready to start transmitting */
 		temp = inb_p(SMBHSTSTS);
@@ -447,10 +433,6 @@ static int i801_block_transaction(union i2c_smbus_data *data, char read_write,
 				"Bad status (%02x) at end of transaction\n",
 				temp);
 		}
-		dev_dbg(I801_dev, "Block (post %d): CNT=%02x, CMD=%02x, "
-			"ADD=%02x, DAT0=%02x, BLKDAT=%02x\n", i,
-			inb_p(SMBHSTCNT), inb_p(SMBHSTCMD), inb_p(SMBHSTADD),
-			inb_p(SMBHSTDAT0), inb_p(SMBBLKDAT));
 
 		if (result < 0)
 			goto END;

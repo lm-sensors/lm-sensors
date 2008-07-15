@@ -3,6 +3,7 @@ lm_sensors CHANGES file
 
 SVN-HEAD
   Library: Avoid namespace pollution
+  Module i2c-i801: Remove verbose debugging messages (2.6 backport)
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
