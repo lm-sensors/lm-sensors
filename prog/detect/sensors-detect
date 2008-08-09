@@ -2010,6 +2010,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	logdev => 0x04,
       },
       {
+	name => "ITE IT8720 Super IO Sensors",
+	driver => "to-be-written",
+	devid => 0x8720,
+	logdev => 0x04,
+      },
+      {
 	name => "ITE IT8726F Super IO Sensors",
 	driver => "it87",
 	devid => 0x8726,
