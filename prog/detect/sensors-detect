@@ -1111,19 +1111,19 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Maxim MAX6646",
-       driver => "to-be-written",
+       driver => "lm90",
        i2c_addrs => [0x4d],
        i2c_detect => sub { lm90_detect(6, @_); },
      },
      {
        name => "Maxim MAX6647",
-       driver => "to-be-written",
+       driver => "lm90",
        i2c_addrs => [0x4e],
        i2c_detect => sub { lm90_detect(6, @_); },
      },
      {
        name => "Maxim MAX6648/MAX6649/MAX6692",
-       driver => "to-be-written",
+       driver => "lm90",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect(6, @_); },
      },
