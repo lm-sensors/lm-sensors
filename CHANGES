@@ -9,6 +9,7 @@ SVN-HEAD
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
                           Add ITE IT8720 support
+                          Add Texas Instruments TMP411 support
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
