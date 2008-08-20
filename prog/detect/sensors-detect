@@ -4100,7 +4100,7 @@ sub lm90_detect
     return if ($conf & 0x1B) != 0;
     return if $rate > 0x0F;
     return if $mid != 0x55;     # Texas Instruments
-    return 6 if ($addr == 0x4c && $cid == 0x12); # TPM411A
+    return 6 if ($addr == 0x4c && $cid == 0x12); # TMP411A
     return 6 if ($addr == 0x4d && $cid == 0x13); # TMP411B
     return 6 if ($addr == 0x4e && $cid == 0x10); # TMP411C
     return;
