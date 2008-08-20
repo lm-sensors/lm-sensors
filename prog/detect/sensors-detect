@@ -1140,7 +1140,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm90_detect(8, @_); },
      },
      {
-       name => "Texas Instruments TMP401",
+       name => "Texas Instruments TMP401/TMP411",
        driver => "tmp401",
        i2c_addrs => [0x4c],
        i2c_detect => sub { lm90_detect(9, @_); },
@@ -4004,7 +4004,7 @@ sub lm83_detect
 # $_[0]: Chip to detect
 #   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032, 4 = MAX6654/MAX6690,
 #    5 = ADT7461, 6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
-#    7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TI TMP401)
+#    7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TI TMP401/TMP411)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 6 or 8 if detected.
@@ -4087,7 +4087,7 @@ sub lm90_detect
     return if ($conf & 0x1B) != 0;
     return if $rate > 0x0F;
     return if $mid != 0x55;     # Texas Instruments
-    return if $cid != 0x11;     # TMP401
+    return if $cid != 0x11;     # TMP401/TMP411
     return 8;
   }
   return;
