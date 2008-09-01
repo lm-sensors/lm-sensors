@@ -330,6 +330,8 @@ function pwmdetail()
 		then
 			PLOT=y  	
 		fi
+	else
+		echo "Note: If you had $PLOTTER installed, I could generate a graphical plot."
 	fi
 
 	if [ "$PLOT" = "y" ]
