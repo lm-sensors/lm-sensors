@@ -331,7 +331,10 @@ function pwmdetail()
 			PLOT=y  	
 		fi
 	else
-		echo "Note: If you had $PLOTTER installed, I could generate a graphical plot."
+		if [ -n "$DISPLAY" ]
+		then
+			echo "Note: If you had $PLOTTER installed, I could generate a graphical plot."
+		fi
 	fi
 
 	if [ "$PLOT" = "y" ]
