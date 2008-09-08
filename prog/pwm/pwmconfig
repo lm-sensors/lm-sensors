@@ -575,6 +575,7 @@ function LoadConfig()
 
 LoadConfig $FCCONFIG
 
+# $1 = pwm value below which the fan is stopped
 function TestMinStart()
 {
 	echo
@@ -583,17 +584,17 @@ function TestMinStart()
 	echo "fan starts spinning. Then enter 'y'."
 	echo 'We will use this value +20 as the starting speed.'
 	let fanok=0
-	let fanval=0
+	let fanval="$1"
 
 	pwmenable $pwms
 	until [ "$fanok" = "1" ]
 	do
-		let fanval=fanval+10
 		if [ $fanval -gt 240 ] ; then let fanval=$MAX ; let fanok=1 ; fi
 		echo -n "Setting $pwms to $fanval..."
 		pwmset $pwms $fanval
 		read FANTEST
 		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
+		let fanval=fanval+10
 	done
 	pwmdisable $pwms
 
@@ -768,44 +769,44 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			fi
 			echo
 			echo "Enter the minimum PWM value (0-$MAX)"
-			echo -n "at which the fan STARTS spinning (press t to test) ($DEFMINSTART): "
-			read XMV
-			if [ "$XMV" = "" ]
-			then
-				XMV=$DEFMINSTART
-			fi
-			if [ "$XMV" = "t" -o "$XMV" = "T" ]
-			then
-				TestMinStart
-				XMV=$fanval
-			fi
-			if [ "$MINSTART" = "" ]
-			then
-				MINSTART="${pwms}=${XMV}"
-			else
-				MINSTART="`echo $MINSTART | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMV}"
-			fi
-			echo
-			echo "Enter the minimum PWM value (0-$MAX)"
 			echo -n "at which the fan STOPS spinning (press t to test) ($DEFMINSTOP): "
-			read XMV
-			if [ "$XMV" = "" ]
+			read XMSTOP
+			if [ "$XMSTOP" = "" ]
 			then
-				XMV=$DEFMINSTOP
+				XMSTOP=$DEFMINSTOP
 			fi
-			if [ "$XMV" = "t" -o "$XMV" = "T" ]
+			if [ "$XMSTOP" = "t" -o "$XMSTOP" = "T" ]
 			then
 				TestMinStop
-				XMV=$fanval
+				XMSTOP=$fanval
 			fi
 			if [ "$MINSTOP" = "" ]
 			then
-				MINSTOP="${pwms}=${XMV}"
+				MINSTOP="${pwms}=${XMSTOP}"
 			else
-				MINSTOP="`echo $MINSTOP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMV}"
+				MINSTOP="`echo $MINSTOP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMSTOP}"
 			fi
 			echo
-			echo "Enter the PWM value (0-$XMV) to use when the temperature"
+			echo "Enter the minimum PWM value ($XMSTOP-$MAX)"
+			echo -n "at which the fan STARTS spinning (press t to test) ($DEFMINSTART): "
+			read XMSTART
+			if [ "$XMSTART" = "" ]
+			then
+				XMSTART=$DEFMINSTART
+			fi
+			if [ "$XMSTART" = "t" -o "$XMSTART" = "T" ]
+			then
+				TestMinStart $XMSTOP
+				XMSTART=$fanval
+			fi
+			if [ "$MINSTART" = "" ]
+			then
+				MINSTART="${pwms}=${XMSTART}"
+			else
+				MINSTART="`echo $MINSTART | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMSTART}"
+			fi
+			echo
+			echo "Enter the PWM value (0-$XMSTOP) to use when the temperature"
 			echo -n "is below the low temperature limit (0): "
 			read XMINP
 			if [ -n "$XMINP" ]
@@ -818,7 +819,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				fi
 			fi
 			echo
-			echo "Enter the PWM value ($XMV-$MAX) to use when the temperature"
+			echo "Enter the PWM value ($XMSTOP-$MAX) to use when the temperature"
 			echo -n "is over the high temperature limit ($MAX): "
 			read XMAXP
 			if [ -n "$XMAXP" ]
