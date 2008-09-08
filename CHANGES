@@ -6,6 +6,7 @@ SVN-HEAD
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
                    Properly report bus arbitration lost (2.6 backport)
   Module i2c-piix4: Minor cleanups (2.6 backport)
+  Program pwmconfig: Fix MINSTOP and MINSTART test functions
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
                           Add ITE IT8720 support

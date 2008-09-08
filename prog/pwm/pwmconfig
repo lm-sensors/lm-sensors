@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pwmconfig v0.9
+# pwmconfig v0.10
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
@@ -9,7 +9,7 @@
 #    Verify that all fans are running at normal speed after this
 #    program has exited!!!
 #
-#    Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2007, 2008 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -567,19 +567,22 @@ function TestMinStart {
 	echo 'We will use this value +20 as the starting speed.'
 	let fanok=0
 	let fanval=0
+
+	pwmenable $pwms
 	until [ "$fanok" = "1" ]
 	do
 		let fanval=fanval+10
 		if [ $fanval -gt 240 ] ; then let fanval=$MAX ; let fanok=1 ; fi
 		echo -n "Setting $pwms to $fanval..."
-		echo $fanval > $pwms
+		pwmset $pwms $fanval
 		read FANTEST
 		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
 	done
+	pwmdisable $pwms
+
 	let fanval=fanval+20
 	if [ $fanval -gt 240 ] ; then let fanval=$MAX ; fi
 	echo "OK, using $fanval"
-	echo $MAX > $pwms
 }
 
 function TestMinStop {
@@ -590,19 +593,22 @@ function TestMinStop {
 	echo 'We will use this value +20 as the minimum speed.'
         let fanok=0
         let fanval=$MAX
+
+	pwmenable $pwms
         until [ "$fanok" = "1" ]
         do
                 let fanval=fanval-10
 		if [ $fanval -lt 0 ] ; then let fanval=0 ; let fanok=1 ; fi
                 echo -n "Setting $pwms to $fanval..."
-                echo $fanval > $pwms
+		pwmset $pwms $fanval
                 read FANTEST
 		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
         done
+	pwmdisable $pwms
+
         let fanval=fanval+20
         if [ $fanval -gt $MAX ] ; then let fanval=$MAX ; fi
         echo "OK, using $fanval"
-	echo $MAX > $pwms
 }
 
 function SaveConfig {
