@@ -512,7 +512,8 @@ then
 	exit 1
 fi
 
-function AskPath {
+function AskPath()
+{
 	echo -n 'What should be the path to your fancontrol config file (/etc/fancontrol)? '
 
 	read FCCONFIG
@@ -524,7 +525,8 @@ function AskPath {
 
 AskPath
 
-function ClearConfig {
+function ClearConfig()
+{
 	FCTEMPS=""
 	FCFANS=""
 	MINTEMP=""
@@ -535,7 +537,8 @@ function ClearConfig {
 	MAXPWM=""
 }
 
-function LoadConfig {
+function LoadConfig()
+{
 	# Nothing to do
 	if [ ! -f "$1" ]
 	then
@@ -569,7 +572,8 @@ function LoadConfig {
 
 LoadConfig $FCCONFIG
 
-function TestMinStart {
+function TestMinStart()
+{
 	echo
 	echo 'Now we increase the PWM value in 10-unit-steps.'
 	echo 'Let the fan stop completely, then press return until the'
@@ -595,33 +599,35 @@ function TestMinStart {
 	echo "OK, using $fanval"
 }
 
-function TestMinStop {
-        echo
-        echo 'Now we decrease the PWM value in 10-unit-steps.'
+function TestMinStop()
+{
+	echo
+	echo 'Now we decrease the PWM value in 10-unit-steps.'
 	echo 'Let the fan reach full speed, then press return until the'
 	echo "fan stops spinning. Then enter 'y'."
 	echo 'We will use this value +20 as the minimum speed.'
-        let fanok=0
-        let fanval=$MAX
+	let fanok=0
+	let fanval=$MAX
 
 	pwmenable $pwms
-        until [ "$fanok" = "1" ]
-        do
-                let fanval=fanval-10
+	until [ "$fanok" = "1" ]
+	do
+		let fanval=fanval-10
 		if [ $fanval -lt 0 ] ; then let fanval=0 ; let fanok=1 ; fi
-                echo -n "Setting $pwms to $fanval..."
+		echo -n "Setting $pwms to $fanval..."
 		pwmset $pwms $fanval
-                read FANTEST
+		read FANTEST
 		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
-        done
+	done
 	pwmdisable $pwms
 
-        let fanval=fanval+20
-        if [ $fanval -gt $MAX ] ; then let fanval=$MAX ; fi
-        echo "OK, using $fanval"
+	let fanval=fanval+20
+	if [ $fanval -gt $MAX ] ; then let fanval=$MAX ; fi
+	echo "OK, using $fanval"
 }
 
-function SaveConfig {
+function SaveConfig()
+{
 	echo
 	echo "Saving configuration to $FCCONFIG..."
 	tmpfile=`mktemp -t pwmcfg.XXXXXXXXXX` || { echo "$0: Cannot create temporary file" >&2; exit 1;  }
@@ -747,7 +753,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			if [ "$MAXTEMP" = "" ]
 			then
 				MAXTEMP="${pwms}=${XMT}"
-                        else
+			else
 				MAXTEMP="`echo $MAXTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
 			fi
 			echo
