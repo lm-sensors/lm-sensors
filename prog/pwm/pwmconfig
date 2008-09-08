@@ -649,6 +649,13 @@ DEFMAXTEMP=60
 DEFMINSTART=150
 DEFMINSTOP=100
 
+function filter_cfgvar()
+{
+	echo "$1" | sed -e 's/ /\n/g' \
+		  | egrep "$2" \
+		  | sed -e 's/.*=//g'
+}
+
 # "select" won't repeat the list of options, so we enclose it in a
 # never-ending loop so that it starts over again with each iteration.
 # I admit it's not exactly nice, but I do not have a better idea to
@@ -677,21 +684,21 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		do
 			echo
 			echo "Settings of ${pwmo}:"
-			echo "  Depends on `echo $FCTEMPS |sed -e 's/ /\n/g' |egrep \"${pwmo}\" |sed -e 's/.*=//g'`"
-			echo "  Controls `echo $FCFANS |sed -e 's/ /\n/g' |egrep \"${pwmo}\" |sed -e 's/.*=//g'`"
-			echo "  MINTEMP=`echo $MINTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			echo "  MAXTEMP=`echo $MAXTEMP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			echo "  MINSTART=`echo $MINSTART |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			echo "  MINSTOP=`echo $MINSTOP |sed -e \"s/ /\n/g\" |egrep \"${pwmo}\" |sed -e \"s/.*=//g\"`"
-			XMINP=`echo $MINPWM | sed -e "s/ /\n/g" | egrep "${pwmo}" | sed -e "s/.*=//g"`
+			echo "  Depends on `filter_cfgvar "$FCTEMPS" "$pwmo"`"
+			echo "  Controls `filter_cfgvar "$FCFANS" "$pwmo"`"
+			echo "  MINTEMP=`filter_cfgvar "$MINTEMP" $pwmo`"
+			echo "  MAXTEMP=`filter_cfgvar "$MAXTEMP" "$pwmo"`"
+			echo "  MINSTART=`filter_cfgvar "$MINSTART" "$pwmo"`"
+			echo "  MINSTOP=`filter_cfgvar "$MINSTOP" "$pwmo"`"
+			XMINP=`filter_cfgvar "$MINPWM" "$pwmo"`
 			[ -n "$XMINP" ] && echo "  MINPWM=$XMINP"
-			XMAXP=`echo $MAXPWM | sed -e "s/ /\n/g" | egrep "${pwmo}" | sed -e "s/.*=//g"`
+			XMAXP=`filter_cfgvar "$MAXPWM" "$pwmo"`
 			[ -n "$XMAXP" ] && echo "  MAXPWM=$XMAXP"
 		done
 		echo
 		break ;;
 
-	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep \"${pwms}\"`" )
+	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep "${pwms}"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
 		echo
 		if [ -n "$SYSFS" ]
@@ -712,7 +719,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo "$j	$S"
 		done
 		FAN=`echo $fanactive|cut -d' ' -f$REPLY`
-	       	FCFANS="`echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g\"` ${pwms}=$FAN"
+	       	FCFANS="`echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=$FAN"
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
 		select tempss in $TEMPS "None (Do not affect this PWM output)"; do
@@ -725,7 +732,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				then
 					FCTEMPS="${pwms}=${tempss}"
 				else
-					FCTEMPS="`echo $FCTEMPS | sed -e "s/${pwmsed}[^ ]* *//g\"` ${pwms}=${tempss}"
+					FCTEMPS="`echo $FCTEMPS | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${tempss}"
 				fi
 			fi
 			echo
@@ -740,7 +747,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			then
 				MINTEMP="${pwms}=${XMT}"
 			else
-				MINTEMP="`echo $MINTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
+				MINTEMP="`echo $MINTEMP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMT}"
 			fi
 			echo
 			echo 'Enter the high temperature (degree C)'
@@ -754,7 +761,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			then
 				MAXTEMP="${pwms}=${XMT}"
 			else
-				MAXTEMP="`echo $MAXTEMP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMT}"
+				MAXTEMP="`echo $MAXTEMP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMT}"
 			fi
 			echo
 			echo "Enter the minimum PWM value (0-$MAX)"
@@ -773,7 +780,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			then
 				MINSTART="${pwms}=${XMV}"
 			else
-				MINSTART="`echo $MINSTART | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMV}"
+				MINSTART="`echo $MINSTART | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMV}"
 			fi
 			echo
 			echo "Enter the minimum PWM value (0-$MAX)"
@@ -792,7 +799,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			then
 				MINSTOP="${pwms}=${XMV}"
 			else
-				MINSTOP="`echo $MINSTOP | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMV}"
+				MINSTOP="`echo $MINSTOP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMV}"
 			fi
 			echo
 			echo "Enter the PWM value (0-$XMV) to use when the temperature"
@@ -804,7 +811,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				then
 					MINPWM="${pwms}=${XMINP}"
 				else
-					MINPWM="`echo $MINPWM | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMINP}"
+					MINPWM="`echo $MINPWM | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMINP}"
 				fi
 			fi
 			echo
@@ -817,7 +824,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 				then
 					MAXPWM="${pwms}=${XMAXP}"
 				else
-					MAXPWM="`echo $MAXPWM | sed -e \"s/${pwmsed}[^ ]* *//g\"` ${pwms}=${XMAXP}"
+					MAXPWM="`echo $MAXPWM | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMAXP}"
 				fi
 			fi
 			echo
