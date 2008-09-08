@@ -7,6 +7,7 @@ SVN-HEAD
   pwmconfig: Tell the user about gnuplot if isn't installed
              Fix MINSTOP and MINSTART test functions
              Test MINSTOP before MINSTART
+             Use better step values for MINSTOP test
   sensors-detect: Add Intel SCH (bus) support
                   Add SMSC EMC6D103 support
                   Improve MAX6657, MAX6658, MAX6659 detection

@@ -606,17 +606,21 @@ function TestMinStart()
 function TestMinStop()
 {
 	echo
-	echo 'Now we decrease the PWM value in 10-unit-steps.'
-	echo 'Let the fan reach full speed, then press return until the'
-	echo "fan stops spinning. Then enter 'y'."
-	echo 'We will use this value +20 as the minimum speed.'
+	echo 'Now we decrease the PWM value to figure out the lowest usable value.'
+	echo 'Press return as long as the fan spins. When the fan stops spinning,'
+	echo "enter 'y'. We will use a slightly greater value as the minimum speed."
 	let fanok=0
 	let fanval=$MAX
 
 	pwmenable $pwms
 	until [ "$fanok" = "1" ]
 	do
-		let fanval=fanval-10
+		if [ $fanval -lt $STEP2_BELOW ]
+		then
+			let fanval=$fanval-$STEP2
+		else
+			let fanval=$fanval-$STEP
+		fi
 		if [ $fanval -lt 0 ] ; then let fanval=0 ; let fanok=1 ; fi
 		echo -n "Setting $pwms to $fanval..."
 		pwmset $pwms $fanval
@@ -625,8 +629,12 @@ function TestMinStop()
 	done
 	pwmdisable $pwms
 
-	let fanval=fanval+20
-	if [ $fanval -gt $MAX ] ; then let fanval=$MAX ; fi
+	if [ $fanval -lt $STEP2_BELOW ]
+	then
+		let 'fanval=fanval+2*STEP2'
+	else
+		let 'fanval=fanval+STEP'
+	fi
 	echo "OK, using $fanval"
 }
 
