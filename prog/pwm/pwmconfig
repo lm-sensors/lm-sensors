@@ -71,7 +71,7 @@ then
 	else
 		echo $0: 'No sensors found! (modprobe sensor modules?)'
 		exit 1
-	fi	
+	fi
 fi
 
 cd $DIR
@@ -331,7 +331,7 @@ function pwmdetail()
 		read X
 		if [ "$X" = "y" -o "$X" = "Y" -o "$X" = "" ]
 		then
-			PLOT=y  	
+			PLOT=y
 		fi
 	else
 		if [ -n "$DISPLAY" ]
@@ -358,15 +358,15 @@ function pwmdetail()
 	pwmenable $P
 	while [ $pwm -ge 0 ]
 	do
-		pwmset $P $pwm  
+		pwmset $P $pwm
 		sleep $PDELAY
 		if [ $? -ne 0 ]
 		then
-			pwmdisable $P	
+			pwmdisable $P
 			echo '^C received, aborting...'
 			rm -f $TMP1 $TMP2
 			exit 1
-		fi		
+		fi
 		# this will return the first field if there's only one (sysfs)
 		S=`cat $F | cut -d' ' -f2`
 		# Fan speed should never increase significantly
@@ -384,7 +384,7 @@ function pwmdetail()
 		fi
 		if [ "$S" = "0" -o "$S" = "-1" ]
 		then
-			pwmdisable $P	
+			pwmdisable $P
 			echo "    Fan Stopped at PWM = $pwm"
 			if [ $pwm -eq $MAX ]
 			then
@@ -405,7 +405,7 @@ function pwmdetail()
 			let pwm=$pwm-$STEP
 		fi
 	done
-	pwmdisable $P	
+	pwmdisable $P
 	if [ "$PLOT" = "y" ]
 	then
 		$PLOTTER  $TMP1
@@ -430,7 +430,7 @@ do
 		pwmdisable $i
 		echo '^C received, restoring PWM and aborting...'
 		exit 1
-	fi		
+	fi
 	let pwmactivecount=0
 	let count=1
 	for j in $GOODFAN
@@ -463,7 +463,7 @@ do
 			then
 				echo '^C received, aborting...'
 				exit 1
-			fi		
+			fi
 			# this will return the first field if there's only one (sysfs)
 			S=`cat $j | cut -d' ' -f2`
 			if [ $S -lt $threshold ]
@@ -765,7 +765,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		select tempss in $TEMPS "None (Do not affect this PWM output)"; do
 			if [ "$tempss" = "None (Do not affect this PWM output)" ]
 			then
-			
+
 				break;
 			else
 				if [ "$FCTEMPS" = "" ]
@@ -891,7 +891,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			break;
 		done
 		break ;;
-	
+
 	*)
 		echo "No such option. Enter a number."
 		break ;;
