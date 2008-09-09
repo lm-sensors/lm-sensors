@@ -453,8 +453,10 @@ do
 				let pwmactivecount=1
 				pwmactive="$i ${pwmactive}"
 				fanactive="$j ${fanactive}"
+				fanactive_min="$S ${fanactive_min}"
 			else
 				fanactive="$j+${fanactive}" #not supported yet by fancontrol
+				fanactive_min="$S+${fanactive_min}"
 			fi
 			sleep $DELAY
 			if [ $? -ne 0 ]
@@ -756,6 +758,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			echo "$j	$S"
 		done
 		FAN=`echo $fanactive|cut -d' ' -f$REPLY`
+		FAN_MIN=`echo $fanactive_min|cut -d' ' -f$REPLY`
 	       	FCFANS="`echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=$FAN"
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
@@ -800,18 +803,25 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			else
 				MAXTEMP="`echo $MAXTEMP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMT}"
 			fi
-			echo
-			echo "Enter the minimum PWM value (0-$MAX)"
-			echo -n "at which the fan STOPS spinning (press t to test) ($DEFMINSTOP): "
-			read XMSTOP
-			if [ "$XMSTOP" = "" ]
+
+			if [ $FAN_MIN -eq 0 ]
 			then
-				XMSTOP=$DEFMINSTOP
-			fi
-			if [ "$XMSTOP" = "t" -o "$XMSTOP" = "T" ]
-			then
-				TestMinStop $FAN
-				XMSTOP=$fanval
+				echo
+				echo "Enter the minimum PWM value (0-$MAX)"
+				echo -n "at which the fan STOPS spinning (press t to test) ($DEFMINSTOP): "
+				read XMSTOP
+
+				if [ "$XMSTOP" = "" ]
+				then
+					XMSTOP=$DEFMINSTOP
+				fi
+				if [ "$XMSTOP" = "t" -o "$XMSTOP" = "T" ]
+				then
+					TestMinStop $FAN
+					XMSTOP=$fanval
+				fi
+			else
+				XMSTOP=0
 			fi
 			if [ "$MINSTOP" = "" ]
 			then
@@ -819,18 +829,25 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			else
 				MINSTOP="`echo $MINSTOP | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMSTOP}"
 			fi
-			echo
-			echo "Enter the minimum PWM value ($XMSTOP-$MAX)"
-			echo -n "at which the fan STARTS spinning (press t to test) ($DEFMINSTART): "
-			read XMSTART
-			if [ "$XMSTART" = "" ]
+
+			if [ $FAN_MIN -eq 0 ]
 			then
+				echo
+				echo "Enter the minimum PWM value ($XMSTOP-$MAX)"
+				echo -n "at which the fan STARTS spinning (press t to test) ($DEFMINSTART): "
+				read XMSTART
+
+				if [ "$XMSTART" = "" ]
+				then
+					XMSTART=$DEFMINSTART
+				fi
+				if [ "$XMSTART" = "t" -o "$XMSTART" = "T" ]
+				then
+					TestMinStart $XMSTOP
+					XMSTART=$fanval
+				fi
+			else
 				XMSTART=$DEFMINSTART
-			fi
-			if [ "$XMSTART" = "t" -o "$XMSTART" = "T" ]
-			then
-				TestMinStart $XMSTOP
-				XMSTART=$fanval
 			fi
 			if [ "$MINSTART" = "" ]
 			then
@@ -838,10 +855,16 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			else
 				MINSTART="`echo $MINSTART | sed -e "s/${pwmsed}[^ ]* *//g"` ${pwms}=${XMSTART}"
 			fi
-			echo
-			echo "Enter the PWM value (0-$XMSTOP) to use when the temperature"
-			echo -n "is below the low temperature limit (0): "
-			read XMINP
+
+			if [ $XMSTOP -gt 0 ]
+			then
+				echo
+				echo "Enter the PWM value (0-$XMSTOP) to use when the temperature"
+				echo -n "is below the low temperature limit (0): "
+				read XMINP
+			else
+				XMINP=""
+			fi
 			if [ -n "$XMINP" ]
 			then
 				if [ "$MINPWM" = "" ]
