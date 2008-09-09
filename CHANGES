@@ -10,6 +10,7 @@ SVN-HEAD
              Use better step values for MINSTOP test
              Print the revision and date at start-up
              Detect and report obviously incorrect fan speeds
+             Determine MINSTOP automatically
   sensors-detect: Add Intel SCH (bus) support
                   Add SMSC EMC6D103 support
                   Improve MAX6657, MAX6658, MAX6659 detection

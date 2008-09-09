@@ -615,29 +615,42 @@ function TestMinStart()
 	echo "OK, using $fanval"
 }
 
+# $1 = fan input to read the fan speed from
 function TestMinStop()
 {
+	local faninput=$1
+	local threshold=100000
+	local fanspeed
+
 	echo
 	echo 'Now we decrease the PWM value to figure out the lowest usable value.'
-	echo 'Press return as long as the fan spins. When the fan stops spinning,'
-	echo "enter 'y'. We will use a slightly greater value as the minimum speed."
-	let fanok=0
+	echo 'We will use a slightly greater value as the minimum speed.'
 	let fanval=$MAX
 
 	pwmenable $pwms
-	until [ "$fanok" = "1" ]
+	while [ $fanval -ge 0 ]
 	do
+		pwmset $pwms $fanval
+		sleep $PDELAY
+		fanspeed=`cat $faninput | cut -d' ' -f2`
+		if [ $fanspeed -gt $threshold ]
+		then
+			echo "    PWM $fanval -> $fanspeed RPM (probably incorrect)"
+			break
+		else
+			echo "    PWM $fanval -> $fanspeed RPM"
+			if [ $fanspeed = "0" -o $fanspeed = "-1" ]
+			then
+				break
+			fi
+			let threshold=fanspeed*6/5
+		fi
 		if [ $fanval -lt $STEP2_BELOW ]
 		then
 			let fanval=$fanval-$STEP2
 		else
 			let fanval=$fanval-$STEP
 		fi
-		if [ $fanval -lt 0 ] ; then let fanval=0 ; let fanok=1 ; fi
-		echo -n "Setting $pwms to $fanval..."
-		pwmset $pwms $fanval
-		read FANTEST
-		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
 	done
 	pwmdisable $pwms
 
@@ -797,7 +810,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 			fi
 			if [ "$XMSTOP" = "t" -o "$XMSTOP" = "T" ]
 			then
-				TestMinStop
+				TestMinStop $FAN
 				XMSTOP=$fanval
 			fi
 			if [ "$MINSTOP" = "" ]
