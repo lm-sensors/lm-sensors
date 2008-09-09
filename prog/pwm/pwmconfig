@@ -353,6 +353,7 @@ function pwmdetail()
 		> $TMP2
 	fi
 
+	local threshold=100000
 	let pwm=$MAX
 	pwmenable $P
 	while [ $pwm -ge 0 ]
@@ -368,7 +369,15 @@ function pwmdetail()
 		fi		
 		# this will return the first field if there's only one (sysfs)
 		S=`cat $F | cut -d' ' -f2`
-		echo "    PWM $pwm FAN $S"
+		# Fan speed should never increase significantly
+		if [ $S -gt $threshold ]
+		then
+			echo "    PWM $pwm FAN $S (probably incorrect)"
+		else
+			echo "    PWM $pwm FAN $S"
+			let threshold=S*6/5
+		fi
+
 		if [ "$PLOT" = "y" ]
 		then
 			echo "$pwm $S" >> $TMP2
