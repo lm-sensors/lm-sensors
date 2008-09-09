@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# pwmconfig $Revision$
+# pwmconfig
 # Tests the pwm outputs of sensors and configures fancontrol
 #
 #    Warning!!! This program will stop your fans, one at a time,
@@ -28,6 +28,8 @@
 #
 #
 
+REVISION=$(echo '$Revision$' | cut -d' ' -f2)
+REVDATE=$(echo '$Date$' | cut -d' ' -f2)
 PIDFILE="/var/run/fancontrol.pid"
 
 if [ -f "$PIDFILE" ]
@@ -39,6 +41,7 @@ then
 	exit 1
 fi
 
+echo "# pwmconfig revision $REVISION ($REVDATE)"
 echo 'This program will search your sensors for pulse width modulation (pwm)'
 echo 'controls, and test each one to see if it controls a fan on'
 echo 'your motherboard. Note that many motherboards do not have pwm'
