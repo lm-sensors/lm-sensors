@@ -3613,6 +3613,11 @@ sub lm78_detect
   return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20)) or
                     ($chip == 1 and $reg == 0x40) or
                     ($chip == 2 and ($reg & 0xfe) == 0xc0);
+
+  # Explicitly prevent misdetection of Winbond chips
+  $reg = i2c_smbus_read_byte_data($file, 0x4f);
+  return if $reg == 0xa3 || $reg == 0x5c;
+
   return (6);
 }
 
