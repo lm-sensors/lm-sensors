@@ -12,6 +12,7 @@ SVN-HEAD
                           Add ITE IT8720 support
                           Add Texas Instruments TMP411 support
                           Prevent misdetection of W83627DHG on I2C as LM78
+                          W83627DHG has no subclients
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2

@@ -4471,10 +4471,11 @@ sub w83781d_detect
   return if $chip == 8 and  $reg1 != 0x7a;
   return if $chip == 9 and  $reg1 != 0xa1;
   return if $chip == 10 and  $reg1 != 0xa2;
-  $reg1 = i2c_smbus_read_byte_data($file, 0x4a);
   # Default address is 0x2d
   @res = ($addr != 0x2d) ? (7) : (8);
-  return @res if $chip == 9; # No subclients
+  return @res if $chip >= 9; # No subclients
+
+  $reg1 = i2c_smbus_read_byte_data($file, 0x4a);
   push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
   push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
   return @res;
