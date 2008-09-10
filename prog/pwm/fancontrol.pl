@@ -127,7 +127,7 @@ if (!(-d $dir))
        }
 
      if (!(-d $dir))
-       { die("No sensors found! (are the necessary modules loaded?) : 
+       { die("No sensors found! (are the necessary modules loaded?) :
 $!\n"); }
      else
        {
@@ -162,7 +162,7 @@ while(1)
 
 1;
 
-################################################################ 
+################################################################
 sub loadconfig($)
 {
    my $file = shift;
@@ -174,7 +174,7 @@ sub loadconfig($)
 
    open(F, $file);
 
-   our ($interval, $fctemps, $fcfans, $mintemp, $maxtemp, $minstart, 
+   our ($interval, $fctemps, $fcfans, $mintemp, $maxtemp, $minstart,
 $minstop);
    while($_ = <F>)
      {
@@ -219,7 +219,7 @@ $minstop);
 }
 
 
-################################################################ 
+################################################################
 sub pwmdisable($)
 {
    my $p = shift;
@@ -260,7 +260,7 @@ sub pwmdisable($)
 }
 
 
-################################################################# 
+#################################################################
 sub pwmenable($)
 {
    my $p = shift;
@@ -293,7 +293,7 @@ sub pwmenable($)
 }
 
 
-################################################################ 
+################################################################
 sub restorefans()
 {
    $SIG{TERM} = 'IGNORE';
@@ -315,7 +315,7 @@ sub restorefans()
 }
 
 
-############################################################ 
+############################################################
 sub UpdateFanSpeeds()
 {
    my $fcvcount = 0;
