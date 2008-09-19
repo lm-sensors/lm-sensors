@@ -1056,6 +1056,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { adm1021_detect(7, @_); },
      },
      {
+       name => "Maxim MAX1618",
+       driver => "max1619",
+       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+       i2c_detect => sub { max1619_detect(1, @_); },
+     },
+     {
        name => "Maxim MAX1619",
        driver => "max1619",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
@@ -5038,7 +5044,7 @@ sub max1668_detect
 }
 
 # $_[0]: Chip to detect
-#   (0 = MAX1619)
+#   (0 = MAX1619, 1 = MAX1618)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, 7 if detected
@@ -5057,11 +5063,19 @@ sub max1619_detect
   my $status = i2c_smbus_read_byte_data($file, 0x02);
   my $convrate = i2c_smbus_read_byte_data($file, 0x04);
 
-  return if $man_id != 0x4D
-    or $dev_id != 0x04
-    or ($conf & 0x03)
-    or ($status & 0x61)
-    or $convrate >= 8;
+  if ($chip == 0) {	# MAX1619
+    return if $man_id != 0x4D
+      or $dev_id != 0x04
+      or ($conf & 0x03)
+      or ($status & 0x61)
+      or $convrate >= 8;
+  }
+  if ($chip == 1) {	# MAX1618
+    return if $man_id != 0x4D
+      or $dev_id != 0x02
+      or ($conf & 0x07)
+      or ($status & 0x63);
+  }
 
   return 7;
 }

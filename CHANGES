@@ -33,6 +33,7 @@ SVN-HEAD
                   Add Texas Instruments TMP411 support
                   Prevent misdetection of W83627DHG on I2C as LM78
                   W83627DHG has no subclients
+                  Add Maxim MAX1618 support
 
 3.0.2 (2008-05-18)
   documentation: Delete the FAQ, now maintained on the wiki
