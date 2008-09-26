@@ -49,15 +49,11 @@
 # FEATURE NAMES
 # -------------
 # Feature names are used in 'label', 'compute', 'set', and 'ignore' lines.
-# Example feature names are 'in0', 'temp2', 'in3_min', and 'temp3_over'.
-# These features are defined for each chip in lib/chips.c.
+# Example feature names are 'in0', 'temp2', 'in3_min', and 'temp3_max'.
 #
 # Undefined features will be silently ignored in 'label' and 'compute' lines.
 # Undefined features in 'set' lines will result in 'Unknown feature name'
 # when running 'sensors -s'.
-#
-# Unfortunately, feature names starting with a number must be in
-# double quotes or you get "parse error, expecting 'NAME'".
 #
 #
 # LABEL LINES
