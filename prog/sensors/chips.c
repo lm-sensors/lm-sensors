@@ -3458,7 +3458,7 @@ void print_it87(const sensors_chip_name *name)
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
-                               (((int)sens)==2) ? "thermistor" :
+                               (((int)sens)==2 || ((int)sens)==4) ? "thermistor" :
                                (((int)sens)==0) ? "disabled" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP1 ? "ALARM" : "" );
     }
@@ -3474,7 +3474,7 @@ void print_it87(const sensors_chip_name *name)
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
-                             (((int)sens)==2) ? "thermistor" :
+                             (((int)sens)==2 || ((int)sens)==4) ? "thermistor" :
                              (((int)sens)==0) ? "disabled" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP2 ? "ALARM" : "" );
     }
@@ -3490,7 +3490,7 @@ void print_it87(const sensors_chip_name *name)
       print_label(label,10);
       print_temp_info( cur, max, min, MINMAX, 0, 0);
       printf(" sensor = %s  ", (((int)sens)==3) ? "diode" :
-                               (((int)sens)==2) ? "thermistor" :
+                               (((int)sens)==2 || ((int)sens)==4) ? "thermistor" :
                                (((int)sens)==0) ? "disabled" : "invalid");
       printf( " %s\n", alarms & IT87_ALARM_TEMP3 ? "ALARM" : "" );
     }

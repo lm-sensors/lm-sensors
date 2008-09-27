@@ -8,6 +8,7 @@ SVN-HEAD
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Program pwmconfig: Fix MINSTOP and MINSTART test functions
                      Change default for MINTEMP from 0 to 20 degrees C
+  Program sensors: Recognize it87 thermal sensor type 4 as thermistor
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
                           Add ITE IT8720 support
