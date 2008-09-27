@@ -13,6 +13,7 @@ SVN-HEAD
              Determine MINSTOP automatically
              Skip MINSTOP and MINSTART tests if fan can't stop
              Change default for MINTEMP from 0 to 20 degrees C
+             Add support for attributes in the hwmon class device (#2260)
   sensors-detect: Add Intel SCH (bus) support
                   Add SMSC EMC6D103 support
                   Improve MAX6657, MAX6658, MAX6659 detection

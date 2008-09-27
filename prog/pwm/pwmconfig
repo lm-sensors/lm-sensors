@@ -77,7 +77,7 @@ fi
 cd $DIR
 if [ "$SYSFS" = "2" ]
 then
-	PREFIX='hwmon*/device'
+	PREFIX='hwmon*'
 else
 	PREFIX='*-*'
 fi
@@ -88,28 +88,60 @@ then
 	exit 1
 fi
 
-MATCH=$PREFIX/'pwm[1-9]'
-PWM=`echo $MATCH`
-if [ "$SYSFS" = "1" -a "$MATCH" = "$PWM" ]
+# For sysfs, we may need to adjust the device path
+if [ "$SYSFS" = "2" ]
 then
-	# Deprecated naming scheme (used in kernels 2.6.5 to 2.6.9)
-	MATCH=$PREFIX/'fan[1-9]_pwm'
-	PWM=`echo $MATCH`
+	OLD_DEVICES="$DEVICES"
+	DEVICES=""
+
+	for device in $OLD_DEVICES
+	do
+		if [ ! -r "$device/name" ]
+		then
+			device="$device/device"
+		fi
+		
+		DEVICES="$DEVICES $device"
+	done
 fi
-if [ "$MATCH" = "$PWM" ]
+
+
+for device in $DEVICES
+do
+	# Find available fan control outputs
+	MATCH=$device/'pwm[1-9]'
+	device_pwm=`echo $MATCH`
+	if [ "$SYSFS" = "1" -a "$MATCH" = "$device_pwm" ]
+	then
+		# Deprecated naming scheme (used in kernels 2.6.5 to 2.6.9)
+		MATCH=$device/'fan[1-9]_pwm'
+		device_pwm=`echo $MATCH`
+	fi
+	if [ "$MATCH" != "$device_pwm" ]
+	then
+		PWM="$PWM $device_pwm"
+	fi
+
+	# Find available fan monitoring inputs
+	if [ -n "$SYSFS" ]
+	then
+		MATCH=$device/'fan[1-9]_input'
+	else
+		MATCH=$device/'fan[1-9]'
+	fi
+	device_fan=`echo $MATCH`
+	if [ "$MATCH" != "$device_fan" ]
+	then
+		FAN="$FAN $device_fan"
+	fi
+done
+
+if [ -z "$PWM" ]
 then
 	echo $0: 'There are no pwm-capable sensor modules installed'
 	exit 1
 fi
-
-if [ -n "$SYSFS" ]
-then
-	MATCH=$PREFIX/'fan[1-9]_input'
-else
-	MATCH=$PREFIX/'fan[1-9]'
-fi
-FAN=`echo $MATCH`
-if [ "$MATCH" = "$FAN" ]
+if [ -z "$FAN" ]
 then
 	echo $0: 'There are no fan-capable sensor modules installed'
 	exit 1
@@ -516,14 +548,23 @@ then
 	exit
 fi
 
-if [ -n "$SYSFS" ]
-then
-	MATCH=$PREFIX/'temp[1-9]_input'
-else
-	MATCH=$PREFIX/'temp[1-9]'
-fi
-TEMPS=`echo $MATCH`
-if [ "$MATCH" = "$TEMPS" ]
+for device in $DEVICES
+do
+	# Find available temperature monitoring inputs
+	if [ -n "$SYSFS" ]
+	then
+		MATCH=$device/'temp[1-9]_input'
+	else
+		MATCH=$device/'temp[1-9]'
+	fi
+	device_temp=`echo $MATCH`
+	if [ "$MATCH" != "$device_temp" ]
+	then
+		TEMPS="$TEMPS $device_temp"
+	fi
+done
+
+if [ -z "$TEMPS" ]
 then
 	echo $0: 'There are no temperature-capable sensor modules installed'
 	exit 1
