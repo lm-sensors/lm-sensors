@@ -151,9 +151,13 @@ fi
 # Only works with Linux 2.6
 function print_devices()
 {
+	local name
+
 	for device in $DEVICES
 	do
-		echo "$1$device is `cat $device/name`"
+		name=`cat $device/name 2> /dev/null`
+		[ -z "$name" ] && name="unknown (no name attribute)"
+		echo "$1$device is $name"
 	done
 }
 
