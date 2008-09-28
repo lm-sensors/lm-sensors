@@ -1,10 +1,10 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN-HEAD
+3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
   fancontrol: Don't use named pipes when we don't need them (#2319)
-  pwmconfig: Tell the user about gnuplot if isn't installed
+  pwmconfig: Tell the user about gnuplot if it isn't installed
              Fix MINSTOP and MINSTART test functions
              Test MINSTOP before MINSTART
              Use better step values for MINSTOP test

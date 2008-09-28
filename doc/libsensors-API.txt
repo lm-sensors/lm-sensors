@@ -6,7 +6,7 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
-0x401	lm-sensors 3.0.2
+0x401	lm-sensors 3.0.2 to 3.0.3
 * Added bus type "virtual":
   #define SENSORS_BUS_TYPE_VIRTUAL
 * Added support for power and energy sensors
