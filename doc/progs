@@ -34,12 +34,6 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
   A SysV init script to be installed in /etc/rc.d/init.d/
   It inserts the bus and chip modules and starts the sensord daemon.
 
-* prog/maxilife/sysinfo.sh (written in shell, not installed)
-  Write system information to the HP Maxilife LCD display using writelcd.sh.
-
-* prog/maxilife/writelcd.sh (written in shell, not installed)
-  Write a string to the HP Maxilife LCD display.
-
 * prog/pwm/pwmconfig (shell script, installed by 'make install')
   Formerly pwmtest, tests the pwm (pulse width modulation) outputs of sensors
   for their effect on the fans and helps to setup the configfile for fancontrol.

@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN-HEAD
+  maxilife scripts: Delete (driver never ported to Linux 2.6)
+
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
   fancontrol: Don't use named pipes when we don't need them (#2319)
