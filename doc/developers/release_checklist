@@ -8,7 +8,7 @@ Release steps:
   Remember: update main number when interface changes, minor if new
   functionality is added, and patch if only bugs are fixed.
   `svn diff -r Vx-y-z lib' is your friend.
-- Update the CHANGES file (add the release date)
+- Update the CHANGES file (set version and release date)
 - Update lm_sensors.lsm (Version, Entered-date and Primary-site)
 - Update libsensors-API.txt
 - Update version.h
@@ -34,12 +34,13 @@ Release steps:
 After release, remember to:
 - Copy to mirrors
 - Update the Download page on lm-sensors.org, then add a news item
+- Announce on the lm-sensors mailing list
 - Announce on Freshmeat
-- Add "+SVN" to version.h
+- Add "+SVN" to version.h and commit
 - Mark the corresponding release milestone as complete using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.0.0 2007-11-24'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.0.0 now'
 - Create a new version for the bug tracking system using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 3.0.0 2007-11-24'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 3.0.0 now'
 - Create a new release milestone using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.0.1 2008-02-15'
 - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
