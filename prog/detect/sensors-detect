@@ -4522,13 +4522,15 @@ sub lm85_detect
            && $verstep != 0x62;	# LM85 B
   } elsif ($chip == 1) {
     return if $vendor != 0x01;	# National Semiconductor
-    return if $verstep != 0x68;	# LM96000
+    return if $verstep != 0x68	# LM96000
+           && $verstep != 0x69;	# LM96000
   } elsif ($chip == 2) {
     return if $vendor != 0x41;	# Analog Devices
     return if $verstep != 0x60;	# ADM1027
   } elsif ($chip == 3) {
     return if $vendor != 0x41;	# Analog Devices
-    return if $verstep != 0x62;	# ADT7463
+    return if $verstep != 0x62	# ADT7463
+           && $verstep != 0x6a;	# ADT7463 C
   } elsif ($chip == 4) {
     return if $vendor != 0x5c;	# SMSC
     return if $verstep != 0x60	# EMC6D100/101 A0
