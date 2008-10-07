@@ -618,7 +618,7 @@ static const ChipDescriptor lm87_chip = {
 
 static const char *it87_names[] = {
   SENSORS_IT87_PREFIX, SENSORS_IT8712_PREFIX,
-  SENSORS_IT8716_PREFIX, SENSORS_IT8718_PREFIX, NULL
+  SENSORS_IT8716_PREFIX, SENSORS_IT8718_PREFIX, SENSORS_IT8720_PREFIX, NULL
 };
 
 static const FeatureDescriptor it87_features[] = {

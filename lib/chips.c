@@ -6443,6 +6443,7 @@ sensors_chip_features sensors_chip_features_list[] =
  { SENSORS_IT8712_PREFIX, it87_features },
  { SENSORS_IT8716_PREFIX, it87_features },
  { SENSORS_IT8718_PREFIX, it87_features },
+ { SENSORS_IT8720_PREFIX, it87_features },
  { SENSORS_FSCPOS_PREFIX, fscpos_features },
  { SENSORS_FSCSCY_PREFIX, fscscy_features },
  { SENSORS_FSCHER_PREFIX, fscher_features },
