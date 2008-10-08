@@ -14,7 +14,7 @@ SVN-HEAD
                    Add it8720 support
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
-                          Add ITE IT8720 support
+                          Add ITE IT8720F support
                           Add Texas Instruments TMP411 support
                           Prevent misdetection of W83627DHG on I2C as LM78
                           W83627DHG has no subclients
