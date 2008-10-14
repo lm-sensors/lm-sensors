@@ -280,6 +280,13 @@ $revision =~ s/ \([^()]*\)//;
        match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
+       vendid => 0x1106,
+       devid  => 0x8353,
+       procid => "VIA Technologies VX800/VX820 South Bridge",
+       driver => "i2c-viapro",
+       match => qr/^SMBus V(IA|ia) Pro adapter at/,
+     },
+     {
        vendid => 0x1039,
        devid  => 0x5597,
        procid => "Silicon Integrated Systems SIS5581/5582/5597/5598 (To be written - Do not use 5595 drivers)",
