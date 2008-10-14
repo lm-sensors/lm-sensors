@@ -18,6 +18,7 @@ SVN-HEAD
                           Add Texas Instruments TMP411 support
                           Prevent misdetection of W83627DHG on I2C as LM78
                           W83627DHG has no subclients
+                          Add VIA VX800/VX820 support
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
