@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  File i2c-dev.h: Drop I2C_FUNC_SMBUS_*I2C_BLOCK_2 defines
   Library: Avoid namespace pollution
            Add support for the IT8720F chip
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
