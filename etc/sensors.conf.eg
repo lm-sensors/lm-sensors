@@ -1566,8 +1566,6 @@ chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*" "max6680-*"
 
    label temp1 "M/B Temp"
    label temp2 "CPU Temp"
-   label temp1_crit "M/B Crit"
-   label temp2_crit "CPU Crit"
 
 # change high and low limits to fit your needs
 #   set temp1_min 10
@@ -1592,8 +1590,6 @@ chip "lm99-*"
 
    label temp1 "G/C Temp"
    label temp2 "GPU Temp"
-   label temp1_crit "G/C Crit"
-   label temp2_crit "GPU Crit"
 
 # note #1: only the LM99 needs this; for a LM89, comment the compute line
 # out
@@ -1626,7 +1622,6 @@ chip "lm63-*"
 
    label temp1       "M/B Temp"
    label temp2       "CPU Temp"
-   label temp2_crit  "CPU Crit"
    label fan1        "CPU Fan"
 
 # Change limits to fit your needs. Note that temp2_crit is read-only.
@@ -2028,11 +2023,8 @@ chip "pc87366-*"
 # Temperature inputs
 
    label temp1       "CPU0 Temp"
-   label temp1_crit  "CPU0 Crit"
    label temp2       "CPU1 Temp"
-   label temp2_crit  "CPU1 Crit"
    label temp3       "S-IO Temp"
-   label temp3_crit  "S-IO Crit"
 
 #   set temp1_min    0
 #   set temp1_max   70
@@ -2092,8 +2084,6 @@ chip "adm1030-*"
 
    label temp1 "SYS Temp"
    label temp2 "CPU Temp"
-   label temp1_crit "SYS Crit"
-   label temp2_crit "CPU Crit"
 
 #   set temp1_max  60
 #   set temp2_max  70
@@ -2110,9 +2100,6 @@ chip "adm1031-*"
    label temp1 "SYS Temp"
    label temp2 "CPU Temp"
    label temp3 "AUX Temp"
-   label temp1_crit "SYS Crit"
-   label temp2_crit "CPU Crit"
-   label temp3_crit "AUX Crit"
 
 #   set temp1_max  60
 #   set temp2_max  70
