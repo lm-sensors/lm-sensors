@@ -5,14 +5,20 @@ SVN-HEAD
   File i2c-dev.h: Drop I2C_FUNC_SMBUS_*I2C_BLOCK_2 defines
   Library: Avoid namespace pollution
            Add support for the IT8720F chip
+           Support separate prefixes lm89, max6658, max6659, max6681,
+            max6646, max6647 and max6649
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
                    Properly report bus arbitration lost (2.6 backport)
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Program pwmconfig: Fix MINSTOP and MINSTART test functions (#2340)
                      Change default for MINTEMP from 0 to 20 degrees C
   Program sensord: Add it8720 support
+                   Add lm89, max6658, max6659, max6681, max6646, max6647
+                    and max6649 support
   Program sensors: Recognize it87 thermal sensor type 4 as thermistor
                    Add it8720 support
+                   Add lm89, max6658, max6659, max6681, max6646, max6647
+                    and max6649 support
   Program sensors-detect: Add VIA VT1212 support
                           Add SMSC EMC2700LPC support
                           Add ITE IT8720F support
