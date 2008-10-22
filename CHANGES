@@ -10,6 +10,7 @@ SVN-HEAD
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
                    Properly report bus arbitration lost (2.6 backport)
   Module i2c-piix4: Minor cleanups (2.6 backport)
+  Module i2c-viapro: Add VX800/VX820 support (2.6 backport)
   Program pwmconfig: Fix MINSTOP and MINSTART test functions (#2340)
                      Change default for MINTEMP from 0 to 20 degrees C
   Program sensord: Add it8720 support

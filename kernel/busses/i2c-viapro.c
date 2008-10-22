@@ -37,6 +37,7 @@
    VT8237A            0x3337             yes
    VT8251             0x3287             yes
    CX700              0x8324             yes
+   VX800/VX820        0x8353             yes
 
    Note: we assume there can only be one device, with one SMBus interface.
 */
@@ -75,6 +76,10 @@
 /* CX700 is undefined */
 #ifndef PCI_DEVICE_ID_VIA_CX700
 #define PCI_DEVICE_ID_VIA_CX700	0x8324
+#endif
+/* VX800 is undefined */
+#ifndef PCI_DEVICE_ID_VIA_VX800
+#define PCI_DEVICE_ID_VIA_VX800	0x8353
 #endif
 
 #define SMBBA1		0x90
@@ -424,6 +429,7 @@ found:
 
 	switch (id->device) {
 	case PCI_DEVICE_ID_VIA_CX700:
+	case PCI_DEVICE_ID_VIA_VX800:
 	case PCI_DEVICE_ID_VIA_8251:
 	case PCI_DEVICE_ID_VIA_8237:
 	case PCI_DEVICE_ID_VIA_8237A:
@@ -525,6 +531,13 @@ static struct pci_device_id vt596_ids[] __initdata = {
 	{
 		.vendor		= PCI_VENDOR_ID_VIA,
 		.device 	= PCI_DEVICE_ID_VIA_CX700,
+		.subvendor	= PCI_ANY_ID,
+		.subdevice	= PCI_ANY_ID,
+		.driver_data	= SMBBA3
+	},
+	{
+		.vendor		= PCI_VENDOR_ID_VIA,
+		.device 	= PCI_DEVICE_ID_VIA_VX800,
 		.subvendor	= PCI_ANY_ID,
 		.subdevice	= PCI_ANY_ID,
 		.driver_data	= SMBBA3

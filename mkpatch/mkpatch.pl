@@ -267,7 +267,7 @@ CONFIG_I2C_VIA
   be built as a module which can be inserted and removed while the
   kernel is running.
 
-VIA Technologies, Inc. VT82C596/82C686/82xx and CX700
+VIA Technologies, Inc. VT82C596/82C686/82xx and CX700/VX800/VX820
 CONFIG_I2C_VIAPRO
   If you say yes to this option, support will be included for the VIA
   Technologies I2C adapter on these chips. For integrated sensors on the
@@ -998,7 +998,7 @@ sub gen_drivers_i2c_Config_in
     dep_tristate '  SiS 645/961,645DX/961,735' CONFIG_I2C_SIS645 $CONFIG_I2C $CONFIG_HOTPLUG
     dep_tristate '  Savage 4' CONFIG_I2C_SAVAGE4 $CONFIG_I2C_ALGOBIT
     dep_tristate '  VIA Technologies, Inc. VT82C586B' CONFIG_I2C_VIA $CONFIG_I2C_ALGOBIT
-    dep_tristate '  VIA Technologies, Inc. VT82C596/82C686/82xx and CX700' CONFIG_I2C_VIAPRO $CONFIG_I2C
+    dep_tristate '  VIA Technologies, Inc. VT82C596/82C686/82xx and CX700/VX800/VX820' CONFIG_I2C_VIAPRO $CONFIG_I2C
     dep_tristate '  Voodoo3 I2C interface' CONFIG_I2C_VOODOO3 $CONFIG_I2C_ALGOBIT
     dep_tristate '  Pseudo ISA adapter (for some hardware sensors)' CONFIG_I2C_ISA $CONFIG_I2C
   fi
