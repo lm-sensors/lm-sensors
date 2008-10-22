@@ -2079,7 +2079,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
   },
   {
     name => "Intel AMB FB-DIMM thermal sensor",
-    driver => "to-be-written",
+    driver => "i5k_amb",
     detect => sub { intel_amb_detect(); },
   },
   {
@@ -5513,12 +5513,10 @@ sub k10temp_pci_detect
 }
 
 # Returns: undef if not detected, (9) if detected.
-# the device 0xa620 should not be visible on host PCI bus, gateway
-# must be used
 sub intel_amb_detect
 {
-	if ((exists $pci_list{'8086:a620'}) ||
-	   (exists $pci_list{'8086:25f0'})) {
+	if ((exists $pci_list{'8086:25f0'}) ||	# Intel 5000
+	    (exists $pci_list{'8086:4030'})) {	# Intel 5400
 		return 9;
 	}
 	return;
