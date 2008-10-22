@@ -329,6 +329,10 @@ static int lm78_detect(struct i2c_adapter *adapter, int address,
 		if (!is_isa
 		    && (lm78_read_value(new_client, LM78_REG_I2C_ADDR) !=
 			address)) goto ERROR1;
+		/* Explicitly prevent the misdetection of Winbond chips */
+		i = lm78_read_value(new_client, 0x4f);
+		if (i == 0xa3 || i == 0x5c)
+			goto ERROR1;
 	}
 
 	/* Determine the chip type. */
