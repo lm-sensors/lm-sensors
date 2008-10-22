@@ -2,6 +2,7 @@ lm_sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  File doc/chips/lm90: Update datasheet links (2.6 backport)
   File i2c-dev.h: Drop I2C_FUNC_SMBUS_*I2C_BLOCK_2 defines
   Library: Avoid namespace pollution
            Add support for the IT8720F chip
