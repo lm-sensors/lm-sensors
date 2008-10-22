@@ -73,11 +73,18 @@ SENSORS_INSMOD_1(max1619);
 #define MAX1619_REG_R_CHIP_ID		0xFF
 
 /*
- * Conversions and various macros
+ * Conversions
  */
 
-#define TEMP_FROM_REG(val)	((val) & 0x80 ? (val)-0x100 : (val))
-#define TEMP_TO_REG(val)	((val) < 0 ? (val)+0x100 : (val))
+static int temp_from_reg(int val)
+{
+	return val & 0x80 ? val-0x100 : val;
+}
+
+static int temp_to_reg(int val)
+{
+	return val < 0 ? val+0x100 : val;
+}
 
 /*
  * Functions declaration
@@ -397,7 +404,7 @@ static void max1619_local_temp(struct i2c_client *client, int operation,
 		*nrels_mag = 0; /* magnitude */
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		max1619_update_client(client);
-		results[0] = TEMP_FROM_REG(data->local_temp);
+		results[0] = temp_from_reg(data->local_temp);
 		*nrels_mag = 1;
 	}
 
@@ -412,18 +419,18 @@ static void max1619_remote_temp(struct i2c_client *client, int operation,
 		*nrels_mag = 0; /* magnitude */
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		max1619_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote_high);
-		results[1] = TEMP_FROM_REG(data->remote_low);
-		results[2] = TEMP_FROM_REG(data->remote_temp);
+		results[0] = temp_from_reg(data->remote_high);
+		results[1] = temp_from_reg(data->remote_low);
+		results[2] = temp_from_reg(data->remote_temp);
 		*nrels_mag = 3;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->remote_high = TEMP_TO_REG(results[0]);
+			data->remote_high = temp_to_reg(results[0]);
 			i2c_smbus_write_byte_data(client,
 				MAX1619_REG_W_REMOTE_THIGH, data->remote_high);
 		}
 		if (*nrels_mag >= 2) {
-			data->remote_low = TEMP_TO_REG(results[1]);
+			data->remote_low = temp_to_reg(results[1]);
 			i2c_smbus_write_byte_data(client,
 				MAX1619_REG_W_REMOTE_TLOW, data->remote_low);
 
@@ -440,17 +447,17 @@ static void max1619_remote_crit(struct i2c_client *client, int operation,
 		*nrels_mag = 0; /* magnitude */
 	else if (operation == SENSORS_PROC_REAL_READ) {
 		max1619_update_client(client);
-		results[0] = TEMP_FROM_REG(data->remote_max);
-		results[1] = TEMP_FROM_REG(data->remote_hyst);
+		results[0] = temp_from_reg(data->remote_max);
+		results[1] = temp_from_reg(data->remote_hyst);
 		*nrels_mag = 2;
 	} else if (operation == SENSORS_PROC_REAL_WRITE) {
 		if (*nrels_mag >= 1) {
-			data->remote_max = TEMP_TO_REG(results[0]);
+			data->remote_max = temp_to_reg(results[0]);
 			i2c_smbus_write_byte_data(client,
 				MAX1619_REG_W_REMOTE_TMAX, data->remote_max);
 		}
 		if (*nrels_mag >= 2) {
-			data->remote_hyst = TEMP_TO_REG(results[1]);
+			data->remote_hyst = temp_to_reg(results[1]);
 			i2c_smbus_write_byte_data(client,
 				MAX1619_REG_W_REMOTE_THYST, data->remote_hyst);
 		}
