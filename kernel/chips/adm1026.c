@@ -666,7 +666,7 @@ static int adm1026_detect(struct i2c_adapter *adapter, int address,
 			kind = adm1026 ;
 		} else if( company == ADM1026_COMPANY_ANALOG_DEV
 		    && (verstep & 0xf0) == ADM1026_VERSTEP_GENERIC ) {
-			printk("adm1026: Unrecgonized stepping 0x%02x"
+			printk("adm1026: Unrecognized stepping 0x%02x"
 			    " Defaulting to ADM1026.\n", verstep );
 			kind = adm1026 ;
 		} else if( (verstep & 0xf0) == ADM1026_VERSTEP_GENERIC ) {

@@ -770,7 +770,7 @@ static int lm85_detect(struct i2c_adapter *adapter, int address,
 		} else if( company == LM85_COMPANY_NATIONAL
 		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
 			printk("lm85: Detected National Semiconductor chip\n");
-			printk("lm85: Unrecgonized version/stepping 0x%02x"
+			printk("lm85: Unrecognized version/stepping 0x%02x"
 			    " Defaulting to Generic LM85.\n", verstep );
 			kind = any_chip ;
 		} else if( company == LM85_COMPANY_ANALOG_DEV
@@ -783,7 +783,7 @@ static int lm85_detect(struct i2c_adapter *adapter, int address,
 		} else if( company == LM85_COMPANY_ANALOG_DEV
 		    && (verstep & LM85_VERSTEP_VMASK) == LM85_VERSTEP_GENERIC) {
 			printk("lm85: Detected Analog Devices chip\n");
-			printk("lm85: Unrecgonized version/stepping 0x%02x"
+			printk("lm85: Unrecognized version/stepping 0x%02x"
 			    " Defaulting to Generic LM85.\n", verstep );
 			kind = any_chip ;
 		} else if( company == LM85_COMPANY_SMSC
