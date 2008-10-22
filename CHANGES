@@ -5,6 +5,7 @@ SVN-HEAD
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensors-detect: Fix detection of ADT7463 and LM96000
                   Add VIA VX800/VX820 support 
+                  Fix detection of Intel 5000 series FB-DIMM AMB
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
