@@ -442,7 +442,7 @@ static int lm90_detect(struct i2c_adapter *adapter, int address,
 	}
 
 	if (kind <= 0) { /* identification failed */
-		printk(KERN_INFO "lm90: Unsupported chip\n");
+		printk(KERN_DEBUG "lm90: Unsupported chip\n");
 		goto exit_free;
 	}
 
