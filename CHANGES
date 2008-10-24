@@ -2,7 +2,9 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  libsensors: Add support for instantaneous power sensors
   maxilife scripts: Delete (driver never ported to Linux 2.6)
+  sensors: Add support for instantaneous power sensors
   sensors-detect: Fix detection of ADT7463 and LM96000
                   Add VIA VX800/VX820 support 
                   Fix detection of Intel 5000 series FB-DIMM AMB

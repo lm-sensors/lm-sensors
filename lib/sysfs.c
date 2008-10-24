@@ -247,6 +247,9 @@ static const struct subfeature_type_match power_matches[] = {
 	{ "average", SENSORS_SUBFEATURE_POWER_AVERAGE },
 	{ "average_highest", SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST },
 	{ "average_lowest", SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST },
+	{ "input", SENSORS_SUBFEATURE_POWER_INPUT },
+	{ "input_highest", SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST },
+	{ "input_lowest", SENSORS_SUBFEATURE_POWER_INPUT_LOWEST },
 	{ "average_interval", SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL },
 	{ NULL, 0 }
 };

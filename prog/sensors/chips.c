@@ -449,8 +449,28 @@ static void print_chip_power(const sensors_chip_name *name,
 	print_label(label, label_size);
 	free(label);
 
+	/* Power sensors come in 2 flavors: instantaneous and averaged.
+	   To keep things simple, we assume that each sensor only implements
+	   one flavor. */
 	sf = sensors_get_subfeature(name, feature,
-				    SENSORS_SUBFEATURE_POWER_AVERAGE);
+				    SENSORS_SUBFEATURE_POWER_INPUT);
+	if (sf) {
+		sfmin = sensors_get_subfeature(name, feature,
+					       SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST);
+		sfmax = sensors_get_subfeature(name, feature,
+					       SENSORS_SUBFEATURE_POWER_INPUT_LOWEST);
+		sfint = NULL;
+	} else {
+		sf = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_POWER_AVERAGE);
+		sfmin = sensors_get_subfeature(name, feature,
+					       SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST);
+		sfmax = sensors_get_subfeature(name, feature,
+					       SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST);
+		sfint = sensors_get_subfeature(name, feature,
+					       SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL);
+	}
+
 	if (sf) {
 		val = get_value(name, sf);
 		scale_value(&val, &unit);
@@ -458,12 +478,6 @@ static void print_chip_power(const sensors_chip_name *name,
 	} else
 		printf("     N/A");
 
-	sfmin = sensors_get_subfeature(name, feature,
-				      SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST);
-	sfmax = sensors_get_subfeature(name, feature,
-				       SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST);
-	sfint = sensors_get_subfeature(name, feature,
-				     SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL);
 	if (sfmin || sfmax || sfint) {
 		printf("  (");
 
