@@ -578,6 +578,72 @@ static void print_chip_beep_enable(const sensors_chip_name *name,
 	free(label);
 }
 
+static void print_chip_curr(const sensors_chip_name *name,
+			    const sensors_feature *feature,
+			    int label_size)
+{
+	const sensors_subfeature *sf, *sfmin, *sfmax;
+	double alarm_max, alarm_min;
+	char *label;
+
+	if (!(label = sensors_get_label(name, feature))) {
+		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
+			feature->name);
+		return;
+	}
+	print_label(label, label_size);
+	free(label);
+
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_CURR_INPUT);
+	if (sf)
+		printf("%+6.2f A", get_value(name, sf));
+	else
+		printf("     N/A");
+
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_CURR_MIN);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_CURR_MAX);
+	if (sfmin && sfmax)
+		printf("  (min = %+6.2f A, max = %+6.2f A)",
+		       get_value(name, sfmin),
+		       get_value(name, sfmax));
+	else if (sfmin)
+		printf("  (min = %+6.2f A)",
+		       get_value(name, sfmin));
+	else if (sfmax)
+		printf("  (max = %+6.2f A)",
+		       get_value(name, sfmax));
+
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_CURR_ALARM);
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_CURR_MIN_ALARM);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_CURR_MAX_ALARM);
+	if (sfmin || sfmax) {
+		alarm_max = sfmax ? get_value(name, sfmax) : 0;
+		alarm_min = sfmin ? get_value(name, sfmin) : 0;
+
+		if (alarm_min || alarm_max) {
+			printf(" ALARM (");
+
+			if (alarm_min)
+				printf("MIN");
+			if (alarm_max)
+				printf("%sMAX", (alarm_min) ? ", " : "");
+
+			printf(")");
+		}
+	} else if (sf) {
+		printf("   %s",
+		       get_value(name, sf) ? "ALARM" : "");
+	}
+
+	printf("\n");
+}
+
 void print_chip(const sensors_chip_name *name)
 {
 	const sensors_feature *feature;
@@ -608,6 +674,9 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_ENERGY:
 			print_chip_energy(name, feature, label_size);
+			break;
+		case SENSORS_FEATURE_CURR:
+			print_chip_curr(name, feature, label_size);
 			break;
 		default:
 			continue;

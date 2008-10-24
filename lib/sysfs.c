@@ -138,7 +138,7 @@ char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_SENSORS_PER_TYPE	20
 #define MAX_SUBFEATURES		8
-#define MAX_SENSOR_TYPES	5
+#define MAX_SENSOR_TYPES	6
 /* Room for all 5 types (in, fan, temp, power, energy) with all their
    subfeatures + VID + misc features */
 #define ALL_POSSIBLE_SUBFEATURES \
@@ -153,6 +153,7 @@ int get_type_scaling(sensors_subfeature_type type)
 	switch (type & 0xFF80) {
 	case SENSORS_SUBFEATURE_IN_INPUT:
 	case SENSORS_SUBFEATURE_TEMP_INPUT:
+	case SENSORS_SUBFEATURE_CURR_INPUT:
 		return 1000;
 	case SENSORS_SUBFEATURE_FAN_INPUT:
 		return 1;
@@ -184,6 +185,7 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_TEMP:
 	case SENSORS_FEATURE_POWER:
 	case SENSORS_FEATURE_ENERGY:
+	case SENSORS_FEATURE_CURR:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
 		break;
@@ -259,6 +261,16 @@ static const struct subfeature_type_match energy_matches[] = {
 	{ NULL, 0 }
 };
 
+static const struct subfeature_type_match curr_matches[] = {
+	{ "input", SENSORS_SUBFEATURE_CURR_INPUT },
+	{ "min", SENSORS_SUBFEATURE_CURR_MIN },
+	{ "max", SENSORS_SUBFEATURE_CURR_MAX },
+	{ "alarm", SENSORS_SUBFEATURE_CURR_ALARM },
+	{ "min_alarm", SENSORS_SUBFEATURE_CURR_MIN_ALARM },
+	{ "max_alarm", SENSORS_SUBFEATURE_CURR_MAX_ALARM },
+	{ NULL, 0 }
+};
+
 static const struct subfeature_type_match cpu_matches[] = {
 	{ "vid", SENSORS_SUBFEATURE_VID },
 	{ NULL, 0 }
@@ -270,6 +282,7 @@ static struct feature_type_match matches[] = {
 	{ "fan%d%c", fan_matches },
 	{ "cpu%d%c", cpu_matches },
 	{ "power%d%c", power_matches },
+	{ "curr%d%c", curr_matches },
 	{ "energy%d%c", energy_matches },
 };
 
@@ -360,6 +373,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		case SENSORS_SUBFEATURE_TEMP_INPUT:
 		case SENSORS_SUBFEATURE_POWER_AVERAGE:
 		case SENSORS_SUBFEATURE_ENERGY_INPUT:
+		case SENSORS_SUBFEATURE_CURR_INPUT:
 			nr--;
 			break;
 		}

@@ -11,6 +11,15 @@ given new feature.
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT_LOWEST
+* Added support for current sensors
+  enum sensors_feature_type SENSORS_FEATURE_CURR
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_INPUT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MIN
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MAX
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MIN_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MAX_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_BEEP
 
 0x401	lm-sensors 3.0.2 to 3.0.3
 * Added bus type "virtual":
