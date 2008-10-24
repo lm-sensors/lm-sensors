@@ -11,6 +11,7 @@ SVN-HEAD
             max6646, max6647 and max6649
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
                    Properly report bus arbitration lost (2.6 backport)
+                   Add support for PCH (Ibex Peak) (2.6 backport)
   Module i2c-piix4: Minor cleanups (2.6 backport)
   Module i2c-viapro: Add VX800/VX820 support (2.6 backport)
   Module lm78: Prevent misdetection of Winbond chips

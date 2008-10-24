@@ -37,6 +37,7 @@
     Tolapai		5032   ("")
     ICH10		3A30   ("")
     ICH10		3A60   ("")
+    PCH			3B30   ("")
 
     This driver supports several versions of Intel's I/O Controller Hubs (ICH).
     For SMBus support, they are similar to the PIIX4 and are part
@@ -119,6 +120,10 @@
 #define PCI_DEVICE_ID_INTEL_ICH10_5	0x3a60
 #endif
 
+#ifndef PCI_DEVICE_ID_INTEL_PCH_SMBUS
+#ifdef PCI_DEVICE_ID_INTEL_PCH_SMBUS	0x3b30
+#endif
+
 #ifdef I2C_CLIENT_PEC
 #define HAVE_PEC
 #endif
@@ -192,7 +197,8 @@ static int __devinit i801_setup(struct pci_dev *dev)
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH9_6 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_TOLAPAI_1 ||
 	    dev->device == PCI_DEVICE_ID_INTEL_ICH10_4 ||
-	    dev->device == PCI_DEVICE_ID_INTEL_ICH10_5)
+	    dev->device == PCI_DEVICE_ID_INTEL_ICH10_5 ||
+	    dev->device == PCI_DEVICE_ID_INTEL_PCH_SMBUS)
 		isich4 = 1;
 	else
 		isich4 = 0;
@@ -679,6 +685,12 @@ static struct pci_device_id i801_ids[] __devinitdata = {
 	{
 		.vendor =	PCI_VENDOR_ID_INTEL,
 		.device =	PCI_DEVICE_ID_INTEL_ICH10_5,
+		.subvendor =	PCI_ANY_ID,
+		.subdevice =	PCI_ANY_ID,
+	},
+	{
+		.vendor =	PCI_VENDOR_ID_INTEL,
+		.device =	PCI_DEVICE_ID_INTEL_PCH_SMBUS,
 		.subvendor =	PCI_ANY_ID,
 		.subdevice =	PCI_ANY_ID,
 	},
