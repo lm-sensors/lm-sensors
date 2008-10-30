@@ -1596,7 +1596,7 @@ chip "lm89-*" "lm99-*"
 # lm90 driver directly instead
 # note #2: there is no way for us to differentiate between a LM89 and a
 # LM99; you have to know what you have; the driver will assume a LM99,
-# use a the force_lm86 module parameter if you have a LM89
+# use the force_lm86 module parameter if you have a LM89
 #   compute temp2 @+16, @-16
 
 # change high and low limits to fit your needs
