@@ -683,7 +683,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm85_detect(0, @_); },
      },
      {
-       name => "National Semiconductor LM96000",
+       name => "National Semiconductor LM96000 or PC8374L",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm85_detect(1, @_); },
