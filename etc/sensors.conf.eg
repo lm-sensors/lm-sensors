@@ -1586,17 +1586,18 @@ chip "lm90-*" "adm1032-*" "lm86-*" "max6657-*" "adt7461-*" "max6680-*"
 # never exceed this value
 #   set temp1_crit_hyst 70
 
-chip "lm99-*"
+chip "lm89-*" "lm99-*"
 
    label temp1 "G/C Temp"
    label temp2 "GPU Temp"
 
-# note #1: only the LM99 needs this; for a LM89, comment the compute line
-# out
+# note #1: the LM99 needs the compute statement below if you're running
+# a kernel <= 2.6.27; since kernel 2.6.28 the offset is handled in the
+# lm90 driver directly instead
 # note #2: there is no way for us to differentiate between a LM89 and a
-# LM99; you have to know what you have; LM99 are frequently found on
-# graphics cards, most notably nVidia ones
-   compute temp2 @+16, @-16
+# LM99; you have to know what you have; the driver will assume a LM99,
+# use a the force_lm86 module parameter if you have a LM89
+#   compute temp2 @+16, @-16
 
 # change high and low limits to fit your needs
 #   set temp1_min  10

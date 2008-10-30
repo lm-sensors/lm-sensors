@@ -7,6 +7,7 @@ SVN-HEAD
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
+  sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
   sensors-detect: Fix detection of ADT7463 and LM96000
                   Add VIA VX800/VX820 support 
                   Fix detection of Intel 5000 series FB-DIMM AMB
