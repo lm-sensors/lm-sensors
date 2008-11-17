@@ -688,10 +688,8 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
      },
      {
        name => "Analog Devices ADT7462",
-       driver => "to-be-written",
-       # The datasheet says addresses 0x5C and 0x58, but I guess these are
-       # left-aligned values
-       i2c_addrs => [0x2c, 0x2e],
+       driver => "adt7462",
+       i2c_addrs => [0x5c, 0x58],
        i2c_detect => sub { adt7467_detect(2, @_); },
      },
      {

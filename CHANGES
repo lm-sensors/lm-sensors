@@ -34,6 +34,7 @@ SVN-HEAD
                           W83627DHG has no subclients
                           Add VIA VX800/VX820 support
                           Fix detection of Intel 5000 series FB-DIMM AMB
+                          Fix detection of ADT7462
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
