@@ -4425,7 +4425,7 @@ sub lm87_detect
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
 #                        3 = W83627HF, 4 = AS99127F (rev.1),
 #                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
-#                        8 = W83792D, 9 = W83627EHF 10 = W83627DHG)
+#                        8 = W83792D, 9 = W83627EHF, 10 = W83627DHG)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
 # Returns: undef if not detected, (8, addr1, addr2) if detected, but only
@@ -4583,7 +4583,7 @@ sub mozart_detect
 }
 
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 3 = W83627HF,
-#                        9 = W83627EHF 10 = W83627DHG)
+#                        9 = W83627EHF, 10 = W83627DHG)
 # $_[1]: ISA address
 # $_[2]: I2C file handle
 # $_[3]: I2C address
