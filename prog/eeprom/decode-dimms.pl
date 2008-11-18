@@ -97,7 +97,7 @@
 require 5.004;
 
 use strict;
-use POSIX;
+use POSIX qw(ceil);
 use Fcntl qw(:DEFAULT :seek);
 use vars qw($opt_html $opt_body $opt_bodyonly $opt_igncheck $use_sysfs
 	    @vendors %decode_callback);

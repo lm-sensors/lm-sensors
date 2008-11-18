@@ -17,6 +17,7 @@ SVN-HEAD
   Module lm78: Prevent misdetection of Winbond chips
   Module lm90: Don't spam the kernel log (2.6 backport)
   Module max1619: Use inline functions instead of macros (2.6 backport)
+  Program decode-dimms.pl: Only export the ceil function from POSIX 
   Program pwmconfig: Fix MINSTOP and MINSTART test functions (#2340)
                      Change default for MINTEMP from 0 to 20 degrees C
   Program sensord: Add it8720 support
