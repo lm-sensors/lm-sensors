@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
-
 #
-#    sensors-detect - Detect PCI bus and chips
+#    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
 #    Copyright (C) 2004 - 2008  Jean Delvare <khali@linux-fr.org>
 #
@@ -20,12 +19,6 @@
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #    MA 02110-1301 USA.
 #
-
-# TODO: Better handling of chips with several addresses
-
-# A Perl wizard really ought to look upon this; the PCI and I2C stuff should
-# each be put in a separate file, using modules and packages. That is beyond
-# me.
 
 require 5.004;
 
