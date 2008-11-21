@@ -1769,9 +1769,17 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	logdev => 0x0a,
       },
       {
+	name => "SMSC LPC47M233 Super IO Sensors",
+	driver => "smsc47m1",
+	devid => 0x6b80,
+	devid_mask => 0xff80,
+	logdev => 0x0a,
+      },
+      {
 	name => "SMSC LPC47M292 Super IO Fan Sensors",
 	driver => "smsc47m1",
-	devid => 0x6b,
+	devid => 0x6b00,
+	devid_mask => 0xff80,
 	logdev => 0x0a,
       },
       {

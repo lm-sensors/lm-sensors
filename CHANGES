@@ -12,6 +12,8 @@ SVN-HEAD
                   Add VIA VX800/VX820 support 
                   Fix detection of Intel 5000 series FB-DIMM AMB
                   Fix detection of ADT7462
+                  Fix detection of SMSC LPC47M292
+                  Add SMSC LPC47M233 support
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
