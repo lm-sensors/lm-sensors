@@ -1287,6 +1287,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        i2c_detect => sub { ddcmonitor_detect(@_); },
      },
      {
+       name => "FSC Poseidon I",
+       driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscpos" },
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fsc_detect(0, @_); },
+     },
+     {
        name => "FSC Poseidon II",
        driver => "to-be-written",
        i2c_addrs => [0x73],
@@ -1297,6 +1303,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        driver => "fschmd",
        i2c_addrs => [0x73],
        i2c_detect => sub { fsc_detect(2, @_); },
+     },
+     {
+       name => "FSC Hermes",
+       driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscher" },
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fsc_detect(3, @_); },
      },
      {
        name => "FSC Heimdal",
@@ -1399,41 +1411,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        driver => "ipmisensors",
        isa_addrs => [0x0ca8],
        isa_detect => sub { ipmi_smic_detect(@_); },
-     },
-);
-
-# Special case chip information goes here and would be included in
-# the chip_special_cases routine below
-use vars qw(@chip_oldfsc_ids @chip_fschmd_ids);
-
-# sigh special case for old seperate FSC drivers to new merged one mapping
-@chip_oldfsc_ids = (
-     {
-       name => "FSC Poseidon I",
-       driver => "fscpos",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(0, @_); },
-     },
-     {
-       name => "FSC Hermes",
-       driver => "fscher",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(3, @_); },
-     },
-);
-
-@chip_fschmd_ids = (
-     {
-       name => "FSC Poseidon I",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(0, @_); },
-     },
-     {
-       name => "FSC Hermes",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(3, @_); },
      },
 );
 
@@ -3437,18 +3414,16 @@ sub scan_cpu($)
 # CHIP DETECTION #
 ##################
 
-# This routine allows you to select which chips are optionally added to the
-# chip detection list. The most common use is to allow for different chip
-# detection/drivers based on different linux kernels
-# This routine follows the pattern of the SiS adapter special cases
+# This routine allows you to dynamically update the chip detection list.
+# The most common use is to allow for different chip to driver mappings
+# based on different linux kernels
 sub chip_special_cases
 {
-	# Based on the kernel, add the appropriate chip structures to the
-	# chip_ids detection list
-	if (kernel_version_at_least(2, 6, 24)) {
-		push @chip_ids, @chip_fschmd_ids;
-	} else {
-		push @chip_ids, @chip_oldfsc_ids;
+	# Some chip to driver mappings depend on the environment
+	foreach my $chip (@chip_ids) {
+		if (ref($chip->{driver}) eq 'CODE') {
+			$chip->{driver} = $chip->{driver}->();
+		}
 	}
 }
 
