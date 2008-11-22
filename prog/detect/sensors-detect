@@ -54,7 +54,7 @@ $revision =~ s/ \([^()]*\)//;
 # either pci.c or oldproc.c). If no driver is written yet, set the
 # driver (Driver Name) field to "to-be-written".
 # The match (Match Description) field should contain a regular expression
-# matching the adapter name as it would appear in /proc/bus/i2c or /sys.
+# matching the adapter name as it would appear in /sys/class/i2c-adapter.
 @pci_adapters = (
      {
        vendid => 0x8086,
@@ -545,7 +545,7 @@ $revision =~ s/ \([^()]*\)//;
 # IDs obscured, we have to qualify these with a custom detection
 # routine before we add them to the @pci_adapters list.
 #
-use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
+use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
 @pci_adapters_sis5595 = (
      {
        vendid => 0x1039,
@@ -553,30 +553,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        procid => "Silicon Integrated Systems SIS5595",
        driver => "i2c-sis5595",
        match => qr/^SMBus SIS5595 adapter at [0-9a-f]{4}/,
-     },
-);
-
-@pci_adapters_sis645 = (
-     {
-       vendid => 0x1039,
-       devid  => 0x0008,
-       procid => "Silicon Integrated Systems SIS5595",
-       driver => "i2c-sis645",
-       match => qr/^SiS645 SMBus adapter at [0-9a-f]{4}/,
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x0016,
-       procid => "Silicon Integrated Systems SMBus Controller",
-       driver => "i2c-sis645",
-       match => qr/^SiS645 SMBus adapter at 0x[0-9a-f]{4}/,
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x0018,
-       procid => "Silicon Integrated Systems 85C503/5513 (LPC Bridge)",
-       driver => "i2c-sis645",
-       match => qr/^SiS645 SMBus adapter at 0x[0-9a-f]{4}/,
      },
 );
 
@@ -784,6 +760,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm87_detect(@_); },
      },
      {
+       name => "Analog Devices ADM1024",
+       driver => "lm87",
+       i2c_addrs => [0x2c..0x2e],
+       i2c_detect => sub { adm1024_detect(0, @_); },
+     },
+     {
        name => "National Semiconductor LM93",
        driver => "lm93",
        i2c_addrs => [0x2c..0x2e],
@@ -812,6 +794,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        driver => "w83781d",
        i2c_addrs => [0x2d],
        i2c_detect => sub { w83781d_detect(2, @_); },
+     },
+     {
+       name => "Winbond W83791D",
+       driver => "w83791d",
+       i2c_addrs => [0x2c..0x2f],
+       i2c_detect => sub { w83781d_detect(7, @_); },
      },
      {
        name => "Winbond W83792D",
@@ -1305,6 +1293,12 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { fscpos_detect(@_); },
      },
      {
+       name => "FSC Scylla",
+       driver => "fschmd",
+       i2c_addrs => [0x73],
+       i2c_detect => sub { fscscy_detect(@_); },
+     },
+     {
        name => "FSC Heimdal",
        driver => "fschmd",
        i2c_addrs => [0x73],
@@ -1394,77 +1388,23 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_addrs => [0x0b],
        i2c_detect => sub { smartbatt_detect(@_); },
      },
-);
-
-# Special case chip information goes here and would be included in
-# the chip_special_cases routine below
-use vars qw(@chip_kern24_ids @chip_kern26_ids
-            @chip_oldfsc_ids @chip_fschmd_ids);
-@chip_kern24_ids = (
-     {
-       name => "Analog Devices ADM1024",
-       driver => "adm1024",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1024_detect(0, @_); },
-     },
-     {
-       name => "Winbond W83791D",
-       driver => "w83781d",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(7, @_); },
-     },
-     {
-       name => "FSC Scylla",
-       driver => "fscscy",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscscy_detect(@_); },
-     },
      {
        name => "IPMI BMC KCS",
-       driver => "bmcsensors",
+       driver => "ipmisensors",
        isa_addrs => [0x0ca0],
        isa_detect => sub { ipmi_kcs_detect(@_); },
      },
      {
        name => "IPMI BMC SMIC",
-       driver => "bmcsensors",
+       driver => "ipmisensors",
        isa_addrs => [0x0ca8],
        isa_detect => sub { ipmi_smic_detect(@_); },
      },
 );
 
-@chip_kern26_ids = (
-     {
-       name => "Analog Devices ADM1024",
-       driver => "lm87",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1024_detect(0, @_); },
-     },
-     {
-       name => "Winbond W83791D",
-       driver => "w83791d",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(7, @_); },
-     },
-     {
-       name => "FSC Scylla",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fscscy_detect(@_); },
-     },
-     {
-       name => "IPMI BMC KCS",
-       driver => "ipmisensors",
-       isa_addrs => [0x0ca0],
-       isa_detect => sub { ipmi_kcs_detect(@_); },
-     },
-     {
-       name => "IPMI BMC SMIC",
-       driver => "ipmisensors",
-       isa_addrs => [0x0ca8],
-       isa_detect => sub { ipmi_smic_detect(@_); },
-     },
-);
+# Special case chip information goes here and would be included in
+# the chip_special_cases routine below
+use vars qw(@chip_oldfsc_ids @chip_fschmd_ids);
 
 # sigh special case for old seperate FSC drivers to new merged one mapping
 @chip_oldfsc_ids = (
@@ -2306,7 +2246,7 @@ sub isa_read_i5d6
 # AUTODETECTION #
 #################
 
-use vars qw($modules_conf $dev_i2c $sysfs_root);
+use vars qw($dev_i2c $sysfs_root);
 
 sub initialize_conf
 {
@@ -2323,6 +2263,12 @@ sub initialize_conf
     }
   }
   close(INPUTFILE);
+
+  # We need sysfs for many things
+  if (!defined $sysfs_root) {
+      print "Sysfs not mounted?\n";
+      exit -1;
+  }
 
   my $use_udev = 0;
   if (open(*INPUTFILE, '/etc/udev/udev.conf')) {
@@ -2345,12 +2291,6 @@ sub initialize_conf
       $use_udev = 1;
       $dev_i2c = '/dev/i2c-';
     }
-  }
-
-  if (kernel_version_at_least(2, 6, 0)) {
-    $modules_conf = '/etc/modprobe.conf';
-  } else {
-    $modules_conf = '/etc/modules.conf';
   }
 
   if (!($use_devfs || $use_udev)) {
@@ -2381,6 +2321,12 @@ sub initialize_kernel_version
   `uname -r` =~ /(\d+)\.(\d+)\.(\d+)(.*)/;
   @kernel_version = ($1, $2, $3, $4);
   chomp($kernel_arch = `uname -m`);
+
+  # We only support kernels >= 2.6.0
+  if (!kernel_version_at_least(2, 6, 0)) {
+      print "Kernel version is unsupported (too old, >= 2.6.0 needed)\n";
+      exit -1;
+  }
 }
 
 sub kernel_version_at_least
@@ -2426,8 +2372,7 @@ sub initialize_cpu_list
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
 # adapter present on the system. Each entry has the following keys: name
-# (directly taken from either /proc/bus/i2c or /sys/class/i2c-adapter) and
-# driver.
+# (directly taken from /sys/class/i2c-adapter) and driver.
 use vars qw(@i2c_adapters);
 
 sub initialize_i2c_adapters_list
@@ -2435,33 +2380,19 @@ sub initialize_i2c_adapters_list
   my $entry;
   local $_;
 
-  if (defined $sysfs_root) {
-    my $class_dir = "${sysfs_root}/class/i2c-adapter";
-    opendir(local *ADAPTERS, $class_dir) or return;
+  my $class_dir = "${sysfs_root}/class/i2c-adapter";
+  opendir(local *ADAPTERS, $class_dir) or return;
 
-    while (defined($_ = readdir(ADAPTERS))) {
-      next unless m/^i2c-(\d+)$/;
-      $entry = {}; # New entry
-      $entry->{'name'} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
-                      || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
-      next if $entry->{'name'} eq "ISA main adapter";
-      $entry->{'driver'} = find_adapter_driver($entry->{'name'});
-      $i2c_adapters[$1] = $entry;
-    }
-    closedir(ADAPTERS);
-  } else {
-    open(local *INPUTFILE, "/proc/bus/i2c") or return;
-
-    while (<INPUTFILE>) {
-      my ($nr, $type, $name) = /^i2c-(\d+)\s+(\S+)\s+(.*?) *(\t|$)/;
-      next if ($type eq "dummy" || $type eq "isa");
-      $entry = {}; # New entry
-      $entry->{'name'} = $name;
-      $entry->{'driver'} = find_adapter_driver($name);
-      $i2c_adapters[$nr] = $entry;
-    }
-    close(INPUTFILE);
+  while (defined($_ = readdir(ADAPTERS))) {
+    next unless m/^i2c-(\d+)$/;
+    $entry = {}; # New entry
+    $entry->{'name'} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
+                    || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
+    next if $entry->{'name'} eq "ISA main adapter";
+    $entry->{'driver'} = find_adapter_driver($entry->{'name'});
+    $i2c_adapters[$1] = $entry;
   }
+  closedir(ADAPTERS);
 }
 
 ###########
@@ -2526,7 +2457,6 @@ use vars qw(%pci_list);
 # 'domain', 'bus', 'slot' and 'func' uniquely identify a PCI device in a
 # computer; 'vendid' and 'devid' uniquely identify a type of device.
 # 'class' lets us spot unknown SMBus adapters.
-# This function is used when sysfs is available (Linux 2.6).
 sub read_sys_dev_pci($)
 {
   my $devices = shift;
@@ -2556,39 +2486,11 @@ sub read_sys_dev_pci($)
   return \@pci_list;
 }
 
-# This function returns a list of hashes. Each hash has some PCI information:
-# 'bus', 'slot' and 'func' uniquely identify a PCI device in a computer;
-# 'vendid' and 'devid' uniquely identify a type of device.
-# This function is used when sysfs is not available (Linux 2.4).
-sub read_proc_dev_pci
-{
-  my ($dfn, $vend, @pci_list);
-  open(local *INPUTFILE, "/proc/bus/pci/devices")
-    or die "/proc/bus/pci/devices: $!";
-  local $_;
-  while (<INPUTFILE>) {
-    my %record;
-    ($dfn, $vend) = map { hex } (split) [0..1];
-    $record{bus} = $dfn >> 8;
-    $record{slot} = ($dfn & 0xf8) >> 3;
-    $record{func} = $dfn & 0x07;
-    $record{vendid} = $vend >> 16;
-    $record{devid} = $vend & 0xffff;
-
-    push @pci_list, \%record;
-  }
-  return \@pci_list;
-}
-
-sub initialize_proc_pci
+sub initialize_pci
 {
   my $pci_list;
 
-  if (defined $sysfs_root) {
-    $pci_list = read_sys_dev_pci("$sysfs_root/bus/pci/devices");
-  } else {
-    $pci_list = read_proc_dev_pci();
-  }
+  $pci_list = read_sys_dev_pci("$sysfs_root/bus/pci/devices");
 
   # Note that we lose duplicate devices at this point, but we don't
   # really care. What matters to us is which unique devices are present,
@@ -2607,39 +2509,15 @@ sub adapter_pci_detection_sis_96x
   my $driver = "";
 
   # first, determine which driver if any...
-  if (kernel_version_at_least(2, 6, 0)) {
-    if (exists $pci_list{"1039:0016"}) {
-      $driver = "i2c-sis96x";
-    } elsif (exists $pci_list{"1039:0008"}) {
-      $driver = "i2c-sis5595";
-    }
-  } elsif (kernel_version_at_least(2, 4, 0)) {
-    if (exists $pci_list{"1039:0008"}) {
-      if ((exists $pci_list{"1039:0645"}) ||
-          (exists $pci_list{"1039:0646"}) ||
-          (exists $pci_list{"1039:0648"}) ||
-          (exists $pci_list{"1039:0650"}) ||
-          (exists $pci_list{"1039:0651"}) ||
-          (exists $pci_list{"1039:0655"}) ||
-          (exists $pci_list{"1039:0661"}) ||
-          (exists $pci_list{"1039:0735"}) ||
-          (exists $pci_list{"1039:0745"}) ||
-          (exists $pci_list{"1039:0746"})) {
-        $driver = "i2c-sis645";
-      } else {
-        $driver = "i2c-sis5595";
-      }
-    } elsif ((exists $pci_list{"1039:0016"}) ||
-             (exists $pci_list{"1039:0018"})) {
-      $driver = "i2c-sis645";
-    }
+  if (exists $pci_list{"1039:0016"}) {
+    $driver = "i2c-sis96x";
+  } elsif (exists $pci_list{"1039:0008"}) {
+    $driver = "i2c-sis5595";
   }
 
   # then, add the appropriate entries to @pci_adapters
   if ($driver eq "i2c-sis5595") {
     push @pci_adapters, @pci_adapters_sis5595;
-  } elsif ($driver eq "i2c-sis645") {
-    push @pci_adapters, @pci_adapters_sis645;
   } elsif ($driver eq "i2c-sis96x") {
     push @pci_adapters, @pci_adapters_sis96x;
   }
@@ -2715,7 +2593,7 @@ sub adapter_pci_detection
   return @res;
 }
 
-# $_[0]: Adapter description as found in /proc/bus/i2c or sysfs
+# $_[0]: Adapter description as found in /sys/class/i2c-adapter
 sub find_adapter_driver
 {
   my $adapter;
@@ -2932,7 +2810,7 @@ use vars qw(@chips_detected);
 # Type detect_data:
 # A hash
 #   with field 'i2c_adap' containing an adapter string as appearing
-#        in /proc/bus/i2c (if this is an I2C detection)
+#        in /sys/class/i2c-adapter (if this is an I2C detection)
 #  with field 'i2c_devnr', contianing the /dev/i2c-* number of this
 #       adapter (if this is an I2C detection)
 #  with field 'i2c_driver', containing the driver name for this adapter
@@ -3177,7 +3055,7 @@ sub i2c_addresses_to_scan()
 }
 
 # $_[0]: The number of the adapter to scan
-# $_[1]: The name of the adapter, as appearing in /proc/bus/i2c
+# $_[1]: The name of the adapter, as appearing in /sys/class/i2c-adapter
 # $_[2]: The driver of the adapter
 # @_[3]: Addresses not to scan (array reference)
 sub scan_adapter
@@ -3218,15 +3096,14 @@ sub scan_adapter
     }
 
     if (!i2c_set_slave_addr(\*FILE, $addr)) {
-      # If the address is busy, in Linux 2.6 we can find out which driver
-      # is using it, and we assume it is the right one. In Linux 2.4 we
-      # just give up and warn the user.
+      # If the address is busy, we can normally find out which driver
+      # is using it, and we assume it is the right one.
       my ($device, $driver);
-      if (defined($sysfs_root)) {
-        $device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
+
+      $device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
                              $adapter_nr, $addr);
-        $driver = sysfs_device_driver($device);
-      }
+      $driver = sysfs_device_driver($device);
+
       if (defined($driver)) {
         $new_hash = {
           conf => 6, # Arbitrary confidence
@@ -3572,12 +3449,6 @@ sub chip_special_cases
 		push @chip_ids, @chip_fschmd_ids;
 	} else {
 		push @chip_ids, @chip_oldfsc_ids;
-	}
-
-	if (kernel_version_at_least(2, 6, 0)) {
-		push @chip_ids, @chip_kern26_ids;
-	} else {
-		push @chip_ids, @chip_kern24_ids;
 	}
 }
 
@@ -5611,13 +5482,12 @@ sub vt1211_alias_detect
 # PCI CHIP DETECTION #
 ######################
 
-# Returns: undef if not detected, (7) or (9) if detected.
+# Returns: undef if not detected, (9) if detected.
 # The address is encoded in PCI space. We could decode it and print it.
-# For Linux 2.4 we should probably check for invalid matches (SiS645).
 sub sis5595_pci_detect
 {
 	return unless exists $pci_list{'1039:0008'};
-	return (kernel_version_at_least(2, 6, 0) ? 9 : 7);
+	return 9;
 }
 
 # Returns: undef if not detected, (9) if detected.
@@ -5792,11 +5662,7 @@ sub generate_modprobes
   $modprobes .= "modprobe i2c-isa\n" if ($isa && !kernel_version_at_least(2, 6, 18));
   if ($ipmi) {
     $modprobes .= "# You must also install and load the IPMI modules\n";
-    if (kernel_version_at_least(2, 6, 0)) {
-      $modprobes .= "modprobe ipmi-si\n";
-    } else {
-      $modprobes .= "modprobe i2c-ipmi\n";
-    }
+    $modprobes .= "modprobe ipmi-si\n";
   }
 
   # Now determine the chip probe lines
@@ -5806,8 +5672,7 @@ sub generate_modprobes
     if ($chip->{driver} eq "to-be-written") {
       $modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet\n";
     } else {
-       # need the * for 2.4 kernels, won't necessarily be an exact match
-       open(local *INPUTFILE, "modprobe -l $chip->{driver}\\* 2>/dev/null |");
+       open(local *INPUTFILE, "modprobe -l $chip->{driver} 2>/dev/null |");
        local $_;
        my $modulefound = 0;
        while (<INPUTFILE>) {
@@ -5884,7 +5749,7 @@ sub main
 
   initialize_kernel_version();
   initialize_conf();
-  initialize_proc_pci();
+  initialize_pci();
   initialize_modules_list();
   # make sure any special case chips are added to the chip_ids list before
   # making the support modules list
@@ -5898,9 +5763,6 @@ sub main
         "to load to use lm_sensors most effectively. It is generally safe\n",
         "and recommended to accept the default answers to all questions,\n",
         "unless you know what you're doing.\n";
-  print "You need to have i2c and lm_sensors installed before running this\n",
-        "program.\n"
-    unless kernel_version_at_least(2, 6, 0);
   print "\n";
 
   print "We can start with probing for (PCI) I2C or SMBus adapters.\n";
@@ -5935,11 +5797,8 @@ sub main
         "them scanned by manually loading the modules before running this script.\n\n";
   initialize_i2c_adapters_list();
 
-  if (!exists($modules_list{"i2c-dev"})
-   && !(defined $sysfs_root && -e "$sysfs_root/class/i2c-dev")) {
+  if (! -e "$sysfs_root/class/i2c-dev") {
     print "To continue, we need module `i2c-dev' to be loaded.\n";
-    print "If it is built-in into your kernel, you can safely skip this.\n"
-      unless kernel_version_at_least(2, 6, 0);
     print "Do you want to load `i2c-dev' now? (YES/no): ";
     if (<STDIN> =~ /^\s*n/i) {
       print "Well, you will know best.\n";
@@ -6083,7 +5942,7 @@ sub main
       close(MODPROBE_D);
     } else {
       print "To make the sensors modules behave correctly, add these lines to\n".
-            "$modules_conf:\n\n";
+            "/etc/modprobe.conf:\n\n";
       print "#----cut here----\n".
             $configfile.
             "#----cut here----\n\n";

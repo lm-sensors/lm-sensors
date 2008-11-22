@@ -14,6 +14,7 @@ SVN-HEAD
                   Fix detection of ADT7462
                   Fix detection of SMSC LPC47M292
                   Add SMSC LPC47M233 support
+                  Drop support for Linux 2.4 (#2325)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
