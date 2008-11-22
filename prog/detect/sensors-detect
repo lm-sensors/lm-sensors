@@ -757,13 +757,13 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        name => "National Semiconductor LM87",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm87_detect(@_); },
+       i2c_detect => sub { lm87_detect(0, @_); },
      },
      {
        name => "Analog Devices ADM1024",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1024_detect(0, @_); },
+       i2c_detect => sub { lm87_detect(1, @_); },
      },
      {
        name => "National Semiconductor LM93",
@@ -4428,16 +4428,32 @@ sub lm85_detect
   return (7);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
+# $_[0]: Chip to detect (0 = LM87, 1 = ADM1024)
+# $_[1]: A reference to the file descriptor to access this chip.
+# $_[2]: Address
 # Returns: undef if not detected, (7) if detected.
-# Registers used: 0x3E, 0x3F
-#        Assume lower 2 bits of reg 0x3F are for revisions.
+# Registers used:
+#   0x3e: Company ID
+#   0x3f: Revision
+#   0x40: Configuration
 sub lm87_detect
 {
-  my ($file, $addr) = @_;
-  return if i2c_smbus_read_byte_data($file, 0x3e) != 0x02;
-  return if (i2c_smbus_read_byte_data($file, 0x3f) & 0xfc) != 0x04;
+  my ($chip, $file, $addr) = @_;
+  my $cid = i2c_smbus_read_byte_data($file, 0x3e);
+  my $rev = i2c_smbus_read_byte_data($file, 0x3f);
+
+  if ($chip == 0) {
+    return if $cid != 0x02;     # National Semiconductor
+    return if ($rev & 0xfc) != 0x04;
+  }
+  if ($chip == 1) {
+    return if $cid != 0x41;     # Analog Devices
+    return if ($rev & 0xf0) != 0x10;
+  }
+
+  my $cfg = i2c_smbus_read_byte_data($file, 0x40);
+  return if ($cfg & 0x80) != 0x00;
+
   return (7);
 }
 
@@ -4795,25 +4811,6 @@ sub adm1026_detect
   $reg = i2c_smbus_read_byte_data($file, 0x16);
   return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file, 0x17) & 0xf0) == 0x40;
-  return (8);
-}
-
-# $_[0]: Chip to detect (0 = ADM1024)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (8) if detected.
-# Registers used:
-#   0x3e: Company ID
-#   0x3f: Revision
-#   0x40: Configuration
-sub adm1024_detect
-{
-  my $reg;
-  my ($chip, $file, $addr) = @_;
-  $reg = i2c_smbus_read_byte_data($file, 0x3e);
-  return unless ($reg == 0x41);
-  return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file, 0x3f) & 0xf0) == 0x10;
   return (8);
 }
 
