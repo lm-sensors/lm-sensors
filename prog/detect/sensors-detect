@@ -2399,12 +2399,12 @@ sub initialize_modules_supported
 # SYSFS HELPERS #
 #################
 
-# From a sysfs device path, return the driver name, or undef
+# From a sysfs device path, return the driver (module) name, or undef
 sub sysfs_device_driver($)
 {
   my $device = shift;
 
-  my $link = readlink("$device/driver");
+  my $link = readlink("$device/driver/module");
   return unless defined $link;
   return basename($link);
 }
@@ -3074,7 +3074,8 @@ sub scan_adapter
 
     if (!i2c_set_slave_addr(\*FILE, $addr)) {
       # If the address is busy, we can normally find out which driver
-      # is using it, and we assume it is the right one.
+      # requested it (if the kernel is recent enough, at least 2.6.16
+      # and later are known to work), and we assume it is the right one.
       my ($device, $driver);
 
       $device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
