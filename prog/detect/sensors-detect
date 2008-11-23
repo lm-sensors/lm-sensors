@@ -4485,7 +4485,7 @@ sub w83781d_detect
   return if $chip == 7 and  $reg1 != 0x71;
   return if $chip == 8 and  $reg1 != 0x7a;
   return if $chip == 9 and  $reg1 != 0xa1;
-  return if $chip == 10 and  $reg1 != 0xa2;
+  return if $chip == 10 and  $reg1 != 0xc1;
   # Default address is 0x2d
   @res = ($addr != 0x2d) ? (7) : (8);
   return @res if $chip >= 9; # No subclients
