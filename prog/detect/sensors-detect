@@ -535,7 +535,7 @@ use vars qw(@i2c_adapter_names);
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { lm78_detect(0, @_); },
        isa_addrs => [0x290],
-       isa_detect => sub { lm78_isa_detect(0, @_); },
+       isa_detect => sub { lm78_isa_detect(@_, 0); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
@@ -544,7 +544,7 @@ use vars qw(@i2c_adapter_names);
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { lm78_detect(2, @_); },
        isa_addrs => [0x290],
-       isa_detect => sub { lm78_isa_detect(2, @_); },
+       isa_detect => sub { lm78_isa_detect(@_, 2); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
@@ -703,7 +703,7 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { w83781d_detect(0, @_); },
        i2c_addrs => [0x28..0x2f],
        isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(0, @_); },
+       isa_detect => sub { w83781d_isa_detect(@_, 0); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
@@ -712,7 +712,7 @@ use vars qw(@i2c_adapter_names);
        i2c_addrs => [0x28..0x2f],
        i2c_detect => sub { w83781d_detect(1, @_); },
        isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(1, @_); },
+       isa_detect => sub { w83781d_isa_detect(@_, 1); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
@@ -3408,40 +3408,6 @@ sub lm78_detect
   return (6);
 }
 
-# $_[0]: Chip to detect (0 = LM78, 2 = LM79)
-# $_[1]: Address
-# Returns: undef if not detected, 6 if detected.
-# Note: Only address 0x290 is scanned at this moment.
-sub lm78_isa_detect
-{
-  my ($chip, $addr) = @_;
-  my $val = inb($addr + 1);
-  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
-            inb($addr + 7) != $val;
-
-  $val = inb($addr + 5);
-  outb($addr + 5, ~$val & 0x7f);
-  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-    outb($addr+5, $val);
-    return;
-  }
-
-  return unless (isa_read_i5d6($addr, 0x40) & 0x80) == 0x00;
-  my $reg = isa_read_i5d6($addr, 0x49);
-  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20 or $reg == 0x40)) or
-                ($chip == 2 and ($reg & 0xfe) == 0xc0);
-
-  # Explicitly prevent misdetection of Winbond chips
-  $reg = isa_read_i5d6($addr, 0x4f);
-  return if $reg == 0xa3 || $reg == 0x5c;
-
-  # Explicitly prevent misdetection of ITE chips
-  $reg = isa_read_i5d6($addr, 0x58);
-  return if $reg == 0x90;
-
-  return 6;
-}
-
 # $_[0]: Chip to detect (0 = LM75, 1 = DS75)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address (unused)
@@ -4507,36 +4473,6 @@ sub mozart_detect
   return 5;
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D)
-# $_[1]: Address
-# Returns: undef if not detected, (8) if detected.
-sub w83781d_isa_detect
-{
-  my ($chip, $addr) = @_;
-  my ($reg1, $reg2);
-  my $val = inb($addr + 1);
-  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
-            inb($addr + 7) != $val;
-
-  $val = inb($addr + 5);
-  outb($addr+5, ~$val & 0x7f);
-  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-    outb($addr+5, $val);
-    return;
-  }
-
-  $reg1 = isa_read_i5d6($addr, 0x4e);
-  $reg2 = isa_read_i5d6($addr, 0x4f);
-  return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
-                (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
-  return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = isa_read_i5d6($addr, 0x58);
-  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
-  return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
-
-  return 8;
-}
-
 # $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
 # $_[1]: A reference to the file descriptor to access this chip.
 # $_[2]: Address
@@ -5091,22 +5027,6 @@ sub smartbatt_detect
   return (5);
 }
 
-# Returns: 4
-# These are simple detectors that only look for a register at the
-# standard location. No writes are performed.
-# For KCS, use the STATUS register. For SMIC, use the FLAGS register.
-sub ipmi_kcs_detect
-{
-  return if inb(0x0ca3) == 0xff;
-  return (4);
-}
-
-sub ipmi_smic_detect
-{
-  return if inb(0x0cab) == 0xff;
-  return (4);
-}
-
 # $_[0]: Chip to detect (0 = W83L784R/AR/G, 1 = W83L785R/G,
 #                        2 = W83L786NR/NG/R/G)
 # $_[1]: A reference to the file descriptor to access this chip.
@@ -5224,6 +5144,86 @@ sub vt1211_i2c_detect
   return unless (i2c_smbus_read_byte_data($file, 0x48) & 0x7f) == $addr;
   return unless i2c_smbus_read_byte_data($file, 0x3f) == 0xb0;
   return 2;
+}
+
+# All ISA detection functions below take at least 1 parameter:
+# $_[0]: Address
+# Some of these functions which can detect more than one type of device,
+# take a second parameter:
+# $_[1]: Chip to detect
+
+# Chip to detect: 0 = LM78, 2 = LM79
+sub lm78_isa_detect
+{
+  my ($addr, $chip) = @_;
+  my $val = inb($addr + 1);
+  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+            inb($addr + 7) != $val;
+
+  $val = inb($addr + 5);
+  outb($addr + 5, ~$val & 0x7f);
+  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+    outb($addr+5, $val);
+    return;
+  }
+
+  return unless (isa_read_i5d6($addr, 0x40) & 0x80) == 0x00;
+  my $reg = isa_read_i5d6($addr, 0x49);
+  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20 or $reg == 0x40)) or
+                ($chip == 2 and ($reg & 0xfe) == 0xc0);
+
+  # Explicitly prevent misdetection of Winbond chips
+  $reg = isa_read_i5d6($addr, 0x4f);
+  return if $reg == 0xa3 || $reg == 0x5c;
+
+  # Explicitly prevent misdetection of ITE chips
+  $reg = isa_read_i5d6($addr, 0x58);
+  return if $reg == 0x90;
+
+  return 6;
+}
+
+# Chip to detect: 0 = W83781D, 1 = W83782D
+sub w83781d_isa_detect
+{
+  my ($addr, $chip) = @_;
+  my ($reg1, $reg2);
+  my $val = inb($addr + 1);
+  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+            inb($addr + 7) != $val;
+
+  $val = inb($addr + 5);
+  outb($addr+5, ~$val & 0x7f);
+  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+    outb($addr+5, $val);
+    return;
+  }
+
+  $reg1 = isa_read_i5d6($addr, 0x4e);
+  $reg2 = isa_read_i5d6($addr, 0x4f);
+  return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
+                (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+  return unless ($reg1 & 0x07) == 0x00;
+  $reg1 = isa_read_i5d6($addr, 0x58);
+  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
+  return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
+
+  return 8;
+}
+
+# These are simple detectors that only look for a register at the
+# standard location.
+# For KCS, use the STATUS register. For SMIC, use the FLAGS register.
+sub ipmi_kcs_detect
+{
+  return if inb(0x0ca3) == 0xff;
+  return 4;
+}
+
+sub ipmi_smic_detect
+{
+  return if inb(0x0cab) == 0xff;
+  return 4;
 }
 
 ###################
