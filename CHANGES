@@ -17,6 +17,7 @@ SVN-HEAD
                   Drop support for Linux 2.4 (#2325)
                   Handle special case chips more efficiently
                   Fix SMBus detection of W83627EHF and W83627DHG
+                  Get I2C adapter driver names from sysfs (#2328)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
