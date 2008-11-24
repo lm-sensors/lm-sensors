@@ -50,8 +50,7 @@ $revision =~ s/ \([^()]*\)//;
 # signature. This is an easy and fast way to determine which SMBus or I2C
 # adapters should be present.
 # Each entry must have a vendid (Vendor ID), devid (Device ID) and
-# procid (string as appears in /proc/pci; see linux/driver/pci,
-# either pci.c or oldproc.c).
+# procid (Device name) and driver (Device driver).
 @pci_adapters = (
      {
        vendid => 0x8086,
