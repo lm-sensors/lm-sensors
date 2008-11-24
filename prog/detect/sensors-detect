@@ -815,13 +815,13 @@ use vars qw(@i2c_adapter_names);
        name => "Genesys Logic GL518SM",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(@_); },
+       i2c_detect => sub { gl518sm_detect(@_, 0); },
      },
      {
        name => "Genesys Logic GL520SM",
        driver => "gl520sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl520sm_detect(@_); },
+       i2c_detect => sub { gl518sm_detect(@_, 1); },
      },
      {
        name => "Genesys Logic GL525SM",
@@ -4360,31 +4360,20 @@ sub mozart_detect
   return 5;
 }
 
+# Chip to detect: 0 = GL518SM, 1 = GL520SM
 # Registers used:
 #   0x00: Device ID
 #   0x01: Revision ID
 #   0x03: Configuration
-# Mediocre detection
 sub gl518sm_detect
 {
-  my ($file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  return unless i2c_smbus_read_byte_data($file, 0x00) == 0x80;
-  return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
-  $reg = i2c_smbus_read_byte_data($file, 0x01);
-  return unless $reg == 0x00 or $reg == 0x80;
-  return (6);
-}
 
-# Registers used:
-#   0x00: Device ID
-#   0x01: Revision ID
-#   0x03: Configuration
-# Mediocre detection
-sub gl520sm_detect
-{
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x00) == 0x20;
+  $reg = i2c_smbus_read_byte_data($file, 0x00);
+  return if $chip == 0 && $reg != 0x80;
+  return if $chip == 1 && $reg != 0x20;
+
   return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file, 0x01);
   return unless $reg == 0x00 or $reg == 0x80;
