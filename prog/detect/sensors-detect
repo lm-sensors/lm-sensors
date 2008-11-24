@@ -782,22 +782,10 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { w83781d_detect(@_, 6); },
      },
      {
-       name => "Asus ASM58 Mozart-2",
-       driver => "to-be-written",
-       i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(@_, 0); },
-     },
-     {
-       name => "Asus AS2K129R Mozart-2",
-       driver => "to-be-written",
-       i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(@_, 1); },
-     },
-     {
        name => "Asus Mozart-2",
        driver => "to-be-written",
        i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(@_, 2); },
+       i2c_detect => sub { mozart_detect(@_); },
      },
      {
        name => "Winbond W83L784R/AR/G",
@@ -4356,7 +4344,6 @@ sub w83791sd_detect
   return 3;
 }
 
-# Chip to detect: 0 = ASM58, 1 = AS2K129R, 2 = ???
 # Registers used:
 #   0x4e: Vendor ID high byte
 #   0x4f: Vendor ID low byte
@@ -4365,16 +4352,16 @@ sub w83791sd_detect
 #       to confirm.
 sub mozart_detect
 {
-  my ($file, $addr, $chip) = @_;
+  my ($file, $addr) = @_;
   my ($vid, $dev);
 
   $vid = (i2c_smbus_read_byte_data($file, 0x4e) << 8)
        +  i2c_smbus_read_byte_data($file, 0x4f);
   $dev = i2c_smbus_read_byte_data($file, 0x58);
 
-  return if ($chip == 0) and ($dev != 0x56 || $vid != 0x9436);
-  return if ($chip == 1) and ($dev != 0x56 || $vid != 0x9406);
-  return if ($chip == 2) and ($dev != 0x10 || $vid != 0x5ca3);
+  return unless ($dev == 0x56 && $vid == 0x9436)  # ASM58
+             || ($dev == 0x56 && $vid == 0x9406)  # AS2K129R
+             || ($dev == 0x10 && $vid == 0x5ca3);
 
   return 5;
 }
