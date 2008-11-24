@@ -3380,10 +3380,6 @@ sub chip_special_cases
 # chips with several SMBus addresses. The SMBus address for which the
 # function was called is never returned.
 
-# If there are devices which get confused if they are only read from, then
-# this program will surely confuse them. But we guarantee never to write to
-# any of these devices.
-
 
 # $_[0]: A reference to the file descriptor to access this chip.
 # $_[1]: Address
