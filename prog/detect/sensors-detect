@@ -1189,7 +1189,7 @@ use vars qw(@i2c_adapter_names);
        name => "ITE IT8712F",
        driver => "it87",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { it8712_detect(@_); },
+       i2c_detect => sub { it8712_i2c_detect(@_); },
      },
      {
        name => "ITE IT8201R/IT8203R/IT8206R/IT8266R",
@@ -4792,7 +4792,7 @@ sub ite_overclock_detect
 #   0x48: Full I2C Address
 #   0x58: Mfr ID
 #   0x5b: Device ID
-sub it8712_detect
+sub it8712_i2c_detect
 {
   my $reg;
   my ($file, $addr) = @_;
