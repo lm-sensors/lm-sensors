@@ -809,7 +809,7 @@ use vars qw(@i2c_adapter_names);
        name => "Winbond W83L785TS-S",
        driver => "w83l785ts",
        i2c_addrs => [0x2e],
-       i2c_detect => sub { w83l785ts_detect(@_); },
+       i2c_detect => sub { w83l784r_detect(@_, 3); },
      },
      {
        name => "Genesys Logic GL518SM",
@@ -4826,7 +4826,8 @@ sub smartbatt_detect
   return (5);
 }
 
-# Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G
+# Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G,
+#                 3 = W83L785TS-S
 # Registers used:
 #   0x40: Configuration
 #   0x4a: Full I2C Address (W83L784R only)
@@ -4849,25 +4850,15 @@ sub w83l784r_detect
   return if $chip == 0 and $reg != 0x50;
   return if $chip == 1 and $reg != 0x60;
   return if $chip == 2 and $reg != 0x80;
+  return if $chip == 3 and $reg != 0x70;
 
-  return 6 if $chip != 0; # No subclients
+  return 8 if $chip != 0; # No subclients
 
   @res = (8);
   $reg = i2c_smbus_read_byte_data($file, 0x4b);
   push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
   push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
   return @res;
-}
-
-# Registers used:
-#   0x4C-4E: Mfr and Chip ID
-sub w83l785ts_detect
-{
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x4c) == 0xa3;
-  return unless i2c_smbus_read_byte_data($file, 0x4d) == 0x5c;
-  return unless i2c_smbus_read_byte_data($file, 0x4e) == 0x70;
-  return (8);
 }
 
 # The max6650 has no device ID register. However, a few registers have
