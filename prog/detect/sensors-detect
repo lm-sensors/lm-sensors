@@ -4813,16 +4813,10 @@ sub fintek_detect
 sub smartbatt_detect
 {
   my ($file, $addr) = @_;
-  # check some registers
-  if (i2c_smbus_read_word_data($file, 0x08) == 0xffff) {
-  	return;
-  }
-  if (i2c_smbus_read_word_data($file, 0x09) == 0xffff) {
-  	return;
-  }
-  if (i2c_smbus_read_word_data($file, 0x0a) == 0xffff) {
-  	return;
-  }
+
+  return if i2c_smbus_read_word_data($file, 0x08) == 0xffff
+         || i2c_smbus_read_word_data($file, 0x09) == 0xffff
+         || i2c_smbus_read_word_data($file, 0x0a) == 0xffff;
   return (5);
 }
 
