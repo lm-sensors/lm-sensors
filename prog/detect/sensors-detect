@@ -825,7 +825,7 @@ use vars qw(@i2c_adapter_names);
      },
      {
        name => "Genesys Logic GL525SM",
-       driver => "Unwritten (GL525SM)",
+       driver => "to-be-written",
        i2c_addrs => [0x2d],
        i2c_detect => sub { gl525sm_detect(@_); },
      },
@@ -4382,11 +4382,13 @@ sub gl518sm_detect
 
 # Registers used:
 #   0x00: Device ID
+#   0x03: Configuration
 # Mediocre detection
 sub gl525sm_detect
 {
   my ($file, $addr) = @_;
   return unless i2c_smbus_read_byte_data($file, 0x00) == 0x25;
+  return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
   return (5);
 }
 
