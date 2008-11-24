@@ -533,7 +533,7 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM78",
        driver => "lm78",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { lm78_detect(0, @_); },
+       i2c_detect => sub { lm78_detect(@_, 0); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(@_, 0); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
@@ -542,7 +542,7 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM79",
        driver => "lm78",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { lm78_detect(2, @_); },
+       i2c_detect => sub { lm78_detect(@_, 2); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(@_, 2); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
@@ -551,13 +551,13 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM75",
        driver => "lm75",
        i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { lm75_detect(0, @_); },
+       i2c_detect => sub { lm75_detect(@_, 0); },
      },
      {
        name => "Dallas Semiconductor DS75",
        driver => "lm75",
        i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { lm75_detect(1, @_); },
+       i2c_detect => sub { lm75_detect(@_, 1); },
      },
      {
        name => "National Semiconductor LM77",
@@ -575,85 +575,85 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM85",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(0, @_); },
+       i2c_detect => sub { lm85_detect(@_, 0); },
      },
      {
        name => "National Semiconductor LM96000 or PC8374L",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(1, @_); },
+       i2c_detect => sub { lm85_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADM1027",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(2, @_); },
+       i2c_detect => sub { lm85_detect(@_, 2); },
      },
      {
        name => "Analog Devices ADT7460 or ADT7463",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(3, @_); },
+       i2c_detect => sub { lm85_detect(@_, 3); },
      },
      {
        name => "SMSC EMC6D100 or EMC6D101",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(4, @_); },
+       i2c_detect => sub { lm85_detect(@_, 4); },
      },
      {
        name => "SMSC EMC6D102",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(5, @_); },
+       i2c_detect => sub { lm85_detect(@_, 5); },
      },
      {
        name => "SMSC EMC6D103",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(6, @_); },
+       i2c_detect => sub { lm85_detect(@_, 6); },
      },
      {
        name => "Analog Devices ADT7462",
        driver => "adt7462",
        i2c_addrs => [0x5c, 0x58],
-       i2c_detect => sub { adt7467_detect(2, @_); },
+       i2c_detect => sub { adt7467_detect(@_, 2); },
      },
      {
        name => "Analog Devices ADT7466",
        driver => "to-be-written",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { adt7467_detect(3, @_); },
+       i2c_detect => sub { adt7467_detect(@_, 3); },
      },
      {
        name => "Analog Devices ADT7467 or ADT7468",
        driver => "to-be-written",
        i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7467_detect(0, @_); },
+       i2c_detect => sub { adt7467_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADT7470",
        driver => "adt7470",
        i2c_addrs => [0x2c, 0x2e, 0x2f],
-       i2c_detect => sub { adt7467_detect(4, @_); },
+       i2c_detect => sub { adt7467_detect(@_, 4); },
      },
      {
        name => "Analog Devices ADT7473",
        driver => "adt7473",
        i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7473_detect(0, @_); },
+       i2c_detect => sub { adt7473_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADT7475",
        driver => "to-be-written",
        i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7473_detect(1, @_); },
+       i2c_detect => sub { adt7473_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADT7476",
        driver => "to-be-written",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adt7467_detect(1, @_); },
+       i2c_detect => sub { adt7467_detect(@_, 1); },
      },
      {
        name => "Andigilog aSC7511",
@@ -665,31 +665,31 @@ use vars qw(@i2c_adapter_names);
        name => "Andigilog aSC7512",
        driver => "to-be-written",
        i2c_addrs => [0x58],
-       i2c_detect => sub { andigilog_detect(0, @_); },
+       i2c_detect => sub { andigilog_detect(@_, 0); },
      },
      {
        name => "Andigilog aSC7611",
        driver => "to-be-written",
        i2c_addrs => [0x2c, 0x2d, 0x2e],
-       i2c_detect => sub { andigilog_detect(1, @_); },
+       i2c_detect => sub { andigilog_detect(@_, 1); },
      },
      {
        name => "Andigilog aSC7621",
        driver => "to-be-written",
        i2c_addrs => [0x2c, 0x2d, 0x2e],
-       i2c_detect => sub { andigilog_detect(2, @_); },
+       i2c_detect => sub { andigilog_detect(@_, 2); },
      },
      {
        name => "National Semiconductor LM87",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm87_detect(0, @_); },
+       i2c_detect => sub { lm87_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADM1024",
        driver => "lm87",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm87_detect(1, @_); },
+       i2c_detect => sub { lm87_detect(@_, 1); },
      },
      {
        name => "National Semiconductor LM93",
@@ -700,7 +700,7 @@ use vars qw(@i2c_adapter_names);
      {
        name => "Winbond W83781D",
        driver => "w83781d",
-       i2c_detect => sub { w83781d_detect(0, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 0); },
        i2c_addrs => [0x28..0x2f],
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(@_, 0); },
@@ -710,7 +710,7 @@ use vars qw(@i2c_adapter_names);
        name => "Winbond W83782D",
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(1, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 1); },
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(@_, 1); },
        alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
@@ -719,19 +719,19 @@ use vars qw(@i2c_adapter_names);
        name => "Winbond W83783S",
        driver => "w83781d",
        i2c_addrs => [0x2d],
-       i2c_detect => sub { w83781d_detect(2, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 2); },
      },
      {
        name => "Winbond W83791D",
        driver => "w83791d",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(7, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 7); },
      },
      {
        name => "Winbond W83792D",
        driver => "w83792d",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(8, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 8); },
      },
      {
        name => "Winbond W83793R/G",
@@ -749,73 +749,73 @@ use vars qw(@i2c_adapter_names);
        name => "Winbond W83627HF",
        driver => "use-isa-instead",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(3, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 3); },
      },
      {
        name => "Winbond W83627EHF",
        driver => "use-isa-instead",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(9, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 9); },
      },
      {
        name => "Winbond W83627DHG",
        driver => "use-isa-instead",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(10, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 10); },
      },
      {
        name => "Asus AS99127F (rev.1)",
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(4, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 4); },
      },
      {
        name => "Asus AS99127F (rev.2)",
        driver => "w83781d",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(5, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 5); },
      },
      {
        name => "Asus ASB100 Bach",
        driver => "asb100",
        i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(6, @_); },
+       i2c_detect => sub { w83781d_detect(@_, 6); },
      },
      {
        name => "Asus ASM58 Mozart-2",
        driver => "to-be-written",
        i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(0, @_); },
+       i2c_detect => sub { mozart_detect(@_, 0); },
      },
      {
        name => "Asus AS2K129R Mozart-2",
        driver => "to-be-written",
        i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(1, @_); },
+       i2c_detect => sub { mozart_detect(@_, 1); },
      },
      {
        name => "Asus Mozart-2",
        driver => "to-be-written",
        i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(2, @_); },
+       i2c_detect => sub { mozart_detect(@_, 2); },
      },
      {
        name => "Winbond W83L784R/AR/G",
        driver => "to-be-written",
        i2c_addrs => [0x2d],
-       i2c_detect => sub { w83l784r_detect(0, @_); },
+       i2c_detect => sub { w83l784r_detect(@_, 0); },
      },
      {
        name => "Winbond W83L785R/G",
        driver => "to-be-written",
        i2c_addrs => [0x2d],
-       i2c_detect => sub { w83l784r_detect(1, @_); },
+       i2c_detect => sub { w83l784r_detect(@_, 1); },
      },
      {
        name => "Winbond W83L786NR/NG/R/G",
        driver => "w83l786ng",
        i2c_addrs => [0x2e, 0x2f],
-       i2c_detect => sub { w83l784r_detect(2, @_); },
+       i2c_detect => sub { w83l784r_detect(@_, 2); },
      },
      {
        name => "Winbond W83L785TS-S",
@@ -827,13 +827,13 @@ use vars qw(@i2c_adapter_names);
        name => "Genesys Logic GL518SM Revision 0x00",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(0, @_); },
+       i2c_detect => sub { gl518sm_detect(@_, 0); },
      },
      {
        name => "Genesys Logic GL518SM Revision 0x80",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(1, @_); },
+       i2c_detect => sub { gl518sm_detect(@_, 1); },
      },
      {
        name => "Genesys Logic GL520SM",
@@ -851,7 +851,7 @@ use vars qw(@i2c_adapter_names);
        name => "Analog Devices ADM9240",
        driver => "adm9240",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(0, @_); },
+       i2c_detect => sub { adm9240_detect(@_, 0); },
      },
      {
        name => "Dallas Semiconductor DS1621/DS1631",
@@ -863,13 +863,13 @@ use vars qw(@i2c_adapter_names);
        name => "Dallas Semiconductor DS1780",
        driver => "adm9240",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(1, @_); },
+       i2c_detect => sub { adm9240_detect(@_, 1); },
      },
      {
        name => "National Semiconductor LM81",
        driver => "adm9240",
        i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(2, @_); },
+       i2c_detect => sub { adm9240_detect(@_, 2); },
      },
      {
        name => "Analog Devices ADM1026",
@@ -881,55 +881,55 @@ use vars qw(@i2c_adapter_names);
        name => "Analog Devices ADM1025",
        driver => "adm1025",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1025_detect(0, @_); },
+       i2c_detect => sub { adm1025_detect(@_, 0); },
      },
      {
        name => "Philips NE1619",
        driver => "adm1025",
        i2c_addrs => [0x2c..0x2d],
-       i2c_detect => sub { adm1025_detect(1, @_); },
+       i2c_detect => sub { adm1025_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADM1021",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(0, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADM1021A/ADM1023",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(1, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 1); },
      },
      {
        name => "Maxim MAX1617",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(2, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 2); },
      },
      {
        name => "Maxim MAX1617A",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(3, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 3); },
      },
      {
        name => "Maxim MAX1668",
        driver => "max1668",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(0, @_); },
+       i2c_detect => sub { max1668_detect(@_, 0); },
      },
      {
        name => "Maxim MAX1805",
        driver => "max1668",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(1, @_); },
+       i2c_detect => sub { max1668_detect(@_, 1); },
      },
      {
        name => "Maxim MAX1989",
        driver => "max1668",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(2, @_); },
+       i2c_detect => sub { max1668_detect(@_, 2); },
      },
      {
        name => "Maxim MAX6650/MAX6651",
@@ -947,37 +947,37 @@ use vars qw(@i2c_adapter_names);
        name => "TI THMC10",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(4, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 4); },
      },
      {
        name => "National Semiconductor LM84",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(5, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 5); },
      },
      {
        name => "Genesys Logic GL523SM",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(6, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 6); },
      },
      {
        name => "Onsemi MC1066",
        driver => "adm1021",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(7, @_); },
+       i2c_detect => sub { adm1021_detect(@_, 7); },
      },
      {
        name => "Maxim MAX1618",
        driver => "max1619",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1619_detect(1, @_); },
+       i2c_detect => sub { max1619_detect(@_, 1); },
      },
      {
        name => "Maxim MAX1619",
        driver => "max1619",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1619_detect(0, @_); },
+       i2c_detect => sub { max1619_detect(@_, 0); },
      },
      {
        name => "National Semiconductor LM82/LM83",
@@ -989,31 +989,31 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM90",
        driver => "lm90",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(0, @_); },
+       i2c_detect => sub { lm90_detect(@_, 0); },
      },
      {
        name => "National Semiconductor LM89/LM99",
        driver => "lm90",
        i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(1, @_); },
+       i2c_detect => sub { lm90_detect(@_, 1); },
      },
      {
        name => "National Semiconductor LM86",
        driver => "lm90",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(2, @_); },
+       i2c_detect => sub { lm90_detect(@_, 2); },
      },
      {
        name => "Analog Devices ADM1032",
        driver => "lm90",
        i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(3, @_); },
+       i2c_detect => sub { lm90_detect(@_, 3); },
      },
      {
        name => "Maxim MAX6654/MAX6690",
        driver => "to-be-written", # probably lm90
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(4, @_); },
+       i2c_detect => sub { lm90_detect(@_, 4); },
      },
      {
        name => "Maxim MAX6657/MAX6658/MAX6659",
@@ -1031,43 +1031,43 @@ use vars qw(@i2c_adapter_names);
        name => "Maxim MAX6646",
        driver => "lm90",
        i2c_addrs => [0x4d],
-       i2c_detect => sub { lm90_detect(6, @_); },
+       i2c_detect => sub { lm90_detect(@_, 6); },
      },
      {
        name => "Maxim MAX6647",
        driver => "lm90",
        i2c_addrs => [0x4e],
-       i2c_detect => sub { lm90_detect(6, @_); },
+       i2c_detect => sub { lm90_detect(@_, 6); },
      },
      {
        name => "Maxim MAX6648/MAX6649/MAX6692",
        driver => "lm90",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(6, @_); },
+       i2c_detect => sub { lm90_detect(@_, 6); },
      },
      {
        name => "Maxim MAX6680/MAX6681",
        driver => "lm90",
        i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(7, @_); },
+       i2c_detect => sub { lm90_detect(@_, 7); },
      },
      {
        name => "Winbond W83L771W/G",
        driver => "lm90",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(8, @_); },
+       i2c_detect => sub { lm90_detect(@_, 8); },
      },
      {
        name => "Texas Instruments TMP401",
        driver => "tmp401",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(9, @_); },
+       i2c_detect => sub { lm90_detect(@_, 9); },
      },
      {
        name => "Texas Instruments TMP411",
        driver => "to-be-written",
        i2c_addrs => [0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(10, @_); },
+       i2c_detect => sub { lm90_detect(@_, 10); },
      },
      {
        name => "National Semiconductor LM95231",
@@ -1079,31 +1079,31 @@ use vars qw(@i2c_adapter_names);
        name => "National Semiconductor LM63",
        driver => "lm63",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm63_detect(1, @_); },
+       i2c_detect => sub { lm63_detect(@_, 1); },
      },
      {
        name => "National Semiconductor LM64",
        driver => "to-be-written", # lm63
        i2c_addrs => [0x18, 0x4e],
-       i2c_detect => sub { lm63_detect(3, @_); },
+       i2c_detect => sub { lm63_detect(@_, 3); },
      },
      {
        name => "Fintek F75363SG",
        driver => "lm63", # Not yet
        i2c_addrs => [0x4c],
-       i2c_detect => sub { lm63_detect(2, @_); },
+       i2c_detect => sub { lm63_detect(@_, 2); },
      },
      {
        name => "National Semiconductor LM92",
        driver => "lm92",
        i2c_addrs => [0x48..0x4b],
-       i2c_detect => sub { lm92_detect(0, @_); },
+       i2c_detect => sub { lm92_detect(@_, 0); },
      },
      {
        name => "National Semiconductor LM76",
        driver => "lm92",
        i2c_addrs => [0x48..0x4b],
-       i2c_detect => sub { lm92_detect(1, @_); },
+       i2c_detect => sub { lm92_detect(@_, 1); },
      },
      {
        name => "Maxim MAX6633/MAX6634/MAX6635",
@@ -1111,13 +1111,13 @@ use vars qw(@i2c_adapter_names);
        i2c_addrs => [0x48..0x4f], # The MAX6633 can also use 0x40-0x47 but we
                                   # don't want to probe these addresses, it's
                                   # dangerous.
-       i2c_detect => sub { lm92_detect(2, @_); },
+       i2c_detect => sub { lm92_detect(@_, 2); },
      },
      {
        name => "Analog Devices ADT7461",
        driver => "lm90",
        i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(5, @_); },
+       i2c_detect => sub { lm90_detect(@_, 5); },
      },
      {
        name => "Analog Devices ADT7481",
@@ -1135,49 +1135,49 @@ use vars qw(@i2c_adapter_names);
        name => "Analog Devices ADM1030",
        driver => "adm1031",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1031_detect(0, @_); },
+       i2c_detect => sub { adm1031_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADM1031",
        driver => "adm1031",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1031_detect(1, @_); },
+       i2c_detect => sub { adm1031_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADM1033",
        driver => "to-be-written",
        i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { adm1034_detect(0, @_); },
+       i2c_detect => sub { adm1034_detect(@_, 0); },
      },
      {
        name => "Analog Devices ADM1034",
        driver => "to-be-written",
        i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { adm1034_detect(1, @_); },
+       i2c_detect => sub { adm1034_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADM1022",
        driver => "thmc50",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1022_detect(0, @_); },
+       i2c_detect => sub { adm1022_detect(@_, 0); },
      },
      {
        name => "Texas Instruments THMC50",
        driver => "thmc50",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1022_detect(1, @_); },
+       i2c_detect => sub { adm1022_detect(@_, 1); },
      },
      {
        name => "Analog Devices ADM1028",
        driver => "thmc50",
        i2c_addrs => [0x2e],
-       i2c_detect => sub { adm1022_detect(2, @_); },
+       i2c_detect => sub { adm1022_detect(@_, 2); },
      },
      {
        name => "Texas Instruments THMC51",
        driver => "to-be-written", # thmc50
        i2c_addrs => [0x2e], # At least (no datasheet)
-       i2c_detect => sub { adm1022_detect(3, @_); },
+       i2c_detect => sub { adm1022_detect(@_, 3); },
      },
      {
        name => "VIA VT1211 (I2C)",
@@ -1216,37 +1216,37 @@ use vars qw(@i2c_adapter_names);
        name => "FSC Poseidon I",
        driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscpos" },
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(0, @_); },
+       i2c_detect => sub { fsc_detect(@_, 0); },
      },
      {
        name => "FSC Poseidon II",
        driver => "to-be-written",
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(1, @_); },
+       i2c_detect => sub { fsc_detect(@_, 1); },
      },
      {
        name => "FSC Scylla",
        driver => "fschmd",
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(2, @_); },
+       i2c_detect => sub { fsc_detect(@_, 2); },
      },
      {
        name => "FSC Hermes",
        driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscher" },
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(3, @_); },
+       i2c_detect => sub { fsc_detect(@_, 3); },
      },
      {
        name => "FSC Heimdal",
        driver => "fschmd",
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(4, @_); },
+       i2c_detect => sub { fsc_detect(@_, 4); },
      },
      {
        name => "FSC Heracles",
        driver => "fschmd",
        i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(5, @_); },
+       i2c_detect => sub { fsc_detect(@_, 5); },
      },
      {
        name => "ALi M5879",
@@ -1264,61 +1264,61 @@ use vars qw(@i2c_adapter_names);
        name => "SMSC DME1737",
        driver => "dme1737",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { dme1737_detect(1, @_); },
+       i2c_detect => sub { dme1737_detect(@_, 1); },
      },
      {
        name => "SMSC SCH5027D-NW",
        driver => "dme1737",
        i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { dme1737_detect(2, @_); },
+       i2c_detect => sub { dme1737_detect(@_, 2); },
      },
      {
        name => "Fintek F75111R/RG/N (GPIO)",
        driver => "not-a-sensor",
        i2c_addrs => [0x4e], # 0x37 not probed
-       i2c_detect => sub { fintek_detect(1, @_); },
+       i2c_detect => sub { fintek_detect(@_, 1); },
      },
      {
        name => "Fintek F75121R/F75122R/RG (VID+GPIO)",
        driver => "to-be-written",
        i2c_addrs => [0x4e], # 0x37 not probed
-       i2c_detect => sub { fintek_detect(2, @_); },
+       i2c_detect => sub { fintek_detect(@_, 2); },
      },
      {
        name => "Fintek F75373S/SG",
        driver => "f75375s",
        i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(3, @_); },
+       i2c_detect => sub { fintek_detect(@_, 3); },
      },
      {
        name => "Fintek F75375S/SP",
        driver => "f75375s",
        i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(4, @_); },
+       i2c_detect => sub { fintek_detect(@_, 4); },
      },
      {
        name => "Fintek F75387SG/RG",
        driver => "to-be-written",
        i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(5, @_); },
+       i2c_detect => sub { fintek_detect(@_, 5); },
      },
      {
        name => "Fintek F75383S/M",
        driver => "to-be-written",
        i2c_addrs => [0x4c],
-       i2c_detect => sub { fintek_detect(6, @_); },
+       i2c_detect => sub { fintek_detect(@_, 6); },
      },
      {
        name => "Fintek F75384S/M",
        driver => "to-be-written",
        i2c_addrs => [0x4d],
-       i2c_detect => sub { fintek_detect(6, @_); },
+       i2c_detect => sub { fintek_detect(@_, 6); },
      },
      {
        name => "Fintek custom power control IC",
        driver => "to-be-written",
        i2c_addrs => [0x2f],
-       i2c_detect => sub { fintek_detect(7, @_); },
+       i2c_detect => sub { fintek_detect(@_, 7); },
      },
      {
        name => "Smart Battery",
@@ -3371,10 +3371,13 @@ sub chip_special_cases
 # chips with several SMBus addresses. The SMBus address for which the
 # function was called is never returned.
 
-
-# $_[0]: A reference to the file descriptor to access this chip.
+# All I2C detection functions below take at least 2 parameters:
+# $_[0]: Reference to the file descriptor to access the chip
 # $_[1]: Address
-# Returns: undef if not detected, (3) if detected.
+# Some of these functions which can detect more than one type of device,
+# take a third parameter:
+# $_[2]: Chip to detect
+
 # Registers used: 0x58
 sub mtp008_detect
 {
@@ -3383,18 +3386,15 @@ sub mtp008_detect
   return (3);
 }
 
-# $_[0]: Chip to detect (0 = LM78, 2 = LM79)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (6) if detected.
+# Chip to detect: 0 = LM78, 2 = LM79
 # Registers used:
 #   0x40: Configuration
 #   0x48: Full I2C Address
 #   0x49: Device ID
 sub lm78_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  my ($chip, $file, $addr) = @_;
   return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
   return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file, 0x49);
@@ -3408,12 +3408,7 @@ sub lm78_detect
   return (6);
 }
 
-# $_[0]: Chip to detect (0 = LM75, 1 = DS75)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 3 or 6 if detected;
-#   6 means that the temperatures make sense;
-#   3 means that the temperatures look strange;
+# Chip to detect: 0 = LM75, 1 = DS75
 # Registers used:
 #   0x00: Temperature
 #   0x01: Configuration
@@ -3434,8 +3429,8 @@ sub lm78_detect
 # useful for detection anyway.
 sub lm75_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $i;
-  my ($chip, $file, $addr) = @_;
   my $cur = i2c_smbus_read_byte_data($file, 0x00);
   my $conf = i2c_smbus_read_byte_data($file, 0x01);
 
@@ -3471,11 +3466,6 @@ sub lm75_detect
   return 3;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 3 or 6 if detected;
-#   6 means that the temperatures make sense;
-#   3 means that the temperatures look strange;
 # Registers used:
 #   0x00: Temperature
 #   0x01: Configuration
@@ -3496,8 +3486,8 @@ sub lm75_detect
 # LM77 chip.
 sub lm77_detect
 {
-  my $i;
   my ($file, $addr) = @_;
+  my $i;
   my $cur = i2c_smbus_read_byte_data($file, 0x00);
   my $conf = i2c_smbus_read_byte_data($file, 0x01);
   my $hyst = i2c_smbus_read_byte_data($file, 0x02);
@@ -3555,10 +3545,7 @@ sub lm77_detect
   return 3;
 }
 
-# $_[0]: Chip to detect (0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 2 or 4 if detected;
+# Chip to detect: 0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635
 # Registers used:
 #   0x01: Configuration (National Semiconductor only)
 #   0x02: Hysteresis
@@ -3575,7 +3562,7 @@ sub lm77_detect
 # have an LM92 chip or compatible.
 sub lm92_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
 
   my $conf = i2c_smbus_read_byte_data($file, 0x01);
   my $hyst = i2c_smbus_read_byte_data($file, 0x02);
@@ -3620,9 +3607,6 @@ sub lm92_detect
   return 2;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 3 if detected
 # Registers used:
 #   0xAA: Temperature
 #   0xA1: High limit
@@ -3664,9 +3648,6 @@ sub ds1621_detect
   return 3;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 1 to 3 if detected.
 # Registers used:
 #   0x00: Configuration register
 #   0x02: Interrupt state register
@@ -3684,8 +3665,8 @@ sub ds1621_detect
 # to loose comparisons did not change the score.
 sub lm80_detect
 {
-  my ($i, $reg);
   my ($file, $addr) = @_;
+  my ($i, $reg);
 
   return if (i2c_smbus_read_byte_data($file, 0x00) & 0x80) != 0;
   return if (i2c_smbus_read_byte_data($file, 0x02) & 0xc0) != 0;
@@ -3724,9 +3705,6 @@ sub lm80_detect
   return $confidence;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 4 to 8 if detected.
 # Registers used:
 #   0x02: Status 1
 #   0x03: Configuration
@@ -3762,13 +3740,10 @@ sub lm83_detect
   return $confidence;
 }
 
-# $_[0]: Chip to detect
-#   (0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032, 4 = MAX6654/MAX6690,
-#    5 = ADT7461, 6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
-#    7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 6 or 8 if detected.
+# Chip to detect: 0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
+#                 4 = MAX6654/MAX6690, 5 = ADT7461,
+#                 6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
+#                 7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -3776,7 +3751,7 @@ sub lm83_detect
 #   0xff: Chip ID / die revision
 sub lm90_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0xfe);
   my $cid = i2c_smbus_read_byte_data($file, 0xff);
   my $conf = i2c_smbus_read_byte_data($file, 0x03);
@@ -3863,9 +3838,6 @@ sub lm90_detect
   return;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 5 if detected.
 # Registers used:
 #   0x03: Configuration (no low nibble)
 #   0x04: Conversion rate
@@ -3895,9 +3867,6 @@ sub max6657_detect
   return 5;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x03: Configuration
 #   0xfe: Manufacturer ID
@@ -3916,9 +3885,6 @@ sub lm95231_detect
   return 6;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x03: Configuration 1
 #   0x24: Configuration 2
@@ -3940,11 +3906,7 @@ sub adt7481_detect
   return 6;
 }
 
-# $_[0]: Chip to detect
-#   (1 = LM63, 2 = F75363SG, 3 = LM64)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 6 if detected.
+# Chip to detect: 1 = LM63, 2 = F75363SG, 3 = LM64
 # Registers used:
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
@@ -3952,7 +3914,7 @@ sub adt7481_detect
 #   0x16: Alert mask (two or three unused bits)
 sub lm63_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
 
   my $mid = i2c_smbus_read_byte_data($file, 0xfe);
   my $cid = i2c_smbus_read_byte_data($file, 0xff);
@@ -3979,9 +3941,6 @@ sub lm63_detect
   return 6;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address (unused)
-# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x02, 0x03: Fan support
 #   0x06: Temperature support
@@ -4011,12 +3970,7 @@ sub adm1029_detect
   return 7;
 }
 
-# $_[0]: Chip to detect
-#   (0 = ADM1030, 1=ADM1031)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 3 to 7 (ADM1031) or 9 (ADM1030)
-#          if detected.
+# Chip to detect: 0 = ADM1030, 1 = ADM1031
 # Registers used:
 #   0x01: Config 2
 #   0x03: Status 2
@@ -4027,7 +3981,7 @@ sub adm1029_detect
 #   0x3f: Die revision
 sub adm1031_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x3e);
   my $cid = i2c_smbus_read_byte_data($file, 0x3d);
   my $drev = i2c_smbus_read_byte_data($file, 0x3f);
@@ -4062,18 +4016,14 @@ sub adm1031_detect
   return;
 }
 
-# $_[0]: Chip to detect
-#   (0 = ADM1033, 1 = ADM1034)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 4 or 6 if detected.
+# Chip to detect: 0 = ADM1033, 1 = ADM1034
 # Registers used:
 #   0x3d: Chip ID
 #   0x3e: Manufacturer ID
 #   0x3f: Die revision
 sub adm1034_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x3e);
   my $cid = i2c_smbus_read_byte_data($file, 0x3d);
   my $drev = i2c_smbus_read_byte_data($file, 0x3f);
@@ -4095,19 +4045,15 @@ sub adm1034_detect
   return
 }
 
-# $_[0]: Chip to detect
-#   (0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
-#    4 = ADT7470)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 5 or 7 if detected.
+# Chip to detect: 0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
+#                 4 = ADT7470
 # Registers used:
 #   0x3d: Chip ID
 #   0x3e: Manufacturer ID
 #   0x3f: Die revision
 sub adt7467_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x3e);
   my $cid = i2c_smbus_read_byte_data($file, 0x3d);
   my $drev = i2c_smbus_read_byte_data($file, 0x3f);
@@ -4150,17 +4096,13 @@ sub adt7467_detect
   return
 }
 
-# $_[0]: Chip to detect
-#   (0 = ADT7473, 1 = ADT7475)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 5 if detected.
+# Chip to detect: 0 = ADT7473, 1 = ADT7475
 # Registers used:
 #   0x3d: Chip ID
 #   0x3e: Manufacturer ID
 sub adt7473_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x3e);
   my $cid = i2c_smbus_read_byte_data($file, 0x3d);
 
@@ -4177,18 +4119,13 @@ sub adt7473_detect
   return
 }
 
-# $_[0]: Chip to detect
-#   (0 = aSC7512, 1 = aSC7611, 2 = aSC7621)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 1 if detected.
+# Chip to detect: 0 = aSC7512, 1 = aSC7611, 2 = aSC7621
 # Registers used:
 #   0x3e: Manufacturer ID (0x61)
 #   0x3f: Version
-
 sub andigilog_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $mid = i2c_smbus_read_byte_data($file, 0x3e);
   my $cid = i2c_smbus_read_byte_data($file, 0x3f);
 
@@ -4212,9 +4149,6 @@ sub andigilog_detect
   return;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address (unused)
-# Returns: undef if not detected, 1 if detected.
 # Registers used:
 #   0xfe: Manufacturer ID
 #   0xff: Die Code
@@ -4232,21 +4166,14 @@ sub andigilog_aSC7511_detect
   }
 }
 
-# $_[0]: Chip to detect
-#   (0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
-#    4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103)
-# $_[1]: A reference to the file descriptor to access this chip.
-# #_[2]: Base address.
-# Returns: undef if not detected, (7) or (8) if detected.
+# Chip to detect: 0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
+#                 4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103
 # Registers used: 0x3e == Vendor register.
 #                 0x3d == Device ID register (Analog Devices only).
 #		  0x3f == Version/Stepping register.
-# Constants used: 0x01 == National Semiconductor Vendor Id.
-#                 0x41 == Analog Devices Vendor Id.
-#                 0x5c == SMSC Vendor Id.
 sub lm85_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
   my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
 
@@ -4285,17 +4212,14 @@ sub lm85_detect
   return (7);
 }
 
-# $_[0]: Chip to detect (0 = LM87, 1 = ADM1024)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (7) if detected.
+# Chip to detect: 0 = LM87, 1 = ADM1024
 # Registers used:
 #   0x3e: Company ID
 #   0x3f: Revision
 #   0x40: Configuration
 sub lm87_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $cid = i2c_smbus_read_byte_data($file, 0x3e);
   my $rev = i2c_smbus_read_byte_data($file, 0x3f);
 
@@ -4314,14 +4238,9 @@ sub lm87_detect
   return (7);
 }
 
-# $_[0]: Chip to detect (0 = W83781D, 1 = W83782D, 2 = W83783S,
-#                        3 = W83627HF, 4 = AS99127F (rev.1),
-#                        5 = AS99127F (rev.2), 6 = ASB100, 7 = W83791D,
-#                        8 = W83792D, 9 = W83627EHF, 10 = W83627DHG)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (8, addr1, addr2) if detected, but only
-#          if the LM75 chip emulation is enabled.
+# Chip to detect: 0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF,
+#                 4 = AS99127F (rev.1), 5 = AS99127F (rev.2), 6 = ASB100,
+#                 7 = W83791D, 8 = W83792D, 9 = W83627EHF, 10 = W83627DHG
 # Registers used:
 #   0x48: Full I2C Address
 #   0x4a: I2C addresses of emulated LM75 chips
@@ -4329,14 +4248,13 @@ sub lm87_detect
 #   0x4f: Vendor ID
 #   0x58: Device ID (only when in bank 0)
 # Note: Fails if the W8378xD is not in bank 0!
-# Note: Detection overrules a previous LM78 detection
 # Note: Asus chips do not have their I2C address at register 0x48?
 #       AS99127F rev.1 and ASB100 have 0x00, confirmation wanted for
 #       AS99127F rev.2.
 sub w83781d_detect
 {
+  my ($file, $addr, $chip) = @_;
   my ($reg1, $reg2, @res);
-  my ($chip, $file, $addr) = @_;
 
   return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr)
     or ($chip >= 4 && $chip <= 6);
@@ -4378,12 +4296,6 @@ sub w83781d_detect
   return @res;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected
-#          6 if detected and bank different from 0
-#          (8, addr1, addr2) if detected, bank is 0 and LM75 chip emulation
-#          is enabled
 # Registers used:
 #   0x0b: Full I2C Address
 #   0x0c: I2C addresses of emulated LM75 chips
@@ -4392,8 +4304,8 @@ sub w83781d_detect
 #   0x0e: Device ID(Bank 0, 1, 2)
 sub w83793_detect
 {
-  my ($bank, $reg, @res);
   my ($file, $addr) = @_;
+  my ($bank, $reg, @res);
 
   $bank = i2c_smbus_read_byte_data($file, 0x00);
   $reg = i2c_smbus_read_byte_data($file, 0x0d);
@@ -4416,9 +4328,6 @@ sub w83793_detect
   return @res;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 3 if detected
 # Registers used:
 #   0x48: Full I2C Address
 #   0x4e: Vendor ID byte selection
@@ -4447,10 +4356,7 @@ sub w83791sd_detect
   return 3;
 }
 
-# $_[0]: Chip to detect (0 = ASM58, 1 = AS2K129R, 2 = ???)
-# $_[1]: A reference to the file descriptor to access this chip
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 5 if detected
+# Chip to detect: 0 = ASM58, 1 = AS2K129R, 2 = ???
 # Registers used:
 #   0x4e: Vendor ID high byte
 #   0x4f: Vendor ID low byte
@@ -4459,8 +4365,8 @@ sub w83791sd_detect
 #       to confirm.
 sub mozart_detect
 {
+  my ($file, $addr, $chip) = @_;
   my ($vid, $dev);
-  my ($chip, $file, $addr) = @_;
 
   $vid = (i2c_smbus_read_byte_data($file, 0x4e) << 8)
        +  i2c_smbus_read_byte_data($file, 0x4f);
@@ -4473,10 +4379,7 @@ sub mozart_detect
   return 5;
 }
 
-# $_[0]: Chip to detect (0 = Revision 0x00, 1 = Revision 0x80)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (6) if detected.
+# Chip to detect: 0 = Revision 0x00, 1 = Revision 0x80
 # Registers used:
 #   0x00: Device ID
 #   0x01: Revision ID
@@ -4484,8 +4387,8 @@ sub mozart_detect
 # Mediocre detection
 sub gl518sm_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  my ($chip, $file, $addr) = @_;
   return unless i2c_smbus_read_byte_data($file, 0x00) == 0x80;
   return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file, 0x01);
@@ -4494,9 +4397,6 @@ sub gl518sm_detect
   return (6);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, (5) if detected.
 # Registers used:
 #   0x00: Device ID
 #   0x01: Revision ID
@@ -4512,9 +4412,6 @@ sub gl520sm_detect
   return (5);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, (5) if detected.
 # Registers used:
 #   0x00: Device ID
 # Mediocre detection
@@ -4525,19 +4422,15 @@ sub gl525sm_detect
   return (5);
 }
 
-# $_[0]: Chip to detect (0 = ADM9240, 1 = DS1780, 2 = LM81)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (7) if detected.
+# Chip to detect: 0 = ADM9240, 1 = DS1780, 2 = LM81
 # Registers used:
 #   0x3e: Company ID
 #   0x40: Configuration
 #   0x48: Full I2C Address
-# Note: Detection overrules a previous LM78 detection
 sub adm9240_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  my ($chip, $file, $addr) = @_;
   $reg = i2c_smbus_read_byte_data($file, 0x3e);
   return unless ($chip == 0 and $reg == 0x23) or
                 ($chip == 1 and $reg == 0xda) or
@@ -4548,20 +4441,15 @@ sub adm9240_detect
   return (7);
 }
 
-# $_[0]: Chip to detect (0 = ADM1022, 1 = THMC50, 2 = ADM1028,
-#                        3 = THMC51)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (8) if detected.
+# Chip to detect: 0 = ADM1022, 1 = THMC50, 2 = ADM1028, 3 = THMC51
 # Registers used:
 #   0x3e: Company ID
 #   0x3f: Revision
 #   0x40: Configuration
-# Note: Detection overrules a previous LM78 or ADM9240 detection
 sub adm1022_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  my ($chip, $file, $addr) = @_;
   $reg = i2c_smbus_read_byte_data($file, 0x3e);
   return unless ($chip == 0 and $reg == 0x41) or
                 ($chip == 1 and $reg == 0x49) or
@@ -4578,21 +4466,17 @@ sub adm1022_detect
   return (8);
 }
 
-# $_[0]: Chip to detect (0 = ADM1025, 1 = NE1619)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (8) if detected.
+# Chip to detect: 0 = ADM1025, 1 = NE1619
 # Registers used:
 #   0x3e: Company ID
 #   0x3f: Revision
 #   0x40: Configuration
 #   0x41: Status 1
 #   0x42: Status 2
-# Note: Detection overrules a previous LM78 or ADM9240 detection
 sub adm1025_detect
 {
+  my ($file, $addr, $chip) = @_;
   my $reg;
-  my ($chip, $file, $addr) = @_;
 
   $reg = i2c_smbus_read_byte_data($file, 0x3e);
   return if ($chip == 0) and ($reg != 0x41);
@@ -4606,30 +4490,21 @@ sub adm1025_detect
   return (8);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, (8) if detected.
 # Registers used:
 #   0x16: Company ID
 #   0x17: Revision
 sub adm1026_detect
 {
-  my $reg;
   my ($file, $addr) = @_;
+  my $reg;
   $reg = i2c_smbus_read_byte_data($file, 0x16);
   return unless ($reg == 0x41);
   return unless (i2c_smbus_read_byte_data($file, 0x17) & 0xf0) == 0x40;
   return (8);
 }
 
-# $_[0]: Chip to detect
-#   (0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A, 4 = THMC10,
-#    5 = LM84, 6 = GL523, 7 = MC1066)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 3 if simply detected, 5 if detected and
-#          manufacturer ID matches, 7 if detected and manufacturer ID and
-#          revision match
+# Chip to detect: 0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A,
+#                 4 = THMC10, 5 = LM84, 6 = GL523, 7 = MC1066
 # Registers used:
 #   0x04: Company ID (LM84 only)
 #   0xfe: Company ID (all but LM84 and MAX1617)
@@ -4642,7 +4517,7 @@ sub adm1026_detect
 # confidence value.
 sub adm1021_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
   my $rev = i2c_smbus_read_byte_data($file, 0xff);
   my $conf = i2c_smbus_read_byte_data($file, 0x03);
@@ -4704,18 +4579,13 @@ sub adm1021_detect
   return 5;
 }
 
-# $_[0]: Chip to detect
-#   (0 = MAX1668, 1 = MAX1805, 2 = MAX1989)
-# $_[1]: A reference to the file descriptor to access this chip.
-#        We may assume an i2c_set_slave_addr was already done.
-# $_[2]: Address
-# Returns: undef if not detected, 7 if detected
+# Chip to detect: 0 = MAX1668, 1 = MAX1805, 2 = MAX1989
 # Registers used:
 #   0xfe: Company ID
 #   0xff: Device ID
 sub max1668_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
   my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
 
@@ -4727,11 +4597,7 @@ sub max1668_detect
   return 7;
 }
 
-# $_[0]: Chip to detect
-#   (0 = MAX1619, 1 = MAX1618)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 7 if detected
+# Chip to detect: 0 = MAX1619, 1 = MAX1618
 # Registers used:
 #   0xfe: Company ID
 #   0xff: Device ID
@@ -4740,7 +4606,7 @@ sub max1668_detect
 #   0x04: Conversion rate
 sub max1619_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
   my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
   my $conf = i2c_smbus_read_byte_data($file, 0x03);
@@ -4764,14 +4630,9 @@ sub max1619_detect
   return 7;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address (unused)
-# Returns: undef if not detected, 6 if detected.
 # Registers used:
 #   0x28: User ID
 #   0x29: User ID2
-#   0x2A: Version ID
-
 sub ite_overclock_detect
 {
   my ($file, $addr) = @_;
@@ -4784,9 +4645,6 @@ sub ite_overclock_detect
   return 6;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 7 or 8 if detected (tops LM78).
 # Registers used:
 #   0x00: Configuration
 #   0x48: Full I2C Address
@@ -4794,8 +4652,8 @@ sub ite_overclock_detect
 #   0x5b: Device ID
 sub it8712_i2c_detect
 {
-  my $reg;
   my ($file, $addr) = @_;
+  my $reg;
   return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
   return unless (i2c_smbus_read_byte_data($file, 0x00) & 0x90) == 0x10;
   return unless i2c_smbus_read_byte_data($file, 0x58) == 0x90;
@@ -4803,9 +4661,6 @@ sub it8712_i2c_detect
   return (7 + ($addr == 0x2d));
 }
 
-# $_[0]: A reference to the file descriptor to access this chip
-# $_[1]: Address
-# Returns: 8 for a memory eeprom
 # Registers used:
 #   0-63: SPD Data and Checksum
 sub eeprom_detect
@@ -4825,9 +4680,6 @@ sub eeprom_detect
   return;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 8 if detected.
 # Registers used:
 #   0x00..0x07: DDC signature
 sub ddcmonitor_detect
@@ -4847,16 +4699,13 @@ sub ddcmonitor_detect
   return 8;
 }
 
-# $_[0]: Chip to detect (0 = Poseidon I, 1 = Poseidon II, 2 = Scylla,
-#                        3 = Hermes, 4 = Heimdal, 5 = Heracles)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, (8) if detected.
+# Chip to detect: 0 = Poseidon I, 1 = Poseidon II, 2 = Scylla,
+#                 3 = Hermes, 4 = Heimdal, 5 = Heracles
 # Registers used:
 #   0x00-0x02: Identification (3 capital ASCII letters)
 sub fsc_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $id;
 
   $id = chr(i2c_smbus_read_byte_data($file, 0x00))
@@ -4873,23 +4722,17 @@ sub fsc_detect
   return (8);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address (unused)
-# Returns: undef if not detected, 5 if detected.
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
 sub lm93_detect
 {
-  my $file = shift;
+  my ($file, $addr) = @_;
   return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x01
             and i2c_smbus_read_byte_data($file, 0x3F) == 0x73;
   return 5;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, (7) if detected.
 # Registers used:
 #   0x3F: Revision ID
 #   0x48: Address
@@ -4916,9 +4759,6 @@ sub m5879_detect
   return (7);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 5 or 6 if detected.
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
@@ -4934,11 +4774,7 @@ sub smsc47m192_detect
   return ($addr == 0x2d ? 6 : 5);
 }
 
-# $_[0]: Chip to detect
-#        (1 = DME1737, 2 = SCH5027)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 5 or 6 if detected.
+# Chip to detect: 1 = DME1737, 2 = SCH5027
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
@@ -4947,7 +4783,7 @@ sub smsc47m192_detect
 #   0xBA: Read-only test register (8 test bits)
 sub dme1737_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $vendor = i2c_smbus_read_byte_data($file, 0x3E);
   my $verstep = i2c_smbus_read_byte_data($file, 0x3F);
 
@@ -4965,19 +4801,15 @@ sub dme1737_detect
   return ($addr == 0x2e ? 6 : 5);
 }
 
-# $_[0]: Chip to detect
-#   (1 = F75111R/RG/N, 2 = F75121R/F75122R/RG, 3 = F75373S/SG,
-#    4 = F75375S/SP, 5 = F75387SG/RG, 6 = F75383M/S/F75384M/S,
-#    7 = custom power control IC)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address (unused)
-# Returns: undef if not detected, 7 if detected.
+# Chip to detect: 1 = F75111R/RG/N, 2 = F75121R/F75122R/RG, 3 = F75373S/SG,
+#                 4 = F75375S/SP, 5 = F75387SG/RG, 6 = F75383M/S/F75384M/S,
+#                 7 = custom power control IC
 # Registers used:
 #   0x5A-0x5B: Chip ID
 #   0x5D-0x5E: Vendor ID
 sub fintek_detect
 {
-  my ($chip, $file, $addr) = @_;
+  my ($file, $addr, $chip) = @_;
   my $chipid = (i2c_smbus_read_byte_data($file, 0x5A) << 8)
              | i2c_smbus_read_byte_data($file, 0x5B);
   my $vendid = (i2c_smbus_read_byte_data($file, 0x5D) << 8)
@@ -5008,9 +4840,6 @@ sub fintek_detect
 # This checks for non-FFFF values for temperature, voltage, and current.
 # The address (0x0b) is specified by the SMBus standard so it's likely
 # that this really is a smart battery.
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: 5
 sub smartbatt_detect
 {
   my ($file, $addr) = @_;
@@ -5027,11 +4856,7 @@ sub smartbatt_detect
   return (5);
 }
 
-# $_[0]: Chip to detect (0 = W83L784R/AR/G, 1 = W83L785R/G,
-#                        2 = W83L786NR/NG/R/G)
-# $_[1]: A reference to the file descriptor to access this chip.
-# $_[2]: Address
-# Returns: undef if not detected, 6 or 8 if detected
+# Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G
 # Registers used:
 #   0x40: Configuration
 #   0x4a: Full I2C Address (W83L784R only)
@@ -5041,8 +4866,8 @@ sub smartbatt_detect
 #   0x4e: Chip ID
 sub w83l784r_detect
 {
+  my ($file, $addr, $chip) = @_;
   my ($reg, @res);
-  my ($chip, $file, $addr) = @_;
 
   return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
   return if $chip == 0
@@ -5064,9 +4889,6 @@ sub w83l784r_detect
   return @res;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 8 if detected
 # Registers used:
 #   0x4C-4E: Mfr and Chip ID
 sub w83l785ts_detect
@@ -5078,10 +4900,6 @@ sub w83l785ts_detect
   return (8);
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-# Returns: undef if not detected, 3 if detected.
-#
 # The max6650 has no device ID register. However, a few registers have
 # spare bits, which are documented as being always zero on read. We read
 # all of these registers check the spare bits. Any non-zero means this
@@ -5110,10 +4928,6 @@ sub max6650_detect
   return 3;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address.
-#
-# Returns: undef if not detected, 6 if detected.
 sub max6655_detect
 {
   my ($file, $addr) = @_;
@@ -5131,13 +4945,9 @@ sub max6655_detect
   return 6;
 }
 
-# $_[0]: A reference to the file descriptor to access this chip.
-# $_[1]: Address
-#
 # This isn't very good detection.
 # Verify the i2c address, and the stepping ID (which is 0xb0 on
 # my chip but could be different for others...
-#
 sub vt1211_i2c_detect
 {
   my ($file, $addr) = @_;
