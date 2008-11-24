@@ -51,8 +51,7 @@ $revision =~ s/ \([^()]*\)//;
 # adapters should be present.
 # Each entry must have a vendid (Vendor ID), devid (Device ID) and
 # procid (string as appears in /proc/pci; see linux/driver/pci,
-# either pci.c or oldproc.c). If no driver is written yet, set the
-# driver (Driver Name) field to "to-be-written".
+# either pci.c or oldproc.c).
 @pci_adapters = (
      {
        vendid => 0x8086,
@@ -245,24 +244,6 @@ $revision =~ s/ \([^()]*\)//;
        devid  => 0x8353,
        procid => "VIA Technologies VX800/VX820 South Bridge",
        driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x5597,
-       procid => "Silicon Integrated Systems SIS5581/5582/5597/5598 (To be written - Do not use 5595 drivers)",
-       driver => "to-be-written",
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x5598,
-       procid => "Silicon Integrated Systems SIS5598 (To be written - Do not use 5595 drivers)",
-       driver => "to-be-written",
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x0540,
-       procid => "Silicon Integrated Systems SIS540 (To be written - Do not use 5595 drivers)",
-       driver => "to-be-written",
      },
      {
        vendid => 0x1039,
