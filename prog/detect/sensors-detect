@@ -4386,9 +4386,9 @@ sub gl520sm_detect
   my ($file, $addr) = @_;
   return unless i2c_smbus_read_byte_data($file, 0x00) == 0x20;
   return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
-  # The line below must be better checked before I dare to use it.
-  # return unless i2c_smbus_read_byte_data($file, 0x01) == 0x00;
-  return (5);
+  $reg = i2c_smbus_read_byte_data($file, 0x01);
+  return unless $reg == 0x00 or $reg == 0x80;
+  return (6);
 }
 
 # Registers used:
