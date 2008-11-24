@@ -53,15 +53,12 @@ $revision =~ s/ \([^()]*\)//;
 # procid (string as appears in /proc/pci; see linux/driver/pci,
 # either pci.c or oldproc.c). If no driver is written yet, set the
 # driver (Driver Name) field to "to-be-written".
-# The match (Match Description) field should contain a regular expression
-# matching the adapter name as it would appear in /sys/class/i2c-adapter.
 @pci_adapters = (
      {
        vendid => 0x8086,
        devid  => 0x7113,
        procid => "Intel 82371AB PIIX4 ACPI",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x8086,
@@ -74,210 +71,180 @@ $revision =~ s/ \([^()]*\)//;
        devid  => 0x719b,
        procid => "Intel 82443MX Mobile",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x8086,
        devid  => 0x2413,
        procid => "Intel 82801AA ICH",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x2423,
        procid => "Intel 82801AB ICH0",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x2443,
        procid => "Intel 82801BA ICH2",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x2483,
        procid => "Intel 82801CA/CAM ICH3",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x24C3,
        procid => "Intel 82801DB ICH4",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x24D3,
        procid => "Intel 82801EB ICH5",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x25A4,
        procid => "Intel 6300ESB",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x269B,
        procid => "Intel Enterprise Southbridge - ESB2",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x266A,
        procid => "Intel 82801FB ICH6",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x27DA,
        procid => "Intel 82801G ICH7",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x283E,
        procid => "Intel 82801H ICH8",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x2930,
        procid => "Intel ICH9",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x5032,
        procid => "Intel Tolapai",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x3A30,
        procid => "Intel ICH10",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x3A60,
        procid => "Intel ICH10",
        driver => "i2c-i801",
-       match => qr/^SMBus I801 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x8086,
        devid  => 0x8119,
        procid => "Intel SCH",
        driver => "i2c-isch",
-       match => qr/^SMBus SCH adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3040,
        procid => "VIA Technologies VT82C586B Apollo ACPI",
        driver => "i2c-via",
-       match => qr/^VIA i2c/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3050,
        procid => "VIA Technologies VT82C596 Apollo ACPI",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3051,
        procid => "VIA Technologies VT82C596B ACPI",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3057,
        procid => "VIA Technologies VT82C686 Apollo ACPI",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3074,
        procid => "VIA Technologies VT8233 VLink South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3147,
        procid => "VIA Technologies VT8233A South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3177,
        procid => "VIA Technologies VT8233A/8235 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3227,
        procid => "VIA Technologies VT8237 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3337,
        procid => "VIA Technologies VT8237A South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x8235,
        procid => "VIA Technologies VT8231 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x3287,
        procid => "VIA Technologies VT8251 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x8324,
        procid => "VIA Technologies CX700 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1106,
        devid  => 0x8353,
        procid => "VIA Technologies VX800/VX820 South Bridge",
        driver => "i2c-viapro",
-       match => qr/^SMBus V(IA|ia) Pro adapter at/,
      },
      {
        vendid => 0x1039,
@@ -302,14 +269,12 @@ $revision =~ s/ \([^()]*\)//;
        devid  => 0x0630,
        procid => "Silicon Integrated Systems SIS630",
        driver => "i2c-sis630",
-       match => qr/^SMBus SIS630 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1039,
        devid  => 0x0730,
        procid => "Silicon Integrated Systems SIS730",
        driver => "i2c-sis630",
-       match => qr/^SMBus SIS630 adapter at [0-9a-f]{4}/,
      },
 #
 # Both Ali chips below have same PCI ID. Can't be helped. Only one should load.
@@ -319,224 +284,192 @@ $revision =~ s/ \([^()]*\)//;
        devid => 0x7101,
        procid => "Acer Labs 1533/1543",
        driver => "i2c-ali15x3",
-       match => qr/^SMBus ALI15X3 adapter at/,
      },
      {
        vendid => 0x10b9,
        devid => 0x7101,
        procid => "Acer Labs 1535",
        driver => "i2c-ali1535",
-       match => qr/^SMBus ALI1535 adapter at/,
      },
      {
        vendid => 0x10b9,
        devid => 0x1563,
        procid => "Acer Labs 1563",
        driver => "i2c-ali1563",
-       match => qr/^SMBus ALi 1563 Adapter @/,
      },
      {
        vendid => 0x1022,
        devid  => 0x740b,
        procid => "AMD-756 Athlon ACPI",
        driver => "i2c-amd756",
-       match => qr/^SMBus AMD756 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1022,
        devid  => 0x7413,
        procid => "AMD-766 Athlon ACPI",
        driver => "i2c-amd756",
-       match => qr/^SMBus AMD766 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1022,
        devid  => 0x7443,
        procid => "AMD-768 System Management",
        driver => "i2c-amd756",
-       match => qr/^SMBus AMD768 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1022,
        devid  => 0x746b,
        procid => "AMD-8111 ACPI",
        driver => "i2c-amd756",
-       match => qr/^SMBus AMD8111 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x1022,
        devid  => 0x746a,
        procid => "AMD-8111 SMBus 2.0",
        driver => "i2c-amd8111",
-       match => qr/^SMBus2 AMD8111 adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x10de,
        devid  => 0x01b4,
        procid => "nVidia nForce SMBus",
        driver => "i2c-amd756",
-       match => qr/^SMBus nVidia nForce adapter at [0-9a-f]{4}/,
      },
      {
        vendid => 0x10de,
        devid  => 0x0064,
        procid => "nVidia Corporation nForce2 SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid  => 0x0084,
        procid => "nVidia Corporation nForce2 Ultra 400 SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid  => 0x00D4,
        procid => "nVidia Corporation nForce3 Pro150 SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid  => 0x00E4,
        procid => "nVidia Corporation nForce3 250Gb SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid  => 0x0052,
        procid => "nVidia Corporation nForce4 SMBus (MCP)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x0034,
        procid => "nVidia Corporation nForce4 SMBus (MCP-04)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x0264,
        procid => "nVidia Corporation nForce4 SMBus (MCP51)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x0368,
        procid => "nVidia Corporation nForce4 SMBus (MCP55)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x03eb,
        procid => "nVidia Corporation nForce4 SMBus (MCP61)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x10de,
        devid => 0x0446,
        procid => "nVidia Corporation nForce4 SMBus (MCP65)",
        driver => "i2c-nforce2",
-       match => qr/^SMBus nForce2 adapter at /,
      },
      {
        vendid => 0x1166,
        devid  => 0x0200,
        procid => "ServerWorks OSB4 South Bridge",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1055,
        devid  => 0x9463,
        procid => "SMSC Victory66 South Bridge",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1166,
        devid  => 0x0201,
        procid => "ServerWorks CSB5 South Bridge",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1166,
        devid  => 0x0203,
        procid => "ServerWorks CSB6 South Bridge",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1166,
        devid  => 0x0205,
        procid => "ServerWorks HT-1000 South Bridge",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1002,
        devid  => 0x4353,
        procid => "ATI Technologies Inc ATI SMBus",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1002,
        devid  => 0x4363,
        procid => "ATI Technologies Inc ATI SMBus",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1002,
        devid  => 0x4372,
        procid => "ATI Technologies Inc IXP SB400 SMBus Controller",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x1002,
        devid  => 0x4385,
        procid => "ATI Technologies Inc SB600 SMBus",
        driver => "i2c-piix4",
-       match => qr/^SMBus PIIX4 adapter at /,
      },
      {
        vendid => 0x100B,
        devid => 0x0500,
        procid => "SCx200 Bridge",
        driver => "scx200_acb",
-       match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+) /,
      },
      {
        vendid => 0x100B,
        devid => 0x0510,
        procid => "SC1100 Bridge",
        driver => "scx200_acb",
-       match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+) /,
      },
      {
        vendid => 0x100B,
        devid => 0x002B,
        procid => "CS5535 ISA bridge",
        driver => "scx200_acb",
-       match => qr/^CS5535 ACB\d+ /,
      },
      {
        vendid => 0x1022,
        devid => 0x2090,
        procid => "CS5536 [Geode companion] ISA",
        driver => "scx200_acb",
-       match => qr/^CS553[56] ACB\d+ /,
      },
 );
 
@@ -552,7 +485,6 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        devid  => 0x0008,
        procid => "Silicon Integrated Systems SIS5595",
        driver => "i2c-sis5595",
-       match => qr/^SMBus SIS5595 adapter at [0-9a-f]{4}/,
      },
 );
 
@@ -562,8 +494,31 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
        devid  => 0x0016,
        procid => "Silicon Integrated Systems SMBus Controller",
        driver => "i2c-sis96x",
-       match => qr/^SiS96x SMBus adapter at 0x[0-9a-f]{4}/,
      },
+);
+
+# Look-up table to find out an I2C bus' driver based on the bus name.
+# The match field should contain a regular expression matching the I2C
+# bus name as it would appear in /sys/class/i2c-adapter.
+# Note that new drivers probably don't need to be added to this table
+# if they bind to their device, as we will be able to get the driver name
+# from sysfs directly.
+use vars qw(@i2c_adapter_names);
+@i2c_adapter_names = (
+	{ driver => "i2c-piix4",	match => qr/^SMBus PIIX4 adapter at / },
+	{ driver => "i2c-i801",		match => qr/^SMBus I801 adapter at / },
+	{ driver => "i2c-via",		match => qr/^VIA i2c/ },
+	{ driver => "i2c-viapro",	match => qr/^SMBus V(IA|ia) Pro adapter at / },
+	{ driver => "i2c-sis5595",	match => qr/^SMBus SIS5595 adapter at / },
+	{ driver => "i2c-sis630",	match => qr/^SMBus SIS630 adapter at / },
+	{ driver => "i2c-sis96x",	match => qr/^SiS96x SMBus adapter at / },
+	{ driver => "i2c-ali15x3",	match => qr/^SMBus ALI15X3 adapter at / },
+	{ driver => "i2c-ali1535",	match => qr/^SMBus ALI1535 adapter at/ },
+	{ driver => "i2c-ali1563",	match => qr/^SMBus ALi 1563 Adapter @ / },
+	{ driver => "i2c-amd756",	match => qr/^SMBus (AMD756|AMD766|AMD768|AMD8111|nVidia nForce) adapter at / },
+	{ driver => "i2c-amd8111",	match => qr/^SMBus2 AMD8111 adapter at / },
+	{ driver => "i2c-nforce2",	match => qr/^SMBus nForce2 adapter at / },
+	{ driver => "scx200_acb",	match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+|CS553[56] ACB\d+) / },
 );
 
 # This is a list of all recognized chips.
@@ -2370,7 +2325,9 @@ sub initialize_i2c_adapters_list
     # First try to get the I2C adapter driver name from sysfs, and if it
     # fails, fall back to searching our list of known I2C adapters.
     $entry->{'driver'} = sysfs_device_driver("${class_dir}/i2c-$1/device")
-                      || find_adapter_driver($entry->{'name'});
+                      || find_i2c_adapter_driver($entry->{'name'})
+                      || 'UNKNOWN';
+    print $entry->{'driver'}, "\n";
     $i2c_adapters[$1] = $entry;
   }
   closedir(ADAPTERS);
@@ -2575,14 +2532,15 @@ sub adapter_pci_detection
 }
 
 # $_[0]: Adapter description as found in /sys/class/i2c-adapter
-sub find_adapter_driver
+sub find_i2c_adapter_driver
 {
-  my $adapter;
-  for $adapter (@pci_adapters) {
-    return $adapter->{driver}
-      if (exists $adapter->{match} && $_[0] =~ $adapter->{match});
-  }
-  return "UNKNOWN";
+	my $name = shift;
+	my $entry;
+
+	foreach $entry (@i2c_adapter_names) {
+		return $entry->{driver}
+			if $name =~ $entry->{match};
+	}
 }
 
 #############################
