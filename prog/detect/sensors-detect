@@ -536,7 +536,7 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { lm78_detect(0, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(0, @_); },
-       alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
        name => "National Semiconductor LM78-J",
@@ -545,7 +545,7 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { lm78_detect(1, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(1, @_); },
-       alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
        name => "National Semiconductor LM79",
@@ -554,7 +554,7 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { lm78_detect(2, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { lm78_isa_detect(2, @_); },
-       alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
        name => "National Semiconductor LM75",
@@ -713,7 +713,7 @@ use vars qw(@i2c_adapter_names);
        i2c_addrs => [0x28..0x2f],
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(0, @_); },
-       alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
        name => "Winbond W83782D",
@@ -722,7 +722,7 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { w83781d_detect(1, @_); },
        isa_addrs => [0x290],
        isa_detect => sub { w83781d_isa_detect(1, @_); },
-       alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
      },
      {
        name => "Winbond W83783S",
@@ -1798,7 +1798,7 @@ use vars qw(@i2c_adapter_names);
 	driver => "w83627hf",
 	devid => 0x52,
 	logdev => 0x0b,
-	alias_detect => sub { winbond_alias_detect(0x2b, 0x3d, @_); },
+	alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
       },
       {
 	name => "Winbond W83627THF/THG Super IO Sensors",
@@ -1838,7 +1838,7 @@ use vars qw(@i2c_adapter_names);
 	devid => 0x8840,
 	devid_mask => 0xFFC0,
 	logdev => 0x0b,
-	alias_detect => sub { winbond_alias_detect(0x2b, 0x3e, @_); },
+	alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3e); },
       },
       {
 	name => "Winbond W83627DHG Super IO Sensors",
@@ -1846,7 +1846,7 @@ use vars qw(@i2c_adapter_names);
 	devid => 0xA020,
 	devid_mask => 0xFFF0,
 	logdev => 0x0b,
-	alias_detect => sub { winbond_alias_detect(0x2b, 0x3e, @_); },
+	alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3e); },
       },
       {
 	name => "Winbond W83L517D Super IO",
@@ -1934,7 +1934,7 @@ use vars qw(@i2c_adapter_names);
 	driver => "it87",
 	devid => 0x8712,
 	logdev => 0x04,
-	alias_detect => sub { winbond_alias_detect(0x30, 0x45, @_); },
+	alias_detect => sub { winbond_alias_detect(@_, 0x30, 0x45); },
       },
       {
 	name => "ITE IT8716F Super IO Sensors",
@@ -4532,23 +4532,6 @@ sub mozart_detect
   return 5;
 }
 
-# $_[0]: First limit register to compare
-# $_[1]: Last limit register to compare
-# $_[2]: ISA address
-# $_[3]: I2C file handle
-# $_[4]: I2C address
-sub winbond_alias_detect
-{
-  my ($first, $last, $isa_addr, $file, $i2c_addr) = @_;
-  my $i;
-
-  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
-  for ($i = $first; $i <= $last; $i++) {
-    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
-  }
-  return 1;
-}
-
 # $_[0]: Chip to detect (0 = W83781D, 1 = W83782D)
 # $_[1]: Address
 # Returns: undef if not detected, (8) if detected.
@@ -5275,13 +5258,37 @@ sub vt1211_i2c_detect
   return 2;
 }
 
-# $_[0]: ISA address
+###################
+# ALIAS DETECTION #
+###################
+
+# These functions take at least 3 parameters:
+# $_[0]: ISA/LPC address
 # $_[1]: I2C file handle
 # $_[2]: I2C address
+# Some of these functions may take extra parameters.
+# They return 1 if both devices are the same, 0 if not.
+
+# Extra parameters:
+# $_[3]: First limit register to compare
+# $_[4]: Last limit register to compare
+sub winbond_alias_detect
+{
+  my ($isa_addr, $file, $i2c_addr, $first, $last) = @_;
+  my $i;
+
+  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
+  for ($i = $first; $i <= $last; $i++) {
+    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
+  }
+  return 1;
+}
+
 sub vt1211_alias_detect
 {
   my ($isa_addr, $file, $i2c_addr) = @_;
   my $i;
+
   return 0 unless (inb($isa_addr + 0x48) & 0x7f) == $i2c_addr;
   for ($i = 0x2b; $i <= 0x3d; $i++) {
     return 0 unless inb($isa_addr + $i) == i2c_smbus_read_byte_data($file, $i);
