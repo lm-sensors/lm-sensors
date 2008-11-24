@@ -1353,20 +1353,21 @@ use vars qw(@i2c_adapter_names);
 # This is a list of all recognized superio chips.
 # Each entry must have the following fields:
 #  name: The full chip name
-#  driver: The driver name (without .o extension). Put in
-#      "to-be-written" if it is not yet available.
-#      Put in "not-a-sensor" if the chip doesn't have hardware monitoring
-#      capabilities (listing such chips here removes the need of manual
-#      lookup when people report them).
-#      Put in exactly "via-smbus-only" if this is a Super-I/O chip whose
-#      hardware monitoring registers can only be accessed via the SMBus.
-#  devid: The device ID(s) we have to match (base device)
+#  driver: The driver name. Put in exactly:
+#      * "to-be-written" if it is not yet available
+#      * "not-a-sensor" if the chip doesn't have hardware monitoring
+#        capabilities (listing such chips here removes the need of manual
+#        lookup when people report them)
+#      * "via-smbus-only" if this is a Super-I/O chip whose hardware
+#        monitoring registers can only be accessed via the SMBus
+#  devid: The device ID we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
-#  alias_detect (optional): For chips which can be both on the ISA and the
-#      I2C bus, a function which detectes whether two entries are the same.
-#      The function should take three parameters: The ISA address, the
-#      I2C bus number, and the I2C address.
+#  alias_detect (optional): For chips which can be both on the LPC and the
+#      I2C bus, a function which detects whether two entries are the same.
+#      The function will be passed three parameters: the LPC address, an
+#      open file descriptor to access the I2C bus, and the I2C address.
+#
 # Entries are grouped by family. Each family entry has the following fields:
 #  family: The family name
 #  guess (optional): Typical logical device address. This lets us do
