@@ -812,16 +812,10 @@ use vars qw(@i2c_adapter_names);
        i2c_detect => sub { w83l785ts_detect(@_); },
      },
      {
-       name => "Genesys Logic GL518SM Revision 0x00",
+       name => "Genesys Logic GL518SM",
        driver => "gl518sm",
        i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(@_, 0); },
-     },
-     {
-       name => "Genesys Logic GL518SM Revision 0x80",
-       driver => "gl518sm",
-       i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(@_, 1); },
+       i2c_detect => sub { gl518sm_detect(@_); },
      },
      {
        name => "Genesys Logic GL520SM",
@@ -4366,7 +4360,6 @@ sub mozart_detect
   return 5;
 }
 
-# Chip to detect: 0 = Revision 0x00, 1 = Revision 0x80
 # Registers used:
 #   0x00: Device ID
 #   0x01: Revision ID
@@ -4374,13 +4367,12 @@ sub mozart_detect
 # Mediocre detection
 sub gl518sm_detect
 {
-  my ($file, $addr, $chip) = @_;
+  my ($file, $addr) = @_;
   my $reg;
   return unless i2c_smbus_read_byte_data($file, 0x00) == 0x80;
   return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
   $reg = i2c_smbus_read_byte_data($file, 0x01);
-  return unless ($chip == 0 and $reg == 0x00) or
-                ($chip == 1 and $reg == 0x80);
+  return unless $reg == 0x00 or $reg == 0x80;
   return (6);
 }
 
