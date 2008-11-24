@@ -1330,13 +1330,13 @@ use vars qw(@i2c_adapter_names);
        name => "IPMI BMC KCS",
        driver => "ipmisensors",
        isa_addrs => [0x0ca0],
-       isa_detect => sub { ipmi_kcs_detect(@_); },
+       isa_detect => sub { ipmi_detect(@_); },
      },
      {
        name => "IPMI BMC SMIC",
        driver => "ipmisensors",
        isa_addrs => [0x0ca8],
-       isa_detect => sub { ipmi_smic_detect(@_); },
+       isa_detect => sub { ipmi_detect(@_); },
      },
 );
 
@@ -5211,18 +5211,13 @@ sub w83781d_isa_detect
   return 8;
 }
 
-# These are simple detectors that only look for a register at the
-# standard location.
+# We simply look for a register at standard locations.
 # For KCS, use the STATUS register. For SMIC, use the FLAGS register.
-sub ipmi_kcs_detect
+# Incidentally they live at the same offset.
+sub ipmi_detect
 {
-  return if inb(0x0ca3) == 0xff;
-  return 4;
-}
-
-sub ipmi_smic_detect
-{
-  return if inb(0x0cab) == 0xff;
+  my ($addr) = @_;
+  return if inb($addr + 3) == 0xff;
   return 4;
 }
 
