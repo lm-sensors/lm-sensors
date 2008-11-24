@@ -501,27 +501,27 @@ use vars qw(@i2c_adapter_names);
 	{ driver => "scx200_acb",	match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+|CS553[56] ACB\d+) / },
 );
 
-# This is a list of all recognized chips.
+# This is a list of all recognized I2C and ISA chips.
 # Each entry must have the following fields:
 #  name: The full chip name
-#  driver: The driver name (without .o extension). Put in exactly
-#      "to-be-written" if it is not yet available. Put in exactly
-#      "not-a-sensor" if it is not a hardware monitoring chip.
-#      Put in exactly "use-isa-instead" if no i2c driver will be written.
-#  i2c_addrs (optional): For I2C chips, the range of valid I2C addresses to
-#      probe. Recommend avoiding 0x69 because of clock chips.
+#  driver: The driver name. Put in exactly:
+#      * "to-be-written" if it is not yet available
+#      * "not-a-sensor" if it is not a hardware monitoring chip
+#      * "use-isa-instead" if no i2c driver will be written
+#  i2c_addrs (optional): For I2C chips, the list of I2C addresses to
+#      probe.
 #  i2c_detect (optional): For I2C chips, the function to call to detect
-#      this chip. The function should take two parameters: an open file
+#      this chip. The function will be passed two parameters: an open file
 #      descriptor to access the bus, and the I2C address to probe.
-#  isa_addrs (optional): For ISA chips, the range of valid port addresses to
+#  isa_addrs (optional): For ISA chips, the list of port addresses to
 #      probe.
 #  isa_detect (optional): For ISA chips, the function to call to detect
-#      this chip. The function should take one parameter: the ISA address
+#      this chip. The function will be passed one parameter: the ISA address
 #      to probe.
 #  alias_detect (optional): For chips which can be both on the ISA and the
-#      I2C bus, a function which detectes whether two entries are the same.
-#      The function should take three parameters: The ISA address, the
-#      I2C bus number, and the I2C address.
+#      I2C bus, a function which detects whether two entries are the same.
+#      The function will be passed three parameters: the ISA address, an
+#      open file descriptor to access the I2C bus, and the I2C address.
 @chip_ids = (
      {
        name => "Myson MTP008",
