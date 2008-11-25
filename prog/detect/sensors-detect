@@ -3344,9 +3344,8 @@ sub chip_special_cases
 }
 
 # Each function returns a confidence value. The higher this value, the more
-# sure we are about this chip. A Winbond W83781D, for example, will be
-# detected as a LM78 too; but as the Winbond detection has a higher confidence
-# factor, you should identify it as a Winbond.
+# sure we are about this chip. This may help overrule false positives,
+# although we also attempt to prevent false positives in the first place.
 
 # Each function returns a list. The first element is the confidence value;
 # Each element after it is an SMBus address. In this way, we can detect
