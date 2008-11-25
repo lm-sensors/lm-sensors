@@ -18,6 +18,12 @@ SVN-HEAD
                   Handle special case chips more efficiently
                   Fix SMBus detection of W83627EHF and W83627DHG
                   Get I2C adapter driver names from sysfs (#2328)
+                  Drop old SiS I2C adapter entries
+                  Drop separate LM78-J entry
+                  Merge all Mozart-2 entries
+                  Merge both GL518SM entries into one
+                  Complete GL520SM detection
+                  Improve GL525SM detection a bit
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
