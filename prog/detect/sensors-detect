@@ -2294,12 +2294,13 @@ use vars qw(%modules_list %modules_supported @modules_we_loaded);
 
 sub initialize_modules_list
 {
-  open(local *INPUTFILE, "/proc/modules") or return;
-  local $_;
-  while (<INPUTFILE>) {
-    tr/-/_/; # Probably not needed
-    $modules_list{$1} = 1 if m/^(\S*)/;
-  }
+	local $_;
+
+	open(local *INPUTFILE, "/proc/modules") or return;
+	while (<INPUTFILE>) {
+		tr/-/_/; # Probably not needed
+		$modules_list{$1} = 1 if m/^(\S*)/;
+	}
 }
 
 sub is_module_loaded
@@ -2332,9 +2333,9 @@ sub load_module
 
 sub initialize_modules_supported
 {
-  foreach my $chip (@chip_ids) {
-    $modules_supported{$chip->{driver}}++;
-  }
+	foreach my $chip (@chip_ids) {
+		$modules_supported{$chip->{driver}}++;
+	}
 }
 
 sub unload_modules
