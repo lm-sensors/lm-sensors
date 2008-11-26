@@ -25,6 +25,7 @@ SVN-HEAD
                   Complete GL520SM detection
                   Improve GL525SM detection a bit
                   Let kernel 2.6.28 and later handle chips aliases
+                  Unload kernel drivers when we are done with them (#2329)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
