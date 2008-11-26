@@ -2297,9 +2297,37 @@ sub initialize_modules_list
   open(local *INPUTFILE, "/proc/modules") or return;
   local $_;
   while (<INPUTFILE>) {
-    tr/_/-/;
+    tr/-/_/; # Probably not needed
     $modules_list{$1} = 1 if m/^(\S*)/;
   }
+}
+
+sub is_module_loaded
+{
+	my $module = shift;
+	$module =~ tr/-/_/;
+	return exists $modules_list{$module}
+}
+
+sub load_module
+{
+	my $module = shift;
+
+	return if is_module_loaded($module);
+
+	system("modprobe", $module);
+	if (($? >> 8) != 0) {
+		print "Failed to load module $module.\n";
+		return -1;
+	}
+	
+	print "Module $module loaded successfully.\n";
+	push @modules_we_loaded, $module;
+
+	# Update the list of loaded modules
+	my $normalized = $module;
+	$normalized =~ tr/-/_/;
+	$modules_list{$normalized} = 1;
 }
 
 sub initialize_modules_supported
@@ -2447,7 +2475,7 @@ sub pci_busid($)
 
 sub adapter_pci_detection
 {
-  my ($key, $device, $try, @res, %smbus);
+  my ($key, $device, $try, %smbus, $count);
   print "Probing for PCI bus adapters...\n";
 
   # Custom detection routine for some SiS chipsets
@@ -2478,9 +2506,10 @@ sub adapter_pci_detection
             print "\n";
           }
         } else {
-          printf "Use driver `\%s' for device \%s: \%s\n",
+          printf "Using driver `\%s' for device \%s: \%s\n",
                  $try->{driver}, pci_busid($device), $try->{procid};
-          push @res, $try->{driver};
+          $count++;
+          load_module($try->{driver});
         }
 
         # Delete from detected SMBus device list
@@ -2495,10 +2524,9 @@ sub adapter_pci_detection
            $device->{vendid}, $device->{devid}, pci_busid($device);
   }
 
-  if (! @res) {
+  if (!$count) {
     print "Sorry, no supported PCI bus adapters found.\n";
   }
-  return @res;
 }
 
 # $_[0]: Adapter description as found in /sys/class/i2c-adapter
@@ -5301,8 +5329,6 @@ sub generate_modprobes
 
 sub main
 {
-  my (@adapters, $res, $did_adapter_detection, $adapter);
-
   # We won't go very far if not root
   unless ($> == 0) {
     print "You need to be root to run this script.\n";
@@ -5332,54 +5358,14 @@ sub main
         "unless you know what you're doing.\n";
   print "\n";
 
-  print "We can start with probing for (PCI) I2C or SMBus adapters.\n";
-  print "Do you want to probe now? (YES/no): ";
-  @adapters = adapter_pci_detection()
-                        if ($did_adapter_detection = not <STDIN> =~ /\s*[Nn]/);
+  adapter_pci_detection();
   print "\n";
-
-  if (not $did_adapter_detection) {
-    print "As you skipped adapter detection, we will only scan already loaded\n".
-          "adapter modules.\n";
-  } else {
-    print "We will now try to load each adapter module in turn.\n"
-      if (@adapters);
-    foreach $adapter (@adapters) {
-      if (exists($modules_list{$adapter})) {
-        print "Module `$adapter' already loaded.\n";
-      } else {
-        print "Load `$adapter' (say NO if built into your kernel)? (YES/no): ";
-        unless (<STDIN> =~ /^\s*[Nn]/) {
-          if (system("modprobe", $adapter)) {
-            print "Loading failed... skipping.\n";
-          } else {
-            print "Module loaded successfully.\n";
-            push @modules_we_loaded, $adapter;
-            $modules_list{$adapter} = 1;
-          }
-        }
-      }
-    }
-  }
 
   print "If you have undetectable or unsupported I2C/SMBus adapters, you can have\n".
         "them scanned by manually loading the modules before running this script.\n\n";
   initialize_i2c_adapters_list();
 
-  if (! -e "$sysfs_root/class/i2c-dev") {
-    print "To continue, we need module `i2c-dev' to be loaded.\n";
-    print "Do you want to load `i2c-dev' now? (YES/no): ";
-    if (<STDIN> =~ /^\s*n/i) {
-      print "Well, you will know best.\n";
-    } elsif (system("modprobe", "i2c-dev")) {
-      print "Loading failed, expect problems later on.\n";
-    } else {
-      print "Module loaded successfully.\n";
-      push @modules_we_loaded, "i2c-dev";
-      $modules_list{"i2c-dev"} = 1;
-    }
-    print "\n";
-  }
+  load_module("i2c-dev") unless -e "$sysfs_root/class/i2c-dev";
 
   $i2c_addresses_to_scan = i2c_addresses_to_scan();
 
