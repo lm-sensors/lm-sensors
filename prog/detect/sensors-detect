@@ -5249,12 +5249,16 @@ sub generate_modprobes
     }
 
     # Handle aliases
-    foreach $detection (@{$chip->{detected}}) {
-      if (exists $detection->{i2c_driver} and
-          exists $detection->{isa_addr} and
-          exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later}) {
-        push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
-                          $detection->{i2c_addr};
+    # As of kernel 2.6.28, alias detection is handled by kernel drivers
+    # directly, so module options are no longer needed.
+    unless (kernel_version_at_least(2, 6, 28)) {
+      foreach $detection (@{$chip->{detected}}) {
+        if (exists $detection->{i2c_driver} and
+            exists $detection->{isa_addr} and
+            exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later}) {
+          push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
+                            $detection->{i2c_addr};
+        }
       }
     }
 
