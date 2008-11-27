@@ -2461,7 +2461,7 @@ sub adapter_pci_detection_sis_96x
 }
 
 # Build and return a PCI device's bus ID
-sub pci_busid($)
+sub pci_busid
 {
   my $device = shift;
   my $busid;
@@ -2568,7 +2568,7 @@ use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
 # Get the i2c adapter's functionalities
 # $_[0]: Reference to an opened filehandle
 # Returns: -1 on failure, functionality bitfield on success.
-sub i2c_get_funcs($)
+sub i2c_get_funcs
 {
   my $file = shift;
   my $funcs = pack("L", 0); # Allocate space
@@ -2672,7 +2672,7 @@ sub i2c_smbus_read_word_data
 # This function is meant to prevent AT24RF08 corruption and write-only
 # chips locks. This is done by choosing the best probing method depending
 # on the address range.
-sub i2c_probe($$$)
+sub i2c_probe
 {
   my ($file, $addr, $funcs) = @_;
   my $data = [];
@@ -2912,7 +2912,7 @@ sub add_isa_to_chips_detected
 # which are worth probing. There's no point in probing an address for which
 # we don't know a single device, and probing some addresses has caused
 # random trouble in the past.
-sub i2c_addresses_to_scan()
+sub i2c_addresses_to_scan
 {
   my @used;
   my @addresses;
@@ -3122,7 +3122,7 @@ sub exit_superio
 }
 
 # Guess if an unknown Super-I/O chip has sensors
-sub guess_superio_ld($$$)
+sub guess_superio_ld
 {
   my ($addrreg, $datareg, $typical_addr) = @_;
   my ($oldldn, $ldn, $addr);
@@ -3153,7 +3153,7 @@ sub guess_superio_ld($$$)
   outb($datareg, $oldldn);
 }
 
-sub probe_superio($$$)
+sub probe_superio
 {
   my ($addrreg, $datareg, $chip) = @_;
   my ($val, $addr);
@@ -3292,7 +3292,7 @@ sub scan_superio
 }
 
 
-sub scan_cpu($)
+sub scan_cpu
 {
   my $entry = shift;
   my $confidence;
