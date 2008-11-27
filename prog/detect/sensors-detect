@@ -2360,28 +2360,29 @@ sub unload_modules
 #################
 
 # From a sysfs device path, return the driver (module) name, or undef
-sub sysfs_device_driver($)
+sub sysfs_device_driver
 {
-  my $device = shift;
+	my $device = shift;
 
-  my $link = readlink("$device/driver/module");
-  return unless defined $link;
-  return basename($link);
+	my $link = readlink("$device/driver/module");
+	return unless defined $link;
+	return basename($link);
 }
 
 # From a sysfs device path and an attribute name, return the attribute
 # value, or undef
-sub sysfs_device_attribute($$)
+sub sysfs_device_attribute
 {
-  my ($device, $attr) = @_;
-  my $value;
+	my ($device, $attr) = @_;
+	my $value;
 
-  open(local *FILE, "$device/$attr") or return;
-  return unless defined($value = <FILE>);
-  close(FILE);
+	open(local *FILE, "$device/$attr") or return;
+	$value = <FILE>;
+	close(FILE);
+	return unless defined $value;
 
-  chomp($value);
-  return $value;
+	chomp($value);
+	return $value;
 }
 
 ##############
