@@ -2268,15 +2268,15 @@ sub initialize_i2c_adapters_list
   while (defined($_ = readdir(ADAPTERS))) {
     next unless m/^i2c-(\d+)$/;
     $entry = {}; # New entry
-    $entry->{'name'} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
-                    || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
-    next if $entry->{'name'} eq "ISA main adapter";
+    $entry->{name} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
+                  || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
+    next if $entry->{name} eq "ISA main adapter";
 
     # First try to get the I2C adapter driver name from sysfs, and if it
     # fails, fall back to searching our list of known I2C adapters.
-    $entry->{'driver'} = sysfs_device_driver("${class_dir}/i2c-$1/device")
-                      || find_i2c_adapter_driver($entry->{'name'})
-                      || 'UNKNOWN';
+    $entry->{driver} = sysfs_device_driver("${class_dir}/i2c-$1/device")
+                    || find_i2c_adapter_driver($entry->{name})
+                    || 'UNKNOWN';
     $i2c_adapters[$1] = $entry;
   }
   closedir(ADAPTERS);
@@ -2446,9 +2446,9 @@ sub adapter_pci_detection_sis_96x
   my $driver = "";
 
   # first, determine which driver if any...
-  if (exists $pci_list{"1039:0016"}) {
+  if (exists $pci_list{'1039:0016'}) {
     $driver = "i2c-sis96x";
-  } elsif (exists $pci_list{"1039:0008"}) {
+  } elsif (exists $pci_list{'1039:0008'}) {
     $driver = "i2c-sis5595";
   }
 
@@ -2919,9 +2919,9 @@ sub i2c_addresses_to_scan
   my $addr;
 
   foreach my $chip (@chip_ids) {
-    next unless defined $chip->{'i2c_addrs'};
-    next if $chip->{'driver'} eq 'not-a-sensor';
-    foreach $addr (@{$chip->{'i2c_addrs'}}) {
+    next unless defined $chip->{i2c_addrs};
+    next if $chip->{driver} eq 'not-a-sensor';
+    foreach $addr (@{$chip->{i2c_addrs}}) {
       $used[$addr]++;
     }
   }
@@ -5066,12 +5066,12 @@ sub coretemp_detect
 {
 	my $probecpu;
 	foreach $probecpu (@cpu) {
-		if ($probecpu->{'vendor_id'} eq 'GenuineIntel' &&
-				$probecpu->{'cpu family'} == 6 &&
-				($probecpu->{'model'} == 14 ||
-				 $probecpu->{'model'} == 15 ||
-				 $probecpu->{'model'} == 0x16 ||
-				 $probecpu->{'model'} == 0x17)) {
+		if ($probecpu->{vendor_id} eq 'GenuineIntel' &&
+				$probecpu->{cpu_family} == 6 &&
+				($probecpu->{model} == 14 ||
+				 $probecpu->{model} == 15 ||
+				 $probecpu->{model} == 0x16 ||
+				 $probecpu->{model} == 0x17)) {
 			return 9;
 		}
 	}
@@ -5083,10 +5083,10 @@ sub c7temp_detect
 {
 	my $probecpu;
 	foreach $probecpu (@cpu) {
-		if ($probecpu->{'vendor_id'} eq 'CentaurHauls' &&
-				$probecpu->{'cpu family'} == 6 &&
-				($probecpu->{'model'} == 0xa ||
-				 $probecpu->{'model'} == 0xd)) {
+		if ($probecpu->{vendor_id} eq 'CentaurHauls' &&
+				$probecpu->{cpu_family} == 6 &&
+				($probecpu->{model} == 0xa ||
+				 $probecpu->{model} == 0xd)) {
 			return 9;
 		}
 	}
@@ -5286,7 +5286,7 @@ sub main
   my ($inp, @not_to_scan, $inp2);
   for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
     next unless exists $i2c_adapters[$dev_nr];
-    my $adap = $i2c_adapters[$dev_nr]->{'name'};
+    my $adap = $i2c_adapters[$dev_nr]->{name};
     print "\n";
     print "Next adapter: $adap (i2c-$dev_nr)\n";
     print "Do you want to scan it? (YES/no/selectively): ";
@@ -5303,7 +5303,7 @@ sub main
       chop($inp2);
       @not_to_scan = parse_not_to_scan(0x03, 0x77, $inp2);
     }
-    scan_adapter($dev_nr, $adap, $i2c_adapters[$dev_nr]->{'driver'},
+    scan_adapter($dev_nr, $adap, $i2c_adapters[$dev_nr]->{driver},
                  \@not_to_scan) unless $inp =~ /^\s*[Nn]/;
   }
   print "\n";
