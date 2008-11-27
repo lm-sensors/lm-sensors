@@ -5141,31 +5141,6 @@ sub generate_modprobes
   my ($isa, $ipmi);
   my ($modprobes, $configfile);
 
-  # Handle aliases
-  # As of kernel 2.6.28, alias detection is handled by kernel drivers
-  # directly, so module options are no longer needed.
-  unless (kernel_version_at_least(2, 6, 28)) {
-    foreach $chip (@chips_detected) {
-      @optionlist = ();
-      foreach $detection (@{$chip->{detected}}) {
-        if (exists $detection->{i2c_driver} and
-            exists $detection->{isa_addr}) {
-          push @optionlist, $detection->{i2c_devnr},
-                            $detection->{i2c_addr};
-        }
-      }
-
-      next if not @optionlist;
-      $configfile = "# hwmon module options\n" unless defined $configfile;
-      $configfile .= "options $chip->{driver}";
-      $configfile .= sprintf(" ignore=%d,0x%02x", shift @optionlist,
-                                                  shift @optionlist);
-      $configfile .= sprintf(",%d,0x%02x", shift @optionlist,
-                             shift @optionlist) while @optionlist;
-      $configfile .= "\n";
-    }
-  }
-
   foreach $chip (@chips_detected) {
     foreach $detection (@{$chip->{detected}}) {
       # Tag adapters which host hardware monitoring chips we want to access
@@ -5180,6 +5155,32 @@ sub generate_modprobes
     }
     if ($chip->{driver} eq "ipmisensors") {
          $ipmi = 1;
+    }
+  }
+
+  # Handle aliases
+  # As of kernel 2.6.28, alias detection is handled by kernel drivers
+  # directly, so module options are no longer needed.
+  unless (kernel_version_at_least(2, 6, 28)) {
+    foreach $chip (@chips_detected) {
+      @optionlist = ();
+      foreach $detection (@{$chip->{detected}}) {
+        if (exists $detection->{i2c_driver} and
+            exists $detection->{isa_addr} and
+            $i2c_adapters[$detection->{i2c_devnr}]->{used}) {
+          push @optionlist, $detection->{i2c_devnr},
+                            $detection->{i2c_addr};
+        }
+      }
+
+      next if not @optionlist;
+      $configfile = "# hwmon module options\n" unless defined $configfile;
+      $configfile .= "options $chip->{driver}";
+      $configfile .= sprintf(" ignore=%d,0x%02x", shift @optionlist,
+                                                  shift @optionlist);
+      $configfile .= sprintf(",%d,0x%02x", shift @optionlist,
+                             shift @optionlist) while @optionlist;
+      $configfile .= "\n";
     }
   }
 
