@@ -2741,9 +2741,6 @@ use vars qw(@chips_detected);
 #    with field 'detected'
 #      being a reference to a list of
 #        references to hashes of type 'detect_data';
-#    with field 'misdetected'
-#      being a reference to a list of
-#        references to hashes of type 'detect_data'
 
 # Type detect_data:
 # A hash
@@ -2772,9 +2769,8 @@ use vars qw(@chips_detected);
 sub add_i2c_to_chips_detected
 {
   my ($chipdriver, $datahash) = @_;
-  my ($i, $new_detected_ref, $new_misdetected_ref, $detected_ref, $misdetected_ref,
-      $main_entry, $detected_entry, $put_in_detected, @hash_addrs, @entry_addrs,
-      $do_not_add);
+  my ($i, $new_detected_ref, $detected_ref,
+      $main_entry, $detected_entry, $put_in_detected, @hash_addrs, @entry_addrs);
 
   # First determine where the hash has to be added.
   for ($i = 0; $i < @chips_detected; $i++) {
@@ -2782,20 +2778,18 @@ sub add_i2c_to_chips_detected
   }
   if ($i == @chips_detected) {
     push @chips_detected, { driver => $chipdriver,
-                            detected => [],
-                            misdetected => [] };
+                            detected => [] };
   }
   $new_detected_ref = $chips_detected[$i]->{detected};
-  $new_misdetected_ref = $chips_detected[$i]->{misdetected};
 
-  # Find out whether our new entry should go into the detected or the
-  # misdetected list. We compare all i2c addresses; if at least one matches,
-  # but our conf value is lower, we assume this is a misdetect.
+  # Find out whether our new entry should go into the detected list
+  # or not. We compare all i2c addresses; if at least one matches,
+  # but our confidence value is lower, we assume this is a misdetection,
+  # in which case we simply discard our new entry.
   @hash_addrs = ($datahash->{i2c_addr});
   push @hash_addrs, @{$datahash->{i2c_sub_addrs}}
        if exists $datahash->{i2c_sub_addrs};
   $put_in_detected = 1;
-  $do_not_add = 0;
   FIND_LOOP:
   foreach $main_entry (@chips_detected) {
     foreach $detected_entry (@{$main_entry->{detected}}) {
@@ -2807,37 +2801,24 @@ sub add_i2c_to_chips_detected
         if ($detected_entry->{conf} >= $datahash->{conf}) {
           $put_in_detected = 0;
         }
-        if ($chipdriver eq $main_entry->{driver}) {
-          $do_not_add = 1;
-        }
         last FIND_LOOP;
       }
     }
   }
 
   if ($put_in_detected) {
-    # Here, we move all entries from detected to misdetected which
+    # Here, we discard all entries which
     # match at least in one main or sub address. This may not be the
     # best idea to do, as it may remove detections without replacing
     # them with second-best ones. Too bad.
-    # (Khali 2003-09-13) If the driver is the same, the "misdetected"
-    # entry is simply deleted; failing to do so cause the configuration
-    # lines generated later to look very confusing (the driver will
-    # be told to ignore valid addresses).
-    @hash_addrs = ($datahash->{i2c_addr});
-    push @hash_addrs, @{$datahash->{i2c_sub_addrs}}
-         if exists $datahash->{i2c_sub_addrs};
     foreach $main_entry (@chips_detected) {
       $detected_ref = $main_entry->{detected};
-      $misdetected_ref = $main_entry->{misdetected};
       for ($i = @$detected_ref-1; $i >=0; $i--) {
         @entry_addrs = ($detected_ref->[$i]->{i2c_addr});
         push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
              if exists $detected_ref->[$i]->{i2c_sub_addrs};
         if ($detected_ref->[$i]->{i2c_devnr} == $datahash->{i2c_devnr} and
             any_list_match(\@entry_addrs, \@hash_addrs)) {
-          push @$misdetected_ref, $detected_ref->[$i]
-            unless $chipdriver eq $main_entry->{driver};
           splice @$detected_ref, $i, 1;
         }
       }
@@ -2845,10 +2826,6 @@ sub add_i2c_to_chips_detected
 
     # Now add the new entry to detected
     push @$new_detected_ref, $datahash;
-  } else {
-    # No hard work here
-    push @$new_misdetected_ref, $datahash
-      unless $do_not_add;
   }
 }
 
@@ -2861,8 +2838,7 @@ sub add_i2c_to_chips_detected
 sub add_isa_to_chips_detected
 {
   my ($alias_detect, $chipdriver, $datahash) = @_;
-  my ($i, $new_detected_ref, $new_misdetected_ref, $detected_ref, $misdetected_ref,
-      $main_entry, $isalias);
+  my ($i, $new_detected_ref, $detected_ref, $main_entry, $isalias);
 
   # First determine where the hash has to be added.
   $isalias = 0;
@@ -2871,41 +2847,14 @@ sub add_isa_to_chips_detected
   }
   if ($i == @chips_detected) {
     push @chips_detected, { driver => $chipdriver,
-                            detected => [],
-                            misdetected => [] };
+                            detected => [] };
   }
   $new_detected_ref = $chips_detected[$i]->{detected};
-  $new_misdetected_ref = $chips_detected[$i]->{misdetected};
 
   # Now, we are looking for aliases. An alias can only be the same chiptype.
-  # If an alias is found in the misdetected list, we add the new information
-  # and terminate this function. If it is found in the detected list, we
+  # If it is found in the detected list, we
   # still have to check whether another chip has claimed this ISA address.
   # So we remove the old entry from the detected list and put it in datahash.
-
-  # Misdetected alias detection:
-  for ($i = 0; $i < @$new_misdetected_ref; $i++) {
-    if (exists $new_misdetected_ref->[$i]->{i2c_addr} and
-        not exists $new_misdetected_ref->[$i]->{isa_addr} and
-        defined $alias_detect and
-        $new_misdetected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-      open(local *FILE, "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}") or
-        print("Can't open $dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
-        next;
-      binmode(FILE);
-      i2c_set_slave_addr(\*FILE, $new_misdetected_ref->[$i]->{i2c_addr}) or
-           print("Can't set I2C address for ",
-                 "$dev_i2c$new_misdetected_ref->[$i]->{i2c_devnr}?!?\n"),
-           next;
-      if (&$alias_detect ($datahash->{isa_addr}, \*FILE,
-                          $new_misdetected_ref->[$i]->{i2c_addr})) {
-        $new_misdetected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
-        return $new_misdetected_ref->[$i];
-      }
-    }
-  }
-
-  # Detected alias detection:
   for ($i = 0; $i < @$new_detected_ref; $i++) {
     if (exists $new_detected_ref->[$i]->{i2c_addr} and
         not exists $new_detected_ref->[$i]->{isa_addr} and
@@ -2929,24 +2878,15 @@ sub add_isa_to_chips_detected
     }
   }
 
-
-  # Find out whether our new entry should go into the detected or the
-  # misdetected list. We only compare main isa_addr here, of course.
-  # (Khali 2004-05-12) If the driver is the same, the "misdetected"
-  # entry is simply deleted; same we do for I2C chips.
+  # Find out whether our new entry should go into the detected list
+  # or not. We only compare main isa_addr here, of course.
   foreach $main_entry (@chips_detected) {
     $detected_ref = $main_entry->{detected};
-    $misdetected_ref = $main_entry->{misdetected};
     for ($i = 0; $i < @{$main_entry->{detected}}; $i++) {
       if (exists $detected_ref->[$i]->{isa_addr} and
           exists $datahash->{isa_addr} and
           $detected_ref->[$i]->{isa_addr} == $datahash->{isa_addr}) {
-        if ($detected_ref->[$i]->{conf} >= $datahash->{conf}) {
-          push @$new_misdetected_ref, $datahash
-            unless $main_entry->{driver} eq $chipdriver;
-        } else {
-          push @$misdetected_ref, $detected_ref->[$i]
-            unless $main_entry->{driver} eq $chipdriver;
+        if ($detected_ref->[$i]->{conf} < $datahash->{conf}) {
           splice @$detected_ref, $i, 1;
           push @$new_detected_ref, $datahash;
         }
@@ -5284,16 +5224,6 @@ sub generate_modprobes
        $modprobes .= "modprobe $chip->{driver}\n";
     }
 
-    # Handle misdetects
-    foreach $detection (@{$chip->{misdetected}}) {
-      push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
-                       $detection->{i2c_addr}
-           if exists $detection->{i2c_addr} and
-              exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later};
-      push @optionlist, -1, $detection->{isa_addr}
-           if exists $detection->{isa_addr};
-    }
-
     # Handle aliases
     # As of kernel 2.6.28, alias detection is handled by kernel drivers
     # directly, so module options are no longer needed.
@@ -5449,28 +5379,9 @@ sub main
 
   my ($chip, $data);
   foreach $chip (@chips_detected) {
-    print "\nDriver `$chip->{driver}' ";
-    if (@{$chip->{detected}}) {
-      if (@{$chip->{misdetected}}) {
-        print "(should be inserted but causes problems):\n";
-      } else {
-        print "(should be inserted):\n";
-      }
-    } else {
-      if (@{$chip->{misdetected}}) {
-        print "(may not be inserted):\n";
-      } else {
-        print "(should not be inserted, but is harmless):\n";
-      }
-    }
-    if (@{$chip->{detected}}) {
-      print "  Detects correctly:\n";
-      print_chips_report($chip->{detected});
-    }
-    if (@{$chip->{misdetected}}) {
-      print "  Misdetects:\n";
-      print_chips_report($chip->{misdetected});
-    }
+    next unless @{$chip->{detected}};
+    print "\nDriver `$chip->{driver}':\n";
+    print_chips_report($chip->{detected});
   }
   print "\n";
 
