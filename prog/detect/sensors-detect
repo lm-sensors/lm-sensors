@@ -2321,7 +2321,7 @@ sub load_module
 		print "Failed to load module $module.\n";
 		return -1;
 	}
-	
+
 	print "Module $module loaded successfully.\n";
 	push @modules_we_loaded, $module;
 
