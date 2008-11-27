@@ -5137,10 +5137,9 @@ sub print_chips_report
 
 sub generate_modprobes
 {
-  my ($chip, $detection, @optionlist, $isa, $adap);
-  my $ipmi = 0;
-  my $modprobes;
-  my $configfile;
+  my ($chip, $detection, @optionlist, $adap);
+  my ($isa, $ipmi);
+  my ($modprobes, $configfile);
 
   # Handle aliases
   # As of kernel 2.6.28, alias detection is handled by kernel drivers
@@ -5167,7 +5166,6 @@ sub generate_modprobes
     }
   }
 
-  $isa = 0;
   foreach $chip (@chips_detected) {
     foreach $detection (@{$chip->{detected}}) {
       # Tag adapters which host hardware monitoring chips we want to access
@@ -5179,9 +5177,9 @@ sub generate_modprobes
       if (exists $detection->{isa_addr}) {
            $isa = 1;
       }
-      if ($chip->{driver} eq "ipmisensors") {
-           $ipmi = 1;
-      }
+    }
+    if ($chip->{driver} eq "ipmisensors") {
+         $ipmi = 1;
     }
   }
 
