@@ -2395,47 +2395,50 @@ use vars qw(%pci_list);
 # 'domain', 'bus', 'slot' and 'func' uniquely identify a PCI device in a
 # computer; 'vendid' and 'devid' uniquely identify a type of device.
 # 'class' lets us spot unknown SMBus adapters.
-sub read_sys_dev_pci($)
+sub read_sys_dev_pci
 {
-  my $devices = shift;
-  my ($dev, @pci_list);
+	my $devices = shift;
+	my ($dev, @pci_list);
 
-  opendir(local *DEVICES, "$devices")
-    or die "$devices: $!";
+	opendir(local *DEVICES, "$devices")
+		or die "$devices: $!";
 
-  while (defined($dev = readdir(DEVICES))) {
-    my %record;
-    next unless $dev =~
-      m/^(?:([\da-f]+):)?([\da-f]+):([\da-f]+)\.([\da-f]+)$/;
+	while (defined($dev = readdir(DEVICES))) {
+		my %record;
+		next unless $dev =~
+			m/^(?:([\da-f]+):)?([\da-f]+):([\da-f]+)\.([\da-f]+)$/;
 
-    $record{domain} = hex $1;
-    $record{bus} = hex $2;
-    $record{slot} = hex $3;
-    $record{func} = hex $4;
+		$record{domain} = hex $1;
+		$record{bus} = hex $2;
+		$record{slot} = hex $3;
+		$record{func} = hex $4;
 
-    $record{vendid} = oct sysfs_device_attribute("$devices/$dev", "vendor");
-    $record{devid} = oct sysfs_device_attribute("$devices/$dev", "device");
-    $record{class} = (oct sysfs_device_attribute("$devices/$dev", "class"))
-                     >> 8;
+		$record{vendid} = oct sysfs_device_attribute("$devices/$dev",
+							     "vendor");
+		$record{devid} = oct sysfs_device_attribute("$devices/$dev",
+							    "device");
+		$record{class} = (oct sysfs_device_attribute("$devices/$dev",
+							     "class")) >> 8;
 
-    push @pci_list, \%record;
-  }
+		push @pci_list, \%record;
+	}
 
-  return \@pci_list;
+	return \@pci_list;
 }
 
 sub initialize_pci
 {
-  my $pci_list;
+	my $pci_list;
+	local $_;
 
-  $pci_list = read_sys_dev_pci("$sysfs_root/bus/pci/devices");
+	$pci_list = read_sys_dev_pci("$sysfs_root/bus/pci/devices");
 
-  # Note that we lose duplicate devices at this point, but we don't
-  # really care. What matters to us is which unique devices are present,
-  # not how many of each.
-  %pci_list = map {
-    sprintf("%04x:%04x", $_->{vendid}, $_->{devid}) => $_
-  } @{$pci_list};
+	# Note that we lose duplicate devices at this point, but we don't
+	# really care. What matters to us is which unique devices are present,
+	# not how many of each.
+	%pci_list = map {
+		sprintf("%04x:%04x", $_->{vendid}, $_->{devid}) => $_
+	} @{$pci_list};
 }
 
 #####################
