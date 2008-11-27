@@ -28,6 +28,7 @@ SVN-HEAD
                   Unload kernel drivers when we are done with them (#2329)
                   Fix handling of bus driver names with an underscore
                   Simplify loading of bus drivers
+                  Fix bus number prediction logic (#2327)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution

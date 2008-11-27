@@ -5135,37 +5135,47 @@ sub print_chips_report
   }
 }
 
-# We build here an array adapters, indexed on the number the adapter has
-# at this moment (we assume only loaded adapters are interesting at all;
-# everything that got scanned also got loaded). Each entry is a reference
-# to a hash containing:
-#  driver: Name of the adapter driver
-#  nr_now: Number of the bus now
-#  nr_later: Number of the bus when the modprobes are done (not included if the
-#        driver should not be loaded)
-# A second array, called
 sub generate_modprobes
 {
-  my ($chip, $detection, $nr, $i, @optionlist, $driver, $isa, $adap);
+  my ($chip, $detection, @optionlist, $isa, $adap);
   my $ipmi = 0;
-  my $modprobes = "";
+  my $modprobes;
   my $configfile;
 
-  # Collect all adapters used
-  $nr = 0;
+  # Handle aliases
+  # As of kernel 2.6.28, alias detection is handled by kernel drivers
+  # directly, so module options are no longer needed.
+  unless (kernel_version_at_least(2, 6, 28)) {
+    foreach $chip (@chips_detected) {
+      @optionlist = ();
+      foreach $detection (@{$chip->{detected}}) {
+        if (exists $detection->{i2c_driver} and
+            exists $detection->{isa_addr}) {
+          push @optionlist, $detection->{i2c_devnr},
+                            $detection->{i2c_addr};
+        }
+      }
+
+      next if not @optionlist;
+      $configfile = "# hwmon module options\n" unless defined $configfile;
+      $configfile .= "options $chip->{driver}";
+      $configfile .= sprintf(" ignore=%d,0x%02x", shift @optionlist,
+                                                  shift @optionlist);
+      $configfile .= sprintf(",%d,0x%02x", shift @optionlist,
+                             shift @optionlist) while @optionlist;
+      $configfile .= "\n";
+    }
+  }
+
   $isa = 0;
   foreach $chip (@chips_detected) {
     foreach $detection (@{$chip->{detected}}) {
-      # If there is more than one bus detected by a driver, they are
-      # still all added. So we number them in the correct order
-      if (exists $detection->{i2c_driver} and
-          not exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later} and
-          not exists $detection->{isa_addr}) { # Always use ISA access if possible
-         foreach $adap (@i2c_adapters) {
-           next unless exists $adap->{driver};
-           $adap->{nr_later} = $nr++ if $adap->{driver} eq $detection->{i2c_driver};
-         }
+      # Tag adapters which host hardware monitoring chips we want to access
+      if (exists $detection->{i2c_devnr}
+       && !exists $detection->{isa_addr}) {
+           $i2c_adapters[$detection->{i2c_devnr}]->{used}++;
       }
+
       if (exists $detection->{isa_addr}) {
            $isa = 1;
       }
@@ -5175,19 +5185,17 @@ sub generate_modprobes
     }
   }
 
-  $modprobes .= "# I2C adapter drivers\n" if $nr;
-  for ($i = 0; $i < $nr; $i++) {
-    foreach $adap (@i2c_adapters) {
-      next unless exists $adap->{nr_later} and $adap->{nr_later} == $i;
-      if ($adap->{driver} eq "UNKNOWN") {
-        $modprobes .= "# modprobe unknown adapter ".$adap->{name}."\n";
-      } else {
-        $modprobes .= "modprobe $adap->{driver}\n"
-          unless $modprobes =~ /modprobe $adap->{driver}\n/;
-      }
-      last;
-    }
+  # If we added any module option to handle aliases, we need to load all
+  # the adapter drivers so that the numbers will be the same. If not, then
+  # we only load the adapter drivers which are useful.
+  foreach $adap (@i2c_adapters) {
+    next unless contains($adap->{driver}, @modules_we_loaded);
+    next if not defined $configfile and not $adap->{used};
+    $modprobes .= "# I2C adapter drivers\n" unless defined $modprobes;
+    $modprobes .= "modprobe $adap->{driver}\n"
+      unless $modprobes =~ /modprobe $adap->{driver}\n/;
   }
+
   # i2c-isa is loaded automatically (as a dependency) since 2.6.14,
   # and will soon be gone.
   $modprobes .= "modprobe i2c-isa\n" if ($isa && !kernel_version_at_least(2, 6, 18));
@@ -5222,30 +5230,6 @@ sub generate_modprobes
        }
        $modprobes .= "modprobe $chip->{driver}\n";
     }
-
-    # Handle aliases
-    # As of kernel 2.6.28, alias detection is handled by kernel drivers
-    # directly, so module options are no longer needed.
-    unless (kernel_version_at_least(2, 6, 28)) {
-      foreach $detection (@{$chip->{detected}}) {
-        if (exists $detection->{i2c_driver} and
-            exists $detection->{isa_addr} and
-            exists $i2c_adapters[$detection->{i2c_devnr}]->{nr_later}) {
-          push @optionlist, $i2c_adapters[$detection->{i2c_devnr}]->{nr_later},
-                            $detection->{i2c_addr};
-        }
-      }
-    }
-
-    next if not @optionlist;
-    $configfile = "# hwmon module options\n" unless defined $configfile;
-    $configfile .= "options $chip->{driver}";
-    $configfile .= sprintf(" ignore=%d,0x%02x", shift @optionlist,
-                                               shift @optionlist)
-                  if @optionlist;
-    $configfile .= sprintf(",%d,0x%02x", shift @optionlist, shift @optionlist)
-                  while @optionlist;
-    $configfile .= "\n";
   }
 
   return ($modprobes, $configfile);
