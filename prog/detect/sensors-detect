@@ -3144,7 +3144,7 @@ sub scan_isa_bus
       $new_hash = add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
                                             $new_hash);
       if ($new_hash) {
-        printf "    Alias of the chip on I2C bus `%s', address 0x%04x\n",
+        printf "    Alias of the chip on I2C bus `%s', address 0x%02x\n",
                         $new_hash->{i2c_adap}, $new_hash->{i2c_addr};
       }
     }
