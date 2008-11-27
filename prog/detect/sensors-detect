@@ -498,7 +498,7 @@ use vars qw(@i2c_adapter_names);
 	{ driver => "i2c-amd756",	match => qr/^SMBus (AMD756|AMD766|AMD768|AMD8111|nVidia nForce) adapter at / },
 	{ driver => "i2c-amd8111",	match => qr/^SMBus2 AMD8111 adapter at / },
 	{ driver => "i2c-nforce2",	match => qr/^SMBus nForce2 adapter at / },
-	{ driver => "scx200_acb",	match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+|CS553[56] ACB\d+) / },
+	{ driver => "scx200_acb",	match => qr/^(NatSemi SCx200 ACCESS\.bus|SCx200 ACB\d+|CS553[56] ACB\d+)/ },
 );
 
 # This is a list of all recognized I2C and ISA chips.
