@@ -2067,44 +2067,40 @@ sub any_list_match
 }
 
 ###################
-# I/O port access #
+# I/O PORT ACCESS #
 ###################
 
 sub initialize_ioports
 {
-  sysopen(IOPORTS, "/dev/port", O_RDWR)
-    or die "/dev/port: $!\n";
-  binmode(IOPORTS);
+	sysopen(IOPORTS, "/dev/port", O_RDWR)
+		or die "/dev/port: $!\n";
+	binmode(IOPORTS);
 }
 
 sub close_ioports
 {
-  close(IOPORTS)
-    or print "Warning: $!\n";
+	close(IOPORTS);
 }
 
 # $_[0]: port to read
 # Returns: -1 on failure, read value on success.
 sub inb
 {
-  my ($res, $nrchars);
-  sysseek(IOPORTS, $_[0], 0) or return -1;
-  $nrchars = sysread(IOPORTS, $res, 1);
-  return -1 if not defined $nrchars or $nrchars != 1;
-  $res = unpack("C", $res);
-  return $res;
+	my ($res, $nrchars);
+	sysseek(IOPORTS, $_[0], 0) or return -1;
+	$nrchars = sysread(IOPORTS, $res, 1);
+	return -1 if not defined $nrchars or $nrchars != 1;
+	$res = unpack("C", $res);
+	return $res;
 }
 
 # $_[0]: port to write
 # $_[1]: value to write
-# Returns: -1 on failure, 0 on success.
+# We assume this can't fail.
 sub outb
 {
-  my $towrite = pack("C", $_[1]);
-  sysseek(IOPORTS, $_[0], 0) or return -1;
-  my $nrchars = syswrite(IOPORTS, $towrite, 1);
-  return -1 if not defined $nrchars or $nrchars != 1;
-  return 0;
+	sysseek(IOPORTS, $_[0], 0);
+	syswrite(IOPORTS, pack("C", $_[1]), 1);
 }
 
 # $_[0]: Address register
@@ -2113,8 +2109,8 @@ sub outb
 # Returns: read value
 sub isa_read_byte
 {
-  outb($_[0], $_[2]);
-  return inb($_[1]);
+	outb($_[0], $_[2]);
+	return inb($_[1]);
 }
 
 # $_[0]: Base address
@@ -2124,8 +2120,8 @@ sub isa_read_byte
 # offset 5 and data register at offset 6.
 sub isa_read_i5d6
 {
-  my ($addr, $reg) = @_;
-  return isa_read_byte($addr + 5, $addr + 6, $reg);
+	my ($addr, $reg) = @_;
+	return isa_read_byte($addr + 5, $addr + 6, $reg);
 }
 
 #################
