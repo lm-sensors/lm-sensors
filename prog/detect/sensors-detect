@@ -5169,8 +5169,7 @@ sub generate_modprobes
       if (exists $detection->{isa_addr}) {
            $isa = 1;
       }
-      if ($chip->{driver} eq "bmcsensors" ||
-          $chip->{driver} eq "ipmisensors") {
+      if ($chip->{driver} eq "ipmisensors") {
            $ipmi = 1;
       }
     }
