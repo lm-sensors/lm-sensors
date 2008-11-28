@@ -2132,63 +2132,63 @@ use vars qw($dev_i2c $sysfs_root);
 
 sub initialize_conf
 {
-  my $use_devfs = 0;
-  open(local *INPUTFILE, "/proc/mounts") or die "Can't access /proc/mounts!";
-  local $_;
-  while (<INPUTFILE>) {
-    if (m@^\w+ /dev devfs @) {
-      $use_devfs = 1;
-      $dev_i2c = '/dev/i2c/';
-    }
-    if (m@^\S+ (/\w+) sysfs @) {
-      $sysfs_root = $1;
-    }
-  }
-  close(INPUTFILE);
+	my $use_devfs = 0;
+	open(local *INPUTFILE, "/proc/mounts") or die "Can't access /proc/mounts!";
+	local $_;
+	while (<INPUTFILE>) {
+		if (m@^\w+ /dev devfs @) {
+			$use_devfs = 1;
+			$dev_i2c = '/dev/i2c/';
+		}
+		if (m@^\S+ (/\w+) sysfs @) {
+			$sysfs_root = $1;
+		}
+	}
+	close(INPUTFILE);
 
-  # We need sysfs for many things
-  if (!defined $sysfs_root) {
-      print "Sysfs not mounted?\n";
-      exit -1;
-  }
+	# We need sysfs for many things
+	if (!defined $sysfs_root) {
+		print "Sysfs not mounted?\n";
+		exit -1;
+	}
 
-  my $use_udev = 0;
-  if (open(*INPUTFILE, '/etc/udev/udev.conf')) {
-    while (<INPUTFILE>) {
-      if (m/^\s*udev_db\s*=\s*\"([^"]*)\"/ || m/^\s*udev_db\s*=\s*(\S+)/) {
-        if (-e $1) {
-          $use_udev = 1;
-          $dev_i2c = '/dev/i2c-';
-        }
-        last;
-      }
-    }
-    close(INPUTFILE);
-  }
+	my $use_udev = 0;
+	if (open(*INPUTFILE, '/etc/udev/udev.conf')) {
+		while (<INPUTFILE>) {
+			next unless m/^\s*udev_db\s*=\s*\"([^"]*)\"/
+				 || m/^\s*udev_db\s*=\s*(\S+)/;
+			if (-e $1) {
+				$use_udev = 1;
+				$dev_i2c = '/dev/i2c-';
+			}
+			last;
+		}
+		close(INPUTFILE);
+	  }
 
-  if (!$use_udev) {
-    # Try some known default udev db locations, just in case
-    if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
-     || -e '/dev/.udevdb') {
-      $use_udev = 1;
-      $dev_i2c = '/dev/i2c-';
-    }
-  }
+	if (!$use_udev) {
+		# Try some known default udev db locations, just in case
+		if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
+		 || -e '/dev/.udevdb') {
+			$use_udev = 1;
+			$dev_i2c = '/dev/i2c-';
+		}
+	}
 
-  if (!($use_devfs || $use_udev)) {
-    if (! -c '/dev/i2c-0' && -x '/sbin/MAKEDEV') {
-      system("/sbin/MAKEDEV i2c");
-    }
-    if (! -c '/dev/i2c-0' && -x '/dev/MAKEDEV') {
-      system("/dev/MAKEDEV i2c");
-    }
-    if (-c '/dev/i2c-0') {
-      $dev_i2c = '/dev/i2c-';
-    } else { # default
-      print "No i2c device files found.\n";
-      exit -1;
-    }
-  }
+	if (!($use_devfs || $use_udev)) {
+		if (! -c '/dev/i2c-0' && -x '/sbin/MAKEDEV') {
+			system("/sbin/MAKEDEV i2c");
+		}
+		if (! -c '/dev/i2c-0' && -x '/dev/MAKEDEV') {
+			system("/dev/MAKEDEV i2c");
+		}
+		if (-c '/dev/i2c-0') {
+			$dev_i2c = '/dev/i2c-';
+		} else { # default
+			print "No i2c device files found.\n";
+			exit -1;
+		}
+	}
 }
 
 # [0] -> VERSION
@@ -2200,26 +2200,26 @@ use vars qw(@kernel_version $kernel_arch);
 
 sub initialize_kernel_version
 {
-  `uname -r` =~ /(\d+)\.(\d+)\.(\d+)(.*)/;
-  @kernel_version = ($1, $2, $3, $4);
-  chomp($kernel_arch = `uname -m`);
+	`uname -r` =~ /(\d+)\.(\d+)\.(\d+)(.*)/;
+	@kernel_version = ($1, $2, $3, $4);
+	chomp($kernel_arch = `uname -m`);
 
-  # We only support kernels >= 2.6.0
-  if (!kernel_version_at_least(2, 6, 0)) {
-      print "Kernel version is unsupported (too old, >= 2.6.0 needed)\n";
-      exit -1;
-  }
+	# We only support kernels >= 2.6.0
+	if (!kernel_version_at_least(2, 6, 0)) {
+		print "Kernel version is unsupported (too old, >= 2.6.0 needed)\n";
+		exit -1;
+	}
 }
 
 sub kernel_version_at_least
 {
-  my ($vers, $plvl, $slvl) = @_;
-  return 1 if ($kernel_version[0]  > $vers ||
-                ($kernel_version[0] == $vers &&
-                  ($kernel_version[1]  > $plvl ||
-                    ($kernel_version[1] == $plvl &&
-                      ($kernel_version[2] >= $slvl)))));
-  return 0;
+	my ($vers, $plvl, $slvl) = @_;
+	return 1 if ($kernel_version[0]  > $vers ||
+		     ($kernel_version[0] == $vers &&
+		      ($kernel_version[1] > $plvl ||
+		       ($kernel_version[1] == $plvl &&
+			($kernel_version[2] >= $slvl)))));
+	return 0;
 }
 
 # @cpu is a list of reference to hashes, one hash per CPU.
@@ -2229,27 +2229,27 @@ use vars qw(@cpu);
 
 sub initialize_cpu_list
 {
-  open(local *INPUTFILE, "/proc/cpuinfo") or die "Can't access /proc/cpuinfo!";
-  local $_;
-  my $entry;
+	local $_;
+	my $entry;
 
-  while (<INPUTFILE>) {
-    if (m/^processor\s*:\s*(\d+)/) {
-      push @cpu, $entry if scalar keys(%{$entry}); # Previous entry
-      $entry = {}; # New entry
-      next;
-    }
-    if (m/^(vendor_id|cpu family|model|model name|stepping)\s*:\s*(.+)$/) {
-      my $k = $1;
-      my $v = $2;
-      $v =~ s/\s+/ /g;	# Merge multiple spaces
-      $v =~ s/ $//;	# Trim trailing space
-      $entry->{$k} = $v;
-      next;
-    }
-  }
-  push @cpu, $entry if scalar keys(%{$entry}); # Last entry
-  close(INPUTFILE);
+	open(local *INPUTFILE, "/proc/cpuinfo") or die "Can't access /proc/cpuinfo!";
+	while (<INPUTFILE>) {
+		if (m/^processor\s*:\s*(\d+)/) {
+			push @cpu, $entry if scalar keys(%{$entry}); # Previous entry
+			$entry = {}; # New entry
+			next;
+		}
+		if (m/^(vendor_id|cpu family|model|model name|stepping)\s*:\s*(.+)$/) {
+			my $k = $1;
+			my $v = $2;
+			$v =~ s/\s+/ /g;	# Merge multiple spaces
+			$v =~ s/ $//;		# Trim trailing space
+			$entry->{$k} = $v;
+			next;
+		}
+	}
+	close(INPUTFILE);
+	push @cpu, $entry if scalar keys(%{$entry}); # Last entry
 }
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
@@ -2259,27 +2259,30 @@ use vars qw(@i2c_adapters);
 
 sub initialize_i2c_adapters_list
 {
-  my $entry;
-  local $_;
+	my $entry;
+	local $_;
 
-  my $class_dir = "${sysfs_root}/class/i2c-adapter";
-  opendir(local *ADAPTERS, $class_dir) or return;
+	my $class_dir = "${sysfs_root}/class/i2c-adapter";
+	opendir(local *ADAPTERS, $class_dir) or return;
 
-  while (defined($_ = readdir(ADAPTERS))) {
-    next unless m/^i2c-(\d+)$/;
-    $entry = {}; # New entry
-    $entry->{name} = sysfs_device_attribute("${class_dir}/i2c-$1", "name")
-                  || sysfs_device_attribute("${class_dir}/i2c-$1/device", "name");
-    next if $entry->{name} eq "ISA main adapter";
+	while (defined($_ = readdir(ADAPTERS))) {
+		next unless m/^i2c-(\d+)$/;
+		$entry = {}; # New entry
+		$entry->{name} = sysfs_device_attribute("${class_dir}/i2c-$1",
+							"name")
+			      || sysfs_device_attribute("${class_dir}/i2c-$1/device",
+							"name");
+		next if $entry->{name} eq "ISA main adapter";
 
-    # First try to get the I2C adapter driver name from sysfs, and if it
-    # fails, fall back to searching our list of known I2C adapters.
-    $entry->{driver} = sysfs_device_driver("${class_dir}/i2c-$1/device")
-                    || find_i2c_adapter_driver($entry->{name})
-                    || 'UNKNOWN';
-    $i2c_adapters[$1] = $entry;
-  }
-  closedir(ADAPTERS);
+		# First try to get the I2C adapter driver name from sysfs,
+		# and if it fails, fall back to searching our list of known
+		# I2C adapters.
+		$entry->{driver} = sysfs_device_driver("${class_dir}/i2c-$1/device")
+				|| find_i2c_adapter_driver($entry->{name})
+				|| 'UNKNOWN';
+		$i2c_adapters[$1] = $entry;
+	}
+	closedir(ADAPTERS);
 }
 
 ###########
