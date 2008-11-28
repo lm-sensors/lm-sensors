@@ -5070,7 +5070,7 @@ sub coretemp_detect
 	my $probecpu;
 	foreach $probecpu (@cpu) {
 		if ($probecpu->{vendor_id} eq 'GenuineIntel' &&
-				$probecpu->{cpu_family} == 6 &&
+				$probecpu->{'cpu family'} == 6 &&
 				($probecpu->{model} == 14 ||
 				 $probecpu->{model} == 15 ||
 				 $probecpu->{model} == 0x16 ||
@@ -5087,7 +5087,7 @@ sub c7temp_detect
 	my $probecpu;
 	foreach $probecpu (@cpu) {
 		if ($probecpu->{vendor_id} eq 'CentaurHauls' &&
-				$probecpu->{cpu_family} == 6 &&
+				$probecpu->{'cpu family'} == 6 &&
 				($probecpu->{model} == 0xa ||
 				 $probecpu->{model} == 0xd)) {
 			return 9;
