@@ -580,12 +580,12 @@ use vars qw(@i2c_adapter_names);
 	}, {
 		name => "Andigilog aSC7611",
 		driver => "to-be-written",
-		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { andigilog_detect(@_, 1); },
 	}, {
 		name => "Andigilog aSC7621",
 		driver => "to-be-written",
-		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { andigilog_detect(@_, 2); },
 	}, {
 		name => "National Semiconductor LM87",
@@ -736,7 +736,7 @@ use vars qw(@i2c_adapter_names);
 	}, {
 		name => "Analog Devices ADM1026",
 		driver => "adm1026",
-		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adm1026_detect(@_); },
 	}, {
 		name => "Analog Devices ADM1025",
