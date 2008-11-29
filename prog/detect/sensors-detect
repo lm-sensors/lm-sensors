@@ -456,803 +456,674 @@ use vars qw(@i2c_adapter_names);
 #      The function will be passed three parameters: the ISA address, an
 #      open file descriptor to access the I2C bus, and the I2C address.
 @chip_ids = (
-     {
-       name => "Myson MTP008",
-       driver => "mtp008",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { mtp008_detect(@_); },
-     },
-     {
-       name => "National Semiconductor LM78",
-       driver => "lm78",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { lm78_detect(@_, 0); },
-       isa_addrs => [0x290],
-       isa_detect => sub { lm78_isa_detect(@_, 0); },
-       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
-     },
-     {
-       name => "National Semiconductor LM79",
-       driver => "lm78",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { lm78_detect(@_, 2); },
-       isa_addrs => [0x290],
-       isa_detect => sub { lm78_isa_detect(@_, 2); },
-       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
-     },
-     {
-       name => "National Semiconductor LM75",
-       driver => "lm75",
-       i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { lm75_detect(@_, 0); },
-     },
-     {
-       name => "Dallas Semiconductor DS75",
-       driver => "lm75",
-       i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { lm75_detect(@_, 1); },
-     },
-     {
-       name => "National Semiconductor LM77",
-       driver => "lm77",
-       i2c_addrs => [0x48..0x4b],
-       i2c_detect => sub { lm77_detect(@_); },
-     },
-     {
-       name => "National Semiconductor LM80",
-       driver => "lm80",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { lm80_detect(@_); },
-     },
-     {
-       name => "National Semiconductor LM85",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 0); },
-     },
-     {
-       name => "National Semiconductor LM96000 or PC8374L",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADM1027",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 2); },
-     },
-     {
-       name => "Analog Devices ADT7460 or ADT7463",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 3); },
-     },
-     {
-       name => "SMSC EMC6D100 or EMC6D101",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 4); },
-     },
-     {
-       name => "SMSC EMC6D102",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 5); },
-     },
-     {
-       name => "SMSC EMC6D103",
-       driver => "lm85",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm85_detect(@_, 6); },
-     },
-     {
-       name => "Analog Devices ADT7462",
-       driver => "adt7462",
-       i2c_addrs => [0x5c, 0x58],
-       i2c_detect => sub { adt7467_detect(@_, 2); },
-     },
-     {
-       name => "Analog Devices ADT7466",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { adt7467_detect(@_, 3); },
-     },
-     {
-       name => "Analog Devices ADT7467 or ADT7468",
-       driver => "to-be-written",
-       i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7467_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADT7470",
-       driver => "adt7470",
-       i2c_addrs => [0x2c, 0x2e, 0x2f],
-       i2c_detect => sub { adt7467_detect(@_, 4); },
-     },
-     {
-       name => "Analog Devices ADT7473",
-       driver => "adt7473",
-       i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7473_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADT7475",
-       driver => "to-be-written",
-       i2c_addrs => [0x2e],
-       i2c_detect => sub { adt7473_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADT7476",
-       driver => "to-be-written",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adt7467_detect(@_, 1); },
-     },
-     {
-       name => "Andigilog aSC7511",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { andigilog_aSC7511_detect(@_); },
-     },
-     {
-       name => "Andigilog aSC7512",
-       driver => "to-be-written",
-       i2c_addrs => [0x58],
-       i2c_detect => sub { andigilog_detect(@_, 0); },
-     },
-     {
-       name => "Andigilog aSC7611",
-       driver => "to-be-written",
-       i2c_addrs => [0x2c, 0x2d, 0x2e],
-       i2c_detect => sub { andigilog_detect(@_, 1); },
-     },
-     {
-       name => "Andigilog aSC7621",
-       driver => "to-be-written",
-       i2c_addrs => [0x2c, 0x2d, 0x2e],
-       i2c_detect => sub { andigilog_detect(@_, 2); },
-     },
-     {
-       name => "National Semiconductor LM87",
-       driver => "lm87",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm87_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADM1024",
-       driver => "lm87",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm87_detect(@_, 1); },
-     },
-     {
-       name => "National Semiconductor LM93",
-       driver => "lm93",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { lm93_detect(@_); },
-     },
-     {
-       name => "Winbond W83781D",
-       driver => "w83781d",
-       i2c_detect => sub { w83781d_detect(@_, 0); },
-       i2c_addrs => [0x28..0x2f],
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(@_, 0); },
-       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
-     },
-     {
-       name => "Winbond W83782D",
-       driver => "w83781d",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 1); },
-       isa_addrs => [0x290],
-       isa_detect => sub { w83781d_isa_detect(@_, 1); },
-       alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
-     },
-     {
-       name => "Winbond W83783S",
-       driver => "w83781d",
-       i2c_addrs => [0x2d],
-       i2c_detect => sub { w83781d_detect(@_, 2); },
-     },
-     {
-       name => "Winbond W83791D",
-       driver => "w83791d",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 7); },
-     },
-     {
-       name => "Winbond W83792D",
-       driver => "w83792d",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 8); },
-     },
-     {
-       name => "Winbond W83793R/G",
-       driver => "w83793",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83793_detect(@_); },
-     },
-     {
-       name => "Winbond W83791SD",
-       driver => "not-a-sensor",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { w83791sd_detect(@_); },
-     },
-     {
-       name => "Winbond W83627HF",
-       driver => "use-isa-instead",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 3); },
-     },
-     {
-       name => "Winbond W83627EHF",
-       driver => "use-isa-instead",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 9); },
-     },
-     {
-       name => "Winbond W83627DHG",
-       driver => "use-isa-instead",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 10); },
-     },
-     {
-       name => "Asus AS99127F (rev.1)",
-       driver => "w83781d",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 4); },
-     },
-     {
-       name => "Asus AS99127F (rev.2)",
-       driver => "w83781d",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 5); },
-     },
-     {
-       name => "Asus ASB100 Bach",
-       driver => "asb100",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { w83781d_detect(@_, 6); },
-     },
-     {
-       name => "Asus Mozart-2",
-       driver => "to-be-written",
-       i2c_addrs => [0x77],
-       i2c_detect => sub { mozart_detect(@_); },
-     },
-     {
-       name => "Winbond W83L784R/AR/G",
-       driver => "to-be-written",
-       i2c_addrs => [0x2d],
-       i2c_detect => sub { w83l784r_detect(@_, 0); },
-     },
-     {
-       name => "Winbond W83L785R/G",
-       driver => "to-be-written",
-       i2c_addrs => [0x2d],
-       i2c_detect => sub { w83l784r_detect(@_, 1); },
-     },
-     {
-       name => "Winbond W83L786NR/NG/R/G",
-       driver => "w83l786ng",
-       i2c_addrs => [0x2e, 0x2f],
-       i2c_detect => sub { w83l784r_detect(@_, 2); },
-     },
-     {
-       name => "Winbond W83L785TS-S",
-       driver => "w83l785ts",
-       i2c_addrs => [0x2e],
-       i2c_detect => sub { w83l784r_detect(@_, 3); },
-     },
-     {
-       name => "Genesys Logic GL518SM",
-       driver => "gl518sm",
-       i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(@_, 0); },
-     },
-     {
-       name => "Genesys Logic GL520SM",
-       driver => "gl520sm",
-       i2c_addrs => [0x2c, 0x2d],
-       i2c_detect => sub { gl518sm_detect(@_, 1); },
-     },
-     {
-       name => "Genesys Logic GL525SM",
-       driver => "to-be-written",
-       i2c_addrs => [0x2d],
-       i2c_detect => sub { gl525sm_detect(@_); },
-     },
-     {
-       name => "Analog Devices ADM9240",
-       driver => "adm9240",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(@_, 0); },
-     },
-     {
-       name => "Dallas Semiconductor DS1621/DS1631",
-       driver => "ds1621",
-       i2c_addrs => [0x48..0x4f],
-       i2c_detect => sub { ds1621_detect(@_); },
-     },
-     {
-       name => "Dallas Semiconductor DS1780",
-       driver => "adm9240",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(@_, 1); },
-     },
-     {
-       name => "National Semiconductor LM81",
-       driver => "adm9240",
-       i2c_addrs => [0x2c..0x2f],
-       i2c_detect => sub { adm9240_detect(@_, 2); },
-     },
-     {
-       name => "Analog Devices ADM1026",
-       driver => "adm1026",
-       i2c_addrs => [0x2c, 0x2d, 0x2e],
-       i2c_detect => sub { adm1026_detect(@_); },
-     },
-     {
-       name => "Analog Devices ADM1025",
-       driver => "adm1025",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1025_detect(@_, 0); },
-     },
-     {
-       name => "Philips NE1619",
-       driver => "adm1025",
-       i2c_addrs => [0x2c..0x2d],
-       i2c_detect => sub { adm1025_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADM1021",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADM1021A/ADM1023",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 1); },
-     },
-     {
-       name => "Maxim MAX1617",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 2); },
-     },
-     {
-       name => "Maxim MAX1617A",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 3); },
-     },
-     {
-       name => "Maxim MAX1668",
-       driver => "max1668",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(@_, 0); },
-     },
-     {
-       name => "Maxim MAX1805",
-       driver => "max1668",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(@_, 1); },
-     },
-     {
-       name => "Maxim MAX1989",
-       driver => "max1668",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1668_detect(@_, 2); },
-     },
-     {
-       name => "Maxim MAX6650/MAX6651",
-       driver => "max6650",
-       i2c_addrs => [0x1b, 0x1f, 0x48, 0x4b],
-       i2c_detect => sub { max6650_detect(@_); },
-     },
-     {
-       name => "Maxim MAX6655/MAX6656",
-       driver => "max6655",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max6655_detect(@_); },
-     },
-     {
-       name => "TI THMC10",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 4); },
-     },
-     {
-       name => "National Semiconductor LM84",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 5); },
-     },
-     {
-       name => "Genesys Logic GL523SM",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 6); },
-     },
-     {
-       name => "Onsemi MC1066",
-       driver => "adm1021",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { adm1021_detect(@_, 7); },
-     },
-     {
-       name => "Maxim MAX1618",
-       driver => "max1619",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1619_detect(@_, 1); },
-     },
-     {
-       name => "Maxim MAX1619",
-       driver => "max1619",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { max1619_detect(@_, 0); },
-     },
-     {
-       name => "National Semiconductor LM82/LM83",
-       driver => "lm83",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { lm83_detect(@_); },
-     },
-     {
-       name => "National Semiconductor LM90",
-       driver => "lm90",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(@_, 0); },
-     },
-     {
-       name => "National Semiconductor LM89/LM99",
-       driver => "lm90",
-       i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(@_, 1); },
-     },
-     {
-       name => "National Semiconductor LM86",
-       driver => "lm90",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(@_, 2); },
-     },
-     {
-       name => "Analog Devices ADM1032",
-       driver => "lm90",
-       i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(@_, 3); },
-     },
-     {
-       name => "Maxim MAX6654/MAX6690",
-       driver => "to-be-written", # probably lm90
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(@_, 4); },
-     },
-     {
-       name => "Maxim MAX6657/MAX6658/MAX6659",
-       driver => "lm90",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { max6657_detect(@_); },
-     },
-     {
-       name => "Maxim MAX6659",
-       driver => "lm90",
-       i2c_addrs => [0x4d..0x4e], # 0x4c is handled above
-       i2c_detect => sub { max6657_detect(@_); },
-     },
-     {
-       name => "Maxim MAX6646",
-       driver => "lm90",
-       i2c_addrs => [0x4d],
-       i2c_detect => sub { lm90_detect(@_, 6); },
-     },
-     {
-       name => "Maxim MAX6647",
-       driver => "lm90",
-       i2c_addrs => [0x4e],
-       i2c_detect => sub { lm90_detect(@_, 6); },
-     },
-     {
-       name => "Maxim MAX6648/MAX6649/MAX6692",
-       driver => "lm90",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(@_, 6); },
-     },
-     {
-       name => "Maxim MAX6680/MAX6681",
-       driver => "lm90",
-       i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(@_, 7); },
-     },
-     {
-       name => "Winbond W83L771W/G",
-       driver => "lm90",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(@_, 8); },
-     },
-     {
-       name => "Texas Instruments TMP401",
-       driver => "tmp401",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm90_detect(@_, 9); },
-     },
-     {
-       name => "Texas Instruments TMP411",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c..0x4e],
-       i2c_detect => sub { lm90_detect(@_, 10); },
-     },
-     {
-       name => "National Semiconductor LM95231",
-       driver => "to-be-written",
-       i2c_addrs => [0x2b, 0x19, 0x2a],
-       i2c_detect => sub { lm95231_detect(@_); },
-     },
-     {
-       name => "National Semiconductor LM63",
-       driver => "lm63",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm63_detect(@_, 1); },
-     },
-     {
-       name => "National Semiconductor LM64",
-       driver => "to-be-written", # lm63
-       i2c_addrs => [0x18, 0x4e],
-       i2c_detect => sub { lm63_detect(@_, 3); },
-     },
-     {
-       name => "Fintek F75363SG",
-       driver => "lm63", # Not yet
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { lm63_detect(@_, 2); },
-     },
-     {
-       name => "National Semiconductor LM92",
-       driver => "lm92",
-       i2c_addrs => [0x48..0x4b],
-       i2c_detect => sub { lm92_detect(@_, 0); },
-     },
-     {
-       name => "National Semiconductor LM76",
-       driver => "lm92",
-       i2c_addrs => [0x48..0x4b],
-       i2c_detect => sub { lm92_detect(@_, 1); },
-     },
-     {
-       name => "Maxim MAX6633/MAX6634/MAX6635",
-       driver => "lm92",
-       i2c_addrs => [0x48..0x4f], # The MAX6633 can also use 0x40-0x47 but we
-                                  # don't want to probe these addresses, it's
-                                  # dangerous.
-       i2c_detect => sub { lm92_detect(@_, 2); },
-     },
-     {
-       name => "Analog Devices ADT7461",
-       driver => "lm90",
-       i2c_addrs => [0x4c..0x4d],
-       i2c_detect => sub { lm90_detect(@_, 5); },
-     },
-     {
-       name => "Analog Devices ADT7481",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c, 0x4b],
-       i2c_detect => sub { adt7481_detect(@_); },
-     },
-     {
-       name => "Analog Devices ADM1029",
-       driver => "adm1029",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { adm1029_detect(@_); },
-     },
-     {
-       name => "Analog Devices ADM1030",
-       driver => "adm1031",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1031_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADM1031",
-       driver => "adm1031",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1031_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADM1033",
-       driver => "to-be-written",
-       i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { adm1034_detect(@_, 0); },
-     },
-     {
-       name => "Analog Devices ADM1034",
-       driver => "to-be-written",
-       i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { adm1034_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADM1022",
-       driver => "thmc50",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1022_detect(@_, 0); },
-     },
-     {
-       name => "Texas Instruments THMC50",
-       driver => "thmc50",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { adm1022_detect(@_, 1); },
-     },
-     {
-       name => "Analog Devices ADM1028",
-       driver => "thmc50",
-       i2c_addrs => [0x2e],
-       i2c_detect => sub { adm1022_detect(@_, 2); },
-     },
-     {
-       name => "Texas Instruments THMC51",
-       driver => "to-be-written", # thmc50
-       i2c_addrs => [0x2e], # At least (no datasheet)
-       i2c_detect => sub { adm1022_detect(@_, 3); },
-     },
-     {
-       name => "VIA VT1211 (I2C)",
-       driver => "use-isa-instead",
-       i2c_addrs => [0x2d],
-       i2c_detect => sub { vt1211_i2c_detect(@_); },
-     },
-     {
-       name => "ITE IT8712F",
-       driver => "it87",
-       i2c_addrs => [0x28..0x2f],
-       i2c_detect => sub { it8712_i2c_detect(@_); },
-     },
-     {
-       name => "ITE IT8201R/IT8203R/IT8206R/IT8266R",
-       driver => "not-a-sensor",
-       i2c_addrs => [0x4e],
-       i2c_detect => sub { ite_overclock_detect(@_); },
-     },
-     {
-       name => "SPD EEPROM",
-       driver => "not-a-sensor",
-       # Can also live at 0x54-0x57, but we don't care: we only check
-       # for SPD and EDID EEPROMs because some hardware monitoring chips
-       # can live at 0x50-0x53.
-       i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { eeprom_detect(@_); },
-     },
-     {
-       name => "EDID EEPROM",
-       driver => "not-a-sensor",
-       i2c_addrs => [0x50..0x53],
-       i2c_detect => sub { ddcmonitor_detect(@_); },
-     },
-     {
-       name => "FSC Poseidon I",
-       driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscpos" },
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 0); },
-     },
-     {
-       name => "FSC Poseidon II",
-       driver => "to-be-written",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 1); },
-     },
-     {
-       name => "FSC Scylla",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 2); },
-     },
-     {
-       name => "FSC Hermes",
-       driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscher" },
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 3); },
-     },
-     {
-       name => "FSC Heimdal",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 4); },
-     },
-     {
-       name => "FSC Heracles",
-       driver => "fschmd",
-       i2c_addrs => [0x73],
-       i2c_detect => sub { fsc_detect(@_, 5); },
-     },
-     {
-       name => "ALi M5879",
-       driver => "to-be-written",
-       i2c_addrs => [0x2c..0x2d],
-       i2c_detect => sub { m5879_detect(@_); },
-     },
-     {
-       name => "SMSC LPC47M15x/192/292/997",
-       driver => "smsc47m192",
-       i2c_addrs => [0x2c..0x2d],
-       i2c_detect => sub { smsc47m192_detect(@_); },
-     },
-     {
-       name => "SMSC DME1737",
-       driver => "dme1737",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { dme1737_detect(@_, 1); },
-     },
-     {
-       name => "SMSC SCH5027D-NW",
-       driver => "dme1737",
-       i2c_addrs => [0x2c..0x2e],
-       i2c_detect => sub { dme1737_detect(@_, 2); },
-     },
-     {
-       name => "Fintek F75111R/RG/N (GPIO)",
-       driver => "not-a-sensor",
-       i2c_addrs => [0x4e], # 0x37 not probed
-       i2c_detect => sub { fintek_detect(@_, 1); },
-     },
-     {
-       name => "Fintek F75121R/F75122R/RG (VID+GPIO)",
-       driver => "to-be-written",
-       i2c_addrs => [0x4e], # 0x37 not probed
-       i2c_detect => sub { fintek_detect(@_, 2); },
-     },
-     {
-       name => "Fintek F75373S/SG",
-       driver => "f75375s",
-       i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(@_, 3); },
-     },
-     {
-       name => "Fintek F75375S/SP",
-       driver => "f75375s",
-       i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(@_, 4); },
-     },
-     {
-       name => "Fintek F75387SG/RG",
-       driver => "to-be-written",
-       i2c_addrs => [0x2d..0x2e],
-       i2c_detect => sub { fintek_detect(@_, 5); },
-     },
-     {
-       name => "Fintek F75383S/M",
-       driver => "to-be-written",
-       i2c_addrs => [0x4c],
-       i2c_detect => sub { fintek_detect(@_, 6); },
-     },
-     {
-       name => "Fintek F75384S/M",
-       driver => "to-be-written",
-       i2c_addrs => [0x4d],
-       i2c_detect => sub { fintek_detect(@_, 6); },
-     },
-     {
-       name => "Fintek custom power control IC",
-       driver => "to-be-written",
-       i2c_addrs => [0x2f],
-       i2c_detect => sub { fintek_detect(@_, 7); },
-     },
-     {
-       name => "Smart Battery",
-       driver => "sbs", # ACPI driver, not sure if it always works
-       i2c_addrs => [0x0b],
-       i2c_detect => sub { smartbatt_detect(@_); },
-     },
-     {
-       name => "IPMI BMC KCS",
-       driver => "ipmisensors",
-       isa_addrs => [0x0ca0],
-       isa_detect => sub { ipmi_detect(@_); },
-     },
-     {
-       name => "IPMI BMC SMIC",
-       driver => "ipmisensors",
-       isa_addrs => [0x0ca8],
-       isa_detect => sub { ipmi_detect(@_); },
-     },
+	{
+		name => "Myson MTP008",
+		driver => "mtp008",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { mtp008_detect(@_); },
+	}, {
+		name => "National Semiconductor LM78",
+		driver => "lm78",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { lm78_detect(@_, 0); },
+		isa_addrs => [0x290],
+		isa_detect => sub { lm78_isa_detect(@_, 0); },
+		alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
+	}, {
+		name => "National Semiconductor LM79",
+		driver => "lm78",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { lm78_detect(@_, 2); },
+		isa_addrs => [0x290],
+		isa_detect => sub { lm78_isa_detect(@_, 2); },
+		alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
+	}, {
+		name => "National Semiconductor LM75",
+		driver => "lm75",
+		i2c_addrs => [0x48..0x4f],
+		i2c_detect => sub { lm75_detect(@_, 0); },
+	}, {
+		name => "Dallas Semiconductor DS75",
+		driver => "lm75",
+		i2c_addrs => [0x48..0x4f],
+		i2c_detect => sub { lm75_detect(@_, 1); },
+	}, {
+		name => "National Semiconductor LM77",
+		driver => "lm77",
+		i2c_addrs => [0x48..0x4b],
+		i2c_detect => sub { lm77_detect(@_); },
+	}, {
+		name => "National Semiconductor LM80",
+		driver => "lm80",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { lm80_detect(@_); },
+	}, {
+		name => "National Semiconductor LM85",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 0); },
+	}, {
+		name => "National Semiconductor LM96000 or PC8374L",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADM1027",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADT7460 or ADT7463",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 3); },
+	}, {
+		name => "SMSC EMC6D100 or EMC6D101",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 4); },
+	}, {
+		name => "SMSC EMC6D102",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 5); },
+	}, {
+		name => "SMSC EMC6D103",
+		driver => "lm85",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 6); },
+	}, {
+		name => "Analog Devices ADT7462",
+		driver => "adt7462",
+		i2c_addrs => [0x5c, 0x58],
+		i2c_detect => sub { adt7467_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADT7466",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { adt7467_detect(@_, 3); },
+	}, {
+		name => "Analog Devices ADT7467 or ADT7468",
+		driver => "to-be-written",
+		i2c_addrs => [0x2e],
+		i2c_detect => sub { adt7467_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADT7470",
+		driver => "adt7470",
+		i2c_addrs => [0x2c, 0x2e, 0x2f],
+		i2c_detect => sub { adt7467_detect(@_, 4); },
+	}, {
+		name => "Analog Devices ADT7473",
+		driver => "adt7473",
+		i2c_addrs => [0x2e],
+		i2c_detect => sub { adt7473_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADT7475",
+		driver => "to-be-written",
+		i2c_addrs => [0x2e],
+		i2c_detect => sub { adt7473_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADT7476",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adt7467_detect(@_, 1); },
+	}, {
+		name => "Andigilog aSC7511",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { andigilog_aSC7511_detect(@_); },
+	}, {
+		name => "Andigilog aSC7512",
+		driver => "to-be-written",
+		i2c_addrs => [0x58],
+		i2c_detect => sub { andigilog_detect(@_, 0); },
+	}, {
+		name => "Andigilog aSC7611",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_detect => sub { andigilog_detect(@_, 1); },
+	}, {
+		name => "Andigilog aSC7621",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_detect => sub { andigilog_detect(@_, 2); },
+	}, {
+		name => "National Semiconductor LM87",
+		driver => "lm87",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm87_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADM1024",
+		driver => "lm87",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm87_detect(@_, 1); },
+	}, {
+		name => "National Semiconductor LM93",
+		driver => "lm93",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm93_detect(@_); },
+	}, {
+		name => "Winbond W83781D",
+		driver => "w83781d",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 0); },
+		isa_addrs => [0x290],
+		isa_detect => sub { w83781d_isa_detect(@_, 0); },
+		alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
+	}, {
+		name => "Winbond W83782D",
+		driver => "w83781d",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 1); },
+		isa_addrs => [0x290],
+		isa_detect => sub { w83781d_isa_detect(@_, 1); },
+		alias_detect => sub { winbond_alias_detect(@_, 0x2b, 0x3d); },
+	}, {
+		name => "Winbond W83783S",
+		driver => "w83781d",
+		i2c_addrs => [0x2d],
+		i2c_detect => sub { w83781d_detect(@_, 2); },
+	}, {
+		name => "Winbond W83791D",
+		driver => "w83791d",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 7); },
+	}, {
+		name => "Winbond W83792D",
+		driver => "w83792d",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 8); },
+	}, {
+		name => "Winbond W83793R/G",
+		driver => "w83793",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { w83793_detect(@_); },
+	}, {
+		name => "Winbond W83791SD",
+		driver => "not-a-sensor",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { w83791sd_detect(@_); },
+	}, {
+		name => "Winbond W83627HF",
+		driver => "use-isa-instead",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 3); },
+	}, {
+		name => "Winbond W83627EHF",
+		driver => "use-isa-instead",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 9); },
+	}, {
+		name => "Winbond W83627DHG",
+		driver => "use-isa-instead",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 10); },
+	}, {
+		name => "Asus AS99127F (rev.1)",
+		driver => "w83781d",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 4); },
+	}, {
+		name => "Asus AS99127F (rev.2)",
+		driver => "w83781d",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 5); },
+	}, {
+		name => "Asus ASB100 Bach",
+		driver => "asb100",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { w83781d_detect(@_, 6); },
+	}, {
+		name => "Asus Mozart-2",
+		driver => "to-be-written",
+		i2c_addrs => [0x77],
+		i2c_detect => sub { mozart_detect(@_); },
+	}, {
+		name => "Winbond W83L784R/AR/G",
+		driver => "to-be-written",
+		i2c_addrs => [0x2d],
+		i2c_detect => sub { w83l784r_detect(@_, 0); },
+	}, {
+		name => "Winbond W83L785R/G",
+		driver => "to-be-written",
+		i2c_addrs => [0x2d],
+		i2c_detect => sub { w83l784r_detect(@_, 1); },
+	}, {
+		name => "Winbond W83L786NR/NG/R/G",
+		driver => "w83l786ng",
+		i2c_addrs => [0x2e, 0x2f],
+		i2c_detect => sub { w83l784r_detect(@_, 2); },
+	}, {
+		name => "Winbond W83L785TS-S",
+		driver => "w83l785ts",
+		i2c_addrs => [0x2e],
+		i2c_detect => sub { w83l784r_detect(@_, 3); },
+	}, {
+		name => "Genesys Logic GL518SM",
+		driver => "gl518sm",
+		i2c_addrs => [0x2c, 0x2d],
+		i2c_detect => sub { gl518sm_detect(@_, 0); },
+	}, {
+		name => "Genesys Logic GL520SM",
+		driver => "gl520sm",
+		i2c_addrs => [0x2c, 0x2d],
+		i2c_detect => sub { gl518sm_detect(@_, 1); },
+	}, {
+		name => "Genesys Logic GL525SM",
+		driver => "to-be-written",
+		i2c_addrs => [0x2d],
+		i2c_detect => sub { gl525sm_detect(@_); },
+	}, {
+		name => "Analog Devices ADM9240",
+		driver => "adm9240",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { adm9240_detect(@_, 0); },
+	}, {
+		name => "Dallas Semiconductor DS1621/DS1631",
+		driver => "ds1621",
+		i2c_addrs => [0x48..0x4f],
+		i2c_detect => sub { ds1621_detect(@_); },
+	}, {
+		name => "Dallas Semiconductor DS1780",
+		driver => "adm9240",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { adm9240_detect(@_, 1); },
+	}, {
+		name => "National Semiconductor LM81",
+		driver => "adm9240",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { adm9240_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADM1026",
+		driver => "adm1026",
+		i2c_addrs => [0x2c, 0x2d, 0x2e],
+		i2c_detect => sub { adm1026_detect(@_); },
+	}, {
+		name => "Analog Devices ADM1025",
+		driver => "adm1025",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adm1025_detect(@_, 0); },
+	}, {
+		name => "Philips NE1619",
+		driver => "adm1025",
+		i2c_addrs => [0x2c..0x2d],
+		i2c_detect => sub { adm1025_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADM1021",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADM1021A/ADM1023",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 1); },
+	}, {
+		name => "Maxim MAX1617",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 2); },
+	}, {
+		name => "Maxim MAX1617A",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 3); },
+	}, {
+		name => "Maxim MAX1668",
+		driver => "max1668",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max1668_detect(@_, 0); },
+	}, {
+		name => "Maxim MAX1805",
+		driver => "max1668",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max1668_detect(@_, 1); },
+	}, {
+		name => "Maxim MAX1989",
+		driver => "max1668",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max1668_detect(@_, 2); },
+	}, {
+		name => "Maxim MAX6650/MAX6651",
+		driver => "max6650",
+		i2c_addrs => [0x1b, 0x1f, 0x48, 0x4b],
+		i2c_detect => sub { max6650_detect(@_); },
+	}, {
+		name => "Maxim MAX6655/MAX6656",
+		driver => "max6655",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max6655_detect(@_); },
+	}, {
+		name => "TI THMC10",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 4); },
+	}, {
+		name => "National Semiconductor LM84",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 5); },
+	}, {
+		name => "Genesys Logic GL523SM",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 6); },
+	}, {
+		name => "Onsemi MC1066",
+		driver => "adm1021",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { adm1021_detect(@_, 7); },
+	}, {
+		name => "Maxim MAX1618",
+		driver => "max1619",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max1619_detect(@_, 1); },
+	}, {
+		name => "Maxim MAX1619",
+		driver => "max1619",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { max1619_detect(@_, 0); },
+	}, {
+		name => "National Semiconductor LM82/LM83",
+		driver => "lm83",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { lm83_detect(@_); },
+	}, {
+		name => "National Semiconductor LM90",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 0); },
+	}, {
+		name => "National Semiconductor LM89/LM99",
+		driver => "lm90",
+		i2c_addrs => [0x4c..0x4d],
+		i2c_detect => sub { lm90_detect(@_, 1); },
+	}, {
+		name => "National Semiconductor LM86",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADM1032",
+		driver => "lm90",
+		i2c_addrs => [0x4c..0x4d],
+		i2c_detect => sub { lm90_detect(@_, 3); },
+	}, {
+		name => "Maxim MAX6654/MAX6690",
+		driver => "to-be-written", # probably lm90
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { lm90_detect(@_, 4); },
+	}, {
+		name => "Maxim MAX6657/MAX6658/MAX6659",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { max6657_detect(@_); },
+	}, {
+		name => "Maxim MAX6659",
+		driver => "lm90",
+		i2c_addrs => [0x4d..0x4e], # 0x4c is handled above
+		i2c_detect => sub { max6657_detect(@_); },
+	}, {
+		name => "Maxim MAX6646",
+		driver => "lm90",
+		i2c_addrs => [0x4d],
+		i2c_detect => sub { lm90_detect(@_, 6); },
+	}, {
+		name => "Maxim MAX6647",
+		driver => "lm90",
+		i2c_addrs => [0x4e],
+		i2c_detect => sub { lm90_detect(@_, 6); },
+	}, {
+		name => "Maxim MAX6648/MAX6649/MAX6692",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 6); },
+	}, {
+		name => "Maxim MAX6680/MAX6681",
+		driver => "lm90",
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { lm90_detect(@_, 7); },
+	}, {
+		name => "Winbond W83L771W/G",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 8); },
+	}, {
+		name => "Texas Instruments TMP401",
+		driver => "tmp401",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 9); },
+	}, {
+		name => "Texas Instruments TMP411",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c..0x4e],
+		i2c_detect => sub { lm90_detect(@_, 10); },
+	}, {
+		name => "National Semiconductor LM95231",
+		driver => "to-be-written",
+		i2c_addrs => [0x2b, 0x19, 0x2a],
+		i2c_detect => sub { lm95231_detect(@_); },
+	}, {
+		name => "National Semiconductor LM63",
+		driver => "lm63",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm63_detect(@_, 1); },
+	}, {
+		name => "National Semiconductor LM64",
+		driver => "to-be-written", # lm63
+		i2c_addrs => [0x18, 0x4e],
+		i2c_detect => sub { lm63_detect(@_, 3); },
+	}, {
+		name => "Fintek F75363SG",
+		driver => "lm63", # Not yet
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm63_detect(@_, 2); },
+	}, {
+		name => "National Semiconductor LM92",
+		driver => "lm92",
+		i2c_addrs => [0x48..0x4b],
+		i2c_detect => sub { lm92_detect(@_, 0); },
+	}, {
+		name => "National Semiconductor LM76",
+		driver => "lm92",
+		i2c_addrs => [0x48..0x4b],
+		i2c_detect => sub { lm92_detect(@_, 1); },
+	}, {
+		name => "Maxim MAX6633/MAX6634/MAX6635",
+		driver => "lm92",
+		i2c_addrs => [0x48..0x4f], # The MAX6633 can also use 0x40-0x47 but we
+					   # don't want to probe these addresses, it's
+					   # dangerous.
+		i2c_detect => sub { lm92_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADT7461",
+		driver => "lm90",
+		i2c_addrs => [0x4c..0x4d],
+		i2c_detect => sub { lm90_detect(@_, 5); },
+	}, {
+		name => "Analog Devices ADT7481",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c, 0x4b],
+		i2c_detect => sub { adt7481_detect(@_); },
+	}, {
+		name => "Analog Devices ADM1029",
+		driver => "adm1029",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { adm1029_detect(@_); },
+	}, {
+		name => "Analog Devices ADM1030",
+		driver => "adm1031",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adm1031_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADM1031",
+		driver => "adm1031",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adm1031_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADM1033",
+		driver => "to-be-written",
+		i2c_addrs => [0x50..0x53],
+		i2c_detect => sub { adm1034_detect(@_, 0); },
+	}, {
+		name => "Analog Devices ADM1034",
+		driver => "to-be-written",
+		i2c_addrs => [0x50..0x53],
+		i2c_detect => sub { adm1034_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADM1022",
+		driver => "thmc50",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adm1022_detect(@_, 0); },
+	}, {
+		name => "Texas Instruments THMC50",
+		driver => "thmc50",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adm1022_detect(@_, 1); },
+	}, {
+		name => "Analog Devices ADM1028",
+		driver => "thmc50",
+		i2c_addrs => [0x2e],
+		i2c_detect => sub { adm1022_detect(@_, 2); },
+	}, {
+		name => "Texas Instruments THMC51",
+		driver => "to-be-written", # thmc50
+		i2c_addrs => [0x2e], # At least (no datasheet)
+		i2c_detect => sub { adm1022_detect(@_, 3); },
+	}, {
+		name => "VIA VT1211 (I2C)",
+		driver => "use-isa-instead",
+		i2c_addrs => [0x2d],
+		i2c_detect => sub { vt1211_i2c_detect(@_); },
+	}, {
+		name => "ITE IT8712F",
+		driver => "it87",
+		i2c_addrs => [0x28..0x2f],
+		i2c_detect => sub { it8712_i2c_detect(@_); },
+	}, {
+		name => "ITE IT8201R/IT8203R/IT8206R/IT8266R",
+		driver => "not-a-sensor",
+		i2c_addrs => [0x4e],
+		i2c_detect => sub { ite_overclock_detect(@_); },
+	}, {
+		name => "SPD EEPROM",
+		driver => "not-a-sensor",
+		# Can also live at 0x54-0x57, but we don't care: we only check
+		# for SPD and EDID EEPROMs because some hardware monitoring
+		# chips can live at 0x50-0x53.
+		i2c_addrs => [0x50..0x53],
+		i2c_detect => sub { eeprom_detect(@_); },
+	}, {
+		name => "EDID EEPROM",
+		driver => "not-a-sensor",
+		i2c_addrs => [0x50..0x53],
+		i2c_detect => sub { ddcmonitor_detect(@_); },
+	}, {
+		name => "FSC Poseidon I",
+		driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscpos" },
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 0); },
+	}, {
+		name => "FSC Poseidon II",
+		driver => "to-be-written",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 1); },
+	}, {
+		name => "FSC Scylla",
+		driver => "fschmd",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 2); },
+	}, {
+		name => "FSC Hermes",
+		driver => sub { kernel_version_at_least(2, 6, 24) ? "fschmd" : "fscher" },
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 3); },
+	}, {
+		name => "FSC Heimdal",
+		driver => "fschmd",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 4); },
+	}, {
+		name => "FSC Heracles",
+		driver => "fschmd",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 5); },
+	}, {
+		name => "ALi M5879",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c..0x2d],
+		i2c_detect => sub { m5879_detect(@_); },
+	}, {
+		name => "SMSC LPC47M15x/192/292/997",
+		driver => "smsc47m192",
+		i2c_addrs => [0x2c..0x2d],
+		i2c_detect => sub { smsc47m192_detect(@_); },
+	}, {
+		name => "SMSC DME1737",
+		driver => "dme1737",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { dme1737_detect(@_, 1); },
+	}, {
+		name => "SMSC SCH5027D-NW",
+		driver => "dme1737",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { dme1737_detect(@_, 2); },
+	}, {
+		name => "Fintek F75111R/RG/N (GPIO)",
+		driver => "not-a-sensor",
+		i2c_addrs => [0x4e], # 0x37 not probed
+		i2c_detect => sub { fintek_detect(@_, 1); },
+	}, {
+		name => "Fintek F75121R/F75122R/RG (VID+GPIO)",
+		driver => "to-be-written",
+		i2c_addrs => [0x4e], # 0x37 not probed
+		i2c_detect => sub { fintek_detect(@_, 2); },
+	}, {
+		name => "Fintek F75373S/SG",
+		driver => "f75375s",
+		i2c_addrs => [0x2d..0x2e],
+		i2c_detect => sub { fintek_detect(@_, 3); },
+	}, {
+		name => "Fintek F75375S/SP",
+		driver => "f75375s",
+		i2c_addrs => [0x2d..0x2e],
+		i2c_detect => sub { fintek_detect(@_, 4); },
+	}, {
+		name => "Fintek F75387SG/RG",
+		driver => "to-be-written",
+		i2c_addrs => [0x2d..0x2e],
+		i2c_detect => sub { fintek_detect(@_, 5); },
+	}, {
+		name => "Fintek F75383S/M",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { fintek_detect(@_, 6); },
+	}, {
+		name => "Fintek F75384S/M",
+		driver => "to-be-written",
+		i2c_addrs => [0x4d],
+		i2c_detect => sub { fintek_detect(@_, 6); },
+	}, {
+		name => "Fintek custom power control IC",
+		driver => "to-be-written",
+		i2c_addrs => [0x2f],
+		i2c_detect => sub { fintek_detect(@_, 7); },
+	}, {
+		name => "Smart Battery",
+		driver => "sbs", # ACPI driver, not sure if it always works
+		i2c_addrs => [0x0b],
+		i2c_detect => sub { smartbatt_detect(@_); },
+	}, {
+		name => "IPMI BMC KCS",
+		driver => "ipmisensors",
+		isa_addrs => [0x0ca0],
+		isa_detect => sub { ipmi_detect(@_); },
+	}, {
+		name => "IPMI BMC SMIC",
+		driver => "ipmisensors",
+		isa_addrs => [0x0ca8],
+		isa_detect => sub { ipmi_detect(@_); },
+	}
 );
 
 
