@@ -1304,7 +1304,7 @@ use vars qw(@i2c_adapter_names);
      },
      {
        name => "Smart Battery",
-       driver => "smartbatt",
+       driver => "sbs", # ACPI driver, not sure if it always works
        i2c_addrs => [0x0b],
        i2c_detect => sub { smartbatt_detect(@_); },
      },

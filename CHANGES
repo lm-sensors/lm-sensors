@@ -29,6 +29,7 @@ SVN-HEAD
                   Fix handling of bus driver names with an underscore
                   Simplify loading of bus drivers
                   Fix bus number prediction logic (#2327)
+                  Suggest the sbs driver for smart batteries
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
