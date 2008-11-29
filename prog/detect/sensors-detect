@@ -52,405 +52,338 @@ $revision =~ s/ \([^()]*\)//;
 # Each entry must have a vendid (Vendor ID), devid (Device ID) and
 # procid (Device name) and driver (Device driver).
 @pci_adapters = (
-     {
-       vendid => 0x8086,
-       devid  => 0x7113,
-       procid => "Intel 82371AB PIIX4 ACPI",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x7603,
-       procid => "Intel 82372FB PIIX5 ACPI",
-       driver => "to-be-tested",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x719b,
-       procid => "Intel 82443MX Mobile",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x2413,
-       procid => "Intel 82801AA ICH",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x2423,
-       procid => "Intel 82801AB ICH0",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x2443,
-       procid => "Intel 82801BA ICH2",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x2483,
-       procid => "Intel 82801CA/CAM ICH3",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x24C3,
-       procid => "Intel 82801DB ICH4",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x24D3,
-       procid => "Intel 82801EB ICH5",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x25A4,
-       procid => "Intel 6300ESB",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x269B,
-       procid => "Intel Enterprise Southbridge - ESB2",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x266A,
-       procid => "Intel 82801FB ICH6",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x27DA,
-       procid => "Intel 82801G ICH7",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x283E,
-       procid => "Intel 82801H ICH8",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x2930,
-       procid => "Intel ICH9",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x5032,
-       procid => "Intel Tolapai",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x3A30,
-       procid => "Intel ICH10",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x3A60,
-       procid => "Intel ICH10",
-       driver => "i2c-i801",
-     },
-     {
-       vendid => 0x8086,
-       devid  => 0x8119,
-       procid => "Intel SCH",
-       driver => "i2c-isch",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3040,
-       procid => "VIA Technologies VT82C586B Apollo ACPI",
-       driver => "i2c-via",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3050,
-       procid => "VIA Technologies VT82C596 Apollo ACPI",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3051,
-       procid => "VIA Technologies VT82C596B ACPI",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3057,
-       procid => "VIA Technologies VT82C686 Apollo ACPI",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3074,
-       procid => "VIA Technologies VT8233 VLink South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3147,
-       procid => "VIA Technologies VT8233A South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3177,
-       procid => "VIA Technologies VT8233A/8235 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3227,
-       procid => "VIA Technologies VT8237 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3337,
-       procid => "VIA Technologies VT8237A South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x8235,
-       procid => "VIA Technologies VT8231 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x3287,
-       procid => "VIA Technologies VT8251 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x8324,
-       procid => "VIA Technologies CX700 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1106,
-       devid  => 0x8353,
-       procid => "VIA Technologies VX800/VX820 South Bridge",
-       driver => "i2c-viapro",
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x0630,
-       procid => "Silicon Integrated Systems SIS630",
-       driver => "i2c-sis630",
-     },
-     {
-       vendid => 0x1039,
-       devid  => 0x0730,
-       procid => "Silicon Integrated Systems SIS730",
-       driver => "i2c-sis630",
-     },
-#
-# Both Ali chips below have same PCI ID. Can't be helped. Only one should load.
-#
-     {
-       vendid => 0x10b9,
-       devid => 0x7101,
-       procid => "Acer Labs 1533/1543",
-       driver => "i2c-ali15x3",
-     },
-     {
-       vendid => 0x10b9,
-       devid => 0x7101,
-       procid => "Acer Labs 1535",
-       driver => "i2c-ali1535",
-     },
-     {
-       vendid => 0x10b9,
-       devid => 0x1563,
-       procid => "Acer Labs 1563",
-       driver => "i2c-ali1563",
-     },
-     {
-       vendid => 0x1022,
-       devid  => 0x740b,
-       procid => "AMD-756 Athlon ACPI",
-       driver => "i2c-amd756",
-     },
-     {
-       vendid => 0x1022,
-       devid  => 0x7413,
-       procid => "AMD-766 Athlon ACPI",
-       driver => "i2c-amd756",
-     },
-     {
-       vendid => 0x1022,
-       devid  => 0x7443,
-       procid => "AMD-768 System Management",
-       driver => "i2c-amd756",
-     },
-     {
-       vendid => 0x1022,
-       devid  => 0x746b,
-       procid => "AMD-8111 ACPI",
-       driver => "i2c-amd756",
-     },
-     {
-       vendid => 0x1022,
-       devid  => 0x746a,
-       procid => "AMD-8111 SMBus 2.0",
-       driver => "i2c-amd8111",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x01b4,
-       procid => "nVidia nForce SMBus",
-       driver => "i2c-amd756",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x0064,
-       procid => "nVidia Corporation nForce2 SMBus (MCP)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x0084,
-       procid => "nVidia Corporation nForce2 Ultra 400 SMBus (MCP)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x00D4,
-       procid => "nVidia Corporation nForce3 Pro150 SMBus (MCP)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x00E4,
-       procid => "nVidia Corporation nForce3 250Gb SMBus (MCP)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid  => 0x0052,
-       procid => "nVidia Corporation nForce4 SMBus (MCP)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid => 0x0034,
-       procid => "nVidia Corporation nForce4 SMBus (MCP-04)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid => 0x0264,
-       procid => "nVidia Corporation nForce4 SMBus (MCP51)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid => 0x0368,
-       procid => "nVidia Corporation nForce4 SMBus (MCP55)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid => 0x03eb,
-       procid => "nVidia Corporation nForce4 SMBus (MCP61)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x10de,
-       devid => 0x0446,
-       procid => "nVidia Corporation nForce4 SMBus (MCP65)",
-       driver => "i2c-nforce2",
-     },
-     {
-       vendid => 0x1166,
-       devid  => 0x0200,
-       procid => "ServerWorks OSB4 South Bridge",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1055,
-       devid  => 0x9463,
-       procid => "SMSC Victory66 South Bridge",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1166,
-       devid  => 0x0201,
-       procid => "ServerWorks CSB5 South Bridge",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1166,
-       devid  => 0x0203,
-       procid => "ServerWorks CSB6 South Bridge",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1166,
-       devid  => 0x0205,
-       procid => "ServerWorks HT-1000 South Bridge",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1002,
-       devid  => 0x4353,
-       procid => "ATI Technologies Inc ATI SMBus",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1002,
-       devid  => 0x4363,
-       procid => "ATI Technologies Inc ATI SMBus",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1002,
-       devid  => 0x4372,
-       procid => "ATI Technologies Inc IXP SB400 SMBus Controller",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x1002,
-       devid  => 0x4385,
-       procid => "ATI Technologies Inc SB600 SMBus",
-       driver => "i2c-piix4",
-     },
-     {
-       vendid => 0x100B,
-       devid => 0x0500,
-       procid => "SCx200 Bridge",
-       driver => "scx200_acb",
-     },
-     {
-       vendid => 0x100B,
-       devid => 0x0510,
-       procid => "SC1100 Bridge",
-       driver => "scx200_acb",
-     },
-     {
-       vendid => 0x100B,
-       devid => 0x002B,
-       procid => "CS5535 ISA bridge",
-       driver => "scx200_acb",
-     },
-     {
-       vendid => 0x1022,
-       devid => 0x2090,
-       procid => "CS5536 [Geode companion] ISA",
-       driver => "scx200_acb",
-     },
+	{
+		vendid	=> 0x8086,
+		devid	=> 0x7113,
+		procid	=> "Intel 82371AB PIIX4 ACPI",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x7603,
+		procid	=> "Intel 82372FB PIIX5 ACPI",
+		driver	=> "to-be-tested",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x719b,
+		procid	=> "Intel 82443MX Mobile",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2413,
+		procid	=> "Intel 82801AA ICH",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2423,
+		procid	=> "Intel 82801AB ICH0",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2443,
+		procid	=> "Intel 82801BA ICH2",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2483,
+		procid	=> "Intel 82801CA/CAM ICH3",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x24C3,
+		procid	=> "Intel 82801DB ICH4",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x24D3,
+		procid	=> "Intel 82801EB ICH5",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x25A4,
+		procid	=> "Intel 6300ESB",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x269B,
+		procid	=> "Intel Enterprise Southbridge - ESB2",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x266A,
+		procid	=> "Intel 82801FB ICH6",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x27DA,
+		procid	=> "Intel 82801G ICH7",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x283E,
+		procid	=> "Intel 82801H ICH8",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2930,
+		procid	=> "Intel ICH9",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x5032,
+		procid	=> "Intel Tolapai",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x3A30,
+		procid	=> "Intel ICH10",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x3A60,
+		procid	=> "Intel ICH10",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8119,
+		procid	=> "Intel SCH",
+		driver	=> "i2c-isch",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3040,
+		procid	=> "VIA Technologies VT82C586B Apollo ACPI",
+		driver	=> "i2c-via",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3050,
+		procid	=> "VIA Technologies VT82C596 Apollo ACPI",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3051,
+		procid	=> "VIA Technologies VT82C596B ACPI",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3057,
+		procid	=> "VIA Technologies VT82C686 Apollo ACPI",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3074,
+		procid	=> "VIA Technologies VT8233 VLink South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3147,
+		procid	=> "VIA Technologies VT8233A South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3177,
+		procid	=> "VIA Technologies VT8233A/8235 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3227,
+		procid	=> "VIA Technologies VT8237 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3337,
+		procid	=> "VIA Technologies VT8237A South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x8235,
+		procid	=> "VIA Technologies VT8231 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x3287,
+		procid	=> "VIA Technologies VT8251 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x8324,
+		procid	=> "VIA Technologies CX700 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1106,
+		devid	=> 0x8353,
+		procid	=> "VIA Technologies VX800/VX820 South Bridge",
+		driver	=> "i2c-viapro",
+	}, {
+		vendid	=> 0x1039,
+		devid	=> 0x0630,
+		procid	=> "Silicon Integrated Systems SIS630",
+		driver	=> "i2c-sis630",
+	}, {
+		vendid	=> 0x1039,
+		devid	=> 0x0730,
+		procid	=> "Silicon Integrated Systems SIS730",
+		driver	=> "i2c-sis630",
+	}, {
+		# Both Ali chips below have same PCI ID. Can't be helped. Only one should load.
+		vendid	=> 0x10b9,
+		devid	=> 0x7101,
+		procid	=> "Acer Labs 1533/1543",
+		driver	=> "i2c-ali15x3",
+	}, {
+		vendid	=> 0x10b9,
+		devid	=> 0x7101,
+		procid	=> "Acer Labs 1535",
+		driver	=> "i2c-ali1535",
+	}, {
+		vendid	=> 0x10b9,
+		devid	=> 0x1563,
+		procid	=> "Acer Labs 1563",
+		driver	=> "i2c-ali1563",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x740b,
+		procid	=> "AMD-756 Athlon ACPI",
+		driver	=> "i2c-amd756",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x7413,
+		procid	=> "AMD-766 Athlon ACPI",
+		driver	=> "i2c-amd756",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x7443,
+		procid	=> "AMD-768 System Management",
+		driver	=> "i2c-amd756",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x746b,
+		procid	=> "AMD-8111 ACPI",
+		driver	=> "i2c-amd756",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x746a,
+		procid	=> "AMD-8111 SMBus 2.0",
+		driver	=> "i2c-amd8111",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x01b4,
+		procid	=> "nVidia nForce SMBus",
+		driver	=> "i2c-amd756",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0064,
+		procid	=> "nVidia Corporation nForce2 SMBus (MCP)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0084,
+		procid	=> "nVidia Corporation nForce2 Ultra 400 SMBus (MCP)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x00D4,
+		procid	=> "nVidia Corporation nForce3 Pro150 SMBus (MCP)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x00E4,
+		procid	=> "nVidia Corporation nForce3 250Gb SMBus (MCP)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0052,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0034,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP-04)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0264,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP51)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0368,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP55)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x03eb,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP61)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0446,
+		procid	=> "nVidia Corporation nForce4 SMBus (MCP65)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x1166,
+		devid	=> 0x0200,
+		procid	=> "ServerWorks OSB4 South Bridge",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1055,
+		devid	=> 0x9463,
+		procid	=> "SMSC Victory66 South Bridge",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1166,
+		devid	=> 0x0201,
+		procid	=> "ServerWorks CSB5 South Bridge",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1166,
+		devid	=> 0x0203,
+		procid	=> "ServerWorks CSB6 South Bridge",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1166,
+		devid	=> 0x0205,
+		procid	=> "ServerWorks HT-1000 South Bridge",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1002,
+		devid	=> 0x4353,
+		procid	=> "ATI Technologies Inc ATI SMBus",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1002,
+		devid	=> 0x4363,
+		procid	=> "ATI Technologies Inc ATI SMBus",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1002,
+		devid	=> 0x4372,
+		procid	=> "ATI Technologies Inc IXP SB400 SMBus Controller",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1002,
+		devid	=> 0x4385,
+		procid	=> "ATI Technologies Inc SB600 SMBus",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x100B,
+		devid	=> 0x0500,
+		procid	=> "SCx200 Bridge",
+		driver	=> "scx200_acb",
+	}, {
+		vendid	=> 0x100B,
+		devid	=> 0x0510,
+		procid	=> "SC1100 Bridge",
+		driver	=> "scx200_acb",
+	}, {
+		vendid	=> 0x100B,
+		devid	=> 0x002B,
+		procid	=> "CS5535 ISA bridge",
+		driver	=> "scx200_acb",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x2090,
+		procid	=> "CS5536 [Geode companion] ISA",
+		driver	=> "scx200_acb",
+	}
 );
 
 # The following entries used to appear directly in @pci_adapters.
@@ -460,21 +393,21 @@ $revision =~ s/ \([^()]*\)//;
 #
 use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
 @pci_adapters_sis5595 = (
-     {
-       vendid => 0x1039,
-       devid  => 0x0008,
-       procid => "Silicon Integrated Systems SIS5595",
-       driver => "i2c-sis5595",
-     },
+	{
+		vendid	=> 0x1039,
+		devid	=> 0x0008,
+		procid	=> "Silicon Integrated Systems SIS5595",
+		driver	=> "i2c-sis5595",
+	}
 );
 
 @pci_adapters_sis96x = (
-     {
-       vendid => 0x1039,
-       devid  => 0x0016,
-       procid => "Silicon Integrated Systems SMBus Controller",
-       driver => "i2c-sis96x",
-     },
+	{
+		vendid	=> 0x1039,
+		devid	=> 0x0016,
+		procid	=> "Silicon Integrated Systems SMBus Controller",
+		driver	=> "i2c-sis96x",
+	}
 );
 
 # Look-up table to find out an I2C bus' driver based on the bus name.
