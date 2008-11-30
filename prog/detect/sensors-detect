@@ -2137,7 +2137,13 @@ sub load_module
 sub initialize_modules_supported
 {
 	foreach my $chip (@chip_ids) {
-		$modules_supported{$chip->{driver}}++;
+		next if $chip->{driver} eq "to-be-written";
+		next if $chip->{driver} eq "not-a-sensor";
+		next if $chip->{driver} eq "use-isa-instead";
+
+		my $normalized = $chip->{driver};
+		$normalized =~ tr/-/_/;
+		$modules_supported{$normalized}++;
 	}
 }
 
