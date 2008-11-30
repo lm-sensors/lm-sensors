@@ -205,7 +205,7 @@ rrdGetSensors_DS
         max = "12000";
         break;
       case DataType_temperature:
-        min = "0";
+        min = "-100";
         max = "250";
         break;
       case DataType_mhz:
