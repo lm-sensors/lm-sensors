@@ -40,7 +40,7 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 
 use constant NO_CACHE => 1;
 use vars qw(@pci_adapters @chip_ids @non_hwmon_chip_ids $i2c_addresses_to_scan
-	    @superio_ids @cpu_ids $revision @i2c_byte_cache);
+	    @cpu_ids $revision @i2c_byte_cache);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -1142,26 +1142,10 @@ use vars qw(@i2c_adapter_names);
 #      I2C bus, a function which detects whether two entries are the same.
 #      The function will be passed three parameters: the LPC address, an
 #      open file descriptor to access the I2C bus, and the I2C address.
-#
-# Entries are grouped by family. Each family entry has the following fields:
-#  family: The family name
-#  guess (optional): Typical logical device address. This lets us do
-#      generic probing if we fail to recognize the chip.
-#  enter: The password sequence to write to the address register
-#  chips: Array of chips
-# The order of families matters, because we stop as soon as one family
-# succeeds. So we have to list families with shorter password sequences
-# first.
-@superio_ids = (
-  {
-    family => "National Semiconductor",
-    enter =>
-    {
-      0x2e => [],
-      0x4e => [],
-    },
-    chips =>
-    [
+use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
+	    @superio_ids_winbond @superio_ids_ite @superio_ids);
+
+@superio_ids_natsemi = (
       {
 	name => "Nat. Semi. PC8374L Super IO Sensors",
 	driver => "to-be-written",
@@ -1278,17 +1262,9 @@ use vars qw(@i2c_adapter_names);
 	devid => 0xf2,
 	logdev => 0x14,
       },
-    ],
-  },
-  {
-    family => "SMSC",
-    enter =>
-    {
-      0x2e => [0x55],
-      0x4e => [0x55],
-    },
-    chips =>
-    [
+);
+
+@superio_ids_smsc = (
       {
 	name => "SMSC DME1737 Super IO",
 	# Hardware monitoring features are accessed on the SMBus
@@ -1507,13 +1483,9 @@ use vars qw(@i2c_adapter_names);
 	driver => "not-a-sensor",
 	devid => 0x83,
       },
-    ],
-    # Non-standard SMSC detection callback and chip list. These chips differ
-    # from the standard ones listed above in that the device ID register
-    # address is 0x0d instead of 0x20 (as specified by the ISA PNP spec).
-    ns_detect => \&smsc_ns_detect_superio,
-    ns_chips =>
-    [
+);
+
+@superio_ids_smsc_ns = (
       {
 	name => "SMSC FDC37C665 Super IO",
 	driver => "not-a-sensor",
@@ -1539,18 +1511,9 @@ use vars qw(@i2c_adapter_names);
 	driver => "not-a-sensor",
 	devid => 0x5a,
       },
-    ],
-  },
-  {
-    family => "VIA/Winbond/Fintek",
-    guess => 0x290,
-    enter =>
-    {
-      0x2e => [0x87, 0x87],
-      0x4e => [0x87, 0x87],
-    },
-    chips =>
-    [
+);
+
+@superio_ids_winbond = (
       {
 	name => "VIA VT1211 Super IO Sensors",
 	driver => "vt1211",
@@ -1680,18 +1643,9 @@ use vars qw(@i2c_adapter_names);
 	driver => "not-a-sensor",
 	devid => 0x8708,
       },
-    ],
-  },
-  {
-    family => "ITE",
-    guess => 0x290,
-    enter =>
-    {
-      0x2e => [0x87, 0x01, 0x55, 0x55],
-      0x4e => [0x87, 0x01, 0x55, 0xaa],
-    },
-    chips =>
-    [
+);
+
+@superio_ids_ite = (
       {
 	name => "ITE IT8702F Super IO Sensors",
 	driver => "to-be-written",
@@ -1735,7 +1689,60 @@ use vars qw(@i2c_adapter_names);
 	devid => 0x8726,
 	logdev => 0x04,
       },
-    ],
+);
+
+# Entries are grouped by family. Each family entry has the following fields:
+#  family: The family name
+#  guess (optional): Typical logical device address. This lets us do
+#      generic probing if we fail to recognize the chip.
+#  enter: The password sequence to write to the address register
+#  chips: Array of chips
+# The order of families matters, because we stop as soon as one family
+# succeeds. So we have to list families with shorter password sequences
+# first.
+@superio_ids = (
+  {
+    family => "National Semiconductor",
+    enter =>
+    {
+      0x2e => [],
+      0x4e => [],
+    },
+    chips => \@superio_ids_natsemi,
+  },
+  {
+    family => "SMSC",
+    enter =>
+    {
+      0x2e => [0x55],
+      0x4e => [0x55],
+    },
+    chips => \@superio_ids_smsc,
+    # Non-standard SMSC detection callback and chip list. These chips differ
+    # from the standard ones listed above in that the device ID register
+    # address is 0x0d instead of 0x20 (as specified by the ISA PNP spec).
+    ns_detect => \&smsc_ns_detect_superio,
+    ns_chips => \@superio_ids_smsc_ns,
+  },
+  {
+    family => "VIA/Winbond/Fintek",
+    guess => 0x290,
+    enter =>
+    {
+      0x2e => [0x87, 0x87],
+      0x4e => [0x87, 0x87],
+    },
+    chips => \@superio_ids_winbond,
+  },
+  {
+    family => "ITE",
+    guess => 0x290,
+    enter =>
+    {
+      0x2e => [0x87, 0x01, 0x55, 0x55],
+      0x4e => [0x87, 0x01, 0x55, 0xaa],
+    },
+    chips => \@superio_ids_ite,
   },
 );
 
