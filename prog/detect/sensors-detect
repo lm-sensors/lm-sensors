@@ -1710,55 +1710,57 @@ use vars qw(@cpu_ids);
 
 # $_[0] is the sought value
 # @_[1..] is the list to seek in
-# Returns: 0 on failure, 1 if found.
-# Note: Every use of this sub probably indicates the use of the wrong
-#       datastructure
+# Returns: 1 if found, 0 if not.
 sub contains
 {
-  my $sought = shift;
-  foreach (@_) {
-    return 1 if $sought eq $_;
-  }
-  return 0;
+	my $sought = shift;
+	local $_;
+
+	foreach (@_) {
+		return 1 if $sought eq $_;
+	}
+	return 0;
 }
 
 # Address can be decimal or hexadecimal
 sub valid_address
 {
-  my $value = shift;
+	my $value = shift;
 
-  if ($value !~ m/^(0x[0-9a-f]+|[0-9]+)$/i) {
-    print "$value is not a valid address, sorry.\n";
-    exit -1;
-  }
-  $value = oct($value) if $value =~ /^0x/i;
+	if ($value !~ m/^(0x[0-9a-f]+|[0-9]+)$/i) {
+		print "$value is not a valid address, sorry.\n";
+		exit -1;
+	}
+	$value = oct($value) if $value =~ m/^0x/i;
 
-  return $value;
+	return $value;
 }
 
 sub parse_not_to_scan
 {
-  my ($min, $max, $to_parse) = @_;
-  my @ranges = split /\s*, \s*/, $to_parse;
-  my @res;
-  my $range;
-  foreach $range (@ranges) {
-    my ($start, $end) = split /\s*-\s*/, $range;
-    $start = valid_address($start);
-    if (defined $end) {
-      $end = valid_address($end);
-      if ($end <= $start) {
-        print "$start-$end is not a valid range, sorry.\n";
-        exit -1;
-      }
-      $start = $min if $start < $min;
-      $end = $max if $end > $max;
-      push @res, ($start..$end);
-    } else {
-      push @res, $start if $start >= $min and $start <= $max;
-    }
-  }
-  return sort { $a <=> $b } @res;
+	my ($min, $max, $to_parse) = @_;
+	my @ranges = split /\s*, \s*/, $to_parse;
+	my @res;
+	my $range;
+
+	foreach $range (@ranges) {
+		my ($start, $end) = split /\s*-\s*/, $range;
+		$start = valid_address($start);
+		if (defined $end) {
+			$end = valid_address($end);
+			if ($end <= $start) {
+				print "$start-$end is not a valid range, sorry.\n";
+				exit -1;
+			}
+			$start = $min if $start < $min;
+			$end = $max if $end > $max;
+			push @res, ($start..$end);
+		} else {
+			push @res, $start if $start >= $min and $start <= $max;
+		}
+	}
+
+	return sort { $a <=> $b } @res;
 }
 
 # @_[0]: Reference to list 1
@@ -1767,14 +1769,15 @@ sub parse_not_to_scan
 # Elements must be numeric.
 sub any_list_match
 {
-  my ($list1, $list2) = @_;
-  my ($el1, $el2);
-  foreach $el1 (@$list1) {
-    foreach $el2 (@$list2) {
-      return 1 if $el1 == $el2;
-    }
-  }
-  return 0;
+	my ($list1, $list2) = @_;
+	my ($el1, $el2);
+
+	foreach $el1 (@$list1) {
+		foreach $el2 (@$list2) {
+			return 1 if $el1 == $el2;
+		}
+	}
+	return 0;
 }
 
 ###################
