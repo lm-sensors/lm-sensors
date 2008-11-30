@@ -2207,31 +2207,31 @@ sub adapter_pci_detection
 	# Loop over the known I2C/SMBus adapters
 	foreach $try (@pci_adapters) {
 		$key = sprintf("%04x:%04x", $try->{vendid}, $try->{devid});
-		if (exists $pci_list{$key}) {
-			$device = $pci_list{$key};
-			if ($try->{driver} =~ m/^to-be-/) {
-				printf "No known driver for device \%s: \%s\n",
-				       pci_busid($device), $try->{procid};
+		next unless exists $pci_list{$key};
 
-				if ($try->{driver} eq "to-be-tested") {
-					print "\nWe are currently looking for testers for this adapter!\n".
-					      "Please check http://www.lm-sensors.org/wiki/Devices\n".
-					      "and/or contact us if you want to help.\n\n";
-					print "Continue... ";
-					<STDIN>;
-					print "\n";
-				}
-	        	} else {
-				printf "Using driver `\%s' for device \%s: \%s\n",
-				       $try->{driver}, pci_busid($device),
-				       $try->{procid};
-				$count++;
-				load_module($try->{driver});
-			}
-
-			# Delete from detected SMBus device list
-			delete $smbus{$key};
+		$device = $pci_list{$key};
+		if ($try->{driver} eq "to-be-tested") {
+			print "\nWe are currently looking for testers for this adapter!\n".
+			      "Please check http://www.lm-sensors.org/wiki/Devices\n".
+			      "and/or contact us if you want to help.\n\n".
+			      "Continue... ";
+			<STDIN>;
+			print "\n";
 		}
+
+		if ($try->{driver} =~ m/^to-be-/) {
+			printf "No known driver for device \%s: \%s\n",
+			       pci_busid($device), $try->{procid};
+	        } else {
+			printf "Using driver `\%s' for device \%s: \%s\n",
+			       $try->{driver}, pci_busid($device),
+			       $try->{procid};
+			$count++;
+			load_module($try->{driver});
+		}
+
+		# Delete from detected SMBus device list
+		delete $smbus{$key};
 	}
 
 	# Now see if there are unknown SMBus devices left
