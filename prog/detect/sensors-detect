@@ -2265,17 +2265,17 @@ sub find_i2c_adapter_driver
 
 # These are copied from <linux/i2c-dev.h>
 
-use constant IOCTL_I2C_SLAVE    => 0x0703;
-use constant IOCTL_I2C_FUNCS    => 0x0705;
-use constant IOCTL_I2C_SMBUS    => 0x0720;
+use constant IOCTL_I2C_SLAVE	=> 0x0703;
+use constant IOCTL_I2C_FUNCS	=> 0x0705;
+use constant IOCTL_I2C_SMBUS	=> 0x0720;
 
-use constant SMBUS_READ         => 1;
-use constant SMBUS_WRITE        => 0;
+use constant SMBUS_READ		=> 1;
+use constant SMBUS_WRITE	=> 0;
 
-use constant SMBUS_QUICK        => 0;
-use constant SMBUS_BYTE         => 1;
-use constant SMBUS_BYTE_DATA    => 2;
-use constant SMBUS_WORD_DATA    => 3;
+use constant SMBUS_QUICK	=> 0;
+use constant SMBUS_BYTE		=> 1;
+use constant SMBUS_BYTE_DATA	=> 2;
+use constant SMBUS_WORD_DATA	=> 3;
 
 use constant I2C_FUNC_SMBUS_QUICK	=> 0x00010000;
 use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
@@ -2285,13 +2285,13 @@ use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
 # Returns: -1 on failure, functionality bitfield on success.
 sub i2c_get_funcs
 {
-  my $file = shift;
-  my $funcs = pack("L", 0); # Allocate space
+	my $file = shift;
+	my $funcs = pack("L", 0); # Allocate space
 
-  ioctl($file, IOCTL_I2C_FUNCS, $funcs) or return -1;
-  $funcs = unpack("L", $funcs);
+	ioctl($file, IOCTL_I2C_FUNCS, $funcs) or return -1;
+	$funcs = unpack("L", $funcs);
 
-  return $funcs;
+	return $funcs;
 }
 
 # Select the device to communicate with through its address.
@@ -2300,20 +2300,18 @@ sub i2c_get_funcs
 # Returns: 0 on failure, 1 on success.
 sub i2c_set_slave_addr
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  # Reset register data cache
-  @i2c_byte_cache = ();
+	# Reset register data cache
+	@i2c_byte_cache = ();
 
-  $addr += 0; # Make sure it's a number not a string
-  ioctl($file, IOCTL_I2C_SLAVE, $addr) or return 0;
-  return 1;
+	$addr += 0; # Make sure it's a number not a string
+	ioctl($file, IOCTL_I2C_SLAVE, $addr) or return 0;
+	return 1;
 }
 
 # i2c_smbus_access is based upon the corresponding C function (see
 # <linux/i2c-dev.h>). You should not need to call this directly.
-# Exact calling conventions are intricate; read i2c-dev.c if you really need
-# to know.
 # $_[0]: Reference to an opened filehandle
 # $_[1]: SMBUS_READ for reading, SMBUS_WRITE for writing
 # $_[2]: Command (usually register number)
@@ -2325,23 +2323,26 @@ sub i2c_set_slave_addr
 # way to do this.
 sub i2c_smbus_access
 {
-  my ($file, $read_write, $command, $size, $data) = @_;
-  my $data_array = pack("C32", @$data);
-  my $ioctl_data = pack("C2x2Ip", $read_write, $command, $size, $data_array);
-  ioctl($file, IOCTL_I2C_SMBUS, $ioctl_data) or return 0;
-  @{$_[4]} = unpack("C32", $data_array);
-  return 1;
+	my ($file, $read_write, $command, $size, $data) = @_;
+	my $data_array = pack("C32", @$data);
+	my $ioctl_data = pack("C2x2Ip", $read_write, $command, $size,
+			      $data_array);
+
+	ioctl($file, IOCTL_I2C_SMBUS, $ioctl_data) or return 0;
+	@{$_[4]} = unpack("C32", $data_array);
+	return 1;
 }
 
 # $_[0]: Reference to an opened filehandle
 # Returns: -1 on failure, the read byte on success.
 sub i2c_smbus_read_byte
 {
-  my ($file) = @_;
-  my @data;
-  i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, \@data)
-         or return -1;
-  return $data[0];
+	my ($file) = @_;
+	my @data;
+
+	i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, \@data)
+		or return -1;
+	return $data[0];
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -2352,14 +2353,15 @@ sub i2c_smbus_read_byte
 # SMBus can be slow, caching results in a big performance boost.
 sub i2c_smbus_read_byte_data
 {
-  my ($file, $command, $nocache) = @_;
-  my @data;
-  if (!$nocache && exists $i2c_byte_cache[$command]) {
-    return $i2c_byte_cache[$command];
-  }
-  i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data)
-         or return -1;
-  return ($i2c_byte_cache[$command] = $data[0]);
+	my ($file, $command, $nocache) = @_;
+	my @data;
+
+	return $i2c_byte_cache[$command]
+		if !$nocache && exists $i2c_byte_cache[$command];
+
+	i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_BYTE_DATA, \@data)
+		or return -1;
+	return ($i2c_byte_cache[$command] = $data[0]);
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -2372,11 +2374,11 @@ sub i2c_smbus_read_byte_data
 # Note: some devices use the wrong endianness.
 sub i2c_smbus_read_word_data
 {
-  my ($file, $command) = @_;
-  my @data;
-  i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data)
-         or return -1;
-  return $data[0] + 256 * $data[1];
+	my ($file, $command) = @_;
+	my @data;
+	i2c_smbus_access($file, SMBUS_READ, $command, SMBUS_WORD_DATA, \@data)
+		or return -1;
+	return $data[0] + 256 * $data[1];
 }
 
 # $_[0]: Reference to an opened filehandle
@@ -2388,21 +2390,23 @@ sub i2c_smbus_read_word_data
 # on the address range.
 sub i2c_probe
 {
-  my ($file, $addr, $funcs) = @_;
-  my $data = [];
-  if (($addr >= 0x50 && $addr <= 0x5F)
-   || ($addr >= 0x30 && $addr <= 0x37)) {
-    # This covers all EEPROMs we know of, including page protection addresses.
-    # Note that some page protection addresses will not reveal themselves with
-    # this, because they ack on write only, but this is probably better since
-    # some EEPROMs write-protect themselves permanently on almost any write to
-    # their page protection address.
-    return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE);
-    return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, $data);
-  } else {
-    return 0 unless ($funcs & I2C_FUNC_SMBUS_QUICK);
-    return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, $data);
-  }
+	my ($file, $addr, $funcs) = @_;
+	my $data = [];
+
+	if (($addr >= 0x50 && $addr <= 0x5F)
+	 || ($addr >= 0x30 && $addr <= 0x37)) {
+		# This covers all EEPROMs we know of, including page protection
+		# addresses. Note that some page protection addresses will not
+		# reveal themselves with this, because they ack on write only,
+		# but this is probably better since some EEPROMs write-protect
+		# themselves permanently on almost any write to their page
+		# protection address.
+		return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE);
+		return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, $data);
+	} else {
+		return 0 unless ($funcs & I2C_FUNC_SMBUS_QUICK);
+		return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, $data);
+	}
 }
 
 # $_[0]: Reference to an opened file handle
@@ -2417,29 +2421,29 @@ sub i2c_probe
 # but that's the best we can do.
 sub i2c_safety_check
 {
-  my ($file) = @_;
-  my $data;
+	my ($file) = @_;
+	my $data;
 
-  # First we receive a byte from the chip, and remember it.
-  $data = i2c_smbus_read_byte($file);
-  return 1 if ($data < 0);
+	# First we receive a byte from the chip, and remember it.
+	$data = i2c_smbus_read_byte($file);
+	return 1 if ($data < 0);
 
-  # We receive a byte again; very likely to be the same for
-  # 1-register-only devices.
-  return 1 if (i2c_smbus_read_byte($file) != $data);
+	# We receive a byte again; very likely to be the same for
+	# 1-register-only devices.
+	return 1 if (i2c_smbus_read_byte($file) != $data);
 
-  # Then we try a standard byte read, with a register offset equal to
-  # the byte we received; we should receive the same byte value in return.
-  return 1 if (i2c_smbus_read_byte_data($file, $data) != $data);
+	# Then we try a standard byte read, with a register offset equal to
+	# the byte we received; we should receive the same byte value in return.
+	return 1 if (i2c_smbus_read_byte_data($file, $data) != $data);
 
-  # Then we try a standard byte read, with a slightly different register
-  # offset; we should again receive the same byte value in return.
-  return 1 if (i2c_smbus_read_byte_data($file, $data ^ 1) != ($data ^ 1));
+	# Then we try a standard byte read, with a slightly different register
+	# offset; we should again receive the same byte value in return.
+	return 1 if (i2c_smbus_read_byte_data($file, $data ^ 1) != ($data ^ 1));
 
-  # Apprently this is a 1-register-only device, restore the original register
-  # value and leave it alone.
-  i2c_smbus_read_byte_data($file, $data);
-  return 0;
+	# Apprently this is a 1-register-only device, restore the original
+	# register value and leave it alone.
+	i2c_smbus_read_byte_data($file, $data);
+	return 0;
 }
 
 ####################
