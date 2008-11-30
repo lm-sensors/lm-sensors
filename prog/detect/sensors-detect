@@ -1104,27 +1104,22 @@ use vars qw(@i2c_adapter_names);
 @non_hwmon_chip_ids = (
 	{
 		name => "Winbond W83791SD",
-		driver => "not-a-sensor",
 		i2c_addrs => [0x2c..0x2f],
 		i2c_detect => sub { w83791sd_detect(@_); },
 	}, {
 		name => "Fintek F75111R/RG/N (GPIO)",
-		driver => "not-a-sensor",
 		i2c_addrs => [0x37, 0x4e],
 		i2c_detect => sub { fintek_detect(@_, 1); },
 	}, {
 		name => "ITE IT8201R/IT8203R/IT8206R/IT8266R",
-		driver => "not-a-sensor",
 		i2c_addrs => [0x4e],
 		i2c_detect => sub { ite_overclock_detect(@_); },
 	}, {
 		name => "SPD EEPROM",
-		driver => "not-a-sensor",
 		i2c_addrs => [0x50..0x57],
 		i2c_detect => sub { eeprom_detect(@_); },
 	}, {
 		name => "EDID EEPROM",
-		driver => "not-a-sensor",
 		i2c_addrs => [0x50],
 		i2c_detect => sub { ddcmonitor_detect(@_); },
 	}
@@ -3140,6 +3135,11 @@ sub chip_special_cases
 		if (ref($chip->{driver}) eq 'CODE') {
 			$chip->{driver} = $chip->{driver}->();
 		}
+	}
+
+	# Also fill the fake driver name of non-hwmon chips
+	foreach my $chip (@non_hwmon_chip_ids) {
+		$chip->{driver} = "not-a-sensor";
 	}
 }
 
