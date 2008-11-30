@@ -1709,7 +1709,7 @@ use vars qw(@cpu_ids);
 #######################
 
 # $_[0] is the sought value
-# @_[1..] is the list to seek in
+# $_[1..] is the list to seek in
 # Returns: 1 if found, 0 if not.
 sub contains
 {
@@ -1763,8 +1763,8 @@ sub parse_not_to_scan
 	return sort { $a <=> $b } @res;
 }
 
-# @_[0]: Reference to list 1
-# @_[1]: Reference to list 2
+# $_[0]: Reference to list 1
+# $_[1]: Reference to list 2
 # Result: 0 if they have no elements in common, 1 if they have
 # Elements must be numeric.
 sub any_list_match
