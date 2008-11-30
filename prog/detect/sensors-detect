@@ -2652,13 +2652,102 @@ sub i2c_addresses_to_scan
 }
 
 # $_[0]: The number of the adapter to scan
-# $_[1]: The name of the adapter, as appearing in /sys/class/i2c-adapter
-# $_[2]: The driver of the adapter
-# @_[3]: Addresses not to scan (array reference)
-sub scan_adapter
+# $_[1]: Address
+sub add_busy_i2c_address
 {
-	my ($adapter_nr, $adapter_name, $adapter_driver, $not_to_scan) = @_;
-	my ($funcs, $chip, $addr, $conf, @chips, $new_hash, $other_addr);
+	my ($adapter_nr, $addr) = @_;
+	# If the address is busy, we can normally find out which driver
+	# requested it (if the kernel is recent enough, at least 2.6.16 and
+	# later are known to work), and we assume it is the right one.
+	my ($device, $driver, $new_hash);
+
+	$device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
+			  $adapter_nr, $addr);
+	$driver = sysfs_device_driver($device);
+
+	if (!defined($driver)) {
+		printf("Client at address 0x%02x can not be probed - ".
+		       "unload all client drivers first!\n", $addr);
+		return;
+	}
+
+	$new_hash = {
+		conf => 6, # Arbitrary confidence
+		i2c_addr => $addr,
+		chipname => sysfs_device_attribute($device, "name")
+			 || "unknown",
+		i2c_adap => $i2c_adapters[$adapter_nr]->{name},
+		i2c_driver => $i2c_adapters[$adapter_nr]->{driver},
+		i2c_devnr => $adapter_nr,
+	};
+
+	printf "Client found at address 0x\%02x\n", $addr;
+	printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
+	       $driver, $new_hash->{chipname};
+
+	# Only add it to the list if this is something we would have detected,
+	# else we end up with random i2c chip drivers listed (for example
+	# media/video drivers.)
+	if (exists $modules_supported{$driver}) {
+		add_i2c_to_chips_detected($driver, $new_hash);
+	} else {
+		print "    (note: this is probably NOT a sensor chip!)\n";
+	}
+}
+
+# $_[0]: The number of the adapter to scan
+# $_[1]: Address
+# $_[2]: Chip being probed
+sub probe_free_i2c_address
+{
+	my ($adapter_nr, $addr, $chip) = @_;
+	my ($conf, @other_addr, $new_hash);
+
+	printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
+	if (($conf, @other_addr) = &{$chip->{i2c_detect}} (\*FILE, $addr)) {
+		if ($chip->{driver} eq "not-a-sensor") {
+			print "Yes\n",
+			      "    (confidence $conf, not a hardware monitoring chip";
+		} else {
+			print "Success!\n",
+			      "    (confidence $conf, driver `$chip->{driver}'";
+		}
+		if (@other_addr) {
+			print ", other addresses:";
+			@other_addr = sort @other_addr;
+			foreach my $other_addr (@other_addr) {
+				printf(" 0x%02x", $other_addr);
+			}
+		}
+		print ")\n";
+
+		return if ($chip->{driver} eq "not-a-sensor"
+			|| $chip->{driver} eq "use-isa-instead");
+
+		$new_hash = {
+			conf => $conf,
+			i2c_addr => $addr,
+			chipname => $chip->{name},
+			i2c_adap => $i2c_adapters[$adapter_nr]->{name},
+			i2c_driver => $i2c_adapters[$adapter_nr]->{driver},
+			i2c_devnr => $adapter_nr,
+		};
+		if (@other_addr) {
+			my @other_addr_copy = @other_addr;
+			$new_hash->{i2c_sub_addrs} = \@other_addr_copy;
+		}
+		add_i2c_to_chips_detected($chip->{driver}, $new_hash);
+	} else {
+		print "No\n";
+	}
+}
+
+# $_[0]: The number of the adapter to scan
+# $_[1]: Addresses not to scan (array reference)
+sub scan_i2c_adapter
+{
+	my ($adapter_nr, $not_to_scan) = @_;
+	my ($funcs, $chip, $addr);
 
 	# As we modify it, we need a copy
 	my @not_to_scan = @$not_to_scan;
@@ -2693,44 +2782,7 @@ sub scan_adapter
 		}
 
 		if (!i2c_set_slave_addr(\*FILE, $addr)) {
-			# If the address is busy, we can normally find out
-			# which driver requested it (if the kernel is recent
-			# enough, at least 2.6.16 and later are known to work),
-			# and we assume it is the right one.
-			my ($device, $driver);
-
-			$device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
-					  $adapter_nr, $addr);
-			$driver = sysfs_device_driver($device);
-
-			if (defined($driver)) {
-				$new_hash = {
-					conf => 6, # Arbitrary confidence
-					i2c_addr => $addr,
-					chipname => sysfs_device_attribute($device, "name")
-						 || "unknown",
-					i2c_adap => $adapter_name,
-					i2c_driver => $adapter_driver,
-					i2c_devnr => $adapter_nr,
-				};
-
-				printf "Client found at address 0x\%02x\n", $addr;
-				printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
-				       $driver, $new_hash->{chipname};
-
-				# Only add it to the list if this is something
-				# we would have detected, else we end up with
-				# random i2c chip drivers listed (for example
-				# media/video drivers.)
-				if (exists $modules_supported{$driver}) {
-					add_i2c_to_chips_detected($driver, $new_hash);
-				} else {
-					print "    (note: this is probably NOT a sensor chip!)\n";
-				}
-			} else {
-				printf("Client at address 0x%02x can not be probed - ".
-				       "unload all client drivers first!\n", $addr);
-			}
+			add_busy_i2c_address($adapter_nr, $addr);
 			next;
 		}
 
@@ -2743,45 +2795,9 @@ sub scan_adapter
 
 		$| = 1;
 		foreach $chip (@chip_ids, @non_hwmon_chip_ids) {
-			if (exists $chip->{i2c_addrs} and contains($addr, @{$chip->{i2c_addrs}})) {
-				printf("\%-60s", sprintf("Probing for `\%s'... ", $chip->{name}));
-				if (($conf, @chips) = &{$chip->{i2c_detect}} (\*FILE, $addr)) {
-					if ($chip->{driver} eq "not-a-sensor") {
-						print "Yes\n",
-						      "    (confidence $conf, not a hardware monitoring chip";
-					} else {
-						print "Success!\n",
-						      "    (confidence $conf, driver `$chip->{driver}'";
-					}
-					if (@chips) {
-						print ", other addresses:";
-						@chips = sort @chips;
-						foreach $other_addr (@chips) {
-							printf(" 0x%02x", $other_addr);
-						}
-					}
-					printf ")\n";
-
-					next if ($chip->{driver} eq "not-a-sensor"
-					      || $chip->{driver} eq "use-isa-instead");
-
-					$new_hash = {
-						conf => $conf,
-						i2c_addr => $addr,
-						chipname => $chip->{name},
-						i2c_adap => $adapter_name,
-						i2c_driver => $adapter_driver,
-						i2c_devnr => $adapter_nr,
-					};
-					if (@chips) {
-						my @chips_copy = @chips;
-						$new_hash->{i2c_sub_addrs} = \@chips_copy;
-					}
-					add_i2c_to_chips_detected($chip->{driver}, $new_hash);
-				} else {
-					print "No\n";
-				}
-			}
+			next unless exists $chip->{i2c_addrs}
+				 && contains($addr, @{$chip->{i2c_addrs}});
+			probe_free_i2c_address($adapter_nr, $addr, $chip);
 		}
 		$| = 0;
 	}
@@ -5036,8 +5052,8 @@ sub main
       chop($inp2);
       @not_to_scan = parse_not_to_scan(0x03, 0x77, $inp2);
     }
-    scan_adapter($dev_nr, $adap, $i2c_adapters[$dev_nr]->{driver},
-                 \@not_to_scan) unless $inp =~ /^\s*[Nn]/;
+    scan_i2c_adapter($dev_nr, \@not_to_scan)
+      unless $inp =~ /^\s*[Nn]/;
   }
   print "\n";
 
