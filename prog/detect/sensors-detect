@@ -2163,22 +2163,14 @@ sub initialize_pci
 # ADAPTER DETECTION #
 #####################
 
+# Not sure if we still need this for Linux 2.6?
 sub adapter_pci_detection_sis_96x
 {
-	my $driver = "";
-
-	# first, determine which driver if any...
+	# Add the appropriate entries to @pci_adapters
 	if (exists $pci_list{'1039:0016'}) {
-		$driver = "i2c-sis96x";
-	} elsif (exists $pci_list{'1039:0008'}) {
-		$driver = "i2c-sis5595";
-	}
-
-	# then, add the appropriate entries to @pci_adapters
-	if ($driver eq "i2c-sis5595") {
-		push @pci_adapters, @pci_adapters_sis5595;
-	} elsif ($driver eq "i2c-sis96x") {
 		push @pci_adapters, @pci_adapters_sis96x;
+	} elsif (exists $pci_list{'1039:0008'}) {
+		push @pci_adapters, @pci_adapters_sis5595;
 	}
 }
 
