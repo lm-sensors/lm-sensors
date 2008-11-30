@@ -40,7 +40,7 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 
 use constant NO_CACHE => 1;
 use vars qw(@pci_adapters @chip_ids @non_hwmon_chip_ids $i2c_addresses_to_scan
-	    @cpu_ids $revision @i2c_byte_cache);
+	    $revision @i2c_byte_cache);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -1658,55 +1658,50 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 	}
 );
 
-# Drivers for CPU embedded sensors
+# Drivers for bridge, CPU and memory embedded sensors
 # Each entry must have the following fields:
-#  name: The CPU family name
+#  name: The device name
 #  driver: The driver name. Put "to-be-written" if no driver is available.
 #  detect: Detection callback function. No parameter will be passed to
-#          this function, it must use global lists of PCI devices, CPU,
-#          etc. It must return a confidence value, undef if no supported
-#          CPU is found.
+#	this function, it must use global lists of PCI devices, CPU,
+#	etc. It must return a confidence value, undef if no supported
+#	CPU is found.
+use vars qw(@cpu_ids);
+
 @cpu_ids = (
-  {
-    name => "Silicon Integrated Systems SIS5595",
-    driver => "sis5595",
-    detect => sub { sis5595_pci_detect(); },
-  },
-  {
-    name => "VIA VT82C686 Integrated Sensors",
-    driver => "via686a",
-    detect => sub { via686a_pci_detect(); },
-  },
-  {
-    name => "VIA VT8231 Integrated Sensors",
-    driver => "vt8231",
-    detect => sub { via8231_pci_detect(); },
-  },
-  {
-    name => "AMD K8 thermal sensors",
-    driver => "k8temp",
-    detect => sub { k8temp_pci_detect(); },
-  },
-  {
-    name => "AMD K10 thermal sensors",
-    driver => "to-be-written",
-    detect => sub { k10temp_pci_detect(); },
-  },
-  {
-    name => "Intel Core family thermal sensor",
-    driver => "coretemp",
-    detect => sub { coretemp_detect(); },
-  },
-  {
-    name => "Intel AMB FB-DIMM thermal sensor",
-    driver => "i5k_amb",
-    detect => sub { intel_amb_detect(); },
-  },
-  {
-    name => "VIA C7 thermal and voltage sensors",
-    driver => "c7temp",
-    detect => sub { c7temp_detect(); },
-  },
+	{
+		name => "Silicon Integrated Systems SIS5595",
+		driver => "sis5595",
+		detect => sub { sis5595_pci_detect(); },
+	}, {
+		name => "VIA VT82C686 Integrated Sensors",
+		driver => "via686a",
+		detect => sub { via686a_pci_detect(); },
+	}, {
+		name => "VIA VT8231 Integrated Sensors",
+		driver => "vt8231",
+		detect => sub { via8231_pci_detect(); },
+	}, {
+		name => "AMD K8 thermal sensors",
+		driver => "k8temp",
+		detect => sub { k8temp_pci_detect(); },
+	}, {
+		name => "AMD K10 thermal sensors",
+		driver => "to-be-written",
+		detect => sub { k10temp_pci_detect(); },
+	}, {
+		name => "Intel Core family thermal sensor",
+		driver => "coretemp",
+		detect => sub { coretemp_detect(); },
+	}, {
+		name => "Intel AMB FB-DIMM thermal sensor",
+		driver => "i5k_amb",
+		detect => sub { intel_amb_detect(); },
+	}, {
+		name => "VIA C7 thermal and voltage sensors",
+		driver => "c7temp",
+		detect => sub { c7temp_detect(); },
+	}
 );
 
 #######################
