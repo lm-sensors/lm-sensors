@@ -2818,107 +2818,108 @@ use vars qw(%superio);
 #  actmask: The activation bit in the activation register
 #  basereg: The I/O base register within the logical device
 %superio = (
-  devidreg => 0x20,
-  logdevreg => 0x07,
-  actreg => 0x30,
-  actmask => 0x01,
-  basereg => 0x60,
+	devidreg => 0x20,
+	logdevreg => 0x07,
+	actreg => 0x30,
+	actmask => 0x01,
+	basereg => 0x60,
 );
 
 sub exit_superio
 {
-  my ($addrreg, $datareg) = @_;
+	my ($addrreg, $datareg) = @_;
 
-  # Some chips (SMSC, Winbond) want this
-  outb($addrreg, 0xaa);
+	# Some chips (SMSC, Winbond) want this
+	outb($addrreg, 0xaa);
 
-  # Return to "Wait For Key" state (PNP-ISA spec)
-  outb($addrreg, 0x02);
-  outb($datareg, 0x02);
+	# Return to "Wait For Key" state (PNP-ISA spec)
+	outb($addrreg, 0x02);
+	outb($datareg, 0x02);
 }
 
 # Guess if an unknown Super-I/O chip has sensors
 sub guess_superio_ld
 {
-  my ($addrreg, $datareg, $typical_addr) = @_;
-  my ($oldldn, $ldn, $addr);
+	my ($addrreg, $datareg, $typical_addr) = @_;
+	my ($oldldn, $ldn, $addr);
 
-  # Save logical device number
-  outb($addrreg, $superio{logdevreg});
-  $oldldn = inb($datareg);
+	# Save logical device number
+	outb($addrreg, $superio{logdevreg});
+	$oldldn = inb($datareg);
 
-  for ($ldn = 0; $ldn < 16; $ldn++) {
-    # Select logical device
-    outb($addrreg, $superio{logdevreg});
-    outb($datareg, $ldn);
+	for ($ldn = 0; $ldn < 16; $ldn++) {
+		# Select logical device
+		outb($addrreg, $superio{logdevreg});
+		outb($datareg, $ldn);
 
-    # Read base I/O address
-    outb($addrreg, $superio{basereg});
-    $addr = inb($datareg) << 8;
-    outb($addrreg, $superio{basereg} + 1);
-    $addr |= inb($datareg);
-    next unless ($addr & 0xfff8) == $typical_addr;
+		# Read base I/O address
+		outb($addrreg, $superio{basereg});
+		$addr = inb($datareg) << 8;
+		outb($addrreg, $superio{basereg} + 1);
+		$addr |= inb($datareg);
+		next unless ($addr & 0xfff8) == $typical_addr;
 
-    printf "    (logical device \%X has address 0x\%x, could be sensors)\n",
-           $ldn, $addr;
-    last;
-  }
+		printf "    (logical device \%X has address 0x\%x, could be sensors)\n",
+		       $ldn, $addr;
+		last;
+	}
 
-  # Be nice, restore original logical device
-  outb($addrreg, $superio{logdevreg});
-  outb($datareg, $oldldn);
+	# Be nice, restore original logical device
+	outb($addrreg, $superio{logdevreg});
+	outb($datareg, $oldldn);
 }
 
 sub probe_superio
 {
-  my ($addrreg, $datareg, $chip) = @_;
-  my ($val, $addr);
+	my ($addrreg, $datareg, $chip) = @_;
+	my ($val, $addr);
 
-  printf "\%-60s",  "Found `$chip->{name}'";
+	printf "\%-60s",  "Found `$chip->{name}'";
 
-  # Does it have hardware monitoring capabilities?
-  if (!exists $chip->{driver}) {
-    print "\n    (no information available)\n";
-    return;
-  }
-  if ($chip->{driver} eq "not-a-sensor") {
-    print "\n    (no hardware monitoring capabilities)\n";
-    return;
-  }
-  if ($chip->{driver} eq "via-smbus-only") {
-    print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
-    return;
-  }
+	# Does it have hardware monitoring capabilities?
+	if (!exists $chip->{driver}) {
+		print "\n    (no information available)\n";
+		return;
+	}
+	if ($chip->{driver} eq "not-a-sensor") {
+		print "\n    (no hardware monitoring capabilities)\n";
+		return;
+	}
+	if ($chip->{driver} eq "via-smbus-only") {
+		print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
+		return;
+	}
 
-  # Switch to the sensor logical device
-  outb($addrreg, $superio{logdevreg});
-  outb($datareg, $chip->{logdev});
+	# Switch to the sensor logical device
+	outb($addrreg, $superio{logdevreg});
+	outb($datareg, $chip->{logdev});
 
-  # Check the activation register
-  outb($addrreg, $superio{actreg});
-  $val = inb($datareg);
-  if (!($val & $superio{actmask})) {
-    print "\n    (but not activated)\n";
-    return;
-  }
+	# Check the activation register
+	outb($addrreg, $superio{actreg});
+	$val = inb($datareg);
+	if (!($val & $superio{actmask})) {
+		print "\n    (but not activated)\n";
+		return;
+	}
 
-  # Get the IO base register
-  outb($addrreg, $superio{basereg});
-  $addr = inb($datareg);
-  outb($addrreg, $superio{basereg} + 1);
-  $addr = ($addr << 8) | inb($datareg);
-  if ($addr == 0) {
-    print "\n    (but no address specified)\n";
-    return;
-  }
-  print "Success!\n";
-  printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
-  my $new_hash = { conf => 9,
-                   isa_addr => $addr,
-                   chipname => $chip->{name}
-                 };
-  add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
-                                        $new_hash);
+	# Get the IO base register
+	outb($addrreg, $superio{basereg});
+	$addr = inb($datareg);
+	outb($addrreg, $superio{basereg} + 1);
+	$addr = ($addr << 8) | inb($datareg);
+	if ($addr == 0) {
+		print "\n    (but no address specified)\n";
+		return;
+	}
+	print "Success!\n";
+	printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
+	my $new_hash = {
+		conf => 9,
+		isa_addr => $addr,
+		chipname => $chip->{name}
+	};
+	add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
+				  $new_hash);
 }
 
 # Detection routine for non-standard SMSC Super I/O chips
@@ -2928,103 +2929,104 @@ sub probe_superio
 # Return values: 1 if non-standard chip found, 0 otherwise
 sub smsc_ns_detect_superio
 {
-    my ($addrreg, $datareg, $ns_chips) = @_;
-    my ($val, $chip);
+	my ($addrreg, $datareg, $ns_chips) = @_;
+	my ($val, $chip);
 
-    # read alternate device ID register
-    outb($addrreg, 0x0d);
-    $val = inb($datareg);
-    if ($val == 0x00 || $val == 0xff) {
-	return 0;
-    }
+	# read alternate device ID register
+	outb($addrreg, 0x0d);
+	$val = inb($datareg);
+	return 0 if $val == 0x00 || $val == 0xff;
 
-    print "Yes\n";
+	print "Yes\n";
 
-    foreach $chip (@{$ns_chips}) {
-	if ($chip->{devid} == $val) {
-	    probe_superio($addrreg, $datareg, $chip);
-	    return 1;
+	foreach $chip (@{$ns_chips}) {
+		if ($chip->{devid} == $val) {
+			probe_superio($addrreg, $datareg, $chip);
+			return 1;
+		}
 	}
-    }
 
-    printf("Found unknown non-standard chip with ID 0x%02x\n", $val);
-    return 1;
+	printf("Found unknown non-standard chip with ID 0x%02x\n", $val);
+	return 1;
 }
 
 sub scan_superio
 {
-  my ($addrreg, $datareg) = @_;
-  my ($val, $found);
+	my ($addrreg, $datareg) = @_;
+	my ($val, $found);
 
-  printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
+	printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
-  $| = 1;
-# reset state to avoid false positives
-  exit_superio($addrreg, $datareg);
-  FAMILY:
-  foreach my $family (@superio_ids) {
-    printf("\%-60s", "Trying family `$family->{family}'... ");
-# write the password
-    foreach $val (@{$family->{enter}->{$addrreg}}) {
-      outb($addrreg, $val);
-    }
-# call the non-standard detection routine first if it exists
-    if (defined($family->{ns_detect}) &&
-        &{$family->{ns_detect}}($addrreg, $datareg, $family->{ns_chips})) {
-      exit_superio($addrreg, $datareg);
-      last FAMILY;
-    }
-# did it work?
-    outb($addrreg, $superio{devidreg});
-    $val = inb($datareg);
-    outb($addrreg, $superio{devidreg} + 1);
-    $val = ($val << 8) | inb($datareg);
-    if ($val == 0x0000 || $val == 0xffff) {
-      print "No\n";
-      next FAMILY;
-    }
-    print "Yes\n";
+	$| = 1;
+	# reset state to avoid false positives
+	exit_superio($addrreg, $datareg);
+	FAMILY:
+	foreach my $family (@superio_ids) {
+		printf("\%-60s", "Trying family `$family->{family}'... ");
+		# write the password
+		foreach $val (@{$family->{enter}->{$addrreg}}) {
+			outb($addrreg, $val);
+		}
+		# call the non-standard detection routine first if it exists
+		if (defined($family->{ns_detect}) &&
+		    &{$family->{ns_detect}}($addrreg, $datareg, $family->{ns_chips})) {
+			exit_superio($addrreg, $datareg);
+			last FAMILY;
+		}
 
-    $found = 0;
-    foreach my $chip (@{$family->{chips}}) {
-      if (($chip->{devid} > 0xff && ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
-       || ($chip->{devid} <= 0xff && ($val >> 8) == $chip->{devid})) {
-        probe_superio($addrreg, $datareg, $chip);
-        $found++;
-      }
-    }
+		# did it work?
+		outb($addrreg, $superio{devidreg});
+		$val = inb($datareg);
+		outb($addrreg, $superio{devidreg} + 1);
+		$val = ($val << 8) | inb($datareg);
+		if ($val == 0x0000 || $val == 0xffff) {
+			print "No\n";
+			next FAMILY;
+		}
+		print "Yes\n";
 
-    if (!$found) {
-      printf("Found unknown chip with ID 0x%04x\n", $val);
-      # Guess if a logical device could correspond to sensors
-      guess_superio_ld($addrreg, $datareg, $family->{guess})
-        if defined $family->{guess};
-    }
+		$found = 0;
+		foreach my $chip (@{$family->{chips}}) {
+			if (($chip->{devid} > 0xff &&
+			     ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
+			 || ($chip->{devid} <= 0xff &&
+			     ($val >> 8) == $chip->{devid})) {
+				probe_superio($addrreg, $datareg, $chip);
+				$found++;
+			}
+		}
 
-    exit_superio($addrreg, $datareg);
-    last FAMILY;
-  }
-  $| = 0;
+		if (!$found) {
+			printf("Found unknown chip with ID 0x%04x\n", $val);
+			# Guess if a logical device could correspond to sensors
+			guess_superio_ld($addrreg, $datareg, $family->{guess})
+				if defined $family->{guess};
+		}
+
+		exit_superio($addrreg, $datareg);
+		last FAMILY;
+	}
+	$| = 0;
 }
 
 
 sub scan_cpu
 {
-  my $entry = shift;
-  my $confidence;
+	my $entry = shift;
+	my $confidence;
 
-  printf("\%-60s", "$entry->{name}... ");
-  if (defined ($confidence = $entry->{detect}())) {
-    print "Success!\n";
-    printf "    (driver `%s')\n", $entry->{driver};
-    my $new_hash = {
-      conf => $confidence,
-      chipname => $entry->{name},
-    };
-    add_isa_to_chips_detected(undef, $entry->{driver}, $new_hash);
-  } else {
-    print "No\n";
-  }
+	printf("\%-60s", "$entry->{name}... ");
+	if (defined ($confidence = $entry->{detect}())) {
+		print "Success!\n";
+		printf "    (driver `%s')\n", $entry->{driver};
+		my $new_hash = {
+			conf => $confidence,
+			chipname => $entry->{name},
+		};
+		add_isa_to_chips_detected(undef, $entry->{driver}, $new_hash);
+	} else {
+		print "No\n";
+	}
 }
 
 
