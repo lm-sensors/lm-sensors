@@ -2391,7 +2391,6 @@ sub i2c_smbus_read_word_data
 sub i2c_probe
 {
 	my ($file, $addr, $funcs) = @_;
-	my $data = [];
 
 	if (($addr >= 0x50 && $addr <= 0x5F)
 	 || ($addr >= 0x30 && $addr <= 0x37)) {
@@ -2402,10 +2401,10 @@ sub i2c_probe
 		# themselves permanently on almost any write to their page
 		# protection address.
 		return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE);
-		return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, $data);
+		return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, []);
 	} else {
 		return 0 unless ($funcs & I2C_FUNC_SMBUS_QUICK);
-		return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, $data);
+		return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, []);
 	}
 }
 
