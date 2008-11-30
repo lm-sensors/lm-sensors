@@ -1708,11 +1708,6 @@ use vars qw(@cpu_ids);
 # AUXILIARY FUNCTIONS #
 #######################
 
-sub swap_bytes
-{
-  return (($_[0] & 0xff00) >> 8) + (($_[0] & 0x00ff) << 8)
-}
-
 # $_[0] is the sought value
 # @_[1..] is the list to seek in
 # Returns: 0 on failure, 1 if found.
@@ -2378,8 +2373,7 @@ sub i2c_smbus_read_byte_data
 # so you should do as much of the detection as possible using byte reads,
 # and only start using word reads when there is a good chance that
 # the detection will succeed.
-# Note: some devices use the wrong endiannes; use swap_bytes to correct for
-# this.
+# Note: some devices use the wrong endianness.
 sub i2c_smbus_read_word_data
 {
   my ($file, $command) = @_;
