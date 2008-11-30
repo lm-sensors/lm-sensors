@@ -5,6 +5,7 @@ SVN-HEAD
   libsensors: Add support for instantaneous power sensors
               Add support for current sensors
   maxilife scripts: Delete (driver never ported to Linux 2.6)
+  sensord: Accept negative temperatures in RRD database
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
   sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
