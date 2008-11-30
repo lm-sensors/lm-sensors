@@ -214,6 +214,11 @@ $revision =~ s/ \([^()]*\)//;
 		driver	=> "i2c-viapro",
 	}, {
 		vendid	=> 0x1039,
+		devid	=> 0x0008,
+		procid	=> "Silicon Integrated Systems SIS5595",
+		driver	=> "i2c-sis5595",
+	}, {
+		vendid	=> 0x1039,
 		devid	=> 0x0630,
 		procid	=> "Silicon Integrated Systems SIS630",
 		driver	=> "i2c-sis630",
@@ -222,6 +227,11 @@ $revision =~ s/ \([^()]*\)//;
 		devid	=> 0x0730,
 		procid	=> "Silicon Integrated Systems SIS730",
 		driver	=> "i2c-sis630",
+	}, {
+		vendid	=> 0x1039,
+		devid	=> 0x0016,
+		procid	=> "Silicon Integrated Systems SMBus Controller",
+		driver	=> "i2c-sis96x",
 	}, {
 		# Both Ali chips below have same PCI ID. Can't be helped. Only one should load.
 		vendid	=> 0x10b9,
@@ -383,30 +393,6 @@ $revision =~ s/ \([^()]*\)//;
 		devid	=> 0x2090,
 		procid	=> "CS5536 [Geode companion] ISA",
 		driver	=> "scx200_acb",
-	}
-);
-
-# The following entries used to appear directly in @pci_adapters.
-# Because of the tendency of SiS chipsets to have their real PCI
-# IDs obscured, we have to qualify these with a custom detection
-# routine before we add them to the @pci_adapters list.
-#
-use vars qw(@pci_adapters_sis5595 @pci_adapters_sis96x);
-@pci_adapters_sis5595 = (
-	{
-		vendid	=> 0x1039,
-		devid	=> 0x0008,
-		procid	=> "Silicon Integrated Systems SIS5595",
-		driver	=> "i2c-sis5595",
-	}
-);
-
-@pci_adapters_sis96x = (
-	{
-		vendid	=> 0x1039,
-		devid	=> 0x0016,
-		procid	=> "Silicon Integrated Systems SMBus Controller",
-		driver	=> "i2c-sis96x",
 	}
 );
 
@@ -2163,17 +2149,6 @@ sub initialize_pci
 # ADAPTER DETECTION #
 #####################
 
-# Not sure if we still need this for Linux 2.6?
-sub adapter_pci_detection_sis_96x
-{
-	# Add the appropriate entries to @pci_adapters
-	if (exists $pci_list{'1039:0016'}) {
-		push @pci_adapters, @pci_adapters_sis96x;
-	} elsif (exists $pci_list{'1039:0008'}) {
-		push @pci_adapters, @pci_adapters_sis5595;
-	}
-}
-
 # Build and return a PCI device's bus ID
 sub pci_busid
 {
@@ -2192,9 +2167,6 @@ sub adapter_pci_detection
 {
 	my ($key, $device, $try, %smbus, $count);
 	print "Probing for PCI bus adapters...\n";
-
-	# Custom detection routine for some SiS chipsets
-	adapter_pci_detection_sis_96x();
 
 	# Build a list of detected SMBus devices
 	foreach $key (keys %pci_list) {
