@@ -2461,12 +2461,8 @@ use vars qw(@chips_detected);
 
 # Type detect_data:
 # A hash
-#   with field 'i2c_adap' containing an adapter string as appearing
-#        in /sys/class/i2c-adapter (if this is an I2C detection)
 #  with field 'i2c_devnr', contianing the /dev/i2c-* number of this
 #       adapter (if this is an I2C detection)
-#  with field 'i2c_driver', containing the driver name for this adapter
-#       (if this is an I2C detection)
 #  with field 'i2c_addr', containing the I2C address of the detection;
 #       (if this is an I2C detection)
 #  with field 'i2c_sub_addrs', containing a reference to a list of
@@ -2676,8 +2672,6 @@ sub add_busy_i2c_address
 		i2c_addr => $addr,
 		chipname => sysfs_device_attribute($device, "name")
 			 || "unknown",
-		i2c_adap => $i2c_adapters[$adapter_nr]->{name},
-		i2c_driver => $i2c_adapters[$adapter_nr]->{driver},
 		i2c_devnr => $adapter_nr,
 	};
 
@@ -2728,8 +2722,6 @@ sub probe_free_i2c_address
 			conf => $conf,
 			i2c_addr => $addr,
 			chipname => $chip->{name},
-			i2c_adap => $i2c_adapters[$adapter_nr]->{name},
-			i2c_driver => $i2c_adapters[$adapter_nr]->{driver},
 			i2c_devnr => $adapter_nr,
 		};
 		if (@other_addr) {
@@ -2827,7 +2819,8 @@ sub scan_isa_bus
 							      $new_hash);
 			if ($new_hash) {
 				printf "    Alias of the chip on I2C bus `%s', address 0x%02x\n",
-				       $new_hash->{i2c_adap}, $new_hash->{i2c_addr};
+				       $i2c_adapters[$new_hash->{i2c_devnr}]->{name},
+				       $new_hash->{i2c_addr};
 			}
 		}
 	}
@@ -4857,9 +4850,9 @@ sub print_chips_report
     my $is_isa = exists $data->{isa_addr};
     print "  * ";
     if ($is_i2c) {
-      printf "Bus `%s'\n", $data->{i2c_adap};
+      printf "Bus `%s'\n", $i2c_adapters[$data->{i2c_devnr}]->{name};
       printf "    Busdriver `%s', I2C address 0x%02x",
-             $data->{i2c_driver}, $data->{i2c_addr};
+             $i2c_adapters[$data->{i2c_devnr}]->{driver}, $data->{i2c_addr};
       if (exists $data->{i2c_sub_addrs}) {
         print " (and";
         my $sub_addr;
@@ -4914,7 +4907,7 @@ sub generate_modprobes
     foreach $chip (@chips_detected) {
       @optionlist = ();
       foreach $detection (@{$chip->{detected}}) {
-        if (exists $detection->{i2c_driver} and
+        if (exists $detection->{i2c_addr} and
             exists $detection->{isa_addr} and
             $i2c_adapters[$detection->{i2c_devnr}]->{used}) {
           push @optionlist, $detection->{i2c_devnr},
