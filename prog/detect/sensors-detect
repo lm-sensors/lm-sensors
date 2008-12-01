@@ -4794,7 +4794,7 @@ sub print_chips_report
 
 sub generate_modprobes
 {
-	my ($chip, $detection, @optionlist, $adap);
+	my ($chip, $detection, $adap);
 	my ($isa, $ipmi);
 	my ($modprobes, $configfile);
 
@@ -4820,27 +4820,22 @@ sub generate_modprobes
 	# directly, so module options are no longer needed.
 	unless (kernel_version_at_least(2, 6, 28)) {
 		foreach $chip (@chips_detected) {
-			@optionlist = ();
+			my @optionlist = ();
 			foreach $detection (@{$chip->{detected}}) {
-				if (exists $detection->{i2c_addr} and
-				    exists $detection->{isa_addr} and
-				    $i2c_adapters[$detection->{i2c_devnr}]->{used}) {
-					push @optionlist,
-					     $detection->{i2c_devnr},
-					     $detection->{i2c_addr};
-				}
+				next unless exists $detection->{i2c_addr}
+					 && exists $detection->{isa_addr}
+					 && $i2c_adapters[$detection->{i2c_devnr}]->{used};
+
+				push @optionlist, sprintf("%d,0x%02x",
+							  $detection->{i2c_devnr},
+							  $detection->{i2c_addr});
 			}
 
 			next if not @optionlist;
 			$configfile = "# hwmon module options\n"
 				unless defined $configfile;
-			$configfile .= "options $chip->{driver}";
-			$configfile .= sprintf(" ignore=%d,0x%02x",
-					       shift @optionlist,
-					       shift @optionlist);
-			$configfile .= sprintf(",%d,0x%02x", shift @optionlist,
-					       shift @optionlist) while @optionlist;
-			$configfile .= "\n";
+			$configfile .= "options $chip->{driver} ignore=".
+				       (join ",", @optionlist)."\n";
 		}
 	}
 
