@@ -31,6 +31,7 @@ SVN-HEAD
                   Simplify loading of bus drivers
                   Fix bus number prediction logic (#2327)
                   Suggest the sbs driver for smart batteries
+                  Drop alias detection for Super-I/O chips
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
