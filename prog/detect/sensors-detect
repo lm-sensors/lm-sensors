@@ -3203,26 +3203,10 @@ sub lm77_detect
     or (($high >> 4) != 0 && ($high >> 4) != 0xf);
 
   # Make sure the chip supports SMBus read word transactions
-  $cur = i2c_smbus_read_word_data($file, 0x00);
-  return if $cur < 0;
-  $hyst = i2c_smbus_read_word_data($file, 0x02);
-  return if $hyst < 0;
-  $os = i2c_smbus_read_word_data($file, 0x03);
-  return if $os < 0;
-  $low = i2c_smbus_read_word_data($file, 0x04);
-  return if $low < 0;
-  $high = i2c_smbus_read_word_data($file, 0x05);
-  return if $high < 0;
+  foreach $i (0x00, 0x02, 0x03, 0x04, 0x05) {
+    return if i2c_smbus_read_word_data($file, $i) < 0;
+  }
 
-  $cur /= 16;
-  $hyst /= 16;
-  $os /= 16;
-  $high /= 16;
-  $low /= 16;
-
-  # Most probable value ranges
-  return 6 if $cur <= 100 and $hyst <= 40
-    and ($os >= 20 && $os <= 127) and ($high >= 20 && $high <= 127);
   return 3;
 }
 
