@@ -2523,7 +2523,7 @@ sub add_i2c_to_chips_detected
 # Returns: 0 if it is not an alias, datahash reference if it is.
 sub add_isa_to_chips_detected
 {
-	my ($alias_detect, $chipdriver, $datahash) = @_;
+	my ($chipdriver, $datahash, $alias_detect) = @_;
 	my ($i, $new_detected_ref, $detected_ref, $main_entry, $isalias);
 
 	# First determine where the hash has to be added.
@@ -2786,9 +2786,9 @@ sub scan_isa_bus
 				isa_addr => $addr,
 				chipname => $chip->{name},
 			};
-			$new_hash = add_isa_to_chips_detected($chip->{alias_detect},
-							      $chip->{driver},
-							      $new_hash);
+			$new_hash = add_isa_to_chips_detected($chip->{driver},
+							      $new_hash,
+							      $chip->{alias_detect});
 			if ($new_hash) {
 				printf "    Alias of the chip on I2C bus `%s', address 0x%02x\n",
 				       $i2c_adapters[$new_hash->{i2c_devnr}]->{name},
@@ -2909,8 +2909,8 @@ sub probe_superio
 		isa_addr => $addr,
 		chipname => $chip->{name}
 	};
-	add_isa_to_chips_detected($chip->{alias_detect}, $chip->{driver},
-				  $new_hash);
+	add_isa_to_chips_detected($chip->{driver}, $new_hash,
+				  $chip->{alias_detect});
 }
 
 # Detection routine for non-standard SMSC Super I/O chips
@@ -3013,7 +3013,7 @@ sub scan_cpu
 			conf => $confidence,
 			chipname => $entry->{name},
 		};
-		add_isa_to_chips_detected(undef, $entry->{driver}, $new_hash);
+		add_isa_to_chips_detected($entry->{driver}, $new_hash);
 	} else {
 		print "No\n";
 	}
