@@ -3777,18 +3777,10 @@ sub andigilog_detect
 
 	return if $mid != 0x61;		# Andigilog
 
-	if ($chip == 0) {
-		return if $cid != 0x62;
-		return 5;
-	}
-	if ($chip == 1) {
-		return if $cid != 0x69;
-		return 5;
-	}
-	if ($chip == 2) {
-		return if $cid != 0x6C && $cid != 0x6D;
-		return 5;
-	}
+	return if $chip == 0 && $cid != 0x62;
+	return if $chip == 1 && $cid != 0x69;
+	return if $chip == 2 && ($cid != 0x6C && $cid != 0x6D);
+	return 5;
 }
 
 # Registers used:
