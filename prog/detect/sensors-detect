@@ -1914,7 +1914,7 @@ sub initialize_kernel_version
 sub kernel_version_at_least
 {
 	my ($vers, $plvl, $slvl) = @_;
-	return 1 if ($kernel_version[0]  > $vers ||
+	return 1 if ($kernel_version[0] > $vers ||
 		     ($kernel_version[0] == $vers &&
 		      ($kernel_version[1] > $plvl ||
 		       ($kernel_version[1] == $plvl &&
@@ -2865,7 +2865,7 @@ sub probe_superio
 	my ($addrreg, $datareg, $chip) = @_;
 	my ($val, $addr);
 
-	printf "\%-60s",  "Found `$chip->{name}'";
+	printf "\%-60s", "Found `$chip->{name}'";
 
 	# Does it have hardware monitoring capabilities?
 	if (!exists $chip->{driver}) {
@@ -3000,7 +3000,6 @@ sub scan_superio
 	$| = 0;
 }
 
-
 sub scan_cpu
 {
 	my $entry = shift;
@@ -3019,7 +3018,6 @@ sub scan_cpu
 		print "No\n";
 	}
 }
-
 
 ##################
 # CHIP DETECTION #
@@ -3907,16 +3905,16 @@ sub w83781d_detect
 
 	$reg1 = i2c_smbus_read_byte_data($file, 0x58);
 	return if $chip == 0 and ($reg1 != 0x10 && $reg1 != 0x11);
-	return if $chip == 1 and  $reg1 != 0x30;
-	return if $chip == 2 and  $reg1 != 0x40;
-	return if $chip == 3 and  $reg1 != 0x21;
-	return if $chip == 4 and  $reg1 != 0x31;
-	return if $chip == 5 and  $reg1 != 0x31;
-	return if $chip == 6 and  $reg1 != 0x31;
-	return if $chip == 7 and  $reg1 != 0x71;
-	return if $chip == 8 and  $reg1 != 0x7a;
+	return if $chip == 1 and $reg1 != 0x30;
+	return if $chip == 2 and $reg1 != 0x40;
+	return if $chip == 3 and $reg1 != 0x21;
+	return if $chip == 4 and $reg1 != 0x31;
+	return if $chip == 5 and $reg1 != 0x31;
+	return if $chip == 6 and $reg1 != 0x31;
+	return if $chip == 7 and $reg1 != 0x71;
+	return if $chip == 8 and $reg1 != 0x7a;
 	return if $chip == 9 and ($reg1 != 0x88 && $reg1 != 0xa1);
-	return if $chip == 10 and  $reg1 != 0xc1;
+	return if $chip == 10 and $reg1 != 0xc1;
 	# Default address is 0x2d
 	@res = ($addr != 0x2d) ? (7) : (8);
 	return @res if $chip >= 9; # No subclients
@@ -4000,7 +3998,7 @@ sub mozart_detect
 	my ($vid, $dev);
 
 	$vid = (i2c_smbus_read_byte_data($file, 0x4e) << 8)
-	     +  i2c_smbus_read_byte_data($file, 0x4f);
+	     + i2c_smbus_read_byte_data($file, 0x4f);
 	$dev = i2c_smbus_read_byte_data($file, 0x58);
 
 	return unless ($dev == 0x56 && $vid == 0x9436)	# ASM58
@@ -4325,12 +4323,12 @@ sub fsc_detect
 	    . chr(i2c_smbus_read_byte_data($file, 0x01))
 	    . chr(i2c_smbus_read_byte_data($file, 0x02));
 
-	return if $chip == 0 and $id ne 'PEG';  # Pegasus? aka Poseidon I
-	return if $chip == 1 and $id ne 'POS';  # Poseidon II
-	return if $chip == 2 and $id ne 'SCY';  # Scylla
-	return if $chip == 3 and $id ne 'HER';  # Hermes
-	return if $chip == 4 and $id ne 'HMD';  # Heimdal
-	return if $chip == 5 and $id ne 'HRC';  # Heracles
+	return if $chip == 0 and $id ne 'PEG';	# Pegasus? aka Poseidon I
+	return if $chip == 1 and $id ne 'POS';	# Poseidon II
+	return if $chip == 2 and $id ne 'SCY';	# Scylla
+	return if $chip == 3 and $id ne 'HER';	# Hermes
+	return if $chip == 4 and $id ne 'HMD';	# Heimdal
+	return if $chip == 5 and $id ne 'HRC';	# Heracles
 
 	return 8;
 }
@@ -4666,7 +4664,6 @@ sub vt1211_alias_detect
 	return 1;
 }
 
-
 ######################
 # PCI CHIP DETECTION #
 ######################
@@ -4788,7 +4785,7 @@ sub print_chips_report
 			print "\n    ";
 		}
 		printf "Chip `%s' (confidence: %d)\n",
-		       $data->{chipname},  $data->{conf};
+		       $data->{chipname}, $data->{conf};
 	}
 }
 
