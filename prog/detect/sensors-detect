@@ -3714,39 +3714,36 @@ sub adt7467_detect
 	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
 	my $drev = i2c_smbus_read_byte_data($file, 0x3f);
 
+	return if $mid != 0x41;			# Analog Devices
+
 	if ($chip == 0) {
-		return if $mid != 0x41;		# Analog Devices
 		return if $cid != 0x68;		# ADT7467
 		return if ($drev & 0xf0) != 0x70;
-		return 7 if ($drev == 0x71 || $drev == 0x72);
+		return 7 if $drev == 0x71 || $drev == 0x72;
 		return 5;
 	}
 	if ($chip == 1) {
-		return if $mid != 0x41;		# Analog Devices
 		return if $cid != 0x76;		# ADT7476
 		return if ($drev & 0xf0) != 0x60;
-		return 7 if ($drev == 0x69);
+		return 7 if $drev == 0x69;
 		return 5;
 	}
 	if ($chip == 2) {
-		return if $mid != 0x41;		# Analog Devices
 		return if $cid != 0x62;		# ADT7462
 		return if ($drev & 0xf0) != 0x00;
-		return 7 if ($drev == 0x04);
+		return 7 if $drev == 0x04;
 		return 5;
 	}
 	if ($chip == 3) {
-		return if $mid != 0x41;		# Analog Devices
 		return if $cid != 0x66;		# ADT7466
 		return if ($drev & 0xf0) != 0x00;
-		return 7 if ($drev == 0x02);
+		return 7 if $drev == 0x02;
 		return 5;
 	}
 	if ($chip == 4) {
-		return if $mid != 0x41;		# Analog Devices
 		return if $cid != 0x70;		# ADT7470
 		return if ($drev & 0xf0) != 0x00;
-		return 7 if ($drev == 0x00);
+		return 7 if $drev == 0x00;
 		return 5;
 	}
 }
@@ -3761,16 +3758,11 @@ sub adt7473_detect
 	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
 	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
 
-	if ($chip == 0) {
-		return if $mid != 0x41;		# Analog Devices
-		return if $cid != 0x73;		# ADT7473
-		return 5;
-	}
-	if ($chip == 1) {
-		return if $mid != 0x41;		# Analog Devices
-		return if $cid != 0x75;		# ADT7475
-		return 5;
-	}
+	return if $mid != 0x41;			# Analog Devices
+
+	return if $chip == 0 && $cid != 0x73;	# ADT7473
+	return if $chip == 1 && $cid != 0x75;	# ADT7475
+	return 5;
 }
 
 # Chip to detect: 0 = aSC7512, 1 = aSC7611, 2 = aSC7621
