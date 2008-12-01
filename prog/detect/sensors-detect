@@ -3455,8 +3455,7 @@ sub lm90_detect
 		return if ($conf & 0x07) != 0;
 		return if $rate > 0x07;
 		return if $mid != 0x4d;		# Maxim
-		return if $cid != 0x08;		# MAX6654/MAX6690
-		return 8;
+		return 8 if $cid == 0x08;	# MAX6654/MAX6690
 	}
 	if ($chip == 5) {
 		return if ($conf & 0x1b) != 0;
@@ -3468,29 +3467,25 @@ sub lm90_detect
 		return if ($conf & 0x3f) != 0;
 		return if $rate > 0x07;
 		return if $mid != 0x4d;		# Maxim
-		return if $cid != 0x59;		# MAX6648/MAX6692
-		return 8;
+		return 8 if $cid == 0x59;	# MAX6648/MAX6692
 	}
 	if ($chip == 7) {
 		return if ($conf & 0x03) != 0;
 		return if $rate > 0x07;
 		return if $mid != 0x4d;		# Maxim
-		return if $cid != 0x01;		# MAX6680/MAX6681
-		return 8;
+		return 8 if $cid == 0x01;	# MAX6680/MAX6681
 	}
 	if ($chip == 8) {
 		return if ($conf & 0x2a) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x5c;		# Winbond
-		return if $cid != 0x00;		# W83L771W/G
-		return 6;
+		return 6 $cid == 0x00;		# W83L771W/G
 	}
 	if ($chip == 9) {
 		return if ($conf & 0x1B) != 0;
 		return if $rate > 0x0F;
 		return if $mid != 0x55;		# Texas Instruments
-		return if $cid != 0x11;		# TMP401
-		return 8;
+		return 8 if $cid == 0x11;		# TMP401
 	}
 	if ($chip == 10) {
 		return if ($conf & 0x1B) != 0;
