@@ -2508,9 +2508,9 @@ sub add_i2c_to_chips_detected
 
 # This adds a detection to the above structure. We also do alias detection
 # here; so you should do ISA detections *after* all I2C detections.
-# $_[0]: alias detection function
-# $_[1]: chip driver
-# $_[2]: reference to data hash
+# $_[0]: chip driver
+# $_[1]: reference to data hash
+# $_[2]: alias detection function (optional)
 # Returns: 0 if it is not an alias, datahash reference if it is.
 sub add_isa_to_chips_detected
 {
