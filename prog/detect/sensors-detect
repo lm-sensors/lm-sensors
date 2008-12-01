@@ -3062,9 +3062,9 @@ sub chip_special_cases
 # Registers used: 0x58
 sub mtp008_detect
 {
-  my ($file, $addr) = @_;
-  return if i2c_smbus_read_byte_data($file, 0x58) != 0xac;
-  return 3;
+	my ($file, $addr) = @_;
+	return if i2c_smbus_read_byte_data($file, 0x58) != 0xac;
+	return 3;
 }
 
 # Chip to detect: 0 = LM78, 2 = LM79
@@ -3074,19 +3074,21 @@ sub mtp008_detect
 #   0x49: Device ID
 sub lm78_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $reg;
-  return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
-  return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
-  $reg = i2c_smbus_read_byte_data($file, 0x49);
-  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20 or $reg == 0x40)) or
-                    ($chip == 2 and ($reg & 0xfe) == 0xc0);
+	my ($file, $addr, $chip) = @_;
+	my $reg;
 
-  # Explicitly prevent misdetection of Winbond chips
-  $reg = i2c_smbus_read_byte_data($file, 0x4f);
-  return if $reg == 0xa3 || $reg == 0x5c;
+	return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
+	return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
 
-  return 6;
+	$reg = i2c_smbus_read_byte_data($file, 0x49);
+	return if $chip == 0 && ($reg != 0x00 && $reg != 0x20 && $reg != 0x40);
+	return if $chip == 2 && ($reg & 0xfe) != 0xc0;
+
+	# Explicitly prevent misdetection of Winbond chips
+	$reg = i2c_smbus_read_byte_data($file, 0x4f);
+	return if $reg == 0xa3 || $reg == 0x5c;
+
+	return 6;
 }
 
 # Chip to detect: 0 = LM75, 1 = DS75
@@ -3110,41 +3112,41 @@ sub lm78_detect
 # useful for detection anyway.
 sub lm75_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $i;
-  my $cur = i2c_smbus_read_byte_data($file, 0x00);
-  my $conf = i2c_smbus_read_byte_data($file, 0x01);
+	my ($file, $addr, $chip) = @_;
+	my $i;
+	my $cur = i2c_smbus_read_byte_data($file, 0x00);
+	my $conf = i2c_smbus_read_byte_data($file, 0x01);
 
-  my $hyst = i2c_smbus_read_byte_data($file, 0x02, NO_CACHE);
-  my $maxreg = $chip == 1 ? 0x0f : 0x07;
-  for $i (0x04 .. $maxreg) {
-    return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $hyst;
-  }
+	my $hyst = i2c_smbus_read_byte_data($file, 0x02, NO_CACHE);
+	my $maxreg = $chip == 1 ? 0x0f : 0x07;
+	for $i (0x04 .. $maxreg) {
+		return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $hyst;
+	}
 
-  my $os = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
-  for $i (0x04 .. $maxreg) {
-    return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $os;
-  }
+	my $os = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
+	for $i (0x04 .. $maxreg) {
+		return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $os;
+	}
 
-  if ($chip == 0) {
-    for ($i = 8; $i <= 248; $i += 40) {
-      return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf
-             or i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst
-             or i2c_smbus_read_byte_data($file, $i + 0x03) != $os;
-    }
-  }
+	if ($chip == 0) {
+		for ($i = 8; $i <= 248; $i += 40) {
+			return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf
+			       or i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst
+			       or i2c_smbus_read_byte_data($file, $i + 0x03) != $os;
+		}
+	}
 
-  # All registers hold the same value, obviously a misdetection
-  return if $conf == $cur and $cur == $hyst and $cur == $os;
+	# All registers hold the same value, obviously a misdetection
+	return if $conf == $cur and $cur == $hyst and $cur == $os;
 
-  # Unused bits
-  return if $chip == 0 and ($conf & 0xe0);
-  return if $chip == 1 and ($conf & 0x80);
+	# Unused bits
+	return if $chip == 0 and ($conf & 0xe0);
+	return if $chip == 1 and ($conf & 0x80);
 
-  # Most probable value ranges
-  return 6 if $cur <= 100 and ($hyst >= 10 && $hyst <= 125)
-    and ($os >= 20 && $os <= 127) and $hyst < $os;
-  return 3;
+	# Most probable value ranges
+	return 6 if $cur <= 100 and ($hyst >= 10 && $hyst <= 125)
+		and ($os >= 20 && $os <= 127) and $hyst < $os;
+	return 3;
 }
 
 # Registers used:
@@ -3167,47 +3169,47 @@ sub lm75_detect
 # LM77 chip.
 sub lm77_detect
 {
-  my ($file, $addr) = @_;
-  my $i;
-  my $cur = i2c_smbus_read_byte_data($file, 0x00);
-  my $conf = i2c_smbus_read_byte_data($file, 0x01);
-  my $hyst = i2c_smbus_read_byte_data($file, 0x02);
-  my $os = i2c_smbus_read_byte_data($file, 0x03);
+	my ($file, $addr) = @_;
+	my $i;
+	my $cur = i2c_smbus_read_byte_data($file, 0x00);
+	my $conf = i2c_smbus_read_byte_data($file, 0x01);
+	my $hyst = i2c_smbus_read_byte_data($file, 0x02);
+	my $os = i2c_smbus_read_byte_data($file, 0x03);
 
-  my $low = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
-  return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $low;
-  return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $low;
+	my $low = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
+	return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $low;
+	return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $low;
 
-  my $high = i2c_smbus_read_byte_data($file, 0x05, NO_CACHE);
-  return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $high;
-  return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $high;
+	my $high = i2c_smbus_read_byte_data($file, 0x05, NO_CACHE);
+	return if i2c_smbus_read_byte_data($file, 0x06, NO_CACHE) != $high;
+	return if i2c_smbus_read_byte_data($file, 0x07, NO_CACHE) != $high;
 
-  for ($i = 8; $i <= 248; $i += 40) {
-    return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
-    return if i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst;
-    return if i2c_smbus_read_byte_data($file, $i + 0x03) != $os;
-    return if i2c_smbus_read_byte_data($file, $i + 0x04) != $low;
-    return if i2c_smbus_read_byte_data($file, $i + 0x05) != $high;
-  }
+	for ($i = 8; $i <= 248; $i += 40) {
+		return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
+		return if i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst;
+		return if i2c_smbus_read_byte_data($file, $i + 0x03) != $os;
+		return if i2c_smbus_read_byte_data($file, $i + 0x04) != $low;
+		return if i2c_smbus_read_byte_data($file, $i + 0x05) != $high;
+	}
 
-  # All registers hold the same value, obviously a misdetection
-  return if $conf == $cur and $cur == $hyst
-    and $cur == $os and $cur == $low and $cur == $high;
+	# All registers hold the same value, obviously a misdetection
+	return if $conf == $cur and $cur == $hyst
+	      and $cur == $os and $cur == $low and $cur == $high;
 
-  # Unused bits
-  return if ($conf & 0xe0)
-    or (($cur >> 4) != 0 && ($cur >> 4) != 0xf)
-    or (($hyst >> 4) != 0 && ($hyst >> 4) != 0xf)
-    or (($os >> 4) != 0 && ($os >> 4) != 0xf)
-    or (($low >> 4) != 0 && ($low >> 4) != 0xf)
-    or (($high >> 4) != 0 && ($high >> 4) != 0xf);
+	# Unused bits
+	return if ($conf & 0xe0)
+	       or (($cur >> 4) != 0 && ($cur >> 4) != 0xf)
+	       or (($hyst >> 4) != 0 && ($hyst >> 4) != 0xf)
+	       or (($os >> 4) != 0 && ($os >> 4) != 0xf)
+	       or (($low >> 4) != 0 && ($low >> 4) != 0xf)
+	       or (($high >> 4) != 0 && ($high >> 4) != 0xf);
 
-  # Make sure the chip supports SMBus read word transactions
-  foreach $i (0x00, 0x02, 0x03, 0x04, 0x05) {
-    return if i2c_smbus_read_word_data($file, $i) < 0;
-  }
+	# Make sure the chip supports SMBus read word transactions
+	foreach $i (0x00, 0x02, 0x03, 0x04, 0x05) {
+		return if i2c_smbus_read_word_data($file, $i) < 0;
+	}
 
-  return 3;
+	return 3;
 }
 
 # Chip to detect: 0 = LM92, 1 = LM76, 2 = MAX6633/MAX6634/MAX6635
@@ -3227,49 +3229,48 @@ sub lm77_detect
 # have an LM92 chip or compatible.
 sub lm92_detect
 {
-  my ($file, $addr, $chip) = @_;
+	my ($file, $addr, $chip) = @_;
 
-  my $conf = i2c_smbus_read_byte_data($file, 0x01);
-  my $hyst = i2c_smbus_read_byte_data($file, 0x02);
-  my $crit = i2c_smbus_read_byte_data($file, 0x03);
-  my $low = i2c_smbus_read_byte_data($file, 0x04);
-  my $high = i2c_smbus_read_byte_data($file, 0x05);
+	my $conf = i2c_smbus_read_byte_data($file, 0x01);
+	my $hyst = i2c_smbus_read_byte_data($file, 0x02);
+	my $crit = i2c_smbus_read_byte_data($file, 0x03);
+	my $low = i2c_smbus_read_byte_data($file, 0x04);
+	my $high = i2c_smbus_read_byte_data($file, 0x05);
 
-  return if $conf == 0 and $hyst == 0 and $crit == 0
-        and $low == 0 and $high == 0;
+	return if $conf == 0 and $hyst == 0 and $crit == 0
+		and $low == 0 and $high == 0;
 
-  # Unused bits
-  return if ($chip == 0 || $chip == 1)
-        and ($conf & 0xE0);
+	# Unused bits
+	return if ($chip == 0 || $chip == 1)
+	      and ($conf & 0xE0);
 
-  for (my $i = 0; $i <= 240; $i += 16) {
-    return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
-    return if i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst;
-    return if i2c_smbus_read_byte_data($file, $i + 0x03) != $crit;
-    return if i2c_smbus_read_byte_data($file, $i + 0x04) != $low;
-    return if i2c_smbus_read_byte_data($file, $i + 0x05) != $high;
-  }
+	for (my $i = 0; $i <= 240; $i += 16) {
+		return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf;
+		return if i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst;
+		return if i2c_smbus_read_byte_data($file, $i + 0x03) != $crit;
+		return if i2c_smbus_read_byte_data($file, $i + 0x04) != $low;
+		return if i2c_smbus_read_byte_data($file, $i + 0x05) != $high;
+	}
 
-  return if $chip == 0
-        and i2c_smbus_read_word_data($file, 0x07) != 0x0180;
+	return if $chip == 0
+	      and i2c_smbus_read_word_data($file, 0x07) != 0x0180;
 
-  # Make sure the chip supports SMBus read word transactions
-  $hyst = i2c_smbus_read_word_data($file, 0x02);
-  return if $hyst < 0;
-  $crit = i2c_smbus_read_word_data($file, 0x03);
-  return if $crit < 0;
-  $low = i2c_smbus_read_word_data($file, 0x04);
-  return if $low < 0;
-  $high = i2c_smbus_read_word_data($file, 0x05);
-  return if $high < 0;
+	# Make sure the chip supports SMBus read word transactions
+	$hyst = i2c_smbus_read_word_data($file, 0x02);
+	return if $hyst < 0;
+	$crit = i2c_smbus_read_word_data($file, 0x03);
+	return if $crit < 0;
+	$low = i2c_smbus_read_word_data($file, 0x04);
+	return if $low < 0;
+	$high = i2c_smbus_read_word_data($file, 0x05);
+	return if $high < 0;
 
-  foreach my $temp ($hyst, $crit, $low, $high) {
-    return if $chip == 2 and ($temp & 0x7F00);
-    return if $chip != 2 and ($temp & 0x0700);
-  }
+	foreach my $temp ($hyst, $crit, $low, $high) {
+		return if $chip == 2 and ($temp & 0x7F00);
+		return if $chip != 2 and ($temp & 0x0700);
+	}
 
-  return 4 if $chip == 0;
-  return 2;
+	return ($chip == 0) ? 4 : 2;
 }
 
 # Registers used:
@@ -3289,28 +3290,28 @@ sub lm92_detect
 # transactions second.
 sub ds1621_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  my $conf = i2c_smbus_read_byte_data($file, 0xAC);
-  return if ($conf & 0x10);
+	my $conf = i2c_smbus_read_byte_data($file, 0xAC);
+	return if ($conf & 0x10);
 
-  my $counter = i2c_smbus_read_byte_data($file, 0xA8);
-  my $slope = i2c_smbus_read_byte_data($file, 0xA9);
-  return if ($slope != 0x10 || $counter > $slope);
+	my $counter = i2c_smbus_read_byte_data($file, 0xA8);
+	my $slope = i2c_smbus_read_byte_data($file, 0xA9);
+	return if ($slope != 0x10 || $counter > $slope);
 
-  my $temp = i2c_smbus_read_word_data($file, 0xAA);
-  return if $temp < 0 || ($temp & 0x0f00);
-  # On the DS1631, the following two checks are too strict in theory,
-  # but in practice I very much doubt that anyone will set temperature
-  # limits not a multiple of 0.5 degrees C.
-  my $high = i2c_smbus_read_word_data($file, 0xA1);
-  return if $high < 0 || ($high & 0x7f00);
-  my $low = i2c_smbus_read_word_data($file, 0xA2);
-  return if $low < 0 || ($low & 0x7f00);
+	my $temp = i2c_smbus_read_word_data($file, 0xAA);
+	return if $temp < 0 || ($temp & 0x0f00);
+	# On the DS1631, the following two checks are too strict in theory,
+	# but in practice I very much doubt that anyone will set temperature
+	# limits not a multiple of 0.5 degrees C.
+	my $high = i2c_smbus_read_word_data($file, 0xA1);
+	return if $high < 0 || ($high & 0x7f00);
+	my $low = i2c_smbus_read_word_data($file, 0xA2);
+	return if $low < 0 || ($low & 0x7f00);
 
-  return if ($temp == 0 && $high == 0 && $low == 0 && $conf == 0);
+	return if ($temp == 0 && $high == 0 && $low == 0 && $conf == 0);
 
-  return 3;
+	return 3;
 }
 
 # Registers used:
@@ -3330,44 +3331,44 @@ sub ds1621_detect
 # to loose comparisons did not change the score.
 sub lm80_detect
 {
-  my ($file, $addr) = @_;
-  my ($i, $reg);
+	my ($file, $addr) = @_;
+	my ($i, $reg);
 
-  return if (i2c_smbus_read_byte_data($file, 0x00) & 0x80) != 0;
-  return if (i2c_smbus_read_byte_data($file, 0x02) & 0xc0) != 0;
+	return if (i2c_smbus_read_byte_data($file, 0x00) & 0x80) != 0;
+	return if (i2c_smbus_read_byte_data($file, 0x02) & 0xc0) != 0;
 
-  for ($i = 0x2a; $i <= 0x3d; $i++) {
-    $reg = i2c_smbus_read_byte_data($file, $i);
-    return if i2c_smbus_read_byte_data($file, $i+0x40) != $reg;
-    return if i2c_smbus_read_byte_data($file, $i+0x80) != $reg;
-    return if i2c_smbus_read_byte_data($file, $i+0xc0) != $reg;
-  }
+	for ($i = 0x2a; $i <= 0x3d; $i++) {
+		$reg = i2c_smbus_read_byte_data($file, $i);
+		return if i2c_smbus_read_byte_data($file, $i+0x40) != $reg;
+		return if i2c_smbus_read_byte_data($file, $i+0x80) != $reg;
+		return if i2c_smbus_read_byte_data($file, $i+0xc0) != $reg;
+	}
 
-  # Refine a bit by checking wether limits are in the correct order
-  # (min<max for voltages, hyst<max for temperature). Since it is still
-  # possible that the chip is an LM80 with limits not properly set,
-  # a few "errors" are tolerated.
-  my $confidence = 0;
-  for ($i = 0x2a; $i <= 0x3a; $i++) {
-    $confidence++
-      if i2c_smbus_read_byte_data($file, $i) < i2c_smbus_read_byte_data($file, $i+1);
-  }
-  # hot temp<OS temp
-  $confidence++
-    if i2c_smbus_read_byte_data($file, 0x38) < i2c_smbus_read_byte_data($file, 0x3a);
+	# Refine a bit by checking whether limits are in the correct order
+	# (min<max for voltages, hyst<max for temperature). Since it is still
+	# possible that the chip is an LM80 with limits not properly set,
+	# a few "errors" are tolerated.
+	my $confidence = 0;
+	for ($i = 0x2a; $i <= 0x3a; $i++) {
+		$confidence++
+			if i2c_smbus_read_byte_data($file, $i) < i2c_smbus_read_byte_data($file, $i+1);
+	}
+	# hot temp<OS temp
+	$confidence++
+		if i2c_smbus_read_byte_data($file, 0x38) < i2c_smbus_read_byte_data($file, 0x3a);
 
-  # Negative temperature limits are unlikely.
-  for ($i = 0x3a; $i <= 0x3d; $i++) {
-    $confidence++ if (i2c_smbus_read_byte_data($file, $i) & 0x80) == 0;
-  }
+	# Negative temperature limits are unlikely.
+	for ($i = 0x3a; $i <= 0x3d; $i++) {
+		$confidence++ if (i2c_smbus_read_byte_data($file, $i) & 0x80) == 0;
+	}
 
-  # $confidence is between 0 and 14
-  $confidence = ($confidence >> 1) - 4;
-  # $confidence is now between -4 and 3
+	# $confidence is between 0 and 14
+	$confidence = ($confidence >> 1) - 4;
+	# $confidence is now between -4 and 3
 
-  return unless $confidence > 0;
+	return unless $confidence > 0;
 
-  return $confidence;
+	return $confidence;
 }
 
 # Registers used:
@@ -3387,22 +3388,22 @@ sub lm80_detect
 # Thanks to Ben Gardner for reporting.
 sub lm83_detect
 {
-  my ($file, $addr) = @_;
-  return if i2c_smbus_read_byte_data($file, 0xfe) != 0x01;
-  my $chipid = i2c_smbus_read_byte_data($file, 0xff);
-  return if $chipid != 0x01 && $chipid != 0x03;
+	my ($file, $addr) = @_;
+	return if i2c_smbus_read_byte_data($file, 0xfe) != 0x01;
+	my $chipid = i2c_smbus_read_byte_data($file, 0xff);
+	return if $chipid != 0x01 && $chipid != 0x03;
 
-  my $confidence = 4;
-  $confidence++
-    if (i2c_smbus_read_byte_data($file, 0x02) & 0xa8) == 0x00;
-  $confidence++
-    if (i2c_smbus_read_byte_data($file, 0x03) & 0x41) == 0x00;
-  $confidence++
-    if i2c_smbus_read_byte_data($file, 0x04) == 0x00;
-  $confidence++
-    if (i2c_smbus_read_byte_data($file, 0x35) & 0x48) == 0x00;
+	my $confidence = 4;
+	$confidence++
+		if (i2c_smbus_read_byte_data($file, 0x02) & 0xa8) == 0x00;
+	$confidence++
+		if (i2c_smbus_read_byte_data($file, 0x03) & 0x41) == 0x00;
+	$confidence++
+		if i2c_smbus_read_byte_data($file, 0x04) == 0x00;
+	$confidence++
+		if (i2c_smbus_read_byte_data($file, 0x35) & 0x48) == 0x00;
 
-  return $confidence;
+	return $confidence;
 }
 
 # Chip to detect: 0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
@@ -3416,120 +3417,117 @@ sub lm83_detect
 #   0xff: Chip ID / die revision
 sub lm90_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
-  my $cid = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
-  my $rate = i2c_smbus_read_byte_data($file, 0x04);
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+	my $cid = i2c_smbus_read_byte_data($file, 0xff);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03);
+	my $rate = i2c_smbus_read_byte_data($file, 0x04);
 
-  if ($chip == 0) {
-    return if ($conf & 0x2a) != 0;
-    return if $rate > 0x09;
-    return if $mid != 0x01;     # National Semiconductor
-    return 8 if $cid == 0x21;   # LM90
-    return 6 if ($cid & 0x0f) == 0x20;
-  }
-  if ($chip == 1) {
-    return if ($conf & 0x2a) != 0;
-    return if $rate > 0x09;
-    return if $mid != 0x01;     # National Semiconductor
-    return 8 if $addr == 0x4c and $cid == 0x31; # LM89/LM99
-    return 8 if $addr == 0x4d and $cid == 0x34; # LM89-1/LM99-1
-    return 6 if ($cid & 0x0f) == 0x30;
-  }
-  if ($chip == 2) {
-    return if ($conf & 0x2a) != 0;
-    return if $rate > 0x09;
-    return if $mid != 0x01;     # National Semiconductor
-    return 8 if $cid == 0x11;   # LM86
-    return 6 if ($cid & 0xf0) == 0x10;
-  }
-  if ($chip == 3) {
-    return if ($conf & 0x3f) != 0;
-    return if $rate > 0x0a;
-    return if $mid != 0x41;     # Analog Devices
-    return 6 if ($cid & 0xf0) == 0x40; # ADM1032
-  }
-  if ($chip == 4) {
-    return if ($conf & 0x07) != 0;
-    return if $rate > 0x07;
-    return if $mid != 0x4d;     # Maxim
-    return if $cid != 0x08;     # MAX6654/MAX6690
-    return 8;
-  }
-  if ($chip == 5) {
-    return if ($conf & 0x1b) != 0;
-    return if $rate > 0x0a;
-    return if $mid != 0x41;     # Analog Devices
-    return 8 if $cid == 0x51;   # ADT7461
-  }
-  if ($chip == 6) {
-    return if ($conf & 0x3f) != 0;
-    return if $rate > 0x07;
-    return if $mid != 0x4d;     # Maxim
-    return if $cid != 0x59;     # MAX6648/MAX6692
-    return 8;
-  }
-  if ($chip == 7) {
-    return if ($conf & 0x03) != 0;
-    return if $rate > 0x07;
-    return if $mid != 0x4d;     # Maxim
-    return if $cid != 0x01;     # MAX6680/MAX6681
-    return 8;
-  }
-  if ($chip == 8) {
-    return if ($conf & 0x2a) != 0;
-    return if $rate > 0x09;
-    return if $mid != 0x5c;     # Winbond
-    return if $cid != 0x00;     # W83L771W/G
-    return 6;
-  }
-  if ($chip == 9) {
-    return if ($conf & 0x1B) != 0;
-    return if $rate > 0x0F;
-    return if $mid != 0x55;     # Texas Instruments
-    return if $cid != 0x11;     # TMP401
-    return 8;
-  }
-  if ($chip == 10) {
-    return if ($conf & 0x1B) != 0;
-    return if $rate > 0x0F;
-    return if $mid != 0x55;     # Texas Instruments
-    return 6 if ($addr == 0x4c && $cid == 0x12); # TMP411A
-    return 6 if ($addr == 0x4d && $cid == 0x13); # TMP411B
-    return 6 if ($addr == 0x4e && $cid == 0x10); # TMP411C
-    return;
-  }
-  return;
+	if ($chip == 0) {
+		return if ($conf & 0x2a) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0x01;		# National Semiconductor
+		return 8 if $cid == 0x21;	# LM90
+		return 6 if ($cid & 0x0f) == 0x20;
+	}
+	if ($chip == 1) {
+		return if ($conf & 0x2a) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0x01;		# National Semiconductor
+		return 8 if $addr == 0x4c and $cid == 0x31; # LM89/LM99
+		return 8 if $addr == 0x4d and $cid == 0x34; # LM89-1/LM99-1
+		return 6 if ($cid & 0x0f) == 0x30;
+	}
+	if ($chip == 2) {
+		return if ($conf & 0x2a) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0x01;		# National Semiconductor
+		return 8 if $cid == 0x11;	# LM86
+		return 6 if ($cid & 0xf0) == 0x10;
+	}
+	if ($chip == 3) {
+		return if ($conf & 0x3f) != 0;
+		return if $rate > 0x0a;
+		return if $mid != 0x41;		# Analog Devices
+		return 6 if ($cid & 0xf0) == 0x40; # ADM1032
+	}
+	if ($chip == 4) {
+		return if ($conf & 0x07) != 0;
+		return if $rate > 0x07;
+		return if $mid != 0x4d;		# Maxim
+		return if $cid != 0x08;		# MAX6654/MAX6690
+		return 8;
+	}
+	if ($chip == 5) {
+		return if ($conf & 0x1b) != 0;
+		return if $rate > 0x0a;
+		return if $mid != 0x41;		# Analog Devices
+		return 8 if $cid == 0x51;	# ADT7461
+	}
+	if ($chip == 6) {
+		return if ($conf & 0x3f) != 0;
+		return if $rate > 0x07;
+		return if $mid != 0x4d;		# Maxim
+		return if $cid != 0x59;		# MAX6648/MAX6692
+		return 8;
+	}
+	if ($chip == 7) {
+		return if ($conf & 0x03) != 0;
+		return if $rate > 0x07;
+		return if $mid != 0x4d;		# Maxim
+		return if $cid != 0x01;		# MAX6680/MAX6681
+		return 8;
+	}
+	if ($chip == 8) {
+		return if ($conf & 0x2a) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0x5c;		# Winbond
+		return if $cid != 0x00;		# W83L771W/G
+		return 6;
+	}
+	if ($chip == 9) {
+		return if ($conf & 0x1B) != 0;
+		return if $rate > 0x0F;
+		return if $mid != 0x55;		# Texas Instruments
+		return if $cid != 0x11;		# TMP401
+		return 8;
+	}
+	if ($chip == 10) {
+		return if ($conf & 0x1B) != 0;
+		return if $rate > 0x0F;
+		return if $mid != 0x55;		# Texas Instruments
+		return 6 if ($addr == 0x4c && $cid == 0x12); # TMP411A
+		return 6 if ($addr == 0x4d && $cid == 0x13); # TMP411B
+		return 6 if ($addr == 0x4e && $cid == 0x10); # TMP411C
+	}
+	return;
 }
 
 # Registers used:
-#   0x03: Configuration (no low nibble)
+#   0x03: Configuration (no low nibble, returns the previous low nibble)
 #   0x04: Conversion rate
 #   0xfe: Manufacturer ID
 #   0xff: no register
 sub max6657_detect
 {
-  my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe, NO_CACHE);
-  my $cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
+	my ($file, $addr) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe, NO_CACHE);
+	my $cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
 
-  return if $mid != 0x4d;     # Maxim
-  return if ($conf & 0x1f) != 0x0d; # No low nibble,
-                                    # returns previous low nibble
-  return if $cid != 0x4d;     # No register, returns previous value
+	return if $mid != 0x4d;		# Maxim
+	return if ($conf & 0x1f) != 0x0d;
+	return if $cid != 0x4d;		# No register, returns previous value
 
-  my $rate = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
-  return if $rate > 0x09;
+	my $rate = i2c_smbus_read_byte_data($file, 0x04, NO_CACHE);
+	return if $rate > 0x09;
 
-  $cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
-  $conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
-  return if ($conf & 0x0f) != $rate; # No low nibble,
-                                     # returns previous low nibble
-  return if $cid != $rate;    # No register, returns previous value
+	$cid = i2c_smbus_read_byte_data($file, 0xff, NO_CACHE);
+	$conf = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
+	return if ($conf & 0x0f) != $rate;
+	return if $cid != $rate;	# No register, returns previous value
 
-  return 5;
+	return 5;
 }
 
 # Registers used:
@@ -3538,16 +3536,16 @@ sub max6657_detect
 #   0xff: Revision ID
 sub lm95231_detect
 {
-  my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
-  my $cid = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
+	my ($file, $addr) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+	my $cid = i2c_smbus_read_byte_data($file, 0xff);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03);
 
-  return if ($conf & 0x89) != 0;
-  return if $mid != 0x01;     # National Semiconductor
-  return if $cid != 0xa1;     # LM95231
+	return if ($conf & 0x89) != 0;
+	return if $mid != 0x01;		# National Semiconductor
+	return if $cid != 0xa1;		# LM95231
 
-  return 6;
+	return 6;
 }
 
 # Registers used:
@@ -3557,18 +3555,18 @@ sub lm95231_detect
 #   0x3e: Device ID
 sub adt7481_detect
 {
-  my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3d);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $conf1 = i2c_smbus_read_byte_data($file, 0x03);
-  my $conf2 = i2c_smbus_read_byte_data($file, 0x24);
+	my ($file, $addr) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3d);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $conf1 = i2c_smbus_read_byte_data($file, 0x03);
+	my $conf2 = i2c_smbus_read_byte_data($file, 0x24);
 
-  return if ($conf1 & 0x10) != 0;
-  return if ($conf2 & 0x7f) != 0;
-  return if $mid != 0x41;     # Analog Devices
-  return if $cid != 0x81;     # ADT7481
+	return if ($conf1 & 0x10) != 0;
+	return if ($conf2 & 0x7f) != 0;
+	return if $mid != 0x41;		# Analog Devices
+	return if $cid != 0x81;		# ADT7481
 
-  return 6;
+	return 6;
 }
 
 # Chip to detect: 1 = LM63, 2 = F75363SG, 3 = LM64
@@ -3579,31 +3577,31 @@ sub adt7481_detect
 #   0x16: Alert mask (two or three unused bits)
 sub lm63_detect
 {
-  my ($file, $addr, $chip) = @_;
+	my ($file, $addr, $chip) = @_;
 
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
-  my $cid = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
-  my $mask = i2c_smbus_read_byte_data($file, 0x16);
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+	my $cid = i2c_smbus_read_byte_data($file, 0xff);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03);
+	my $mask = i2c_smbus_read_byte_data($file, 0x16);
 
-  if ($chip == 1) {
-    return if $mid != 0x01    # National Semiconductor
-           || $cid != 0x41;   # LM63
-    return if ($conf & 0x18) != 0x00
-           || ($mask & 0xa4) != 0xa4;
-  } elsif ($chip == 2) {
-    return if $mid != 0x23    # Fintek
-           || $cid != 0x20;   # F75363SG
-    return if ($conf & 0x1a) != 0x00
-           || ($mask & 0x84) != 0x00;
-  } elsif ($chip == 3) {
-    return if $mid != 0x01    # National Semiconductor
-           || $cid != 0x51;   # LM64
-    return if ($conf & 0x18) != 0x00
-           || ($mask & 0xa4) != 0xa4;
-  }
+	if ($chip == 1) {
+		return if $mid != 0x01		# National Semiconductor
+		       || $cid != 0x41;		# LM63
+		return if ($conf & 0x18) != 0x00
+		       || ($mask & 0xa4) != 0xa4;
+	} elsif ($chip == 2) {
+		return if $mid != 0x23		# Fintek
+		       || $cid != 0x20;		# F75363SG
+		return if ($conf & 0x1a) != 0x00
+		       || ($mask & 0x84) != 0x00;
+	} elsif ($chip == 3) {
+		return if $mid != 0x01		# National Semiconductor
+		       || $cid != 0x51;		# LM64
+		return if ($conf & 0x18) != 0x00
+		       || ($mask & 0xa4) != 0xa4;
+	}
 
-  return 6;
+	return 6;
 }
 
 # Registers used:
@@ -3614,25 +3612,25 @@ sub lm63_detect
 #   0x0e: Chip ID / die revision
 sub adm1029_detect
 {
-  my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x0d);
-  my $cid = i2c_smbus_read_byte_data($file, 0x0e);
-  my $cfg;
+	my ($file, $addr) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x0d);
+	my $cid = i2c_smbus_read_byte_data($file, 0x0e);
+	my $cfg;
 
-  return unless $mid == 0x41;             # Analog Devices
-  return unless ($cid & 0xF0) == 0x00;    # ADM1029
+	return unless $mid == 0x41;		# Analog Devices
+	return unless ($cid & 0xF0) == 0x00;	# ADM1029
 
-  # Extra check on unused bits
-  $cfg = i2c_smbus_read_byte_data($file, 0x02);
-  return unless $cfg == 0x03;
-  $cfg = i2c_smbus_read_byte_data($file, 0x06);
-  return unless ($cfg & 0xF9) == 0x01;
-  foreach my $reg (0x03, 0x07, 0x08, 0x09) {
-    $cfg = i2c_smbus_read_byte_data($file, $reg);
-    return unless ($cfg & 0xFC) == 0x00;
-  }
+	# Extra check on unused bits
+	$cfg = i2c_smbus_read_byte_data($file, 0x02);
+	return unless $cfg == 0x03;
+	$cfg = i2c_smbus_read_byte_data($file, 0x06);
+	return unless ($cfg & 0xF9) == 0x01;
+	foreach my $reg (0x03, 0x07, 0x08, 0x09) {
+		$cfg = i2c_smbus_read_byte_data($file, $reg);
+		return unless ($cfg & 0xFC) == 0x00;
+	}
 
-  return 7;
+	return 7;
 }
 
 # Chip to detect: 0 = ADM1030, 1 = ADM1031
@@ -3646,39 +3644,38 @@ sub adm1029_detect
 #   0x3f: Die revision
 sub adm1031_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
-  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
-  my $conf2 = i2c_smbus_read_byte_data($file, 0x01);
-  my $stat2 = i2c_smbus_read_byte_data($file, 0x03);
-  my $fsc = i2c_smbus_read_byte_data($file, 0x22);
-  my $lto = i2c_smbus_read_byte_data($file, 0x0d);
-  my $r1to = i2c_smbus_read_byte_data($file, 0x0e);
-  my $r2to = i2c_smbus_read_byte_data($file, 0x0f);
-  my $confidence = 3;
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+	my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+	my $conf2 = i2c_smbus_read_byte_data($file, 0x01);
+	my $stat2 = i2c_smbus_read_byte_data($file, 0x03);
+	my $fsc = i2c_smbus_read_byte_data($file, 0x22);
+	my $lto = i2c_smbus_read_byte_data($file, 0x0d);
+	my $r1to = i2c_smbus_read_byte_data($file, 0x0e);
+	my $r2to = i2c_smbus_read_byte_data($file, 0x0f);
+	my $confidence = 3;
 
-  if ($chip == 0) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x30;     # ADM1030
-    $confidence++ if ($drev & 0x70) == 0x00;
-    $confidence++ if ($conf2 & 0x4A) == 0x00;
-    $confidence++ if ($stat2 & 0x3F) == 0x00;
-    $confidence++ if ($fsc & 0xF0) == 0x00;
-    $confidence++ if ($lto & 0x70) == 0x00;
-    $confidence++ if ($r1to & 0x70) == 0x00;
-    return $confidence;
-  }
-  if ($chip == 1) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x31;     # ADM1031
-    $confidence++ if ($drev & 0x70) == 0x00;
-    $confidence++ if ($lto & 0x70) == 0x00;
-    $confidence++ if ($r1to & 0x70) == 0x00;
-    $confidence++ if ($r2to & 0x70) == 0x00;
-    return $confidence;
-  }
-  return;
+	if ($chip == 0) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x30;		# ADM1030
+		$confidence++ if ($drev & 0x70) == 0x00;
+		$confidence++ if ($conf2 & 0x4A) == 0x00;
+		$confidence++ if ($stat2 & 0x3F) == 0x00;
+		$confidence++ if ($fsc & 0xF0) == 0x00;
+		$confidence++ if ($lto & 0x70) == 0x00;
+		$confidence++ if ($r1to & 0x70) == 0x00;
+		return $confidence;
+	}
+	if ($chip == 1) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x31;		# ADM1031
+		$confidence++ if ($drev & 0x70) == 0x00;
+		$confidence++ if ($lto & 0x70) == 0x00;
+		$confidence++ if ($r1to & 0x70) == 0x00;
+		$confidence++ if ($r2to & 0x70) == 0x00;
+		return $confidence;
+	}
 }
 
 # Chip to detect: 0 = ADM1033, 1 = ADM1034
@@ -3688,26 +3685,25 @@ sub adm1031_detect
 #   0x3f: Die revision
 sub adm1034_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
-  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+	my $drev = i2c_smbus_read_byte_data($file, 0x3f);
 
-  if ($chip == 0) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x33;     # ADM1033
-    return if ($drev & 0xf8) != 0x00;
-    return 6 if $drev == 0x02;
-    return 4;
-  }
-  if ($chip == 1) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x34;     # ADM1034
-    return if ($drev & 0xf8) != 0x00;
-    return 6 if $drev == 0x02;
-    return 4;
-  }
-  return
+	if ($chip == 0) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x33;		# ADM1033
+		return if ($drev & 0xf8) != 0x00;
+		return 6 if $drev == 0x02;
+		return 4;
+	}
+	if ($chip == 1) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x34;		# ADM1034
+		return if ($drev & 0xf8) != 0x00;
+		return 6 if $drev == 0x02;
+		return 4;
+	}
 }
 
 # Chip to detect: 0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
@@ -3718,47 +3714,46 @@ sub adm1034_detect
 #   0x3f: Die revision
 sub adt7467_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
-  my $drev = i2c_smbus_read_byte_data($file, 0x3f);
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+	my $drev = i2c_smbus_read_byte_data($file, 0x3f);
 
-  if ($chip == 0) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x68;     # ADT7467
-    return if ($drev & 0xf0) != 0x70;
-    return 7 if ($drev == 0x71 || $drev == 0x72);
-    return 5;
-  }
-  if ($chip == 1) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x76;     # ADT7476
-    return if ($drev & 0xf0) != 0x60;
-    return 7 if ($drev == 0x69);
-    return 5;
-  }
-  if ($chip == 2) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x62;     # ADT7462
-    return if ($drev & 0xf0) != 0x00;
-    return 7 if ($drev == 0x04);
-    return 5;
-  }
-  if ($chip == 3) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x66;     # ADT7466
-    return if ($drev & 0xf0) != 0x00;
-    return 7 if ($drev == 0x02);
-    return 5;
-  }
-  if ($chip == 4) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x70;     # ADT7470
-    return if ($drev & 0xf0) != 0x00;
-    return 7 if ($drev == 0x00);
-    return 5;
-  }
-  return
+	if ($chip == 0) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x68;		# ADT7467
+		return if ($drev & 0xf0) != 0x70;
+		return 7 if ($drev == 0x71 || $drev == 0x72);
+		return 5;
+	}
+	if ($chip == 1) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x76;		# ADT7476
+		return if ($drev & 0xf0) != 0x60;
+		return 7 if ($drev == 0x69);
+		return 5;
+	}
+	if ($chip == 2) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x62;		# ADT7462
+		return if ($drev & 0xf0) != 0x00;
+		return 7 if ($drev == 0x04);
+		return 5;
+	}
+	if ($chip == 3) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x66;		# ADT7466
+		return if ($drev & 0xf0) != 0x00;
+		return 7 if ($drev == 0x02);
+		return 5;
+	}
+	if ($chip == 4) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x70;		# ADT7470
+		return if ($drev & 0xf0) != 0x00;
+		return 7 if ($drev == 0x00);
+		return 5;
+	}
 }
 
 # Chip to detect: 0 = ADT7473, 1 = ADT7475
@@ -3767,51 +3762,46 @@ sub adt7467_detect
 #   0x3e: Manufacturer ID
 sub adt7473_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3d);
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3d);
 
-  if ($chip == 0) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x73;     # ADT7473
-    return 5;
-  }
-  if ($chip == 1) {
-    return if $mid != 0x41;     # Analog Devices
-    return if $cid != 0x75;     # ADT7475
-    return 5;
-  }
-  return
+	if ($chip == 0) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x73;		# ADT7473
+		return 5;
+	}
+	if ($chip == 1) {
+		return if $mid != 0x41;		# Analog Devices
+		return if $cid != 0x75;		# ADT7475
+		return 5;
+	}
 }
 
 # Chip to detect: 0 = aSC7512, 1 = aSC7611, 2 = aSC7621
 # Registers used:
-#   0x3e: Manufacturer ID (0x61)
+#   0x3e: Manufacturer ID
 #   0x3f: Version
 sub andigilog_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $cid = i2c_smbus_read_byte_data($file, 0x3f);
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3f);
 
-  return if ($mid != 0x61);
+	return if $mid != 0x61;		# Andigilog
 
-  if ($chip == 0) {
-    return if $cid != 0x62;
-    return 5;
-  }
-
-  if ($chip == 1) {
-    return if $cid != 0x69;
-    return 5;
-  }
-
-  if ($chip == 2) {
-    return if ($cid != 0x6C && $cid != 0x6D);
-    return 5;
-  }
-
-  return;
+	if ($chip == 0) {
+		return if $cid != 0x62;
+		return 5;
+	}
+	if ($chip == 1) {
+		return if $cid != 0x69;
+		return 5;
+	}
+	if ($chip == 2) {
+		return if $cid != 0x6C && $cid != 0x6D;
+		return 5;
+	}
 }
 
 # Registers used:
@@ -3819,62 +3809,59 @@ sub andigilog_detect
 #   0xff: Die Code
 sub andigilog_aSC7511_detect
 {
-  my ($file, $addr) = @_;
-  my $mid = i2c_smbus_read_byte_data($file, 0xfe);
-  my $die = i2c_smbus_read_byte_data($file, 0xff);
+	my ($file, $addr) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+	my $die = i2c_smbus_read_byte_data($file, 0xff);
 
-  return if $mid != 0x61;     # Andigilog
-  if ($die == 0x0) {
-      return 3;
-  } else {
-      return 1;
-  }
+	return if $mid != 0x61;		# Andigilog
+	return if $die != 0x00;
+	return 3;
 }
 
 # Chip to detect: 0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
 #                 4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103
-# Registers used: 0x3e == Vendor register.
-#                 0x3d == Device ID register (Analog Devices only).
-#		  0x3f == Version/Stepping register.
+# Registers used:
+#   0x3e: Vendor register
+#   0x3d: Device ID register (Analog Devices only)
+#   0x3f: Version/Stepping register
 sub lm85_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
-  my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
+	my ($file, $addr, $chip) = @_;
+	my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
+	my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
 
-  if ($chip == 0) {
-    return if $vendor != 0x01;	# National Semiconductor
-    return if $verstep != 0x60	# LM85 C
-           && $verstep != 0x62;	# LM85 B
-  } elsif ($chip == 1) {
-    return if $vendor != 0x01;	# National Semiconductor
-    return if $verstep != 0x68	# LM96000
-           && $verstep != 0x69;	# LM96000
-  } elsif ($chip == 2) {
-    return if $vendor != 0x41;	# Analog Devices
-    return if $verstep != 0x60;	# ADM1027
-  } elsif ($chip == 3) {
-    return if $vendor != 0x41;	# Analog Devices
-    return if $verstep != 0x62	# ADT7463
-           && $verstep != 0x6a;	# ADT7463 C
-  } elsif ($chip == 4) {
-    return if $vendor != 0x5c;	# SMSC
-    return if $verstep != 0x60	# EMC6D100/101 A0
-           && $verstep != 0x61;	# EMC6D100/101 A1
-  } elsif ($chip == 5) {
-    return if $vendor != 0x5c;	# SMSC
-    return if $verstep != 0x65;	# EMC6D102
-  } elsif ($chip == 6) {
-    return if $vendor != 0x5c;	# SMSC
-    return if $verstep != 0x68;	# EMC6D103
-  }
+	if ($chip == 0) {
+		return if $vendor != 0x01;	# National Semiconductor
+		return if $verstep != 0x60	# LM85 C
+		       && $verstep != 0x62;	# LM85 B
+	} elsif ($chip == 1) {
+		return if $vendor != 0x01;	# National Semiconductor
+		return if $verstep != 0x68	# LM96000
+		       && $verstep != 0x69;	# LM96000
+	} elsif ($chip == 2) {
+		return if $vendor != 0x41;	# Analog Devices
+		return if $verstep != 0x60;	# ADM1027
+	} elsif ($chip == 3) {
+		return if $vendor != 0x41;	# Analog Devices
+		return if $verstep != 0x62	# ADT7463
+		       && $verstep != 0x6a;	# ADT7463 C
+	} elsif ($chip == 4) {
+		return if $vendor != 0x5c;	# SMSC
+		return if $verstep != 0x60	# EMC6D100/101 A0
+		       && $verstep != 0x61;	# EMC6D100/101 A1
+	} elsif ($chip == 5) {
+		return if $vendor != 0x5c;	# SMSC
+		return if $verstep != 0x65;	# EMC6D102
+	} elsif ($chip == 6) {
+		return if $vendor != 0x5c;	# SMSC
+		return if $verstep != 0x68;	# EMC6D103
+	}
 
-  if ($vendor == 0x41) { # Analog Devices
-    return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
-    return 8;
-  }
-
-  return 7;
+	if ($vendor == 0x41) {			# Analog Devices
+		return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
+		return 8;
+	}
+	return 7;
 }
 
 # Chip to detect: 0 = LM87, 1 = ADM1024
@@ -3884,23 +3871,23 @@ sub lm85_detect
 #   0x40: Configuration
 sub lm87_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $cid = i2c_smbus_read_byte_data($file, 0x3e);
-  my $rev = i2c_smbus_read_byte_data($file, 0x3f);
+	my ($file, $addr, $chip) = @_;
+	my $cid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $rev = i2c_smbus_read_byte_data($file, 0x3f);
 
-  if ($chip == 0) {
-    return if $cid != 0x02;     # National Semiconductor
-    return if ($rev & 0xfc) != 0x04;
-  }
-  if ($chip == 1) {
-    return if $cid != 0x41;     # Analog Devices
-    return if ($rev & 0xf0) != 0x10;
-  }
+	if ($chip == 0) {
+		return if $cid != 0x02;		# National Semiconductor
+		return if ($rev & 0xfc) != 0x04; # LM87
+	}
+	if ($chip == 1) {
+		return if $cid != 0x41;		# Analog Devices
+		return if ($rev & 0xf0) != 0x10; # ADM1024
+	}
 
-  my $cfg = i2c_smbus_read_byte_data($file, 0x40);
-  return if ($cfg & 0x80) != 0x00;
+	my $cfg = i2c_smbus_read_byte_data($file, 0x40);
+	return if ($cfg & 0x80) != 0x00;
 
-  return 7;
+	return 7;
 }
 
 # Chip to detect: 0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF,
@@ -3918,47 +3905,48 @@ sub lm87_detect
 #       AS99127F rev.2.
 sub w83781d_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my ($reg1, $reg2, @res);
+	my ($file, $addr, $chip) = @_;
+	my ($reg1, $reg2, @res);
 
-  return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr)
-    or ($chip >= 4 && $chip <= 6);
+	return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr)
+		   or ($chip >= 4 && $chip <= 6);
 
-  $reg1 = i2c_smbus_read_byte_data($file, 0x4e);
-  $reg2 = i2c_smbus_read_byte_data($file, 0x4f);
-  if ($chip == 4) { # Asus AS99127F (rev.1)
-    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xc3) or
-                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x12);
-  } elsif ($chip == 6) { # Asus ASB100
-    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0x94) or
-                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x06);
-  } else { # Winbond and Asus AS99127F (rev.2)
-    return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
-                  (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
-  }
+	$reg1 = i2c_smbus_read_byte_data($file, 0x4e);
+	$reg2 = i2c_smbus_read_byte_data($file, 0x4f);
+	if ($chip == 4) {		# Asus AS99127F (rev.1)
+		return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xc3) or
+			      (($reg1 & 0x80) == 0x80 and $reg2 == 0x12);
+	} elsif ($chip == 6) {		# Asus ASB100
+		return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0x94) or
+			      (($reg1 & 0x80) == 0x80 and $reg2 == 0x06);
+	} else {			# Winbond and Asus AS99127F (rev.2)
+		return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
+			      (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+	}
 
-  return unless ($reg1 & 0x07) == 0x00;
+	return unless ($reg1 & 0x07) == 0x00;
 
-  $reg1 = i2c_smbus_read_byte_data($file, 0x58);
-  return if $chip == 0 and ($reg1 != 0x10 && $reg1 != 0x11);
-  return if $chip == 1 and  $reg1 != 0x30;
-  return if $chip == 2 and  $reg1 != 0x40;
-  return if $chip == 3 and  $reg1 != 0x21;
-  return if $chip == 4 and  $reg1 != 0x31;
-  return if $chip == 5 and  $reg1 != 0x31;
-  return if $chip == 6 and  $reg1 != 0x31;
-  return if $chip == 7 and  $reg1 != 0x71;
-  return if $chip == 8 and  $reg1 != 0x7a;
-  return if $chip == 9 and ($reg1 != 0x88 && $reg1 != 0xa1);
-  return if $chip == 10 and  $reg1 != 0xc1;
-  # Default address is 0x2d
-  @res = ($addr != 0x2d) ? (7) : (8);
-  return @res if $chip >= 9; # No subclients
+	$reg1 = i2c_smbus_read_byte_data($file, 0x58);
+	return if $chip == 0 and ($reg1 != 0x10 && $reg1 != 0x11);
+	return if $chip == 1 and  $reg1 != 0x30;
+	return if $chip == 2 and  $reg1 != 0x40;
+	return if $chip == 3 and  $reg1 != 0x21;
+	return if $chip == 4 and  $reg1 != 0x31;
+	return if $chip == 5 and  $reg1 != 0x31;
+	return if $chip == 6 and  $reg1 != 0x31;
+	return if $chip == 7 and  $reg1 != 0x71;
+	return if $chip == 8 and  $reg1 != 0x7a;
+	return if $chip == 9 and ($reg1 != 0x88 && $reg1 != 0xa1);
+	return if $chip == 10 and  $reg1 != 0xc1;
+	# Default address is 0x2d
+	@res = ($addr != 0x2d) ? (7) : (8);
+	return @res if $chip >= 9; # No subclients
 
-  $reg1 = i2c_smbus_read_byte_data($file, 0x4a);
-  push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
-  push @res, (($reg1 & 0x70) >> 4) + 0x48 unless ($reg1 & 0x80 or $chip == 2);
-  return @res;
+	$reg1 = i2c_smbus_read_byte_data($file, 0x4a);
+	push @res, ($reg1 & 0x07) + 0x48 unless $reg1 & 0x08;
+	push @res, (($reg1 & 0x70) >> 4) + 0x48
+		unless ($reg1 & 0x80 or $chip == 2);
+	return @res;
 }
 
 # Registers used:
@@ -3969,28 +3957,28 @@ sub w83781d_detect
 #   0x0e: Device ID(Bank 0, 1, 2)
 sub w83793_detect
 {
-  my ($file, $addr) = @_;
-  my ($bank, $reg, @res);
+	my ($file, $addr) = @_;
+	my ($bank, $reg, @res);
 
-  $bank = i2c_smbus_read_byte_data($file, 0x00);
-  $reg = i2c_smbus_read_byte_data($file, 0x0d);
+	$bank = i2c_smbus_read_byte_data($file, 0x00);
+	$reg = i2c_smbus_read_byte_data($file, 0x0d);
 
-  return unless (($bank & 0x80) == 0x00 and $reg == 0xa3) or
-                (($bank & 0x80) == 0x80 and $reg == 0x5c);
+	return unless (($bank & 0x80) == 0x00 and $reg == 0xa3) or
+		      (($bank & 0x80) == 0x80 and $reg == 0x5c);
 
-  $reg = i2c_smbus_read_byte_data($file, 0x0e);
-  return if $reg != 0x7b;
+	$reg = i2c_smbus_read_byte_data($file, 0x0e);
+	return if $reg != 0x7b;
 
-# If bank 0 is selected, we can do more checks
-  return 6 unless ($bank & 0x07) == 0;
-  $reg = i2c_smbus_read_byte_data($file, 0x0b);
-  return unless ($reg == ($addr << 1));
+	# If bank 0 is selected, we can do more checks
+	return 6 unless ($bank & 0x07) == 0;
+	$reg = i2c_smbus_read_byte_data($file, 0x0b);
+	return unless ($reg == ($addr << 1));
 
-  $reg = i2c_smbus_read_byte_data($file, 0x0c);
-  @res = (8);
-  push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
-  push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
-  return @res;
+	$reg = i2c_smbus_read_byte_data($file, 0x0c);
+	@res = (8);
+	push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
+	push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
+	return @res;
 }
 
 # Registers used:
@@ -4005,20 +3993,20 @@ sub w83793_detect
 # we should investigate about.
 sub w83791sd_detect
 {
-  my ($file, $addr) = @_;
-  my ($reg1, $reg2);
+	my ($file, $addr) = @_;
+	my ($reg1, $reg2);
 
-  return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr);
+	return unless (i2c_smbus_read_byte_data($file, 0x48) == $addr);
 
-  $reg1 = i2c_smbus_read_byte_data($file, 0x4e);
-  $reg2 = i2c_smbus_read_byte_data($file, 0x4f);
-  return unless (!($reg1 & 0x80) && $reg2 == 0xa3)
-             || (($reg1 & 0x80) && $reg2 == 0x5c);
+	$reg1 = i2c_smbus_read_byte_data($file, 0x4e);
+	$reg2 = i2c_smbus_read_byte_data($file, 0x4f);
+	return unless (!($reg1 & 0x80) && $reg2 == 0xa3)
+		   || (($reg1 & 0x80) && $reg2 == 0x5c);
 
-  $reg1 = i2c_smbus_read_byte_data($file, 0x58);
-  return unless $reg1 == 0x72;
+	$reg1 = i2c_smbus_read_byte_data($file, 0x58);
+	return unless $reg1 == 0x72;
 
-  return 3;
+	return 3;
 }
 
 # Registers used:
@@ -4029,18 +4017,18 @@ sub w83791sd_detect
 #       to confirm.
 sub mozart_detect
 {
-  my ($file, $addr) = @_;
-  my ($vid, $dev);
+	my ($file, $addr) = @_;
+	my ($vid, $dev);
 
-  $vid = (i2c_smbus_read_byte_data($file, 0x4e) << 8)
-       +  i2c_smbus_read_byte_data($file, 0x4f);
-  $dev = i2c_smbus_read_byte_data($file, 0x58);
+	$vid = (i2c_smbus_read_byte_data($file, 0x4e) << 8)
+	     +  i2c_smbus_read_byte_data($file, 0x4f);
+	$dev = i2c_smbus_read_byte_data($file, 0x58);
 
-  return unless ($dev == 0x56 && $vid == 0x9436)  # ASM58
-             || ($dev == 0x56 && $vid == 0x9406)  # AS2K129R
-             || ($dev == 0x10 && $vid == 0x5ca3);
+	return unless ($dev == 0x56 && $vid == 0x9436)	# ASM58
+		   || ($dev == 0x56 && $vid == 0x9406)	# AS2K129R
+		   || ($dev == 0x10 && $vid == 0x5ca3);
 
-  return 5;
+	return 5;
 }
 
 # Chip to detect: 0 = GL518SM, 1 = GL520SM
@@ -4050,17 +4038,17 @@ sub mozart_detect
 #   0x03: Configuration
 sub gl518sm_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $reg;
+	my ($file, $addr, $chip) = @_;
+	my $reg;
 
-  $reg = i2c_smbus_read_byte_data($file, 0x00);
-  return if $chip == 0 && $reg != 0x80;
-  return if $chip == 1 && $reg != 0x20;
+	$reg = i2c_smbus_read_byte_data($file, 0x00);
+	return if $chip == 0 && $reg != 0x80;
+	return if $chip == 1 && $reg != 0x20;
 
-  return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
-  $reg = i2c_smbus_read_byte_data($file, 0x01);
-  return unless $reg == 0x00 or $reg == 0x80;
-  return 6;
+	return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
+	$reg = i2c_smbus_read_byte_data($file, 0x01);
+	return unless $reg == 0x00 or $reg == 0x80;
+	return 6;
 }
 
 # Registers used:
@@ -4069,10 +4057,10 @@ sub gl518sm_detect
 # Mediocre detection
 sub gl525sm_detect
 {
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x00) == 0x25;
-  return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
-  return 5;
+	my ($file, $addr) = @_;
+	return unless i2c_smbus_read_byte_data($file, 0x00) == 0x25;
+	return unless (i2c_smbus_read_byte_data($file, 0x03) & 0x80) == 0x00;
+	return 5;
 }
 
 # Chip to detect: 0 = ADM9240, 1 = DS1780, 2 = LM81
@@ -4082,16 +4070,16 @@ sub gl525sm_detect
 #   0x48: Full I2C Address
 sub adm9240_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $reg;
-  $reg = i2c_smbus_read_byte_data($file, 0x3e);
-  return unless ($chip == 0 and $reg == 0x23) or
-                ($chip == 1 and $reg == 0xda) or
-                ($chip == 2 and $reg == 0x01);
-  return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
-  return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
+	my ($file, $addr, $chip) = @_;
+	my $reg;
+	$reg = i2c_smbus_read_byte_data($file, 0x3e);
+	return unless ($chip == 0 and $reg == 0x23) or
+		      ($chip == 1 and $reg == 0xda) or
+		      ($chip == 2 and $reg == 0x01);
+	return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
+	return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
 
-  return 7;
+	return 7;
 }
 
 # Chip to detect: 0 = ADM1022, 1 = THMC50, 2 = ADM1028, 3 = THMC51
@@ -4101,22 +4089,22 @@ sub adm9240_detect
 #   0x40: Configuration
 sub adm1022_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $reg;
-  $reg = i2c_smbus_read_byte_data($file, 0x3e);
-  return unless ($chip == 0 and $reg == 0x41) or
-                ($chip == 1 and $reg == 0x49) or
-                ($chip == 2 and $reg == 0x41) or
-                ($chip == 3 and $reg == 0x49);
-  $reg = i2c_smbus_read_byte_data($file, 0x40);
-  return if ($reg & 0x10);			# Soft Reset always reads 0
-  return if ($chip != 0 and ($reg & 0x80));	# Reserved on THMC50 and ADM1028
-  $reg = i2c_smbus_read_byte_data($file, 0x3f) & 0xf0;
-  return unless ($chip == 0 and $reg == 0xc0) or
-                ($chip == 1 and $reg == 0xc0) or
-                ($chip == 2 and $reg == 0xd0) or
-                ($chip == 3 and $reg == 0xd0);
-  return 8;
+	my ($file, $addr, $chip) = @_;
+	my $reg;
+	$reg = i2c_smbus_read_byte_data($file, 0x3e);
+	return unless ($chip == 0 and $reg == 0x41) or
+		      ($chip == 1 and $reg == 0x49) or
+		      ($chip == 2 and $reg == 0x41) or
+		      ($chip == 3 and $reg == 0x49);
+	$reg = i2c_smbus_read_byte_data($file, 0x40);
+	return if ($reg & 0x10);			# Soft Reset always reads 0
+	return if ($chip != 0 and ($reg & 0x80));	# Reserved on THMC50 and ADM1028
+	$reg = i2c_smbus_read_byte_data($file, 0x3f) & 0xf0;
+	return unless ($chip == 0 and $reg == 0xc0) or
+		      ($chip == 1 and $reg == 0xc0) or
+		      ($chip == 2 and $reg == 0xd0) or
+		      ($chip == 3 and $reg == 0xd0);
+	return 8;
 }
 
 # Chip to detect: 0 = ADM1025, 1 = NE1619
@@ -4128,19 +4116,19 @@ sub adm1022_detect
 #   0x42: Status 2
 sub adm1025_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $reg;
+	my ($file, $addr, $chip) = @_;
+	my $reg;
 
-  $reg = i2c_smbus_read_byte_data($file, 0x3e);
-  return if ($chip == 0) and ($reg != 0x41);
-  return if ($chip == 1) and ($reg != 0xA1);
+	$reg = i2c_smbus_read_byte_data($file, 0x3e);
+	return if ($chip == 0) and ($reg != 0x41);
+	return if ($chip == 1) and ($reg != 0xA1);
 
-  return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file, 0x41) & 0xC0) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file, 0x42) & 0xBC) == 0x00;
-  return unless (i2c_smbus_read_byte_data($file, 0x3f) & 0xf0) == 0x20;
+	return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
+	return unless (i2c_smbus_read_byte_data($file, 0x41) & 0xC0) == 0x00;
+	return unless (i2c_smbus_read_byte_data($file, 0x42) & 0xBC) == 0x00;
+	return unless (i2c_smbus_read_byte_data($file, 0x3f) & 0xf0) == 0x20;
 
-  return 8;
+	return 8;
 }
 
 # Registers used:
@@ -4148,12 +4136,12 @@ sub adm1025_detect
 #   0x17: Revision
 sub adm1026_detect
 {
-  my ($file, $addr) = @_;
-  my $reg;
-  $reg = i2c_smbus_read_byte_data($file, 0x16);
-  return unless ($reg == 0x41);
-  return unless (i2c_smbus_read_byte_data($file, 0x17) & 0xf0) == 0x40;
-  return 8;
+	my ($file, $addr) = @_;
+	my $reg;
+	$reg = i2c_smbus_read_byte_data($file, 0x16);
+	return unless ($reg == 0x41);
+	return unless (i2c_smbus_read_byte_data($file, 0x17) & 0xf0) == 0x40;
+	return 8;
 }
 
 # Chip to detect: 0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A,
@@ -4170,66 +4158,62 @@ sub adm1026_detect
 # confidence value.
 sub adm1021_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
-  my $rev = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
-  my $status = i2c_smbus_read_byte_data($file, 0x02);
-  my $convrate = i2c_smbus_read_byte_data($file, 0x04);
+	my ($file, $addr, $chip) = @_;
+	my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+	my $rev = i2c_smbus_read_byte_data($file, 0xff);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03);
+	my $status = i2c_smbus_read_byte_data($file, 0x02);
+	my $convrate = i2c_smbus_read_byte_data($file, 0x04);
 
-  # Check manufacturer IDs and product revisions when available
-  return if $chip == 0 and $man_id != 0x41 ||
-                          ($rev & 0xf0) != 0x00;
-  return if $chip == 1 and $man_id != 0x41 ||
-                          ($rev & 0xf0) != 0x30;
-  return if $chip == 3 and $man_id != 0x4d ||
-                           $rev != 0x01;
-  return if $chip == 4 and $man_id != 0x49;
-  return if $chip == 5 and $convrate != 0x00;
-  return if $chip == 6 and $man_id != 0x23;
-  return if $chip == 7 and $man_id != 0x54;
+	# Check manufacturer IDs and product revisions when available
+	return if $chip == 0 and $man_id != 0x41 || ($rev & 0xf0) != 0x00;
+	return if $chip == 1 and $man_id != 0x41 || ($rev & 0xf0) != 0x30;
+	return if $chip == 3 and $man_id != 0x4d || $rev != 0x01;
+	return if $chip == 4 and $man_id != 0x49;
+	return if $chip == 5 and $convrate != 0x00;
+	return if $chip == 6 and $man_id != 0x23;
+	return if $chip == 7 and $man_id != 0x54;
 
-  # Check unused bits
-  if ($chip == 5) { # LM84
-    return if ($status & 0xab) != 0;
-    return if ($conf & 0x7f) != 0;
-  } else {
-    return if ($status & 0x03) != 0;
-    return if ($conf & 0x3f) != 0;
-    return if ($convrate & 0xf8) != 0;
-  }
+	# Check unused bits
+	if ($chip == 5) {	# LM84
+		return if ($status & 0xab) != 0;
+		return if ($conf & 0x7f) != 0;
+	} else {
+		return if ($status & 0x03) != 0;
+		return if ($conf & 0x3f) != 0;
+		return if ($convrate & 0xf8) != 0;
+	}
 
-  # Extra checks for MAX1617 and LM84, since those are often misdetected
-  # We verify several assertions (6 for the MAX1617, 4 for the LM84) and
-  # discard the chip if any fail. Note that these checks are not done
-  # by the adm1021 driver.
-  if ($chip == 2 || $chip == 5) {
-    my $lte = i2c_smbus_read_byte_data($file, 0x00);
-    my $rte = i2c_smbus_read_byte_data($file, 0x01);
-    my $lhi = i2c_smbus_read_byte_data($file, 0x05);
-    my $rhi = i2c_smbus_read_byte_data($file, 0x07);
-    my $llo = i2c_smbus_read_byte_data($file, 0x06);
-    my $rlo = i2c_smbus_read_byte_data($file, 0x08);
+	# Extra checks for MAX1617 and LM84, since those are often misdetected.
+	# We verify several assertions (6 for the MAX1617, 4 for the LM84) and
+	# discard the chip if any fail. Note that these checks are not done
+	# by the adm1021 driver.
+	if ($chip == 2 || $chip == 5) {
+		my $lte = i2c_smbus_read_byte_data($file, 0x00);
+		my $rte = i2c_smbus_read_byte_data($file, 0x01);
+		my $lhi = i2c_smbus_read_byte_data($file, 0x05);
+		my $rhi = i2c_smbus_read_byte_data($file, 0x07);
+		my $llo = i2c_smbus_read_byte_data($file, 0x06);
+		my $rlo = i2c_smbus_read_byte_data($file, 0x08);
 
-    # If all registers hold the same value, it has to be a misdetection
-    return if $lte == $rte and $lte == $lhi and $lte == $rhi
-           and $lte == $llo and $lte == $rlo;
+		# If all registers hold the same value, it has to be a misdetection
+		return if $lte == $rte and $lte == $lhi and $lte == $rhi
+		      and $lte == $llo and $lte == $rlo;
 
-    # Negative temperatures
-    return if ($lte & 0x80) or ($rte & 0x80);
-    # Negative high limits
-    return if ($lhi & 0x80) or ($rhi & 0x80);
-    # Low limits over high limits
-    if ($chip != 5) { # LM84 doesn't have low limits
-      $llo -= 256 if ($llo & 0x80);
-      $rlo -= 256 if ($rlo & 0x80);
-      return if ($llo > $lhi) or ($rlo > $rhi);
-    }
-  }
+		# Negative temperatures
+		return if ($lte & 0x80) or ($rte & 0x80);
+		# Negative high limits
+		return if ($lhi & 0x80) or ($rhi & 0x80);
+		# Low limits over high limits
+		if ($chip == 2) {
+			$llo -= 256 if ($llo & 0x80);
+			$rlo -= 256 if ($rlo & 0x80);
+			return if ($llo > $lhi) or ($rlo > $rhi);
+		}
+		return 3;
+	}
 
-  return 3 if ($chip == 2) or ($chip == 5);
-  return 7 if $chip <= 3;
-  return 5;
+	return ($chip <= 3) ? 7 : 5;
 }
 
 # Chip to detect: 0 = MAX1668, 1 = MAX1805, 2 = MAX1989
@@ -4238,16 +4222,16 @@ sub adm1021_detect
 #   0xff: Device ID
 sub max1668_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
-  my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
+	my ($file, $addr, $chip) = @_;
+	my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+	my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
 
-  return if $man_id != 0x4d;
-  return if $chip == 0 and $dev_id != 0x03;
-  return if $chip == 1 and $dev_id != 0x05;
-  return if $chip == 2 and $dev_id != 0x0b;
+	return if $man_id != 0x4d;
+	return if $chip == 0 and $dev_id != 0x03;
+	return if $chip == 1 and $dev_id != 0x05;
+	return if $chip == 2 and $dev_id != 0x0b;
 
-  return 7;
+	return 7;
 }
 
 # Chip to detect: 0 = MAX1619, 1 = MAX1618
@@ -4259,28 +4243,28 @@ sub max1668_detect
 #   0x04: Conversion rate
 sub max1619_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
-  my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
-  my $conf = i2c_smbus_read_byte_data($file, 0x03);
-  my $status = i2c_smbus_read_byte_data($file, 0x02);
-  my $convrate = i2c_smbus_read_byte_data($file, 0x04);
+	my ($file, $addr, $chip) = @_;
+	my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+	my $dev_id = i2c_smbus_read_byte_data($file, 0xff);
+	my $conf = i2c_smbus_read_byte_data($file, 0x03);
+	my $status = i2c_smbus_read_byte_data($file, 0x02);
+	my $convrate = i2c_smbus_read_byte_data($file, 0x04);
 
-  if ($chip == 0) {	# MAX1619
-    return if $man_id != 0x4D
-      or $dev_id != 0x04
-      or ($conf & 0x03)
-      or ($status & 0x61)
-      or $convrate >= 8;
-  }
-  if ($chip == 1) {	# MAX1618
-    return if $man_id != 0x4D
-      or $dev_id != 0x02
-      or ($conf & 0x07)
-      or ($status & 0x63);
-  }
+	return if $man_id != 0x4D;	# Maxim
 
-  return 7;
+	if ($chip == 0) {		# MAX1619
+		return if $dev_id != 0x04
+		       or ($conf & 0x03)
+		       or ($status & 0x61)
+		       or $convrate >= 8;
+	}
+	if ($chip == 1) {		# MAX1618
+		return if $dev_id != 0x02
+		       or ($conf & 0x07)
+		       or ($status & 0x63);
+	}
+
+	return 7;
 }
 
 # Registers used:
@@ -4288,14 +4272,13 @@ sub max1619_detect
 #   0x29: User ID2
 sub ite_overclock_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  my $uid1 = i2c_smbus_read_byte_data($file, 0x28);
-  my $uid2 = i2c_smbus_read_byte_data($file, 0x29);
-  return if $uid1 != 0x83
-         || $uid2 != 0x12;
+	my $uid1 = i2c_smbus_read_byte_data($file, 0x28);
+	my $uid2 = i2c_smbus_read_byte_data($file, 0x29);
+	return if $uid1 != 0x83 || $uid2 != 0x12;
 
-  return 6;
+	return 6;
 }
 
 # Registers used:
@@ -4305,51 +4288,49 @@ sub ite_overclock_detect
 #   0x5b: Device ID
 sub it8712_i2c_detect
 {
-  my ($file, $addr) = @_;
-  my $reg;
-  return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
-  return unless (i2c_smbus_read_byte_data($file, 0x00) & 0x90) == 0x10;
-  return unless i2c_smbus_read_byte_data($file, 0x58) == 0x90;
-  return if i2c_smbus_read_byte_data($file, 0x5b) != 0x12;
-  return 7 + ($addr == 0x2d);
+	my ($file, $addr) = @_;
+	my $reg;
+	return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
+	return unless (i2c_smbus_read_byte_data($file, 0x00) & 0x90) == 0x10;
+	return unless i2c_smbus_read_byte_data($file, 0x58) == 0x90;
+	return if i2c_smbus_read_byte_data($file, 0x5b) != 0x12;
+	return 7 + ($addr == 0x2d);
 }
 
 # Registers used:
 #   0-63: SPD Data and Checksum
 sub eeprom_detect
 {
-  my ($file, $addr) = @_;
-  my $checksum = 0;
+	my ($file, $addr) = @_;
+	my $checksum = 0;
 
-  # Check the checksum for validity (works for most DIMMs and RIMMs)
-  for (my $i = 0; $i <= 62; $i++) {
-    $checksum += i2c_smbus_read_byte_data($file, $i);
-  }
-  $checksum &= 255;
-
-  return 8
-    if $checksum == i2c_smbus_read_byte_data($file, 63);
-
-  return;
+	# Check the checksum for validity (works for most DIMMs and RIMMs)
+	for (my $i = 0; $i <= 62; $i++) {
+		$checksum += i2c_smbus_read_byte_data($file, $i);
+	}
+	$checksum &= 255;
+	
+	return 8 if $checksum == i2c_smbus_read_byte_data($file, 63);
+	return;
 }
 
 # Registers used:
 #   0x00..0x07: DDC signature
 sub ddcmonitor_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  return unless
-    i2c_smbus_read_byte_data($file, 0x00) == 0x00 and
-    i2c_smbus_read_byte_data($file, 0x01) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x02) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x03) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x04) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x05) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x06) == 0xFF and
-    i2c_smbus_read_byte_data($file, 0x07) == 0x00;
+	return unless
+		i2c_smbus_read_byte_data($file, 0x00) == 0x00 and
+		i2c_smbus_read_byte_data($file, 0x01) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x02) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x03) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x04) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x05) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x06) == 0xFF and
+		i2c_smbus_read_byte_data($file, 0x07) == 0x00;
 
-  return 8;
+	return 8;
 }
 
 # Chip to detect: 0 = Poseidon I, 1 = Poseidon II, 2 = Scylla,
@@ -4358,21 +4339,21 @@ sub ddcmonitor_detect
 #   0x00-0x02: Identification (3 capital ASCII letters)
 sub fsc_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $id;
+	my ($file, $addr, $chip) = @_;
+	my $id;
 
-  $id = chr(i2c_smbus_read_byte_data($file, 0x00))
-      . chr(i2c_smbus_read_byte_data($file, 0x01))
-      . chr(i2c_smbus_read_byte_data($file, 0x02));
+	$id = chr(i2c_smbus_read_byte_data($file, 0x00))
+	    . chr(i2c_smbus_read_byte_data($file, 0x01))
+	    . chr(i2c_smbus_read_byte_data($file, 0x02));
 
-  return if $chip == 0 and $id ne 'PEG';  # Pegasus? aka Poseidon I
-  return if $chip == 1 and $id ne 'POS';  # Poseidon II
-  return if $chip == 2 and $id ne 'SCY';  # Scylla
-  return if $chip == 3 and $id ne 'HER';  # Hermes
-  return if $chip == 4 and $id ne 'HMD';  # Heimdal
-  return if $chip == 5 and $id ne 'HRC';  # Heracles
+	return if $chip == 0 and $id ne 'PEG';  # Pegasus? aka Poseidon I
+	return if $chip == 1 and $id ne 'POS';  # Poseidon II
+	return if $chip == 2 and $id ne 'SCY';  # Scylla
+	return if $chip == 3 and $id ne 'HER';  # Hermes
+	return if $chip == 4 and $id ne 'HMD';  # Heimdal
+	return if $chip == 5 and $id ne 'HRC';  # Heracles
 
-  return 8;
+	return 8;
 }
 
 # Registers used:
@@ -4380,10 +4361,10 @@ sub fsc_detect
 #   0x3F: Version/Stepping
 sub lm93_detect
 {
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x01
-            and i2c_smbus_read_byte_data($file, 0x3F) == 0x73;
-  return 5;
+	my ($file, $addr) = @_;
+	return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x01
+		  and i2c_smbus_read_byte_data($file, 0x3F) == 0x73;
+	return 5;
 }
 
 # Registers used:
@@ -4394,22 +4375,18 @@ sub lm93_detect
 # "VID4/Device ID" so it is doubtful bits 7-1 are really unused.
 sub m5879_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  return
-    unless i2c_smbus_read_byte_data($file, 0x3F) == 0x01;
+	return unless i2c_smbus_read_byte_data($file, 0x3F) == 0x01;
+	return unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
 
-  return
-    unless i2c_smbus_read_byte_data($file, 0x48) == $addr;
+	return unless (i2c_smbus_read_byte_data($file, 0x4A) & 0x06) == 0
+		  and (i2c_smbus_read_byte_data($file, 0x4B) & 0xFC) == 0
+		  and (i2c_smbus_read_byte_data($file, 0x4F) & 0xFC) == 0
+		  and (i2c_smbus_read_byte_data($file, 0x57) & 0xFE) == 0
+		  and (i2c_smbus_read_byte_data($file, 0x58) & 0xEF) == 0;
 
-  return
-    unless (i2c_smbus_read_byte_data($file, 0x4A) & 0x06) == 0
-       and (i2c_smbus_read_byte_data($file, 0x4B) & 0xFC) == 0
-       and (i2c_smbus_read_byte_data($file, 0x4F) & 0xFC) == 0
-       and (i2c_smbus_read_byte_data($file, 0x57) & 0xFE) == 0
-       and (i2c_smbus_read_byte_data($file, 0x58) & 0xEF) == 0;
-
-  return 7;
+	return 7;
 }
 
 # Registers used:
@@ -4419,12 +4396,12 @@ sub m5879_detect
 #   0x49: VID4 (7 reserved bits)
 sub smsc47m192_detect
 {
-  my ($file, $addr) = @_;
-  return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x55
-           and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF0) == 0x20
-           and (i2c_smbus_read_byte_data($file, 0x47) & 0x70) == 0x00
-           and (i2c_smbus_read_byte_data($file, 0x49) & 0xFE) == 0x80;
-  return ($addr == 0x2d ? 6 : 5);
+	my ($file, $addr) = @_;
+	return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x55
+		  and (i2c_smbus_read_byte_data($file, 0x3F) & 0xF0) == 0x20
+		  and (i2c_smbus_read_byte_data($file, 0x47) & 0x70) == 0x00
+		  and (i2c_smbus_read_byte_data($file, 0x49) & 0xFE) == 0x80;
+	return ($addr == 0x2d ? 6 : 5);
 }
 
 # Chip to detect: 1 = DME1737, 2 = SCH5027
@@ -4436,22 +4413,22 @@ sub smsc47m192_detect
 #   0xBA: Read-only test register (8 test bits)
 sub dme1737_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $vendor = i2c_smbus_read_byte_data($file, 0x3E);
-  my $verstep = i2c_smbus_read_byte_data($file, 0x3F);
+	my ($file, $addr, $chip) = @_;
+	my $vendor = i2c_smbus_read_byte_data($file, 0x3E);
+	my $verstep = i2c_smbus_read_byte_data($file, 0x3F);
 
-  return unless $vendor == 0x5C; # SMSC
+	return unless $vendor == 0x5C; # SMSC
 
-  if ($chip == 1) { # DME1737
-      return unless ($verstep & 0xF8) == 0x88 and
-          (i2c_smbus_read_byte_data($file, 0x73) & 0x0F) == 0x09 and
-          (i2c_smbus_read_byte_data($file, 0x8A) & 0x7F) == 0x4D;
-  } elsif ($chip == 2) { # SCH5027
-      return unless $verstep >= 0x69 and $verstep <= 0x6F and
-          i2c_smbus_read_byte_data($file, 0xBA) == 0x0F;
-  }
+	if ($chip == 1) { # DME1737
+		return unless ($verstep & 0xF8) == 0x88 and
+			      (i2c_smbus_read_byte_data($file, 0x73) & 0x0F) == 0x09 and
+			      (i2c_smbus_read_byte_data($file, 0x8A) & 0x7F) == 0x4D;
+	} elsif ($chip == 2) { # SCH5027
+		return unless $verstep >= 0x69 and $verstep <= 0x6F and
+			      i2c_smbus_read_byte_data($file, 0xBA) == 0x0F;
+	}
 
-  return ($addr == 0x2e ? 6 : 5);
+	return ($addr == 0x2e ? 6 : 5);
 }
 
 # Chip to detect: 1 = F75111R/RG/N, 2 = F75121R/F75122R/RG, 3 = F75373S/SG,
@@ -4462,32 +4439,33 @@ sub dme1737_detect
 #   0x5D-0x5E: Vendor ID
 sub fintek_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my $chipid = (i2c_smbus_read_byte_data($file, 0x5A) << 8)
-             | i2c_smbus_read_byte_data($file, 0x5B);
-  my $vendid = (i2c_smbus_read_byte_data($file, 0x5D) << 8)
-             | i2c_smbus_read_byte_data($file, 0x5E);
+	my ($file, $addr, $chip) = @_;
+	my $chipid = (i2c_smbus_read_byte_data($file, 0x5A) << 8)
+		   | i2c_smbus_read_byte_data($file, 0x5B);
+	my $vendid = (i2c_smbus_read_byte_data($file, 0x5D) << 8)
+		   | i2c_smbus_read_byte_data($file, 0x5E);
 
-  return unless $vendid == 0x1934; # Fintek ID
+	return unless $vendid == 0x1934; # Fintek ID
 
-  if ($chip == 1) { # F75111R/RG/N
-    return unless $chipid == 0x0300;
-  } elsif ($chip == 2) { # F75121R/F75122R/RG
-    return unless $chipid == 0x0301;
-  } elsif ($chip == 3) { # F75373S/SG
-    return unless $chipid == 0x0204;
-  } elsif ($chip == 4) { # F75375S/SP
-    return unless $chipid == 0x0306;
-  } elsif ($chip == 5) { # F75387SG/RG
-    return unless $chipid == 0x0410;
-  } elsif ($chip == 6) { # F75383M/S/F75384M/S
-    # The datasheet has 0x0303, but Fintek say 0x0413 is also possible
-    return unless $chipid == 0x0303 || $chipid == 0x0413;
-  } elsif ($chip == 7) { # custom power control IC
-    return unless $chipid == 0x0302;
-  }
+	if ($chip == 1) { # F75111R/RG/N
+		return unless $chipid == 0x0300;
+	} elsif ($chip == 2) { # F75121R/F75122R/RG
+		return unless $chipid == 0x0301;
+	} elsif ($chip == 3) { # F75373S/SG
+		return unless $chipid == 0x0204;
+	} elsif ($chip == 4) { # F75375S/SP
+		return unless $chipid == 0x0306;
+	} elsif ($chip == 5) { # F75387SG/RG
+		return unless $chipid == 0x0410;
+	} elsif ($chip == 6) { # F75383M/S/F75384M/S
+		# The datasheet has 0x0303, but Fintek say 0x0413 is also
+		# possible
+		return unless $chipid == 0x0303 || $chipid == 0x0413;
+	} elsif ($chip == 7) { # custom power control IC
+		return unless $chipid == 0x0302;
+	}
 
-  return 7;
+	return 7;
 }
 
 # This checks for non-FFFF values for temperature, voltage, and current.
@@ -4495,12 +4473,12 @@ sub fintek_detect
 # that this really is a smart battery.
 sub smartbatt_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  return if i2c_smbus_read_word_data($file, 0x08) == 0xffff
-         || i2c_smbus_read_word_data($file, 0x09) == 0xffff
-         || i2c_smbus_read_word_data($file, 0x0a) == 0xffff;
-  return 5;
+	return if i2c_smbus_read_word_data($file, 0x08) == 0xffff
+	       || i2c_smbus_read_word_data($file, 0x09) == 0xffff
+	       || i2c_smbus_read_word_data($file, 0x0a) == 0xffff;
+	return 5;
 }
 
 # Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G,
@@ -4514,28 +4492,28 @@ sub smartbatt_detect
 #   0x4e: Chip ID
 sub w83l784r_detect
 {
-  my ($file, $addr, $chip) = @_;
-  my ($reg, @res);
+	my ($file, $addr, $chip) = @_;
+	my ($reg, @res);
 
-  return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
-  return if $chip == 0
-    and i2c_smbus_read_byte_data($file, 0x4a) != $addr;
-  return unless i2c_smbus_read_byte_data($file, 0x4c) == 0xa3;
-  return unless i2c_smbus_read_byte_data($file, 0x4d) == 0x5c;
+	return unless (i2c_smbus_read_byte_data($file, 0x40) & 0x80) == 0x00;
+	return if $chip == 0
+	      and i2c_smbus_read_byte_data($file, 0x4a) != $addr;
+	return unless i2c_smbus_read_byte_data($file, 0x4c) == 0xa3;
+	return unless i2c_smbus_read_byte_data($file, 0x4d) == 0x5c;
 
-  $reg = i2c_smbus_read_byte_data($file, 0x4e);
-  return if $chip == 0 and $reg != 0x50;
-  return if $chip == 1 and $reg != 0x60;
-  return if $chip == 2 and $reg != 0x80;
-  return if $chip == 3 and $reg != 0x70;
+	$reg = i2c_smbus_read_byte_data($file, 0x4e);
+	return if $chip == 0 and $reg != 0x50;
+	return if $chip == 1 and $reg != 0x60;
+	return if $chip == 2 and $reg != 0x80;
+	return if $chip == 3 and $reg != 0x70;
 
-  return 8 if $chip != 0; # No subclients
+	return 8 if $chip != 0; # No subclients
 
-  @res = (8);
-  $reg = i2c_smbus_read_byte_data($file, 0x4b);
-  push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
-  push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
-  return @res;
+	@res = (8);
+	$reg = i2c_smbus_read_byte_data($file, 0x4b);
+	push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
+	push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
+	return @res;
 }
 
 # The max6650 has no device ID register. However, a few registers have
@@ -4553,34 +4531,34 @@ sub w83l784r_detect
 # the configuration register.
 sub max6650_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  my $conf = i2c_smbus_read_byte_data($file, 0x02);
+	my $conf = i2c_smbus_read_byte_data($file, 0x02);
 
-  return if i2c_smbus_read_byte_data($file, 0x16) & 0xFC;
-  return if i2c_smbus_read_byte_data($file, 0x0A) & 0xE0;
-  return if i2c_smbus_read_byte_data($file, 0x08) & 0xE0;
-  return if i2c_smbus_read_byte_data($file, 0x14) & 0xE0;
-  return if ($conf & 0xC0) or ($conf & 0x07) > 4;
+	return if i2c_smbus_read_byte_data($file, 0x16) & 0xFC;
+	return if i2c_smbus_read_byte_data($file, 0x0A) & 0xE0;
+	return if i2c_smbus_read_byte_data($file, 0x08) & 0xE0;
+	return if i2c_smbus_read_byte_data($file, 0x14) & 0xE0;
+	return if ($conf & 0xC0) or ($conf & 0x07) > 4;
 
-  return 3;
+	return 3;
 }
 
 sub max6655_detect
 {
-  my ($file, $addr) = @_;
+	my ($file, $addr) = @_;
 
-  # checking RDID (Device ID)
-  return unless i2c_smbus_read_byte_data($file, 0xfe) == 0x0a;
-  # checking RDRV (Manufacturer ID)
-  return unless i2c_smbus_read_byte_data($file, 0xff) == 0x4d;
-  # checking unused bits (conversion rate, extended temperature)
-  return unless i2c_smbus_read_byte_data($file, 0x04) & 0xf8;
-  return unless i2c_smbus_read_byte_data($file, 0x10) & 0x1f;
-  return unless i2c_smbus_read_byte_data($file, 0x11) & 0x1f;
-  return unless i2c_smbus_read_byte_data($file, 0x12) & 0x1f;
+	# checking RDID (Device ID)
+	return unless i2c_smbus_read_byte_data($file, 0xfe) == 0x0a;
+	# checking RDRV (Manufacturer ID)
+	return unless i2c_smbus_read_byte_data($file, 0xff) == 0x4d;
+	# checking unused bits (conversion rate, extended temperature)
+	return unless i2c_smbus_read_byte_data($file, 0x04) & 0xf8;
+	return unless i2c_smbus_read_byte_data($file, 0x10) & 0x1f;
+	return unless i2c_smbus_read_byte_data($file, 0x11) & 0x1f;
+	return unless i2c_smbus_read_byte_data($file, 0x12) & 0x1f;
 
-  return 6;
+	return 6;
 }
 
 # This isn't very good detection.
@@ -4588,10 +4566,10 @@ sub max6655_detect
 # my chip but could be different for others...
 sub vt1211_i2c_detect
 {
-  my ($file, $addr) = @_;
-  return unless (i2c_smbus_read_byte_data($file, 0x48) & 0x7f) == $addr;
-  return unless i2c_smbus_read_byte_data($file, 0x3f) == 0xb0;
-  return 2;
+	my ($file, $addr) = @_;
+	return unless (i2c_smbus_read_byte_data($file, 0x48) & 0x7f) == $addr;
+	return unless i2c_smbus_read_byte_data($file, 0x3f) == 0xb0;
+	return 2;
 }
 
 # All ISA detection functions below take at least 1 parameter:
@@ -4603,60 +4581,60 @@ sub vt1211_i2c_detect
 # Chip to detect: 0 = LM78, 2 = LM79
 sub lm78_isa_detect
 {
-  my ($addr, $chip) = @_;
-  my $val = inb($addr + 1);
-  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
-            inb($addr + 7) != $val;
+	my ($addr, $chip) = @_;
+	my $val = inb($addr + 1);
+	return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+		  inb($addr + 7) != $val;
 
-  $val = inb($addr + 5);
-  outb($addr + 5, ~$val & 0x7f);
-  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-    outb($addr+5, $val);
-    return;
-  }
+	$val = inb($addr + 5);
+	outb($addr + 5, ~$val & 0x7f);
+	if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+		outb($addr+5, $val);
+		return;
+	}
 
-  return unless (isa_read_i5d6($addr, 0x40) & 0x80) == 0x00;
-  my $reg = isa_read_i5d6($addr, 0x49);
-  return unless ($chip == 0 and ($reg == 0x00 or $reg == 0x20 or $reg == 0x40)) or
-                ($chip == 2 and ($reg & 0xfe) == 0xc0);
+	return unless (isa_read_i5d6($addr, 0x40) & 0x80) == 0x00;
+	my $reg = isa_read_i5d6($addr, 0x49);
+	return if $chip == 0 && ($reg != 0x00 && $reg != 0x20 && $reg != 0x40);
+	return if $chip == 2 && ($reg & 0xfe) != 0xc0;
 
-  # Explicitly prevent misdetection of Winbond chips
-  $reg = isa_read_i5d6($addr, 0x4f);
-  return if $reg == 0xa3 || $reg == 0x5c;
+	# Explicitly prevent misdetection of Winbond chips
+	$reg = isa_read_i5d6($addr, 0x4f);
+	return if $reg == 0xa3 || $reg == 0x5c;
 
-  # Explicitly prevent misdetection of ITE chips
-  $reg = isa_read_i5d6($addr, 0x58);
-  return if $reg == 0x90;
+	# Explicitly prevent misdetection of ITE chips
+	$reg = isa_read_i5d6($addr, 0x58);
+	return if $reg == 0x90;
 
-  return 6;
+	return 6;
 }
 
 # Chip to detect: 0 = W83781D, 1 = W83782D
 sub w83781d_isa_detect
 {
-  my ($addr, $chip) = @_;
-  my ($reg1, $reg2);
-  my $val = inb($addr + 1);
-  return if inb($addr + 2) != $val or inb($addr + 3) != $val or
+	my ($addr, $chip) = @_;
+	my ($reg1, $reg2);
+	my $val = inb($addr + 1);
+	return if inb($addr + 2) != $val or inb($addr + 3) != $val or
             inb($addr + 7) != $val;
 
-  $val = inb($addr + 5);
-  outb($addr+5, ~$val & 0x7f);
-  if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
-    outb($addr+5, $val);
-    return;
-  }
+	$val = inb($addr + 5);
+	outb($addr+5, ~$val & 0x7f);
+	if ((inb($addr+5) & 0x7f) != (~ $val & 0x7f)) {
+		outb($addr+5, $val);
+		return;
+	}
 
-  $reg1 = isa_read_i5d6($addr, 0x4e);
-  $reg2 = isa_read_i5d6($addr, 0x4f);
-  return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
-                (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
-  return unless ($reg1 & 0x07) == 0x00;
-  $reg1 = isa_read_i5d6($addr, 0x58);
-  return if $chip == 0 and  ($reg1 & 0xfe) != 0x10;
-  return if $chip == 1 and  ($reg1 & 0xfe) != 0x30;
+	$reg1 = isa_read_i5d6($addr, 0x4e);
+	$reg2 = isa_read_i5d6($addr, 0x4f);
+	return unless (($reg1 & 0x80) == 0x00 and $reg2 == 0xa3) or
+		      (($reg1 & 0x80) == 0x80 and $reg2 == 0x5c);
+	return unless ($reg1 & 0x07) == 0x00;
+	$reg1 = isa_read_i5d6($addr, 0x58);
+	return if $chip == 0 && ($reg1 & 0xfe) != 0x10;
+	return if $chip == 1 && ($reg1 & 0xfe) != 0x30;
 
-  return 8;
+	return 8;
 }
 
 # We simply look for a register at standard locations.
@@ -4664,9 +4642,9 @@ sub w83781d_isa_detect
 # Incidentally they live at the same offset.
 sub ipmi_detect
 {
-  my ($addr) = @_;
-  return if inb($addr + 3) == 0xff;
-  return 4;
+	my ($addr) = @_;
+	return if inb($addr + 3) == 0xff;
+	return 4;
 }
 
 ###################
@@ -4685,26 +4663,28 @@ sub ipmi_detect
 # $_[4]: Last limit register to compare
 sub winbond_alias_detect
 {
-  my ($isa_addr, $file, $i2c_addr, $first, $last) = @_;
-  my $i;
+	my ($isa_addr, $file, $i2c_addr, $first, $last) = @_;
+	my $i;
 
-  return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
-  for ($i = $first; $i <= $last; $i++) {
-    return 0 unless isa_read_i5d6($isa_addr, $i) == i2c_smbus_read_byte_data($file, $i);
-  }
-  return 1;
+	return 0 unless isa_read_i5d6($isa_addr, 0x48) == $i2c_addr;
+	for ($i = $first; $i <= $last; $i++) {
+		return 0 unless isa_read_i5d6($isa_addr, $i) ==
+				i2c_smbus_read_byte_data($file, $i);
+	}
+	return 1;
 }
 
 sub vt1211_alias_detect
 {
-  my ($isa_addr, $file, $i2c_addr) = @_;
-  my $i;
+	my ($isa_addr, $file, $i2c_addr) = @_;
+	my $i;
 
-  return 0 unless (inb($isa_addr + 0x48) & 0x7f) == $i2c_addr;
-  for ($i = 0x2b; $i <= 0x3d; $i++) {
-    return 0 unless inb($isa_addr + $i) == i2c_smbus_read_byte_data($file, $i);
-  }
-  return 1;
+	return 0 unless (inb($isa_addr + 0x48) & 0x7f) == $i2c_addr;
+	for ($i = 0x2b; $i <= 0x3d; $i++) {
+		return 0 unless inb($isa_addr + $i) ==
+				i2c_smbus_read_byte_data($file, $i);
+	}
+	return 1;
 }
 
 
