@@ -1117,10 +1117,10 @@ use vars qw(@i2c_adapter_names);
 #  driver: The driver name. Put in exactly:
 #      * "to-be-written" if it is not yet available
 #      * "not-a-sensor" if the chip doesn't have hardware monitoring
-#        capabilities (listing such chips here removes the need of manual
-#        lookup when people report them)
+#	 capabilities (listing such chips here removes the need of manual
+#	 lookup when people report them)
 #      * "via-smbus-only" if this is a Super-I/O chip whose hardware
-#        monitoring registers can only be accessed via the SMBus
+#	 monitoring registers can only be accessed via the SMBus
 #  devid: The device ID we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
@@ -2194,7 +2194,7 @@ sub adapter_pci_detection
 		if ($try->{driver} =~ m/^to-be-/) {
 			printf "No known driver for device \%s: \%s\n",
 			       pci_busid($device), $try->{procid};
-	        } else {
+		} else {
 			printf "Using driver `\%s' for device \%s: \%s\n",
 			       $try->{driver}, pci_busid($device),
 			       $try->{procid};
@@ -2429,7 +2429,7 @@ use vars qw(@chips_detected);
 #    with field 'driver', being a string with the driver name for this chip;
 #    with field 'detected'
 #      being a reference to a list of
-#        references to hashes of type 'detect_data';
+#	 references to hashes of type 'detect_data';
 
 # Type detect_data:
 # A hash
@@ -3407,9 +3407,9 @@ sub lm83_detect
 }
 
 # Chip to detect: 0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
-#                 4 = MAX6654/MAX6690, 5 = ADT7461,
-#                 6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
-#                 7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411
+#		  4 = MAX6654/MAX6690, 5 = ADT7461,
+#		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
+#		  7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -3479,13 +3479,13 @@ sub lm90_detect
 		return if ($conf & 0x2a) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x5c;		# Winbond
-		return 6 if $cid == 0x00;		# W83L771W/G
+		return 6 if $cid == 0x00;	# W83L771W/G
 	}
 	if ($chip == 9) {
 		return if ($conf & 0x1B) != 0;
 		return if $rate > 0x0F;
 		return if $mid != 0x55;		# Texas Instruments
-		return 8 if $cid == 0x11;		# TMP401
+		return 8 if $cid == 0x11;	# TMP401
 	}
 	if ($chip == 10) {
 		return if ($conf & 0x1B) != 0;
@@ -3702,7 +3702,7 @@ sub adm1034_detect
 }
 
 # Chip to detect: 0 = ADT7467/ADT7468, 1 = ADT7476, 2 = ADT7462, 3 = ADT7466,
-#                 4 = ADT7470
+#		  4 = ADT7470
 # Registers used:
 #   0x3d: Chip ID
 #   0x3e: Manufacturer ID
@@ -3798,7 +3798,7 @@ sub andigilog_aSC7511_detect
 }
 
 # Chip to detect: 0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
-#                 4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103
+#		  4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103
 # Registers used:
 #   0x3e: Vendor register
 #   0x3d: Device ID register (Analog Devices only)
@@ -3870,8 +3870,8 @@ sub lm87_detect
 }
 
 # Chip to detect: 0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF,
-#                 4 = AS99127F (rev.1), 5 = AS99127F (rev.2), 6 = ASB100,
-#                 7 = W83791D, 8 = W83792D, 9 = W83627EHF, 10 = W83627DHG
+#		  4 = AS99127F (rev.1), 5 = AS99127F (rev.2), 6 = ASB100,
+#		  7 = W83791D, 8 = W83792D, 9 = W83627EHF, 10 = W83627DHG
 # Registers used:
 #   0x48: Full I2C Address
 #   0x4a: I2C addresses of emulated LM75 chips
@@ -4124,7 +4124,7 @@ sub adm1026_detect
 }
 
 # Chip to detect: 0 = ADM1021, 1 = ADM1021A/ADM1023, 2 = MAX1617, 3 = MAX1617A,
-#                 4 = THMC10, 5 = LM84, 6 = GL523, 7 = MC1066
+#		  4 = THMC10, 5 = LM84, 6 = GL523, 7 = MC1066
 # Registers used:
 #   0x04: Company ID (LM84 only)
 #   0xfe: Company ID (all but LM84 and MAX1617)
@@ -4313,7 +4313,7 @@ sub ddcmonitor_detect
 }
 
 # Chip to detect: 0 = Poseidon I, 1 = Poseidon II, 2 = Scylla,
-#                 3 = Hermes, 4 = Heimdal, 5 = Heracles
+#		  3 = Hermes, 4 = Heimdal, 5 = Heracles
 # Registers used:
 #   0x00-0x02: Identification (3 capital ASCII letters)
 sub fsc_detect
@@ -4411,8 +4411,8 @@ sub dme1737_detect
 }
 
 # Chip to detect: 1 = F75111R/RG/N, 2 = F75121R/F75122R/RG, 3 = F75373S/SG,
-#                 4 = F75375S/SP, 5 = F75387SG/RG, 6 = F75383M/S/F75384M/S,
-#                 7 = custom power control IC
+#		  4 = F75375S/SP, 5 = F75387SG/RG, 6 = F75383M/S/F75384M/S,
+#		  7 = custom power control IC
 # Registers used:
 #   0x5A-0x5B: Chip ID
 #   0x5D-0x5E: Vendor ID
@@ -4461,7 +4461,7 @@ sub smartbatt_detect
 }
 
 # Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G,
-#                 3 = W83L785TS-S
+#		  3 = W83L785TS-S
 # Registers used:
 #   0x40: Configuration
 #   0x4a: Full I2C Address (W83L784R only)
@@ -4595,7 +4595,7 @@ sub w83781d_isa_detect
 	my ($reg1, $reg2);
 	my $val = inb($addr + 1);
 	return if inb($addr + 2) != $val or inb($addr + 3) != $val or
-            inb($addr + 7) != $val;
+		  inb($addr + 7) != $val;
 
 	$val = inb($addr + 5);
 	outb($addr+5, ~$val & 0x7f);
@@ -4825,8 +4825,9 @@ sub generate_modprobes
 				if (exists $detection->{i2c_addr} and
 				    exists $detection->{isa_addr} and
 				    $i2c_adapters[$detection->{i2c_devnr}]->{used}) {
-					push @optionlist, $detection->{i2c_devnr},
-					                  $detection->{i2c_addr};
+					push @optionlist,
+					     $detection->{i2c_devnr},
+					     $detection->{i2c_addr};
 				}
 			}
 
