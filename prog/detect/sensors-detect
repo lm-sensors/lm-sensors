@@ -1627,7 +1627,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		family => "VIA/Winbond/Fintek",
 		guess => 0x290,
 		enter =>
-		{ 
+		{
 			0x2e => [0x87, 0x87],
 			0x4e => [0x87, 0x87],
 		},
@@ -4304,7 +4304,7 @@ sub eeprom_detect
 		$checksum += i2c_smbus_read_byte_data($file, $i);
 	}
 	$checksum &= 255;
-	
+
 	return 8 if $checksum == i2c_smbus_read_byte_data($file, 63);
 	return;
 }
