@@ -2412,15 +2412,11 @@ sub i2c_safety_check
 # ADAPTER SCANNING #
 ####################
 
-use vars qw(@chips_detected);
+use vars qw(%chips_detected);
 
-# We will build a complicated structure @chips_detected here, being:
-# A list of
-#  references to hashes
-#    with field 'driver', being a string with the driver name for this chip;
-#    with field 'detected'
-#      being a reference to a list of
-#	 references to hashes of type 'detect_data';
+# We will build a complicated structure %chips_detected here, being a hash
+# where keys are driver names and values are detected chip information in
+# the form of a list of hashes of type 'detect_data'.
 
 # Type detect_data:
 # A hash
@@ -2446,20 +2442,13 @@ use vars qw(@chips_detected);
 sub add_i2c_to_chips_detected
 {
 	my ($chipdriver, $datahash) = @_;
-	my ($i, $new_detected_ref, $detected_ref, $main_entry, $detected_entry,
+	my ($i, $new_detected_ref, $detected_ref, $detected_entry,
 	    $put_in_detected, @hash_addrs, @entry_addrs);
 
 	# First determine where the hash has to be added.
-	for ($i = 0; $i < @chips_detected; $i++) {
-		last if ($chips_detected[$i]->{driver} eq $chipdriver);
-	}
-	if ($i == @chips_detected) {
-		push @chips_detected, {
-			driver => $chipdriver,
-			detected => [],
-		};
-	}
-	$new_detected_ref = $chips_detected[$i]->{detected};
+	$chips_detected{$chipdriver} = []
+		unless exists $chips_detected{$chipdriver};
+	$new_detected_ref = $chips_detected{$chipdriver};
 
 	# Find out whether our new entry should go into the detected list
 	# or not. We compare all i2c addresses; if at least one matches,
@@ -2470,8 +2459,8 @@ sub add_i2c_to_chips_detected
 		if exists $datahash->{i2c_sub_addrs};
 	$put_in_detected = 1;
  FIND_LOOP:
-	foreach $main_entry (@chips_detected) {
-		foreach $detected_entry (@{$main_entry->{detected}}) {
+	foreach $detected_ref (values %chips_detected) {
+		foreach $detected_entry (@{$detected_ref}) {
 			@entry_addrs = ($detected_entry->{i2c_addr});
 			push @entry_addrs, @{$detected_entry->{i2c_sub_addrs}}
 				if exists $detected_entry->{i2c_sub_addrs};
@@ -2490,8 +2479,7 @@ sub add_i2c_to_chips_detected
 	# Here, we discard all entries which match at least in one main or
 	# sub address. This may not be the best idea to do, as it may remove
 	# detections without replacing them with second-best ones. Too bad.
-	foreach $main_entry (@chips_detected) {
-		$detected_ref = $main_entry->{detected};
+	foreach $detected_ref (values %chips_detected) {
 		for ($i = @$detected_ref-1; $i >=0; $i--) {
 			@entry_addrs = ($detected_ref->[$i]->{i2c_addr});
 			push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
@@ -2513,25 +2501,17 @@ sub add_i2c_to_chips_detected
 sub add_isa_to_chips_detected
 {
 	my ($chipdriver, $datahash) = @_;
-	my ($i, $new_detected_ref, $detected_ref, $main_entry);
+	my ($i, $new_detected_ref, $detected_ref);
 
 	# First determine where the hash has to be added.
-	for ($i = 0; $i < @chips_detected; $i++) {
-		last if ($chips_detected[$i]->{driver} eq $chipdriver);
-	}
-	if ($i == @chips_detected) {
-		push @chips_detected, {
-			driver => $chipdriver,
-			detected => [],
-		};
-	}
-	$new_detected_ref = $chips_detected[$i]->{detected};
+	$chips_detected{$chipdriver} = []
+		unless exists $chips_detected{$chipdriver};
+	$new_detected_ref = $chips_detected{$chipdriver};
 
 	# Find out whether our new entry should go into the detected list
 	# or not. We only compare main isa_addr here, of course.
-	foreach $main_entry (@chips_detected) {
-		$detected_ref = $main_entry->{detected};
-		for ($i = 0; $i < @{$main_entry->{detected}}; $i++) {
+	foreach $detected_ref (values %chips_detected) {
+		for ($i = 0; $i < @{$detected_ref}; $i++) {
 			if (exists $detected_ref->[$i]->{isa_addr} and
 			    exists $datahash->{isa_addr} and
 			    $detected_ref->[$i]->{isa_addr} == $datahash->{isa_addr}) {
@@ -4786,12 +4766,12 @@ sub print_chips_report
 
 sub generate_modprobes
 {
-	my ($chip, $detection, $adap);
+	my ($driver, $detection, $adap);
 	my ($isa, $ipmi);
 	my ($modprobes, $configfile);
 
-	foreach $chip (@chips_detected) {
-		foreach $detection (@{$chip->{detected}}) {
+	foreach $driver (keys %chips_detected) {
+		foreach $detection (@{$chips_detected{$driver}}) {
 			# Tag adapters which host hardware monitoring chips we want to access
 			if (exists $detection->{i2c_devnr}
 			 && !exists $detection->{isa_addr}) {
@@ -4802,7 +4782,7 @@ sub generate_modprobes
 				$isa = 1;
 			}
 		}
-		if ($chip->{driver} eq "ipmisensors") {
+		if ($driver eq "ipmisensors") {
 			$ipmi = 1;
 		}
 	}
@@ -4811,9 +4791,9 @@ sub generate_modprobes
 	# As of kernel 2.6.28, alias detection is handled by kernel drivers
 	# directly, so module options are no longer needed.
 	unless (kernel_version_at_least(2, 6, 28)) {
-		foreach $chip (@chips_detected) {
+		foreach $driver (keys %chips_detected) {
 			my @optionlist = ();
-			foreach $detection (@{$chip->{detected}}) {
+			foreach $detection (@{$chips_detected{$driver}}) {
 				next unless exists $detection->{i2c_addr}
 					 && exists $detection->{isa_addr}
 					 && $i2c_adapters[$detection->{i2c_devnr}]->{used};
@@ -4826,7 +4806,7 @@ sub generate_modprobes
 			next if not @optionlist;
 			$configfile = "# hwmon module options\n"
 				unless defined $configfile;
-			$configfile .= "options $chip->{driver} ignore=".
+			$configfile .= "options $driver ignore=".
 				       (join ",", @optionlist)."\n";
 		}
 	}
@@ -4852,12 +4832,12 @@ sub generate_modprobes
 
 	# Now determine the chip probe lines
 	$modprobes .= "# Chip drivers\n";
-	foreach $chip (@chips_detected) {
-		next if not @{$chip->{detected}};
-		if ($chip->{driver} eq "to-be-written") {
-			$modprobes .= "# no driver for $chip->{detected}[0]{chipname} yet\n";
+	foreach $driver (keys %chips_detected) {
+		next if not @{$chips_detected{$driver}};
+		if ($driver eq "to-be-written") {
+			$modprobes .= "# no driver for ${$chips_detected{$driver}}[0]{chipname} yet\n";
 		} else {
-			open(local *INPUTFILE, "modprobe -l $chip->{driver} 2>/dev/null |");
+			open(local *INPUTFILE, "modprobe -l $driver 2>/dev/null |");
 			local $_;
 			my $modulefound = 0;
 			while (<INPUTFILE>) {
@@ -4870,12 +4850,12 @@ sub generate_modprobes
 			# Check return value from modprobe in case modprobe -l
 			# isn't supported
 			if ((($? >> 8) == 0) && ! $modulefound) {
-				$modprobes .= "# Warning: the required module $chip->{driver} is not currently installed\n".
+				$modprobes .= "# Warning: the required module $driver is not currently installed\n".
 					      "# on your system. For status of 2.6 kernel ports check\n".
 					      "# http://www.lm-sensors.org/wiki/Devices. If driver is built\n".
 					      "# into the kernel, or unavailable, comment out the following line.\n";
 			}
-			$modprobes .= "modprobe $chip->{driver}\n";
+			$modprobes .= "modprobe $driver\n";
 		}
 	}
 
@@ -4988,7 +4968,7 @@ sub main
 	}
 	print "\n";
 
-	if (!@chips_detected) {
+	if (!keys %chips_detected) {
 		print "Sorry, no sensors were detected.\n",
 		      "Either your sensors are not supported, or they are connected to an\n",
 		      "I2C or SMBus adapter that is not supported. See\n",
@@ -5002,12 +4982,11 @@ sub main
 	      "Just press ENTER to continue: ";
 	<STDIN>;
 
-	my ($chip, $data);
-	foreach $chip (@chips_detected) {
-		next unless @{$chip->{detected}};
-		find_aliases($chip->{detected});
-		print "\nDriver `$chip->{driver}':\n";
-		print_chips_report($chip->{detected});
+	foreach my $driver (keys %chips_detected) {
+		next unless @{$chips_detected{$driver}};
+		find_aliases($chips_detected{$driver});
+		print "\nDriver `$driver':\n";
+		print_chips_report($chips_detected{$driver});
 	}
 	print "\n";
 
