@@ -2864,6 +2864,7 @@ sub guess_superio_ld
 	outb($datareg, $oldldn);
 }
 
+# Returns: 1 if device added to chips_detected, undef if not
 sub probe_superio
 {
 	my ($addrreg, $datareg, $chip) = @_;
@@ -2914,6 +2915,7 @@ sub probe_superio
 		chipname => $chip->{name}
 	};
 	add_isa_to_chips_detected($chip->{driver}, $new_hash);
+	return 1;
 }
 
 # Detection routine for non-standard SMSC Super I/O chips
@@ -2944,10 +2946,12 @@ sub smsc_ns_detect_superio
 	return 1;
 }
 
+# Returns: number of device added to chips_detected (0 or 1)
 sub scan_superio
 {
 	my ($addrreg, $datareg) = @_;
 	my ($val, $found);
+	my $added = 0;
 
 	printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
@@ -2985,7 +2989,7 @@ sub scan_superio
 			     ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
 			 || ($chip->{devid} <= 0xff &&
 			     ($val >> 8) == $chip->{devid})) {
-				probe_superio($addrreg, $datareg, $chip);
+				$added = 1 if probe_superio($addrreg, $datareg, $chip);
 				$found++;
 			}
 		}
@@ -3001,6 +3005,7 @@ sub scan_superio
 		last FAMILY;
 	}
 	$| = 0;
+	return $added;
 }
 
 sub scan_cpu
@@ -4869,7 +4874,7 @@ sub generate_modprobes
 
 sub main
 {
-	my ($input);
+	my ($input, $superio_found);
 
 	# We won't go very far if not root
 	unless ($> == 0) {
@@ -4917,20 +4922,23 @@ sub main
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
 		unless (<STDIN> =~ /^\s*n/i) {
 			initialize_ioports();
-			scan_superio(0x2e, 0x2f);
-			scan_superio(0x4e, 0x4f);
+			$superio_found += scan_superio(0x2e, 0x2f);
+			$superio_found += scan_superio(0x4e, 0x4f);
 			close_ioports();
 		}
 		print "\n";
 
-		print "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
-		      "We have to write to arbitrary I/O ports to probe them. This is usually\n".
-		      "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
-		      "ISA slots! Do you want to scan the ISA I/O ports? (YES/no/ipmi only): ";
+		printf "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
+		       "We have to write to arbitrary I/O ports to probe them. This is usually\n".
+		       "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
+		       "ISA slots! Do you want to scan the ISA I/O ports? (\%s): ",
+		       $superio_found ? "yes/no/IPMI ONLY" : "YES/no/ipmi only";
 		$input = <STDIN>;
 		unless ($input =~ /^\s*n/i) {
+			my $ipmi_only = ($superio_found && $input !~ /^\s*y/i)
+				     || (!$superio_found && $input =~ /^\s*i/i);
 			initialize_ioports();
-			scan_isa_bus($input =~ /^\s*i/i);
+			scan_isa_bus($ipmi_only);
 			close_ioports();
 		}
 		print "\n";
