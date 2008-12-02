@@ -2064,6 +2064,16 @@ sub sysfs_device_driver
 	return basename($link);
 }
 
+# From a sysfs device path, return the subsystem name, or undef
+sub sysfs_device_subsystem
+{
+	my $device = shift;
+
+	my $link = readlink("$device/subsystem");
+	return unless defined $link;
+	return basename($link);
+}
+
 # From a sysfs device path and an attribute name, return the attribute
 # value, or undef
 sub sysfs_device_attribute
@@ -2702,17 +2712,42 @@ sub probe_free_i2c_address
 	}
 }
 
+# $_[0]: The number of the adapter to check
+# Returns: 1 if the I2C adapter is on a PCI multimedia adapter, 0 otherwise
+sub is_multimedia_i2c_adapter
+{
+	my ($adapter_nr) = @_;
+	my ($adapter, $subsystem, $class);
+
+	$adapter = "$sysfs_root/class/i2c-adapter/i2c-$adapter_nr";
+	$subsystem = sysfs_device_subsystem("$adapter/device");
+	return 0 unless defined $subsystem && $subsystem eq "pci";
+
+	$class = sysfs_device_attribute("$adapter/device", "class");
+	return 0 unless defined $class;
+	$class = oct($class) if $class =~ /^0/;
+	return ($class & 0xff0000) == 0x040000;
+}
+
 # $_[0]: The number of the adapter to scan
 sub scan_i2c_adapter
 {
 	my ($adapter_nr) = @_;
-	my ($funcs, $chip, $addr, $input, @not_to_scan);
+	my ($funcs, $chip, $addr, $multimedia, $input, @not_to_scan);
 
-	print "Next adapter: $i2c_adapters[$adapter_nr]->{name} (i2c-$adapter_nr)\n".
-	      "Do you want to scan it? (YES/no/selectively): ";
+	# Do not probe adapters on PCI multimedia cards by default
+	$multimedia = is_multimedia_i2c_adapter($adapter_nr);
+
+	printf "Next adapter: $i2c_adapters[$adapter_nr]->{name} (i2c-$adapter_nr)\n".
+	       "Do you want to scan it? (\%s): ",
+	       $multimedia ? "yes/NO/selectively" : "YES/no/selectively";
 
 	$input = <STDIN>;
-	return if $input =~ /^\s*n/i;
+	if ($input =~ /^\s*n/i
+	 || ($multimedia && $input !~ /^\s*[ys]/i)) {
+		print "\n";
+		return;
+	}
 
 	if ($input =~ /^\s*s/i) {
 		print "Please enter one or more addresses not to scan. Separate them with commas.\n",
