@@ -4640,35 +4640,28 @@ sub winbond_alias_detect
 	return 1;
 }
 
-######################
-# PCI CHIP DETECTION #
-######################
+############################
+# PCI CHIP / CPU DETECTION #
+############################
 
-# Returns: undef if not detected, (9) if detected.
-# The address is encoded in PCI space. We could decode it and print it.
 sub sis5595_pci_detect
 {
 	return unless exists $pci_list{'1039:0008'};
 	return 9;
 }
 
-# Returns: undef if not detected, (9) if detected.
-# The address is encoded in PCI space. We could decode it and print it.
 sub via686a_pci_detect
 {
 	return unless exists $pci_list{'1106:3057'};
 	return 9;
 }
 
-# Returns: undef if not detected, (9) if detected.
-# The address is encoded in PCI space. We could decode it and print it.
 sub via8231_pci_detect
 {
 	return unless exists $pci_list{'1106:8235'};
 	return 9;
 }
 
-# Returns: undef if not detected, (9) if detected.
 sub k8temp_pci_detect
 {
 	return unless exists $pci_list{'1022:1103'};
@@ -4681,7 +4674,6 @@ sub k10temp_pci_detect
 	return 9;
 }
 
-# Returns: undef if not detected, (9) if detected.
 sub intel_amb_detect
 {
 	if ((exists $pci_list{'8086:25f0'}) ||	# Intel 5000
@@ -4691,7 +4683,6 @@ sub intel_amb_detect
 	return;
 }
 
-# Returns: undef if not detected, (9) if detected.
 sub coretemp_detect
 {
 	my $probecpu;
@@ -4708,7 +4699,6 @@ sub coretemp_detect
 	return;
 }
 
-# Returns: undef if not detected, (9) if detected.
 sub c7temp_detect
 {
 	my $probecpu;
