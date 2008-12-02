@@ -2706,11 +2706,24 @@ sub probe_free_i2c_address
 # $_[1]: Addresses not to scan (array reference)
 sub scan_i2c_adapter
 {
-	my ($adapter_nr, $not_to_scan) = @_;
-	my ($funcs, $chip, $addr);
+	my ($adapter_nr) = @_;
+	my ($funcs, $chip, $addr, $input, @not_to_scan);
 
-	# As we modify it, we need a copy
-	my @not_to_scan = @$not_to_scan;
+	print "Next adapter: $i2c_adapters[$adapter_nr]->{name} (i2c-$adapter_nr)\n".
+	      "Do you want to scan it? (YES/no/selectively): ";
+
+	$input = <STDIN>;
+	return if $input =~ /^\s*n/i;
+
+	if ($input =~ /^\s*s/i) {
+		print "Please enter one or more addresses not to scan. Separate them with commas.\n",
+		      "You can specify a range by using dashes. Example: 0x58-0x5f,0x69.\n",
+		      "Addresses: ";
+		$input = <STDIN>;
+		chomp($input);
+		@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
+	}
+	print "\n";
 
 	open(local *FILE, "$dev_i2c$adapter_nr") or
 		(print "Can't open $dev_i2c$adapter_nr\n"), return;
@@ -4932,25 +4945,9 @@ sub main
 		$i2c_addresses_to_scan = i2c_addresses_to_scan();
 		print "\n";
 
-		my ($input, @not_to_scan);
 		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
 			next unless exists $i2c_adapters[$dev_nr];
-			print "Next adapter: $i2c_adapters[$dev_nr]->{name} (i2c-$dev_nr)\n".
-			      "Do you want to scan it? (YES/no/selectively): ";
-
-			$input = <STDIN>;
-			unless ($input =~ /^\s*n/i) {
-				if ($input =~ /^\s*s/i) {
-					print "Please enter one or more addresses not to scan. Separate them with commas.\n",
-					      "You can specify a range by using dashes. Example: 0x58-0x5f,0x69.\n",
-					      "Addresses: ";
-					$input = <STDIN>;
-					chomp($input);
-					@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
-				}
-				scan_i2c_adapter($dev_nr, \@not_to_scan)
-			}
-			print "\n";
+			scan_i2c_adapter($dev_nr);
 		}
 	}
 
