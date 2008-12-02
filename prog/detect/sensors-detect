@@ -2157,7 +2157,6 @@ sub pci_busid
 sub adapter_pci_detection
 {
 	my ($key, $device, $try, %smbus, $count);
-	print "Probing for PCI bus adapters...\n";
 
 	# Build a list of detected SMBus devices
 	foreach $key (keys %pci_list) {
@@ -2461,6 +2460,7 @@ sub add_i2c_to_chips_detected
  FIND_LOOP:
 	foreach $detected_ref (values %chips_detected) {
 		foreach $detected_entry (@{$detected_ref}) {
+			next unless defined $detected_entry->{i2c_addr};
 			@entry_addrs = ($detected_entry->{i2c_addr});
 			push @entry_addrs, @{$detected_entry->{i2c_sub_addrs}}
 				if exists $detected_entry->{i2c_sub_addrs};
@@ -2481,6 +2481,7 @@ sub add_i2c_to_chips_detected
 	# detections without replacing them with second-best ones. Too bad.
 	foreach $detected_ref (values %chips_detected) {
 		for ($i = @$detected_ref-1; $i >=0; $i--) {
+			next unless defined $detected_entry->{i2c_addr};
 			@entry_addrs = ($detected_ref->[$i]->{i2c_addr});
 			push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
 				if exists $detected_ref->[$i]->{i2c_sub_addrs};
@@ -4891,61 +4892,21 @@ sub main
 	      "and recommended to accept the default answers to all questions,\n",
 	      "unless you know what you're doing.\n\n";
 
-	adapter_pci_detection();
-	print "\n";
-
-	print "If you have undetectable or unsupported I2C/SMBus adapters, you can have\n".
-	      "them scanned by manually loading the modules before running this script.\n\n";
-	initialize_i2c_adapters_list();
-
-	load_module("i2c-dev") unless -e "$sysfs_root/class/i2c-dev";
-
-	$i2c_addresses_to_scan = i2c_addresses_to_scan();
-
-	print "We are now going to do the I2C/SMBus adapter probings. Some chips may\n",
-	      "be double detected; we choose the one with the highest confidence\n",
-	      "value in that case.\n",
-	      "If you found that the adapter hung after probing a certain address,\n",
-	      "you can specify that address to remain unprobed.\n";
-
-	my ($inp, @not_to_scan, $inp2);
-	for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
-		next unless exists $i2c_adapters[$dev_nr];
-		my $adap = $i2c_adapters[$dev_nr]->{name};
-		print "\n";
-		print "Next adapter: $adap (i2c-$dev_nr)\n";
-		print "Do you want to scan it? (YES/no/selectively): ";
-
-		$inp = <STDIN>;
-		if ($inp =~ /^\s*[Ss]/) {
-			print "Please enter one or more addresses not to scan. Separate them with comma's.\n",
-			      "You can specify a range by using dashes. Addresses may be decimal (like 54)\n",
-			      "or hexadecimal (like 0x33).\n",
-			      "Addresses: ";
-			$inp2 = <STDIN>;
-			chop($inp2);
-			@not_to_scan = parse_not_to_scan(0x03, 0x77, $inp2);
+	print "Some south bridges, CPUs or memory controllers contain embedded sensors.\n".
+	      "Do you want to scan for them? This is totally safe. (YES/no): ";
+	unless (<STDIN> =~ /^\s*n/i) {
+		$| = 1;
+		foreach my $entry (@cpu_ids) {
+			scan_cpu($entry);
 		}
-		scan_i2c_adapter($dev_nr, \@not_to_scan)
-			unless $inp =~ /^\s*[Nn]/;
+		$| = 0;
 	}
 	print "\n";
 
 	# Skip "random" I/O port probing on PPC
 	if ($kernel_arch ne 'ppc'
 	 && $kernel_arch ne 'ppc64') {
-		print "Some chips are also accessible through the ISA I/O ports. We have to\n".
-		      "write to arbitrary I/O ports to probe them. This is usually safe though.\n".
-		      "Yes, you do have ISA I/O ports even if you do not have any ISA slots!\n".
-		      "Do you want to scan the ISA I/O ports? (YES/no): ";
-		unless (<STDIN> =~ /^\s*n/i) {
-			initialize_ioports();
-			scan_isa_bus();
-			close_ioports();
-		}
-		print "\n";
-
-		print "Some Super I/O chips may also contain sensors. We have to write to\n".
+		print "Some Super I/O chips contain embedded sensors. We have to write to\n".
 		      "standard I/O ports to probe them. This is usually safe.\n";
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
 		unless (<STDIN> =~ /^\s*n/i) {
@@ -4955,18 +4916,53 @@ sub main
 			close_ioports();
 		}
 		print "\n";
+
+		print "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
+		      "We have to write to arbitrary I/O ports to probe them. This is usually\n".
+		      "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
+		      "ISA slots! Do you want to scan the ISA I/O ports? (YES/no): ";
+		unless (<STDIN> =~ /^\s*n/i) {
+			initialize_ioports();
+			scan_isa_bus();
+			close_ioports();
+		}
+		print "\n";
 	}
 
-	print "Some south bridges, CPUs or memory controllers may also contain\n".
-	      "embedded sensors. Do you want to scan for them? (YES/no): ";
+	print "Lastly, we can probe the I2C/SMBus adapters for connected hardware\n".
+	      "monitoring devices. This is the most risky part, and while it works\n".
+	      "reasonably well on most systems, it has been reported to cause trouble\n".
+	      "on some systems.\n".
+	      "Do you want to probe the I2C/SMBus adapters now? (YES/no): ";
+
 	unless (<STDIN> =~ /^\s*n/i) {
-		$| = 1;
-		foreach my $entry (@cpu_ids) {
-			scan_cpu($entry);
+		adapter_pci_detection();
+		load_module("i2c-dev") unless -e "$sysfs_root/class/i2c-dev";
+		initialize_i2c_adapters_list();
+		$i2c_addresses_to_scan = i2c_addresses_to_scan();
+		print "\n";
+
+		my ($input, @not_to_scan);
+		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
+			next unless exists $i2c_adapters[$dev_nr];
+			print "Next adapter: $i2c_adapters[$dev_nr]->{name} (i2c-$dev_nr)\n".
+			      "Do you want to scan it? (YES/no/selectively): ";
+
+			$input = <STDIN>;
+			unless ($input =~ /^\s*n/i) {
+				if ($input =~ /^\s*s/i) {
+					print "Please enter one or more addresses not to scan. Separate them with commas.\n",
+					      "You can specify a range by using dashes. Example: 0x58-0x5f,0x69.\n",
+					      "Addresses: ";
+					$input = <STDIN>;
+					chomp($input);
+					@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
+				}
+				scan_i2c_adapter($dev_nr, \@not_to_scan)
+			}
+			print "\n";
 		}
-		$| = 0;
 	}
-	print "\n";
 
 	if (!keys %chips_detected) {
 		print "Sorry, no sensors were detected.\n",
