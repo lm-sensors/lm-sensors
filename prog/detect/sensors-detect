@@ -2434,9 +2434,10 @@ use vars qw(@chips_detected);
 #       (if this is an ISA detection)
 #  with field 'conf', containing the confidence level of this detection
 #  with field 'chipname', containing the chip name
+#  with optional field 'alias_detect', containing a reference to an alias
+#       detection function for this chip
 
-# This adds a detection to the above structure. We do no alias detection
-# here; so you should do ISA detections *after* all I2C detections.
+# This adds a detection to the above structure.
 # Not all possibilities of i2c_addr and i2c_sub_addrs are exhausted.
 # In all normal cases, it should be all right.
 # $_[0]: chip driver
@@ -2506,19 +2507,15 @@ sub add_i2c_to_chips_detected
 	push @$new_detected_ref, $datahash;
 }
 
-# This adds a detection to the above structure. We also do alias detection
-# here; so you should do ISA detections *after* all I2C detections.
+# This adds a detection to the above structure.
 # $_[0]: chip driver
 # $_[1]: reference to data hash
-# $_[2]: alias detection function (optional)
-# Returns: 0 if it is not an alias, datahash reference if it is.
 sub add_isa_to_chips_detected
 {
-	my ($chipdriver, $datahash, $alias_detect) = @_;
-	my ($i, $new_detected_ref, $detected_ref, $main_entry, $isalias);
+	my ($chipdriver, $datahash) = @_;
+	my ($i, $new_detected_ref, $detected_ref, $main_entry);
 
 	# First determine where the hash has to be added.
-	$isalias = 0;
 	for ($i = 0; $i < @chips_detected; $i++) {
 		last if ($chips_detected[$i]->{driver} eq $chipdriver);
 	}
@@ -2529,33 +2526,6 @@ sub add_isa_to_chips_detected
 		};
 	}
 	$new_detected_ref = $chips_detected[$i]->{detected};
-
-	# Now, we are looking for aliases. An alias can only be the same
-	# chiptype. If it is found in the detected list, we still have to
-	# check whether another chip has claimed this ISA address. So we
-	# remove the old entry from the detected list and put it in datahash.
-	for ($i = 0; $i < @$new_detected_ref; $i++) {
-		if (exists $new_detected_ref->[$i]->{i2c_addr} and
-		    not exists $new_detected_ref->[$i]->{isa_addr} and
-		    defined $alias_detect and
-		    $new_detected_ref->[$i]->{chipname} eq $datahash->{chipname}) {
-			open(local *FILE, "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}") or
-				print("Can't open $dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
-				next;
-			binmode(FILE);
-			i2c_set_slave_addr(\*FILE, $new_detected_ref->[$i]->{i2c_addr}) or
-				print("Can't set I2C address for ",
-				      "$dev_i2c$new_detected_ref->[$i]->{i2c_devnr}?!?\n"),
-				next;
-			if (&$alias_detect($datahash->{isa_addr}, \*FILE,
-					   $new_detected_ref->[$i]->{i2c_addr})) {
-				$new_detected_ref->[$i]->{isa_addr} = $datahash->{isa_addr};
-				($datahash) = splice (@$new_detected_ref, $i, 1);
-				$isalias = 1;
-				last;
-			}
-		}
-	}
 
 	# Find out whether our new entry should go into the detected list
 	# or not. We only compare main isa_addr here, of course.
@@ -2569,21 +2539,75 @@ sub add_isa_to_chips_detected
 					splice @$detected_ref, $i, 1;
 					push @$new_detected_ref, $datahash;
 				}
-				if ($isalias) {
-					return $datahash;
-				} else {
-					return 0;
-				}
+				return;
 			}
 		}
 	}
 
 	# Not found? OK, put it in the detected list
 	push @$new_detected_ref, $datahash;
-	if ($isalias) {
-		return $datahash;
-	} else {
-		return 0;
+}
+
+# $_[0]: reference to an array of chips which may be aliases of each other
+sub find_aliases
+{
+	my $detected = shift;
+	my ($isa, $i2c, $dev, $alias_detect, $is_alias);
+
+	for ($isa = 0; $isa < @{$detected}; $isa++) {
+		# Look for chips with an ISA address but no I2C address
+		next unless defined $detected->[$isa];
+		next unless $detected->[$isa]->{isa_addr};
+		next if defined $detected->[$isa]->{i2c_addr};
+		# Additionally, the chip must possibly have I2C aliases
+		next unless defined $detected->[$isa]->{alias_detect};
+
+		for ($i2c = 0; $i2c < @{$detected}; $i2c++) {
+			# Look for chips with an I2C address but no ISA address
+			next unless defined $detected->[$i2c];
+			next unless defined $detected->[$i2c]->{i2c_addr};
+			next if $detected->[$i2c]->{isa_addr};
+			# Additionally, it must have the same chip name
+			next unless $detected->[$i2c]->{chipname} eq
+				    $detected->[$isa]->{chipname};
+
+			# We have potential aliases, check if they actually are
+			$dev = $dev_i2c.$detected->[$i2c]->{i2c_devnr};
+			open(local *FILE, $dev) or
+				print("Can't open $dev\n"),
+				next;
+			binmode(FILE);
+			i2c_set_slave_addr(\*FILE, $detected->[$i2c]->{i2c_addr}) or
+				print("Can't set I2C address for $dev\n"),
+				next;
+
+			initialize_ioports();
+			$alias_detect = $detected->[$isa]->{alias_detect};
+			$is_alias = &$alias_detect($detected->[$isa]->{isa_addr},
+						   \*FILE,
+						   $detected->[$i2c]->{i2c_addr});
+			close(FILE);
+			close_ioports();
+
+			next unless $is_alias;
+			# This is an alias: copy the I2C data into the ISA
+			# entry, then discard the I2C entry
+			$detected->[$isa]->{i2c_devnr} = $detected->[$i2c]->{i2c_devnr};
+			$detected->[$isa]->{i2c_addr} = $detected->[$i2c]->{i2c_addr};
+			$detected->[$isa]->{i2c_sub_addr} = $detected->[$i2c]->{i2c_sub_addr};
+			undef $detected->[$i2c];
+			last;
+		}
+	}
+
+	# The loops above may have made the chip list sparse, make it
+	# compact again
+	for ($isa = 0; $isa < @{$detected}; ) {
+		if (defined($detected->[$isa])) {
+			$isa++;
+		} else {
+			splice @{$detected}, $isa, 1;
+		}
 	}
 }
 
@@ -2776,15 +2800,9 @@ sub scan_isa_bus
 				conf => $conf,
 				isa_addr => $addr,
 				chipname => $chip->{name},
+				alias_detect => $chip->{alias_detect},
 			};
-			$new_hash = add_isa_to_chips_detected($chip->{driver},
-							      $new_hash,
-							      $chip->{alias_detect});
-			if ($new_hash) {
-				printf "    Alias of the chip on I2C bus `%s', address 0x%02x\n",
-				       $i2c_adapters[$new_hash->{i2c_devnr}]->{name},
-				       $new_hash->{i2c_addr};
-			}
+			add_isa_to_chips_detected($chip->{driver}, $new_hash);
 		}
 	}
 	$| = 0;
@@ -4987,6 +5005,7 @@ sub main
 	my ($chip, $data);
 	foreach $chip (@chips_detected) {
 		next unless @{$chip->{detected}};
+		find_aliases($chip->{detected});
 		print "\nDriver `$chip->{driver}':\n";
 		print_chips_report($chip->{detected});
 	}
