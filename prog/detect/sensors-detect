@@ -2777,11 +2777,13 @@ sub scan_i2c_adapter
 
 sub scan_isa_bus
 {
+	my $ipmi_only = shift;
 	my ($chip, $addr, $conf);
 
 	$| = 1;
 	foreach $chip (@chip_ids) {
 		next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
+		next if $ipmi_only && $chip->{name} !~ m/\bIPMI\b/;
 		foreach $addr (@{$chip->{isa_addrs}}) {
 			printf("\%-60s", sprintf("Probing for `\%s'\ at 0x\%x... ",
 						 $chip->{name}, $addr));
@@ -4867,6 +4869,8 @@ sub generate_modprobes
 
 sub main
 {
+	my ($input);
+
 	# We won't go very far if not root
 	unless ($> == 0) {
 		print "You need to be root to run this script.\n";
@@ -4922,10 +4926,11 @@ sub main
 		print "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
 		      "We have to write to arbitrary I/O ports to probe them. This is usually\n".
 		      "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
-		      "ISA slots! Do you want to scan the ISA I/O ports? (YES/no): ";
-		unless (<STDIN> =~ /^\s*n/i) {
+		      "ISA slots! Do you want to scan the ISA I/O ports? (YES/no/ipmi only): ";
+		$input = <STDIN>;
+		unless ($input =~ /^\s*n/i) {
 			initialize_ioports();
-			scan_isa_bus();
+			scan_isa_bus($input =~ /^\s*i/i);
 			close_ioports();
 		}
 		print "\n";

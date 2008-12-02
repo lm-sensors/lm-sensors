@@ -34,6 +34,7 @@ SVN-HEAD
                   Drop alias detection for Super-I/O chips
                   Move alias detection after all chip detections
                   Probe chip types from safest to more risky (#2322)
+                  Add an option to skip ISA probes except IPMI
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
