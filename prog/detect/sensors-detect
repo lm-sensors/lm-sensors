@@ -2703,7 +2703,6 @@ sub probe_free_i2c_address
 }
 
 # $_[0]: The number of the adapter to scan
-# $_[1]: Addresses not to scan (array reference)
 sub scan_i2c_adapter
 {
 	my ($adapter_nr) = @_;
@@ -2723,7 +2722,6 @@ sub scan_i2c_adapter
 		chomp($input);
 		@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
 	}
-	print "\n";
 
 	open(local *FILE, "$dev_i2c$adapter_nr") or
 		(print "Can't open $dev_i2c$adapter_nr\n"), return;
@@ -2774,6 +2772,7 @@ sub scan_i2c_adapter
 		}
 		$| = 0;
 	}
+	print "\n";
 }
 
 sub scan_isa_bus
