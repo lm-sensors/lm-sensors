@@ -2993,7 +2993,6 @@ sub scan_superio
 	$| = 1;
 	# reset state to avoid false positives
 	exit_superio($addrreg, $datareg);
-	FAMILY:
 	foreach my $family (@superio_ids) {
 		printf("\%-60s", "Trying family `$family->{family}'... ");
 		# write the password
@@ -3003,8 +3002,7 @@ sub scan_superio
 		# call the non-standard detection routine first if it exists
 		if (defined($family->{ns_detect}) &&
 		    &{$family->{ns_detect}}($addrreg, $datareg, $family->{ns_chips})) {
-			exit_superio($addrreg, $datareg);
-			last FAMILY;
+			last;
 		}
 
 		# did it work?
@@ -3014,7 +3012,7 @@ sub scan_superio
 		$val = ($val << 8) | inb($datareg);
 		if ($val == 0x0000 || $val == 0xffff) {
 			print "No\n";
-			next FAMILY;
+			next;
 		}
 		print "Yes\n";
 
@@ -3035,10 +3033,9 @@ sub scan_superio
 			guess_superio_ld($addrreg, $datareg, $family->{guess})
 				if defined $family->{guess};
 		}
-
-		exit_superio($addrreg, $datareg);
-		last FAMILY;
+		last;
 	}
+	exit_superio($addrreg, $datareg);
 	$| = 0;
 	return $added;
 }
