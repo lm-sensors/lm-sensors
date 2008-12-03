@@ -2965,7 +2965,7 @@ sub guess_superio_ld
 	outb($datareg, $oldldn);
 }
 
-# Returns: 1 if device added to chips_detected, undef if not
+# Returns: features bitmask if device added to chips_detected, 0 if not
 sub probe_superio
 {
 	my ($addrreg, $datareg, $chip) = @_;
@@ -2976,15 +2976,15 @@ sub probe_superio
 	# Does it have hardware monitoring capabilities?
 	if (!exists $chip->{driver}) {
 		print "\n    (no information available)\n";
-		return;
+		return 0;
 	}
 	if ($chip->{driver} eq "not-a-sensor") {
 		print "\n    (no hardware monitoring capabilities)\n";
-		return;
+		return 0;
 	}
 	if ($chip->{driver} eq "via-smbus-only") {
 		print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
-		return;
+		return 0;
 	}
 
 	# Switch to the sensor logical device
@@ -2996,7 +2996,7 @@ sub probe_superio
 	$val = inb($datareg);
 	if (!($val & $superio{actmask})) {
 		print "\n    (but not activated)\n";
-		return;
+		return 0;
 	}
 
 	# Get the IO base register
@@ -3006,7 +3006,7 @@ sub probe_superio
 	$addr = ($addr << 8) | inb($datareg);
 	if ($addr == 0) {
 		print "\n    (but no address specified)\n";
-		return;
+		return 0;
 	}
 	print "Success!\n";
 	printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
@@ -3016,7 +3016,7 @@ sub probe_superio
 		chipname => $chip->{name}
 	};
 	add_isa_to_chips_detected($chip->{driver}, $new_hash);
-	return 1;
+	return $chip->{features};
 }
 
 # Detection routine for non-standard SMSC Super I/O chips
@@ -3047,12 +3047,12 @@ sub smsc_ns_detect_superio
 	return 1;
 }
 
-# Returns: number of device added to chips_detected (0 or 1)
+# Returns: features supported by the device added, if any
 sub scan_superio
 {
 	my ($addrreg, $datareg) = @_;
 	my ($val, $found);
-	my $added = 0;
+	my $features = 0;
 
 	printf("Probing for Super-I/O at 0x\%x/0x\%x\n", $addrreg, $datareg);
 
@@ -3088,7 +3088,7 @@ sub scan_superio
 			     ($val & ($chip->{devid_mask} || 0xffff)) == $chip->{devid})
 			 || ($chip->{devid} <= 0xff &&
 			     ($val >> 8) == $chip->{devid})) {
-				$added = 1 if probe_superio($addrreg, $datareg, $chip);
+				$features |= probe_superio($addrreg, $datareg, $chip);
 				$found++;
 			}
 		}
@@ -3103,7 +3103,7 @@ sub scan_superio
 	}
 	exit_superio($addrreg, $datareg);
 	$| = 0;
-	return $added;
+	return $features;
 }
 
 sub scan_cpu
@@ -4972,7 +4972,7 @@ sub generate_modprobes
 
 sub main
 {
-	my ($input, $superio_found);
+	my ($input, $superio_features);
 
 	# We won't go very far if not root
 	unless ($> == 0) {
@@ -5020,8 +5020,8 @@ sub main
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
 		unless (<STDIN> =~ /^\s*n/i) {
 			initialize_ioports();
-			$superio_found += scan_superio(0x2e, 0x2f);
-			$superio_found += scan_superio(0x4e, 0x4f);
+			$superio_features |= scan_superio(0x2e, 0x2f);
+			$superio_features |= scan_superio(0x4e, 0x4f);
 			close_ioports();
 		}
 		print "\n";
@@ -5030,11 +5030,11 @@ sub main
 		       "We have to write to arbitrary I/O ports to probe them. This is usually\n".
 		       "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
 		       "ISA slots! Do you want to scan the ISA I/O ports? (\%s): ",
-		       $superio_found ? "yes/no/IPMI ONLY" : "YES/no/ipmi only";
+		       $superio_features ? "yes/no/IPMI ONLY" : "YES/no/ipmi only";
 		$input = <STDIN>;
 		unless ($input =~ /^\s*n/i) {
-			my $ipmi_only = ($superio_found && $input !~ /^\s*y/i)
-				     || (!$superio_found && $input =~ /^\s*i/i);
+			my $ipmi_only = ($superio_features && $input !~ /^\s*y/i)
+				     || (!$superio_features && $input =~ /^\s*i/i);
 			initialize_ioports();
 			scan_isa_bus($ipmi_only);
 			close_ioports();
