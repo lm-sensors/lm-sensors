@@ -1124,8 +1124,16 @@ use vars qw(@i2c_adapter_names);
 #  devid: The device ID we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
+#  features (optional): Features supported by this device, amongst:
+#      * FEAT_IN
+#      * FEAT_FAN
+#      * FEAT_TEMP
 use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 	    @superio_ids_winbond @superio_ids_ite @superio_ids);
+
+use constant FEAT_IN	=> (1 << 0);
+use constant FEAT_FAN	=> (1 << 1);
+use constant FEAT_TEMP	=> (1 << 2);
 
 @superio_ids_natsemi = (
 	{
@@ -1133,6 +1141,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "to-be-written",
 		devid => 0xf1,
 		logdev => 0x08,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Nat. Semi. PC87351 Super IO Fan Sensors",
 		driver => "to-be-written",
@@ -1143,56 +1152,67 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "pc87360",
 		devid => 0xe1,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87363 Super IO Fan Sensors",
 		driver => "pc87360",
 		devid => 0xe8,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87364 Super IO Fan Sensors",
 		driver => "pc87360",
 		devid => 0xe4,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87365 Super IO Fan Sensors",
 		driver => "pc87360",
 		devid => 0xe5,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87365 Super IO Voltage Sensors",
 		driver => "pc87360",
 		devid => 0xe5,
 		logdev => 0x0d,
+		features => FEAT_IN,
 	}, {
 		name => "Nat. Semi. PC87365 Super IO Thermal Sensors",
 		driver => "pc87360",
 		devid => 0xe5,
 		logdev => 0x0e,
+		features => FEAT_TEMP,
 	}, {
 		name => "Nat. Semi. PC87366 Super IO Fan Sensors",
 		driver => "pc87360",
 		devid => 0xe9,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87366 Super IO Voltage Sensors",
 		driver => "pc87360",
 		devid => 0xe9,
 		logdev => 0x0d,
+		features => FEAT_IN,
 	}, {
 		name => "Nat. Semi. PC87366 Super IO Thermal Sensors",
 		driver => "pc87360",
 		devid => 0xe9,
 		logdev => 0x0e,
+		features => FEAT_TEMP,
 	}, {
 		name => "Nat. Semi. PC87372 Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0xf0,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87373 Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0xf3,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87591 Super IO",
 		driver => "to-be-written",
@@ -1219,11 +1239,13 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "pc87427",
 		devid => 0xf2,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "Nat. Semi. PC87427 Super IO Health Sensors",
 		driver => "to-be-written",
 		devid => 0xf2,
 		logdev => 0x14,
+		features => FEAT_IN | FEAT_TEMP,
 	}
 );
 
@@ -1269,6 +1291,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "smsc47m1",
 		devid => 0x51,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47B34x Super IO",
 		driver => "not-a-sensor",
@@ -1286,48 +1309,57 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "to-be-written",
 		devid => 0x52,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47B397-NC Super IO",
 		driver => "smsc47b397",
 		devid => 0x6f,
 		logdev => 0x08,
+		features => FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC LPC47M10x/112/13x Super IO Fan Sensors",
 		driver => "smsc47m1",
 		devid => 0x59,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M14x Super IO Fan Sensors",
 		driver => "smsc47m1",
 		devid => 0x5f,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M15x/192/997 Super IO Fan Sensors",
 		driver => "smsc47m1",
 		devid => 0x60,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M172 Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x14,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M182 Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x74,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M233 Super IO Sensors",
 		driver => "smsc47m1",
 		devid => 0x6b80,
 		devid_mask => 0xff80,
 		logdev => 0x0a,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC LPC47M292 Super IO Fan Sensors",
 		driver => "smsc47m1",
 		devid => 0x6b00,
 		devid_mask => 0xff80,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M584-NC Super IO",
 		# No datasheet
@@ -1337,41 +1369,49 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "to-be-written",
 		devid => 0x0e,
 		logdev => 0x09,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47S42x Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x57,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47S45x Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x62,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47U33x Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x54,
 		logdev => 0x0a,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC SCH3112 Super IO",
 		driver => "dme1737",
 		devid => 0x7c,
 		logdev => 0x0a,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH3114 Super IO",
 		driver => "dme1737",
 		devid => 0x7d,
 		logdev => 0x0a,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH3116 Super IO",
 		driver => "dme1737",
 		devid => 0x7f,
 		logdev => 0x0a,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH4307 Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x90,
 		logdev => 0x08,
+		features => FEAT_FAN,
 	}, {
 		name => "SMSC SCH5027D-NW Super IO",
 		# Hardware monitoring features are accessed on the SMBus
@@ -1382,16 +1422,19 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "dme1737",
 		devid => 0x86,
 		logdev => 0x0a,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH5307-NS Super IO",
 		driver => "smsc47b397",
 		devid => 0x81,
 		logdev => 0x08,
+		features => FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH5317 Super IO",
 		driver => "smsc47b397",
 		devid => 0x85,
 		logdev => 0x08,
+		features => FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH5317 Super IO",
 		# The SCH5317 shows up twice in this list because it can return either
@@ -1399,6 +1442,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "smsc47b397",
 		devid => 0x8c,
 		logdev => 0x08,
+		features => FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "SMSC SCH5504-NS Super IO",
 		# No datasheet
@@ -1445,6 +1489,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "vt1211",
 		devid => 0x3c,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "VIA VT1212 Super IO Lite",	# in 100 pin TQFP package
 		driver => "not-a-sensor",
@@ -1458,31 +1503,37 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "w83627hf",
 		devid => 0x52,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83627THF/THG Super IO Sensors",
 		driver => "w83627hf",
 		devid => 0x82,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83637HF/HG Super IO Sensors",
 		driver => "w83627hf",
 		devid => 0x70,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83687THF Super IO Sensors",
 		driver => "w83627hf",
 		devid => 0x85,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83697HF/F/HG Super IO Sensors",
 		driver => "w83627hf",
 		devid => 0x60,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83697SF/UF/UG Super IO PWM",
 		driver => "to-be-written",
 		devid => 0x68,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83627EHF/EF/EHG/EG Super IO Sensors",
 		driver => "w83627ehf",
@@ -1491,12 +1542,14 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		devid => 0x8840,
 		devid_mask => 0xFFC0,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83627DHG Super IO Sensors",
 		driver => "w83627ehf",
 		devid => 0xA020,
 		devid_mask => 0xFFF0,
 		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Winbond W83L517D Super IO",
 		driver => "not-a-sensor",
@@ -1506,26 +1559,31 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "f71805f",
 		devid => 0x0406,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71862FG Super IO Sensors",
 		driver => "to-be-written",
 		devid => 0x0601,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71806FG/F71872FG Super IO Sensors",
 		driver => "f71805f",
 		devid => 0x0341,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71858DG Super IO Sensors",
 		driver => "to-be-written",
 		devid => 0x0507,
 		logdev => 0x02,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71882FG/F71883FG Super IO Sensors",
 		driver => "f71882fg",
 		devid => 0x0541,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F81216D Super IO",
 		driver => "not-a-sensor",
@@ -1539,6 +1597,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 		driver => "f8000",
 		devid => 0x0581,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		# Shouldn't be in this family, but seems to be still.
 		name => "ITE IT8708F Super IO",
@@ -1549,40 +1608,47 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 
 @superio_ids_ite = (
 	{
-		name => "ITE IT8702F Super IO Sensors",
+		name => "ITE IT8702F Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x8702,
 		logdev => 0x04,
+		features => FEAT_FAN,
 	}, {
 		name => "ITE IT8705F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8705,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8712F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8712,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8716F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8716,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8718F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8718,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8720F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8720,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8726F Super IO Sensors",
 		driver => "it87",
 		devid => 0x8726,
 		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}
 );
 
