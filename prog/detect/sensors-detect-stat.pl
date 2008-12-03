@@ -3,7 +3,7 @@
 # sensors-detect-stat.pl
 # Statistical analysis of sensors-detect i2c addresses scanner
 # Part of the lm_sensors project
-# Copyright (C) 2003-2007  Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2003-2008  Jean Delvare <khali@linux-fr.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,8 +79,8 @@ while (<SD>)
 close SD;
 
 # Print the data.
-printf "$file knows \%d chips and scans \%d addresses.\n\n",
-	$chips, scalar keys %histo;
+printf "\%s knows \%d chips and scans \%d addresses.\n\n",
+	$file, $chips, scalar keys %histo;
 print "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n";
 for (my $i=0; $i<128; $i+=16)
 {
