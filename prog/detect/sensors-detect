@@ -4838,6 +4838,39 @@ sub c7temp_detect
 	return;
 }
 
+#################
+# SPECIAL MODES #
+#################
+
+sub show_i2c_stats
+{
+	my ($chip, $addr, %histo, $chips);
+
+	# Gather the data
+	foreach $chip (@chip_ids) {
+		next unless defined $chip->{i2c_addrs};
+		$chips++;
+		foreach my $addr (@{$chip->{i2c_addrs}}) {
+			$histo{$addr}++;
+		}
+	}
+
+	# Display the data
+	printf "\%d I2C chips known, \%d I2C addresses probed\n\n",
+		$chips, scalar keys %histo;
+	print "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n".
+	      "00:         ";
+	for (my $addr = 0x03; $addr <= 0x77; $addr ++) {
+		printf("\n\%02x:", $addr) if ($addr % 16) == 0;
+		if (defined $histo{$addr}) {
+			printf ' %02d', $histo{$addr};
+		} else {
+			print ' --';
+		}
+	}
+	print "\n";
+}
+
 ################
 # MAIN PROGRAM #
 ################
@@ -4981,6 +5014,12 @@ sub generate_modprobes
 sub main
 {
 	my ($input, $superio_features);
+
+	# Handle special command line cases first
+	if (defined $ARGV[0] && $ARGV[0] eq "--stat") {
+		show_i2c_stats();
+		exit 0;
+	}
 
 	# We won't go very far if not root
 	unless ($> == 0) {
