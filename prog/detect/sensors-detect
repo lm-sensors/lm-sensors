@@ -4860,7 +4860,7 @@ sub show_i2c_stats
 		$chips, scalar keys %histo;
 	print "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n".
 	      "00:         ";
-	for (my $addr = 0x03; $addr <= 0x77; $addr ++) {
+	for (my $addr = 0x03; $addr <= 0x77; $addr++) {
 		printf("\n\%02x:", $addr) if ($addr % 16) == 0;
 		if (defined $histo{$addr}) {
 			printf ' %02d', $histo{$addr};
