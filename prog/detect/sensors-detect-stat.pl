@@ -57,7 +57,9 @@ while (<SD>)
 {
 	# Some chips are handled differently depending on the kernel
 	# version, avoid counting them twice.
-	if (m/^\@chip_kern24_ids\s*=/ || m/^\@chip_oldfsc_ids\s*=/) {
+	if (m/^\@chip_kern24_ids\s*=/
+	 || m/^\@chip_oldfsc_ids\s*=/
+	 || m/^\@non_hwmon_chip_ids\s*=/) {
 		$skip = 1;
 		next;
 	}
