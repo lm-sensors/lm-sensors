@@ -37,6 +37,7 @@ SVN-HEAD
                   Add an option to skip ISA probes except IPMI
                   Skip ISA detection by default if a Super I/O was found (#2322)
                   Do not scan I2C adapters on multimedia cards by default
+                  Skip SMBus probing by default if a Super I/O was found (#2322)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution

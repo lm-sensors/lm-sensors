@@ -2779,8 +2779,8 @@ sub probe_free_i2c_address
 }
 
 # $_[0]: The number of the adapter to check
-# Returns: 1 if the I2C adapter is on a PCI multimedia adapter, 0 otherwise
-sub is_multimedia_i2c_adapter
+# Returns: PCI class of the adapter if available, 0 if not
+sub get_i2c_adapter_class
 {
 	my ($adapter_nr) = @_;
 	my ($adapter, $subsystem, $class);
@@ -2792,25 +2792,33 @@ sub is_multimedia_i2c_adapter
 	$class = sysfs_device_attribute("$adapter/device", "class");
 	return 0 unless defined $class;
 	$class = oct($class) if $class =~ /^0/;
-	return ($class & 0xff0000) == 0x040000;
+	return $class >> 8;
 }
 
 # $_[0]: The number of the adapter to scan
 sub scan_i2c_adapter
 {
-	my ($adapter_nr) = @_;
-	my ($funcs, $chip, $addr, $multimedia, $input, @not_to_scan);
+	my ($adapter_nr, $smbus_default) = @_;
+	my ($funcs, $chip, $addr, $class, $default, $input, @not_to_scan);
 
-	# Do not probe adapters on PCI multimedia cards by default
-	$multimedia = is_multimedia_i2c_adapter($adapter_nr);
+	$class = get_i2c_adapter_class($adapter_nr);
+	if (($class & 0xff00) == 0x0400) {
+		# Do not probe adapters on PCI multimedia cards by default
+		$default = 0;
+	} elsif ($class == 0x0c01 || $class == 0x0c05
+	      || find_i2c_adapter_driver($i2c_adapters[$adapter_nr]->{name})) {
+		$default = $smbus_default;
+	} else {
+		$default = 1;
+	}
 
 	printf "Next adapter: $i2c_adapters[$adapter_nr]->{name} (i2c-$adapter_nr)\n".
-	       "Do you want to scan it? (\%s): ",
-	       $multimedia ? "yes/NO/selectively" : "YES/no/selectively";
+	       "Do you want to scan it? (\%s/selectively): ",
+	       $default ? "YES/no" : "yes/NO";
 
 	$input = <STDIN>;
 	if ($input =~ /^\s*n/i
-	 || ($multimedia && $input !~ /^\s*[ys]/i)) {
+	 || (!$default && $input !~ /^\s*[ys]/i)) {
 		print "\n";
 		return;
 	}
@@ -5012,6 +5020,7 @@ sub main
 	}
 	print "\n";
 
+	$superio_features = 0;
 	# Skip "random" I/O port probing on PPC
 	if ($kernel_arch ne 'ppc'
 	 && $kernel_arch ne 'ppc64') {
@@ -5057,7 +5066,8 @@ sub main
 
 		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
 			next unless exists $i2c_adapters[$dev_nr];
-			scan_i2c_adapter($dev_nr);
+			scan_i2c_adapter($dev_nr,
+					 ~$superio_features & (FEAT_IN | FEAT_FAN | FEAT_TEMP));
 		}
 	}
 
