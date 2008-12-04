@@ -1985,6 +1985,12 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
 	driver => "not-a-sensor",
 	devid => 0x8708,
       },
+      {
+	# Shouldn't be in this family, but seems to be still.
+	name => "ITE IT8710F Super IO",
+	driver => "not-a-sensor",
+	devid => 0x8710,
+      },
     ],
   },
   {
