@@ -2122,6 +2122,81 @@ sub unload_modules
 	print "\n";
 }
 
+############
+# DMI DATA #
+############
+
+use vars qw(%dmi);
+
+sub initialize_dmi_data
+{
+	my %items = (
+		# sysfs file name => dmidecode string name
+		sys_vendor => 'system-manufacturer',
+		product_name => 'system-product-name',
+		product_version => 'system-version',
+		board_vendor => 'baseboard-manufacturer',
+		board_name => 'baseboard-product-name',
+		board_version => 'baseboard-product-name',
+		chassis_type => 'chassis-type',
+	);
+	# Many BIOS have broken DMI data, filter it out
+	my %fake = (
+		'System Manufacturer' => 1,
+		'System Name' => 1,
+	);
+
+	# First try reading the strings from sysfs if available
+	if (-d '/sys/devices/virtual/dmi/id') {
+		foreach my $k (keys %items) {
+			$dmi{$k} = sysfs_device_attribute("/sys/devices/virtual/dmi/id", $k);
+		}
+	} else {
+		# Else fallback on calling dmidecode
+		return unless open(local *DMIDECODE,
+				   "dmidecode --version 2>/dev/null |");
+		my $version = <DMIDECODE>;
+		close(DMIDECODE);
+		return unless defined $version;
+
+		# We need at least version 2.7
+		chomp $version;
+		return unless $version =~ m/^(\d+).(\d+)$/;
+		return unless (($1 == 2 && $2 >= 7) || $1 > 2);
+
+		foreach my $k (keys %items) {
+			next unless open(local *DMIDECODE,
+					 "dmidecode -s $items{$k} 2>/dev/null |");
+			$dmi{$k} = <DMIDECODE>;
+			close(DMIDECODE);
+		}
+	}
+
+	# Strip trailing white-space, discard empty field
+	foreach my $k (keys %dmi) {
+		if (!defined $dmi{$k}) {
+			delete $dmi{$k};
+			next;
+		}
+		$dmi{$k} =~ s/\s*$//;
+		delete $dmi{$k} if $dmi{$k} eq '' || exists $fake{$dmi{$k}};
+	}
+}
+
+sub print_dmi_summary
+{
+	my ($system, $board);
+	if (defined $dmi{sys_vendor} && defined $dmi{product_name}) {
+		$system = "$dmi{sys_vendor} $dmi{product_name}";
+	}
+	if (defined $dmi{board_vendor} && defined $dmi{board_name}) {
+		$board = "$dmi{board_vendor} $dmi{board_name}";
+	}
+	print "# System: $system\n" if defined $system;
+	print "# Board: $board\n" if defined $board
+				  && (!defined $system || $system ne $board);
+}
+
 #################
 # SYSFS HELPERS #
 #################
@@ -5047,8 +5122,11 @@ sub main
 	chip_special_cases();
 	initialize_modules_supported();
 	initialize_cpu_list();
+	initialize_dmi_data();
 
-	print "# sensors-detect revision $revision\n\n";
+	print "# sensors-detect revision $revision\n";
+	print_dmi_summary();
+	print "\n";
 	print "This program will help you determine which kernel modules you need\n",
 	      "to load to use lm_sensors most effectively. It is generally safe\n",
 	      "and recommended to accept the default answers to all questions,\n",

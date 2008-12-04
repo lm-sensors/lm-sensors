@@ -40,6 +40,7 @@ SVN-HEAD
                   Skip SMBus probing by default if a Super I/O was found (#2322)
                   Display I2C address statictics with --stat
                   Document the new detection order and rules
+                  Gather DMI data and print it at start-up
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)
