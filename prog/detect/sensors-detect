@@ -2197,6 +2197,17 @@ sub print_dmi_summary
 				  && (!defined $system || $system ne $board);
 }
 
+sub dmi_match
+{
+	my $key = shift;
+	my $value;
+
+	while (defined ($value = shift)) {
+		return 1 if $dmi{$key} =~ m/\b$value\b/i;
+	}
+	return 0;
+}
+
 #################
 # SYSFS HELPERS #
 #################
@@ -5187,10 +5198,15 @@ sub main
 		$i2c_addresses_to_scan = i2c_addresses_to_scan();
 		print "\n";
 
+		# Skip SMBus probing by default if Super-I/O has all the features
+		my $by_default = ~$superio_features & (FEAT_IN | FEAT_FAN | FEAT_TEMP);
+		# Except on Asus and Tyan boards which often have more than
+		# one hardware monitoring chip
+		$by_default = 1 if dmi_match('board_vendor', 'asustek', 'tyan');
+
 		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
 			next unless exists $i2c_adapters[$dev_nr];
-			scan_i2c_adapter($dev_nr,
-					 ~$superio_features & (FEAT_IN | FEAT_FAN | FEAT_TEMP));
+			scan_i2c_adapter($dev_nr, $by_default);
 		}
 	}
 

@@ -41,6 +41,7 @@ SVN-HEAD
                   Display I2C address statictics with --stat
                   Document the new detection order and rules
                   Gather DMI data and print it at start-up
+                  Always probe the SMBus on Asus and Tyan boards
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)
