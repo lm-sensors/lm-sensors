@@ -1134,6 +1134,7 @@ use vars qw(@superio_ids_natsemi @superio_ids_smsc @superio_ids_smsc_ns
 use constant FEAT_IN	=> (1 << 0);
 use constant FEAT_FAN	=> (1 << 1);
 use constant FEAT_TEMP	=> (1 << 2);
+use constant FEAT_SMBUS	=> (1 << 7);
 
 @superio_ids_natsemi = (
 	{
@@ -2992,7 +2993,7 @@ sub probe_superio
 	}
 	if ($chip->{driver} eq "via-smbus-only") {
 		print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
-		return 0;
+		return FEAT_SMBUS;
 	}
 
 	# Switch to the sensor logical device
