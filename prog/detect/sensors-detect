@@ -2150,11 +2150,13 @@ sub initialize_dmi_data
 		'System Manufacturer' => 1,
 		'System Name' => 1,
 	);
+	my $dmi_id_dir;
 
 	# First try reading the strings from sysfs if available
-	if (-d "$sysfs_root/devices/virtual/dmi/id") {
+	if (-d ($dmi_id_dir = "$sysfs_root/devices/virtual/dmi/id")	# kernel >= 2.6.28
+	 || -d ($dmi_id_dir = "$sysfs_root/class/dmi/id")) {
 		foreach my $k (keys %items) {
-			$dmi{$k} = sysfs_device_attribute("$sysfs_root/devices/virtual/dmi/id", $k);
+			$dmi{$k} = sysfs_device_attribute($dmi_id_dir, $k);
 		}
 	} else {
 		# Else fallback on calling dmidecode
