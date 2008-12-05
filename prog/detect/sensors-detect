@@ -2152,9 +2152,9 @@ sub initialize_dmi_data
 	);
 
 	# First try reading the strings from sysfs if available
-	if (-d '/sys/devices/virtual/dmi/id') {
+	if (-d "$sysfs_root/devices/virtual/dmi/id") {
 		foreach my $k (keys %items) {
-			$dmi{$k} = sysfs_device_attribute("/sys/devices/virtual/dmi/id", $k);
+			$dmi{$k} = sysfs_device_attribute("$sysfs_root/devices/virtual/dmi/id", $k);
 		}
 	} else {
 		# Else fallback on calling dmidecode
@@ -5248,7 +5248,7 @@ sub main
 
 	if (!keys %chips_detected) {
 		print "Sorry, no sensors were detected.\n";
-		if (is_laptop() && -d "/sys/firmware/acpi") {
+		if (is_laptop() && -d "$sysfs_root/firmware/acpi") {
 			print "This is relatively common on laptops, where thermal management is\n".
 			      "handled by ACPI rather than the OS.\n";
 		} else {
