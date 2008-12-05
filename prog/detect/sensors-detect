@@ -2207,6 +2207,7 @@ sub dmi_match
 	my $key = shift;
 	my $value;
 
+	return unless defined $dmi{$key};
 	while (defined ($value = shift)) {
 		return 1 if $dmi{$key} =~ m/\b$value\b/i;
 	}
