@@ -2668,7 +2668,7 @@ sub add_i2c_to_chips_detected
 	# detections without replacing them with second-best ones. Too bad.
 	foreach $detected_ref (values %chips_detected) {
 		for ($i = @$detected_ref-1; $i >=0; $i--) {
-			next unless defined $detected_entry->{i2c_addr};
+			next unless defined $detected_ref->[$i]->{i2c_addr};
 			@entry_addrs = ($detected_ref->[$i]->{i2c_addr});
 			push @entry_addrs, @{$detected_ref->[$i]->{i2c_sub_addrs}}
 				if exists $detected_ref->[$i]->{i2c_sub_addrs};
