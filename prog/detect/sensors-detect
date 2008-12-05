@@ -5233,7 +5233,8 @@ sub main
 		my $by_default = ~$superio_features & (FEAT_IN | FEAT_FAN | FEAT_TEMP);
 		# Except on Asus and Tyan boards which often have more than
 		# one hardware monitoring chip
-		$by_default = 1 if dmi_match('board_vendor', 'asustek', 'tyan');
+		$by_default = 1 if dmi_match('board_vendor', 'asustek', 'tyan',
+					     'supermicro');
 
 		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
 			next unless exists $i2c_adapters[$dev_nr];

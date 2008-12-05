@@ -41,7 +41,7 @@ SVN-HEAD
                   Display I2C address statictics with --stat
                   Document the new detection order and rules
                   Gather DMI data and print it at start-up
-                  Always probe the SMBus on Asus and Tyan boards
+                  Always probe the SMBus on Asus, Tyan and Supermicro boards
                   Move IPMI interface detection to its own section
                   Skip IPMI probing on laptops
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
