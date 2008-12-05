@@ -5242,12 +5242,16 @@ sub main
 	}
 
 	if (!keys %chips_detected) {
-		print "Sorry, no sensors were detected.\n",
-		      "Either your sensors are not supported, or they are connected to an\n",
-		      "I2C or SMBus adapter that is not supported. See\n",
-		      "http://www.lm-sensors.org/wiki/FAQ/Chapter3 for further information.\n",
-		      "If you find out what chips are on your board, check\n",
-		      "http://www.lm-sensors.org/wiki/Devices for driver status.\n";
+		print "Sorry, no sensors were detected.\n";
+		if (is_laptop() && -d "/sys/firmware/acpi") {
+			print "This is relatively common on laptops, where thermal management is\n".
+			      "handled by ACPI rather than the OS.\n";
+		} else {
+			print "Either your system has no sensors, or they are not supported, or\n".
+			      "they are connected to an I2C or SMBus adapter that is not\n".
+			      "supported. If you find out what chips are on your board, check\n".
+			      "http://www.lm-sensors.org/wiki/Devices for driver status.\n";
+		}
 		exit;
 	}
 
