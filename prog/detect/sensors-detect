@@ -2197,7 +2197,12 @@ sub print_dmi_summary
 	if (defined $dmi{board_vendor} && defined $dmi{board_name}) {
 		$board = "$dmi{board_vendor} $dmi{board_name}";
 	}
-	print "# System: $system\n" if defined $system;
+	
+	if (defined $system) {
+		print "# System: $system";
+		print " (laptop)" if (is_laptop());
+		print "\n";
+	}
 	print "# Board: $board\n" if defined $board
 				  && (!defined $system || $system ne $board);
 }
