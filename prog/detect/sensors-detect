@@ -2214,6 +2214,14 @@ sub dmi_match
 	return 0;
 }
 
+sub is_laptop
+{
+	return 0 unless $dmi{chassis_type};
+	return 1 if $dmi{chassis_type} =~ m/(Laptop|Notebook|Hand Held)/i;
+	return 1 if $dmi{chassis_type} =~ m/^(9|10|11|14)$/;
+	return 0;
+}
+
 #################
 # SYSFS HELPERS #
 #################
@@ -5174,17 +5182,19 @@ sub main
 		}
 		print "\n";
 
-		print "Some systems (mainly servers) implement IPMI, a set of common interfaces\n".
-		      "through which system health data may be retrieved, amongst other things.\n".
-		      "We have to read from arbitrary I/O ports to probe for such interfaces.\n".
-		      "This is normally safe. Do you want to scan for IPMI interfaces?\n".
-		      "(YES/no): ";
-		unless (<STDIN> =~ /^\s*n/i) {
-			initialize_ioports();
-			scan_isa_bus(\@ipmi_ifs);
-			close_ioports();
+		unless (is_laptop()) {
+			print "Some systems (mainly servers) implement IPMI, a set of common interfaces\n".
+			      "through which system health data may be retrieved, amongst other things.\n".
+			      "We have to read from arbitrary I/O ports to probe for such interfaces.\n".
+			      "This is normally safe. Do you want to scan for IPMI interfaces?\n".
+			      "(YES/no): ";
+			unless (<STDIN> =~ /^\s*n/i) {
+				initialize_ioports();
+				scan_isa_bus(\@ipmi_ifs);
+				close_ioports();
+			}
+			print "\n";
 		}
-		print "\n";
 
 		printf "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
 		       "We have to write to arbitrary I/O ports to probe them. This is usually\n".
