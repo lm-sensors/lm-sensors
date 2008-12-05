@@ -2158,16 +2158,20 @@ sub initialize_dmi_data
 		}
 	} else {
 		# Else fallback on calling dmidecode
-		return unless open(local *DMIDECODE,
-				   "dmidecode --version 2>/dev/null |");
-		my $version = <DMIDECODE>;
-		close(DMIDECODE);
-		return unless defined $version;
+		my $version;
+		if (open(local *DMIDECODE, "dmidecode --version 2>/dev/null |")) {
+			$version = <DMIDECODE>;
+			close(DMIDECODE);
+			chomp $version if defined $version;
+		}
 
-		# We need at least version 2.7
-		chomp $version;
-		return unless $version =~ m/^(\d+).(\d+)$/;
-		return unless (($1 == 2 && $2 >= 7) || $1 > 2);
+		if (!defined $version
+		 || !($version =~ m/^(\d+).(\d+)$/)
+		 || !(($1 == 2 && $2 >= 7) || $1 > 2)) {
+			print "# DMI data unavailable, please consider installing dmidecode 2.7\n".
+			      "# or later for better results.\n";
+			return;
+		}
 
 		foreach my $k (keys %items) {
 			next unless open(local *DMIDECODE,
@@ -5151,9 +5155,9 @@ sub main
 	chip_special_cases();
 	initialize_modules_supported();
 	initialize_cpu_list();
-	initialize_dmi_data();
 
 	print "# sensors-detect revision $revision\n";
+	initialize_dmi_data();
 	print_dmi_summary();
 	print "\n";
 	print "This program will help you determine which kernel modules you need\n",
