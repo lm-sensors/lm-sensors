@@ -39,8 +39,8 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 #########################
 
 use constant NO_CACHE => 1;
-use vars qw(@pci_adapters @chip_ids @non_hwmon_chip_ids $i2c_addresses_to_scan
-	    $revision @i2c_byte_cache);
+use vars qw(@pci_adapters @chip_ids @ipmi_ifs @non_hwmon_chip_ids
+	    $i2c_addresses_to_scan $revision @i2c_byte_cache);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -1070,7 +1070,12 @@ use vars qw(@i2c_adapter_names);
 		driver => "sbs", # ACPI driver, not sure if it always works
 		i2c_addrs => [0x0b],
 		i2c_detect => sub { smartbatt_detect(@_); },
-	}, {
+	}
+);
+
+# IPMI interfaces have their own array now
+@ipmi_ifs = (
+	{
 		name => "IPMI BMC KCS",
 		driver => "ipmisensors",
 		isa_addrs => [0x0ca0],
@@ -2978,13 +2983,12 @@ sub scan_i2c_adapter
 
 sub scan_isa_bus
 {
-	my $ipmi_only = shift;
+	my $chip_list_ref = shift;
 	my ($chip, $addr, $conf);
 
 	$| = 1;
-	foreach $chip (@chip_ids) {
+	foreach $chip (@{$chip_list_ref}) {
 		next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
-		next if $ipmi_only && $chip->{name} !~ m/\bIPMI\b/;
 		foreach $addr (@{$chip->{isa_addrs}}) {
 			printf("\%-60s", sprintf("Probing for `\%s'\ at 0x\%x... ",
 						 $chip->{name}, $addr));
@@ -5169,17 +5173,28 @@ sub main
 		}
 		print "\n";
 
+		print "Some systems (mainly servers) implement IPMI, a set of common interfaces\n".
+		      "through which system health data may be retrieved, amongst other things.\n".
+		      "We have to read from arbitrary I/O ports to probe for such interfaces.\n".
+		      "This is normally safe. Do you want to scan for IPMI interfaces?\n".
+		      "(YES/no): ";
+		unless (<STDIN> =~ /^\s*n/i) {
+			initialize_ioports();
+			scan_isa_bus(\@ipmi_ifs);
+			close_ioports();
+		}
+		print "\n";
+
 		printf "Some hardware monitoring chips are accessible through the ISA I/O ports.\n".
 		       "We have to write to arbitrary I/O ports to probe them. This is usually\n".
 		       "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
 		       "ISA slots! Do you want to scan the ISA I/O ports? (\%s): ",
-		       $superio_features ? "yes/no/IPMI ONLY" : "YES/no/ipmi only";
+		       $superio_features ? "yes/NO" : "YES/no";
 		$input = <STDIN>;
-		unless ($input =~ /^\s*n/i) {
-			my $ipmi_only = ($superio_features && $input !~ /^\s*y/i)
-				     || (!$superio_features && $input =~ /^\s*i/i);
+		unless ($input =~ /^\s*n/i
+		     || ($superio_features && $input !~ /^\s*y/i)) {
 			initialize_ioports();
-			scan_isa_bus($ipmi_only);
+			scan_isa_bus(\@chip_ids);
 			close_ioports();
 		}
 		print "\n";

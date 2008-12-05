@@ -42,6 +42,7 @@ SVN-HEAD
                   Document the new detection order and rules
                   Gather DMI data and print it at start-up
                   Always probe the SMBus on Asus and Tyan boards
+                  Move IPMI interface detection to its own section
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)
