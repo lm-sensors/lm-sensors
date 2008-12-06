@@ -44,6 +44,7 @@ SVN-HEAD
                   Always probe the SMBus on Asus, Tyan and Supermicro boards
                   Move IPMI interface detection to its own section
                   Skip IPMI probing on laptops
+                  Add Winbond/Nuvoton W83667HG support
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)

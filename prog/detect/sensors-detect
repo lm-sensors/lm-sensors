@@ -1557,6 +1557,13 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
+		name => "Winbond W83667HG Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0xA510,
+		devid_mask => 0xFFF0,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "Winbond W83L517D Super IO",
 		driver => "not-a-sensor",
 		devid => 0x61,
