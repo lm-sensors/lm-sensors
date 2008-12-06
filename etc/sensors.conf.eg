@@ -188,7 +188,8 @@
 #
 # Think of tempx_max as 'alarm set' and tempx_max_hyst as 'alarm clear'
 # thresholds. In most cases the 'max' value should be higher than
-# the 'max_hyst' value by several degrees.
+# the 'max_hyst' value by several degrees. Obviously, having them equal
+# disables the hysteresis mechanism.
 #
 # All the set statements from this file are commented out by default.
 # The reason is that the proper limits are highly system-dependent,
