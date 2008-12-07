@@ -412,7 +412,7 @@ sub printl2 ($$) # print a line w/ label and value (outside a table)
 	print "$label: $value\n";
 }
 
-sub prints ($) # print seperator w/ given text
+sub prints ($) # print separator w/ given text
 {
 	my ($label) = @_;
 	if ($opt_html) {

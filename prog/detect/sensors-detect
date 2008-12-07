@@ -1399,7 +1399,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
      },
 );
 
-# sigh special case for old seperate FSC drivers to new merged one mapping
+# sigh special case for old separate FSC drivers to new merged one mapping
 @chip_oldfsc_ids = (
      {
        name => "FSC Poseidon I",
