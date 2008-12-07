@@ -1,5 +1,6 @@
-.\" Copyright 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk> and
-.\" Frodo Looijaard <frodol@dds.nl>
+.\" Copyright (C) 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk> and
+.\"                          Frodo Looijaard <frodol@dds.nl>
+.\" Copyright (C) 2008       Jean Delvare <khali@linux-fr.org>
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -8,28 +9,429 @@
 .\" Permission is granted to copy and distribute modified versions of this
 .\" manual under the conditions for verbatim copying, provided that the
 .\" entire resulting derived work is distributed under the terms of a
-.\" permission notice identical to this one
+.\" permission notice identical to this one.
 .\" 
 .\" Since the Linux kernel and libraries are constantly changing, this
 .\" manual page may be incorrect or out-of-date.  The author(s) assume no
 .\" responsibility for errors or omissions, or for damages resulting from
-.\" the use of the information contained herein.  The author(s) may not
-.\" have taken the same level of care in the production of this manual,
-.\" which is licensed free of charge, as they might when working
-.\" professionally.
+.\" the use of the information contained herein.
 .\" 
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "October 2007" "lm-sensors 3" "Linux User's Manual"
+.TH sensors.conf 5  "December 2008" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
 .SH DESCRIPTION
 sensors.conf describes how libsensors, and so all programs using it, should
 translate the raw readings from the kernel modules to real\-world values.
+
+.SH SEMANTICS
+
+On a given system, there may be one or more hardware monitoring chips.
+Each chip may have several features. For example, the LM78 monitors 7
+voltage inputs, 3 fans and one temperature. Feature names are
+standardized. Typical feature names are in0, in1, in2... for voltage
+inputs, fan1, fan2, fan3... for fans and temp1, temp2, temp3... for
+temperature inputs.
+
+Each feature may in turn have one or more sub\-features, each
+representing an attribute of the feature: input value, low limit, high
+limit, alarm, etc. Sub\-feature names are standardized as well. For
+example, the first voltage input (in0) would typically have
+sub\-features in0_input (measured value), in0_min (low limit), in0_max
+(high limit) and in0_alarm (alarm flag). Which sub\-features are
+actually present depend on the exact chip type.
+
+The
+.I sensors.conf
+configuration file will let you configure each chip, feature and
+sub\-feature in a way that makes sense for your system.
+
+The rest of this section describes the meaning of each configuration
+statement.
+
+.SS CHIP STATEMENT
+
+A
+.I chip
+statement selects for which chips all following
+.IR compute ,
+.IR label ,
+.I ignore
+and
+.I set
+statements are meant. A chip
+selection remains valid until the next
+.I chip
+statement. Example:
+
+.RS
+chip "lm78\-*" "lm79\-*"
+.RE
+
+If a chip matches at least one of the chip descriptions, the following
+configuration lines are examined for it, otherwise they are ignored.
+
+A chip description is built from several elements, separated by
+dashes. The first element is the chip type, the second element is
+the name of the bus, and the third element is the hexadecimal address
+of the chip. Such chip descriptions are printed by sensors(1) as the
+first line for every chip.
+
+The name of the bus is either
+.IR isa ,
+.IR pci ,
+.IR virtual ,
+.I spi-*
+or
+.I i2c-N
+with 
+.I N
+being a bus number as binded with a 
+.I bus
+statement. This list isn't necessarily exhaustive as support for other
+bus types may be added in the future.
+
+You may substitute the wildcard operator
+.I *
+for every element. Note however that it wouldn't make any sense to specify
+the address without the bus type, so the address part is plain omitted
+when the bus type isn't specified.
+Here is how you would express the following matches:
+
+.TS
+l l.
+LM78 chip at address 0x2d on I2C bus 1	lm78\-i2c\-1\-2d
+LM78 chip at address 0x2d on any I2C bus	lm78\-i2c\-*\-2d
+LM78 chip at address 0x290 on the ISA bus	lm78\-isa\-0290
+Any LM78 chip on I2C bus 1	lm78\-i2c\-1\-*
+Any LM78 on any I2C bus	lm78\-i2c\-*\-*
+Any LM78 chip on the ISA bus	lm78\-isa\-*
+Any LM78 chip	lm78\-*
+Any chip at address 0x2d on I2C bus 1	*\-i2c\-1\-2d
+Any chip at address 0x290 on the ISA bus	*\-isa\-0290
+.TE
+
+If several chip statements match a specific chip, they are all considered.
+
+.SS LABEL STATEMENT
+
+A
+.I label
+statement describes how a feature should be called. Features without a
+.I label
+statement are just called by their feature name. Applications can use this
+to label the readings they present. Example:
+
+.RS
+label in3 "+5V"
+.RE
+
+The first argument is the feature name. The second argument is the feature
+description.
+
+.SS IGNORE STATEMENT
+
+An 
+.I ignore
+statement is a hint that a specific feature should be ignored - probably
+because it returns bogus values (for example, because a fan or temperature
+sensor is not connected). Example:
+
+.RS
+ignore fan1
+.RE
+
+The only argument is the feature name. Please note that this does not disable
+anything in the actual sensor chip; it simply hides the feature in question
+from libsensors users.
+
+.SS COMPUTE STATEMENT
+
+A 
+.I compute
+statement describes how a feature's raw value should be translated to a
+real\-world value, and how a real\-world value should be translated back
+to a raw value again. This is most useful for voltage sensors, because
+in general sensor chips have a limited range and voltages outside this
+range must be divided (using resistors) before they can be monitored.
+Example:
+
+.RS
+compute in3 ((6.8/10)+1)*@, @/((6.8/10)+1)
+.RE
+
+The example above expresses the fact that the voltage input is divided
+using two resistors of values 6.8 Ohm and 10 Ohm, respectively. See the
+.B VOLTAGE COMPUTATION DETAILS
+section below for details.
+
+The first argument is the feature name. The second argument is an expression
+which specifies how a raw value must be translated to a real\-world value;
+`@' stands here for the raw value. This is the formula which will be applied
+when reading values from the chip. The third argument is an expression that
+specifies how a real\-world value should be translated back to a raw value;
+`@' stands here for the real\-world value. This is the formula which will be
+applied when writing values to the chip. The two formulas are obviously
+related, and are seperated by a comma.
+
+A
+.I compute
+statement applies to all sub\-features of the target feature for which
+it makes sense. For example, the above example would affect sub\-features
+in3_min and in3_max (which are voltage values) but not in3_alarm
+(which is a boolean flag.)
+
+The following operators are supported in
+.I compute
+statements:
+.RS
++ \- * / ( ) ^ `
+.RE
+^x means exp(x) and `x means ln(x).
+
+You may use the name of sub\-features in these expressions; current readings
+are substituted. You should be careful though to avoid circular references.
+
+If at any moment a translation between a raw and a real\-world value is
+called for, but no 
+.I compute
+statement applies, a one\-on\-one translation is used instead.
+
+.SS SET STATEMENT
+
+A
+.I set
+statement is used to write a sub\-feature value to the chip. Of course not
+all sub\-feature values can be set that way, in particular input values
+and alarm flags can not. Valid sub\-features are usually min/max limits.
+Example:
+
+.RS
+set in3_min  5 * 0.95
+.RE
+.RS
+set in3_max  5 * 1.05
+.RE
+
+The example above basically configures the chip to allow a 5% deviance
+for the +5V power input.
+
+The first argument is the feature name. The second argument is an expression
+which determines the written value. If there is an applying 
+.I compute
+statement, this value is fed to its third argument to translate it to a
+raw value. 
+
+You may use the name of sub\-features in these expressions; current readings
+are substituted. You should be careful though to avoid circular references.
+
+Please note that
+.I set
+statements are only executed by sensors(1) when you use the
+.B \-s
+option. Typical graphical sensors applications do not care about these
+statements at all.
+
+.SS BUS STATEMENT
+
+A
+.I bus
+statement binds the description of an I2C or SMBus adapter to a bus number. 
+This makes it possible to refer to an adapter in the configuration file,
+independent of the actual correspondence of bus numbers and actual
+adapters (which may change from moment to moment). Example:
+
+.RS
+bus "i2c\-0" "SMBus PIIX4 adapter at e800"
+.RE
+
+The first argument is the bus number. It is the literal text
+.IR i2c\- ,
+followed by a number. As there is a dash in this argument, it must
+always be quoted.
+
+The second argument is the adapter name, it must match exactly the
+adapter name as it appears in
+.IR /sys/class/i2c\-adapter/i2c\-*/name .
+It should always be quoted as well as it will most certainly contain
+spaces or dashes.
+
+The
+.I bus
+statements may be scattered randomly throughout the configuration file;
+there is no need to place the bus line before the place where its binding
+is referred to. Still, as a matter of good style, we suggest you place
+all
+.I bus
+statements together at the top of your configuration file.
+
+Running
+.B sensors --bus-list
+will generate these lines for you.
+
+.SS STATEMENT ORDER
+
+Statements can go in any order, however it is recommended to put
+`set fanX_div' statements before `set fanX_min' statements, in case
+a driver doesn't preserve the fanX_min setting when the fanX_div
+value is changed. Even if the driver does, it's still better to put
+the statements in this order to avoid accuracy loss.
+
+.SH VOLTAGE COMPUTATION DETAILS
+
+Most voltage sensors in sensor chips have a range of 0 to 4.08 V.
+This is generally sufficient for the +3.3V and CPU supply voltages, so
+the sensor chip reading is the actual voltage.
+
+Other supply voltages must be scaled with an external resistor network.
+The driver reports the value at the chip's pin (0 \- 4.08 V), and the
+userspace application must convert this raw value to an actual voltage.
+The
+.I compute
+statements provide this facility.
+
+Unfortunately the resistor values vary among motherboard types.
+Therefore you have to figure out the correct resistor values for your
+own motherboard.
+
+For positive voltages (typically +5V and +12V), two resistors are used,
+with the following formula:
+        R1 = R2 * (Vs/Vin \- 1)
+
+where:
+        R1 and R2 are the resistor values
+        Vs is the actual voltage being monitored
+        Vin is the voltage at the pin
+
+This leads to the following compute formula:
+        compute inX @*((R1/R2)+1),  @/(((R1/R2)+1)
+
+Real\-world formula for +5V and +12V would look like:
+        compute in3 @*((6.8/10)+1), @/((6.8/10)+1)
+        compute in4 @*((28/10)+1),  @/((28/10)+1)
+
+For negative voltages (typically \-5V and \-12V), two resistors are used
+as well, but different boards use different strategies to bring the
+voltage value into the 0 \- 4.08 V range. Some use an inverting
+amplifier, others use a positive reference voltage. This leads to
+different computation formulas. Note that most users won't have to care
+because most modern motherboards make little use of \-12V and no use of
+\-5V so they do not bother monitoring these voltage inputs.
+
+Real\-world examples for the inverting amplifier case:
+        compute in5 \-@*(240/60), \-@/(240/60)
+        compute in6 \-@*(100/60), \-@/(100/60)
+
+Real\-world examples for the positive voltage reference case:
+        compute in5 @*(1+232/56) \- 4.096*232/56, (@ + 4.096*232/56)/(1+232/56)
+        compute in6 @*(1+120/56) \- 4.096*120/56, (@ + 4.096*120/56)/(1+120/56)
+
+Many recent monitoring chips have a 0 \- 2.04 V range, so scaling resistors
+are even more needed, and resistor values are different.
+
+There are also a few chips out there which have internal scaling
+resistors, meaning that their value is known and doesn't change from
+one motherboard to the next. For these chips, the driver usually
+handles the scaling so it is transparent to the user and no
+.I compute
+statements are needed.
+
+.SH TEMPERATURE CONFIGURATION
+
+On top of the usual features, temperatures can have two specific
+sub\-features: temperature sensor type (tempX_type) and hysteresis
+values (tempX_max_hyst and tempX_crit_hyst).
+
+.SS THERMAL SENSOR TYPES
+
+Available thermal sensor types:
+.TS
+r l.
+1	PII/Celeron Diode
+2	3904 transistor
+3	thermal diode
+4	thermistor
+5	AMD AMDSI
+6	Intel PECI
+.TE
+
+For example, to set temp1 to thermistor type, use:
+
+.RS
+set temp1_type 4
+.RE
+
+Only certain chips support thermal sensor type change, and even these
+usually only support some of the types above. Please refer to the
+specific driver documentation to find out which types are supported
+by your chip.
+
+In theory, the BIOS should have configured the sensor types correctly,
+so you shouldn't have to touch them, but sometimes it isn't the case.
+
+.SS THERMAL HYSTERESIS MECHANISM
+
+Many monitoring chips do not handle the high and critical temperature
+limits as simple limits. Instead, they have two values for each
+limit, one which triggers an alarm when the temperature rises and another
+one which clears the alarm when the temperature falls. The latter is
+typically a few degrees below the former. This mechanism is known as
+hysteresis.
+
+The reason for implementing things that way is that high temperature
+alarms typically trigger an action to attempt to cool the system down,
+either by scaling down the CPU frequency, or by kicking in an extra
+fan. This should normally let the temperature fall in a timely manner.
+If this was clearing the alarm immediately, then the system would be
+back to its original state where the temperature rises and the alarm
+would immediately trigger again, causing an undesirable tight fan on,
+fan off loop. The hysteresis mechanism ensures that the system is
+really cool before the fan stops, so that it will not have to kick in
+again immediately.
+
+So, in addition to tempX_max, many chips have a tempX_max_hyst
+sub-feature. Likewise, tempX_crit often comes with tempX_max_crit.
+Example:
+
+.RS
+set temp1_max      60
+.RE
+.RS
+set temp1_max_hyst 56
+.RE
+
+The hysteresis mechanism can be disabled by giving both limits the same
+value.
+
+.SH BEEPS
+
+Some chips support alarms with beep warnings. When an alarm is triggered
+you can be warned by a beeping signal through your computer speaker. On
+top of per\-feature beep flags, there is usually a master beep control
+switch to enable or disable beeping globally. Enable beeping using:
+
+.RS
+set beep_enable 1
+.RE
+
+or disable it using:
+
+.RS
+set beep_enable 0
+.RE
+
+.SH WHICH STATEMENT APPLIES
+
+If more than one statement of the same kind applies at a certain moment,
+the last one in the configuration file is used. So usually, you should
+put more general
+.I chip
+statements at the top, so you can overrule them below.
 
 .SH SYNTAX
 Comments are introduced by hash marks. A comment continues to the end of the
@@ -67,7 +469,7 @@ set
 A
 .B NAME
 is a string. If it only contains letters, digits and underscores, it does not
-have to quoted; in all other cases, you should use double quotes around it.
+have to be quoted; in all other cases, you must use double quotes around it.
 Within quotes, you can use the normal escape\-codes from C.
 
 A
@@ -106,6 +508,12 @@ is of one of the below forms:
 \- 
 .B EXPR
 .sp 0
+^
+.B EXPR
+.sp 0
+` 
+.B EXPR
+.sp 0
 ( 
 .B EXPR 
 )
@@ -115,284 +523,6 @@ A
 .B NUMBER
 is a floating\-point number. `10', `10.4' and `.4' are examples of valid
 floating\-point numbers; `10.' or `10E4' are not valid.
-
-.SH SEMANTICS
-
-This section describes the meaning of each statement. Each statement is
-accompanied by an example line. Please ignore line wrap\-arounds.
-
-.SS BUS STATEMENT
-
-.RS
-bus "i2c\-0" "SMBus PIIX4 adapter at e800"
-.RE
-
-A
-.I bus
-statement binds the description of an I2C or SMBus adapter to a bus number. 
-This makes it possible to refer to an adapter in the configuration file,
-independent of the actual correspondence of bus numbers and actual
-adapters (which may change from moment to moment).
-
-The first argument is the bus number. It is the literal text
-.IR i2c\- ,
-followed by a number. As there is a dash in this argument, it must
-always be quoted.
-
-The second argument is the adapter name, it must match exactly the
-adapter name as it appears in
-.IR /sys/class/i2c-adapter/i2c-*/name .
-It should always be quoted as well as it will most certainly contain
-spaces or dashes.
-
-The
-.I bus
-statements may be scattered randomly throughout the configuration file;
-there is no need to place the bus line before the place where its binding
-is referred to. Still, as a matter of good style, we suggest you place
-all
-.I bus
-statements together at the top of your configuration file.
-
-Running
-.B sensors --bus-list
-will generate these lines for you.
-
-.SS CHIP STATEMENT
-
-.RS
-chip "lm78\-*" "lm79\-*"
-.RE
-
-The 
-.I chip
-statement selects for which chips all following configuration
-statements are meant. The chip selection remains valid until the next
-.I chip
-statement. It does not influence the operation of a
-.I bus
-statement.
-
-If a chip matches at least one of the chip descriptions, all following
-configuration lines are examined for it. If it matches none of the
-chip descriptions, every 
-.RI non\- bus
-statement is ignored upto the next
-.I chip
-statement.
-
-A chip description is built from a couple of elements, separated by
-dashes.
-
-The first element is the name of the chip type. Sometimes a single driver
-implements several chip types, with several names. The driver documentation
-should tell you. You may substitute the wildcard operator
-.I *
-for this element.
-
-The second element is the name of the bus. This is either
-.IR isa ,
-.I pci
-or
-.IR i2c-N ,
-with 
-.I N
-being any number as binded with a 
-.I bus
-statement. You may substitute the wildcard operator
-.I *
-for this element, or only for the number of the I2C bus
-(which means 'any I2C bus').
-
-The third element is the hexadecimal address of the chip. The valid range
-depends on the bus type. You may substitute
-the wildcard operator
-.I *
-for this element. 
-
-Note that it wouldn't make any sense to specify the address without the
-bus type. For this reason, the address part is plain omitted when the bus
-type isn't specified.
-The following are all valid chip type specification based on
-.I lm78\-i2c\-1\-2d
-or
-.IR lm78\-isa\-0290 :
-
-.RS
-lm78\-i2c\-1\-2d
-.sp 0
-lm78\-i2c\-1\-*
-.sp 0
-lm78\-i2c\-*\-2d
-.sp 0
-lm78\-i2c\-*\-*
-.sp 0
-lm78\-isa\-0290
-.sp 0
-lm78\-isa\-*    
-.sp 0
-lm78\-*       
-.sp 0
-*\-i2c\-1\-2d
-.sp 0
-*\-i2c\-1\-*
-.sp 0
-*\-i2c\-*\-2d
-.sp 0
-*\-i2c-*\-*
-.sp 0
-*\-isa\-0290
-.sp 0
-*\-isa\-*
-.RE
-
-.SS COMPUTE STATEMENT
-.RS
-compute in3 ((6.8/10)+1)*@ ,  @/((6.8/10)+1)
-.RE
-
-The 
-.I compute
-statement describes how you should translate a feature's raw value to a
-real\-world value, and how you should translate it back to a raw value again.
-
-The first argument is the feature name, which may be the name of a feature
-class (see below). The second is an expression which specifies how a
-raw value must be translated to a real\-world value; `@' stands here for 
-the raw value. The third is an expression that specifies how a real\-world
-value should be translated back to a raw value; `@' stands here for the
-real\-world value.
-
-You may use the name of other features in these expressions; you should be
-careful though to avoid circular references, as this may hang the expression
-evaluator.
-
-If at any moment a translation between a raw and a real\-world value is
-called for, but no 
-.I compute
-statement applies, a one\-on\-one translation is used instead.
-
-The comma is an unfortunate necessity to stop the statement from becoming
-ambiguous.
-
-.SS IGNORE STATEMENT
-.RS
-ignore fan1
-.RE
-
-The 
-.I ignore
-statement is a hint that a specific feature should be ignored - probably
-because it returns bogus values (for example, because a fan or temperature
-sensor is not connected).
-
-The only argument is the feature name, which may be a feature class;
-in that case the label class is used (see below).
-
-.SS LABEL STATEMENT
-.RS
-label in3 "+5V"
-.RE
-
-The
-.I label
-statement describes how a feature should be called. Features without a
-.I label
-statement are just called by their feature name. Applications can use this
-to label the readings they present (but they don't have to).
-
-The first argument is the feature name, which may be a feature class (see
-below). The second argument is the feature description.
-
-.SS SET STATEMENT
-.RS
-set in3_min  5 * 0.95
-.RE
-
-The
-.I set
-statement gives an initial value for a feature. Not each feature can be
-given a sensible initial value; valid features are usually min/max limits.
-
-The first argument is the feature name. The second argument is an expression
-which determines the initial value. If there is an applying 
-.I compute
-statement, this value is fed to its third argument to translate it to a
-raw value. 
-
-You may use the name of other features in these expressions; current readings
-are substituted. You should be careful though to avoid circular references, 
-as this may hang the expression evaluator. Also, you can't be sure in which
-order 
-.I set
-statements are evaluated, so this can lead to nasty surprises.
-
-.SH FEATURE CLASSES
-
-There are two kinds of classes, here called
-.I compute
-and
-.I label
-classes, after the statements for which they are defined. Classes are
-defined over features: the kind of values that can be read from or set
-for a specific kind of chip.
-
-Each class has a class name, which is usually the same as its most 
-prominent feature. A 
-.I label
-or
-.I compute
-statement for the class name feature forces the same settings for all other
-class members. A specific statement for a class member feature always
-overrides the general class setting, though. This means that you can't
-override the class name feature explicitly.
-
-A simple example will explain this better. The
-.I fan1
-label class of the 
-.I lm78
-chip contains three members:
-.I fan1
-itself,
-.I fan1_min
-and 
-.IR fan1_div .
-The last feature sets the number by which readings are divided (to give the
-fan less resolution, but a larger field of operation). The following
-line will set the name of all these features to describe the fan:
-.RS
-label fan1 "Processor 1 FAN"
-.RE
-Now we happen to know that, due to the type of fan we use, all readings
-are always off by a factor of two (some fans only return one 'tick' each
-rotation, others return two):
-.RS
-compute fan1 @/2 , @*2
-.RE
-It will be clear that this should be done for the 
-.I fan1_min 
-feature too, but not for the
-.I fan1_div
-feature! Fortunately, the 
-.I fan1
-compute class contains 
-.IR fan1_min ,
-but not 
-.IR fan1_div ,
-so this works out right.
-
-.SH WHICH STATEMENT APPLIES
-
-If more than one statement of the same kind applies at a certain moment,
-the last one in the configuration file is used. So usually, you should
-put more general
-.I chip
-statements at the top, so you can overrule them below.
-
-There is one exception to this rule: if a statement only applies because
-the feature is in the same class as the feature the statement contains,
-and there is anywhere else a statement for this specific class member,
-that one takes always precedence.
 
 .SH FILES
 .I /etc/sensors3.conf
