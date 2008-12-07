@@ -10,12 +10,12 @@
 .\" manual under the conditions for verbatim copying, provided that the
 .\" entire resulting derived work is distributed under the terms of a
 .\" permission notice identical to this one.
-.\" 
+.\"
 .\" Since the Linux kernel and libraries are constantly changing, this
 .\" manual page may be incorrect or out-of-date.  The author(s) assume no
 .\" responsibility for errors or omissions, or for damages resulting from
 .\" the use of the information contained herein.
-.\" 
+.\"
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
@@ -89,9 +89,9 @@ The name of the bus is either
 .I spi-*
 or
 .I i2c-N
-with 
+with
 .I N
-being a bus number as binded with a 
+being a bus number as binded with a
 .I bus
 statement. This list isn't necessarily exhaustive as support for other
 bus types may be added in the future.
@@ -136,7 +136,7 @@ description.
 
 .SS IGNORE STATEMENT
 
-An 
+An
 .I ignore
 statement is a hint that a specific feature should be ignored - probably
 because it returns bogus values (for example, because a fan or temperature
@@ -152,7 +152,7 @@ from libsensors users.
 
 .SS COMPUTE STATEMENT
 
-A 
+A
 .I compute
 statement describes how a feature's raw value should be translated to a
 real\-world value, and how a real\-world value should be translated back
@@ -198,7 +198,7 @@ You may use the name of sub\-features in these expressions; current readings
 are substituted. You should be careful though to avoid circular references.
 
 If at any moment a translation between a raw and a real\-world value is
-called for, but no 
+called for, but no
 .I compute
 statement applies, a one\-on\-one translation is used instead.
 
@@ -222,10 +222,10 @@ The example above basically configures the chip to allow a 5% deviance
 for the +5V power input.
 
 The first argument is the feature name. The second argument is an expression
-which determines the written value. If there is an applying 
+which determines the written value. If there is an applying
 .I compute
 statement, this value is fed to its third argument to translate it to a
-raw value. 
+raw value.
 
 You may use the name of sub\-features in these expressions; current readings
 are substituted. You should be careful though to avoid circular references.
@@ -241,7 +241,7 @@ statements at all.
 
 A
 .I bus
-statement binds the description of an I2C or SMBus adapter to a bus number. 
+statement binds the description of an I2C or SMBus adapter to a bus number.
 This makes it possible to refer to an adapter in the configuration file,
 independent of the actual correspondence of bus numbers and actual
 adapters (which may change from moment to moment). Example:
@@ -435,7 +435,7 @@ statements at the top, so you can overrule them below.
 
 .SH SYNTAX
 Comments are introduced by hash marks. A comment continues to the end of the
-line. Empty lines, and lines containing only whitespace or comments are 
+line. Empty lines, and lines containing only whitespace or comments are
 ignored.  Other lines have one of the below forms. There must be whitespace
 between each element, but the amount of whitespace is unimportant. A line
 may be continued on the next line by ending it with a backslash; this does
@@ -445,24 +445,24 @@ or
 .BR NUMBER .
 
 .RS
-bus 
+bus
 .B NAME NAME NAME
 .sp 0
-chip 
+chip
 .B NAME\-LIST
 .sp 0
-label 
+label
 .B NAME NAME
 .sp 0
-compute 
-.B NAME EXPR 
-, 
+compute
+.B NAME EXPR
+,
 .B EXPR
 .sp 0
 ignore
 .B NAME
 .sp 0
-set 
+set
 .B NAME EXPR
 .RE
 .sp
@@ -489,33 +489,33 @@ is of one of the below forms:
 .sp 0
 @
 .sp 0
-.B EXPR 
+.B EXPR
 +
 .B EXPR
 .sp 0
-.B EXPR 
-\- 
+.B EXPR
+\-
 .B EXPR
 .sp 0
-.B EXPR 
-* 
+.B EXPR
+*
 .B EXPR
 .sp 0
-.B EXPR 
-/ 
+.B EXPR
+/
 .B EXPR
 .sp 0
-\- 
+\-
 .B EXPR
 .sp 0
 ^
 .B EXPR
 .sp 0
-` 
+`
 .B EXPR
 .sp 0
-( 
-.B EXPR 
+(
+.B EXPR
 )
 .RE
 
