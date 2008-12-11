@@ -2185,3 +2185,12 @@ chip "adm1022-*" "thmc50-*"
    # Dual CPU setup (ADM1022 only)
    #label temp2 "CPU0 Temp"
    #label temp3 "CPU1 Temp"
+
+# Asus/Fintek F8000
+chip "f8000-*"
+
+   # All 3 voltages are internal, so scaling is done by the driver and
+   # labels are always correct
+   label  in0  "+3.3V"
+   label  in1  "3VSB"
+   label  in2  "Vbat"
