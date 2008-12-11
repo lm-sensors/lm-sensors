@@ -11,6 +11,7 @@ SVN-HEAD
   sensors.conf.8: Lots of additions and reworks
   sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
                    Move help section to sensors.conf.5
+                   Add a section for the Asus/Fintek F8000
   sensors-detect: Fix detection of ADT7463 and LM96000
                   Add VIA VX800/VX820 support 
                   Fix detection of Intel 5000 series FB-DIMM AMB
