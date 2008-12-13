@@ -40,6 +40,7 @@ SVN-HEAD
                           Fix detection of SMSC LPC47M292
                           Add SMSC LPC47M233 support
                           Fix SMBus detection of W83627EHF and W83627DHG
+                          Add Intel Core I7 support
 
 2.10.7 (20080701)
   Library: Don't choke on unrecognized devices, part 2
