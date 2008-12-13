@@ -48,6 +48,7 @@ SVN-HEAD
                   Move IPMI interface detection to its own section
                   Skip IPMI probing on laptops
                   Add Winbond/Nuvoton W83667HG support
+                  Add Intel Core I7 support
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)
