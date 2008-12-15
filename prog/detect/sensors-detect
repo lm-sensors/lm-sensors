@@ -1975,7 +1975,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
       },
       {
 	name => "Asus F8000 Super IO",
-	driver => "f8000",
+	driver => "to-be-written",
 	devid => 0x0581,
 	logdev => 0x04,
       },
