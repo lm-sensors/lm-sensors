@@ -1,7 +1,7 @@
 Begin4
 Title: lm_sensors
-Version: 2.10.7
-Entered-date: 2008-07-01
+Version: 2.10.8
+Entered-date: 2008-12-16
 Description: Hardware health monitoring package for Linux. It consists of 
              kernel modules to access sensor chips and SMBus hardware,
              of a library to allow applications to read this data more
