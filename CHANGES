@@ -25,6 +25,7 @@ SVN-HEAD
                    Add lm89, max6658, max6659, max6681, max6646, max6647
                     and max6649 support
                    Accept negative temperatures in RRD database
+                   Don't bail out on transient errors (#2330)
   Program sensors: Recognize it87 thermal sensor type 4 as thermistor
                    Add it8720 support
                    Add lm89, max6658, max6659, max6681, max6646, max6647

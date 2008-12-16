@@ -85,27 +85,30 @@ sensord
 
   sensorLog (LOG_INFO, "sensord started");
 
-  while (!done && (ret == 0)) {
-    if (ret == 0)
-      ret = reloadLib ();
-    if ((ret == 0) && scanTime) { /* should I scan on the read cycle? */
-      ret = scanChips ();
-      if (scanValue <= 0)
-        scanValue += scanTime;
+  while (!done) {
+    ret = reloadLib ();
+    if (ret)
+      sensorLog (LOG_NOTICE, "config reload error (%d)", ret);
+    if (scanTime && (scanValue <= 0)) {
+      if ((ret = scanChips ()))
+        sensorLog (LOG_NOTICE, "sensor scan error (%d)", ret);
+      scanValue += scanTime;
     }
-    if ((ret == 0) && logTime && (logValue <= 0)) {
-      ret = readChips ();
+    if (logTime && (logValue <= 0)) {
+      if ((ret = readChips ()))
+        sensorLog (LOG_NOTICE, "sensor read error (%d)", ret);
       logValue += logTime;
     }
-    if ((ret == 0) && rrdTime && rrdFile && (rrdValue <= 0)) {
-      ret = rrdUpdate ();
+    if (rrdTime && rrdFile && (rrdValue <= 0)) {
+      if ((ret = rrdUpdate ()))
+        sensorLog (LOG_NOTICE, "rrd update error (%d)", ret);
       /*
        * The amount of time to wait is computed using the same method as
        * in RRD instead of simply adding the interval.
        */
       rrdValue = rrdTime - time(NULL) % rrdTime;
     }
-    if (!done && (ret == 0)) {
+    if (!done) {
       int a = logTime ? logValue : INT_MAX;
       int b = scanTime ? scanValue : INT_MAX;
       int c = (rrdTime && rrdFile) ? rrdValue : INT_MAX;
@@ -117,10 +120,7 @@ sensord
     }
   }
 
-  if (ret)
-    sensorLog (LOG_INFO, "sensord failed (%d)", ret);
-  else
-    sensorLog (LOG_INFO, "sensord stopped");
+  sensorLog (LOG_INFO, "sensord stopped");
 
   return ret;
 }
