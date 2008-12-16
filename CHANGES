@@ -9,6 +9,7 @@ SVN-HEAD
            Add support for the IT8720F chip
            Support separate prefixes lm89, max6658, max6659, max6681,
             max6646, max6647 and max6649
+           Add alternative feature name for f71882fg temperature alarms
   Module i2c-i801: Remove verbose debugging messages (2.6 backport)
                    Properly report bus arbitration lost (2.6 backport)
                    Add support for PCH (Ibex Peak) (2.6 backport)

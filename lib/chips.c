@@ -6267,7 +6267,8 @@ static sensors_chip_feature applesmc_features[] =
 		NOSYSCTL, VALUE(5), 3 }, \
 	{ { SENSORS_F71882FG_TEMP_ALARM(nr), "temp" #nr "_alarm", \
 		SENSORS_F71882FG_TEMP(nr), NOMAP, R }, \
-		NOSYSCTL, VALUE(1), 0 }, \
+		NOSYSCTL, VALUE(1), 0, "temp" #nr "_max_alarm", 0, \
+		"temp" #nr "_alarm" }, \
 	{ { SENSORS_F71882FG_TEMP_FAULT(nr), "temp" #nr "_fault", \
 		SENSORS_F71882FG_TEMP(nr), NOMAP, R }, \
 		NOSYSCTL, VALUE(2), 0 }, \
