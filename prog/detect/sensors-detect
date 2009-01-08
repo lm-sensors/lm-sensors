@@ -1607,7 +1607,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		devid => 0x0206,
 	}, {
 		name => "Asus F8000 Super IO",
-		driver => "f8000",
+		driver => "f71882fg",
 		devid => 0x0581,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
