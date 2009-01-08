@@ -6,6 +6,7 @@ SVN-HEAD
               Add support for current sensors
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
+           Don't bail out on transient errors (#2330)
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
   sensors.conf.8: Lots of additions and reworks
