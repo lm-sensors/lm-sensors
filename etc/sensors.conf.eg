@@ -2189,8 +2189,12 @@ chip "adm1022-*" "thmc50-*"
 # Asus/Fintek F8000
 chip "f8000-*"
 
-   # All 3 voltages are internal, so scaling is done by the driver and
-   # labels are always correct
+   # All 3 voltages are internal, but scaling is not done by the driver
+   # so we do it here
+   compute in0  @*2, @/2
+   compute in1  @*2, @/2
+   compute in2  @*2, @/2
+
    label  in0  "+3.3V"
    label  in1  "3VSB"
    label  in2  "Vbat"
