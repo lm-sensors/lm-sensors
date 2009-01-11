@@ -1,7 +1,7 @@
 /*
     error.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 #define SENSORS_ERR_PARSE	8 /* General parse error */
 #define SENSORS_ERR_ACCESS_W	9 /* Can't write */
 #define SENSORS_ERR_IO		10 /* I/O error */
+#define SENSORS_ERR_RECURSION	11 /* Evaluation recurses too deep */
 
 #ifdef __cplusplus
 extern "C" {

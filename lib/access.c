@@ -1,7 +1,7 @@
 /*
     access.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,9 +29,13 @@
 #include "sysfs.h"
 #include "general.h"
 
+/* We watch the recursion depth for variables only, as an easy way to
+   detect cycles. */
+#define DEPTH_MAX	8
+
 static int sensors_eval_expr(const sensors_chip_features *chip_features,
 			     const sensors_expr *expr,
-			     double val, double *result);
+			     double val, int depth, double *result);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
@@ -221,8 +225,8 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 /* Read the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
-		      double *result)
+static int __sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+			       int depth, double *result)
 {
 	const sensors_chip_features *chip_features;
 	const sensors_subfeature *subfeature;
@@ -230,6 +234,8 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 	double val;
 	int res, i;
 
+	if (depth >= DEPTH_MAX)
+		return -SENSORS_ERR_RECURSION;
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
 	if (!(chip_features = sensors_lookup_chip(name)))
@@ -265,9 +271,16 @@ int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
 		return res;
 	if (!expr)
 		*result = val;
-	else if ((res = sensors_eval_expr(chip_features, expr, val, result)))
+	else if ((res = sensors_eval_expr(chip_features, expr, val, depth,
+					  result)))
 		return res;
 	return 0;
+}
+
+int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+		      double *result)
+{
+	return __sensors_get_value(name, subfeat_nr, 0, result);
 }
 
 /* Set the value of a subfeature of a certain chip. Note that chip should not
@@ -315,7 +328,7 @@ int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
 	to_write = value;
 	if (expr)
 		if ((res = sensors_eval_expr(chip_features, expr,
-					     value, &to_write)))
+					     value, 0, &to_write)))
 			return res;
 	return sensors_write_sysfs_attr(name, subfeature, to_write);
 }
@@ -419,7 +432,7 @@ sensors_get_subfeature(const sensors_chip_name *name,
 /* Evaluate an expression */
 int sensors_eval_expr(const sensors_chip_features *chip_features,
 		      const sensors_expr *expr,
-		      double val, double *result)
+		      double val, int depth, double *result)
 {
 	double res1, res2;
 	int res;
@@ -437,15 +450,16 @@ int sensors_eval_expr(const sensors_chip_features *chip_features,
 		if (!(subfeature = sensors_lookup_subfeature_name(chip_features,
 							    expr->data.var)))
 			return -SENSORS_ERR_NO_ENTRY;
-		return sensors_get_value(&chip_features->chip,
-					 subfeature->number, result);
+		return __sensors_get_value(&chip_features->chip,
+					   subfeature->number, depth + 1,
+					   result);
 	}
 	if ((res = sensors_eval_expr(chip_features, expr->data.subexpr.sub1,
-				     val, &res1)))
+				     val, depth, &res1)))
 		return res;
 	if (expr->data.subexpr.sub2 &&
 	    (res = sensors_eval_expr(chip_features, expr->data.subexpr.sub2,
-				     val, &res2)))
+				     val, depth, &res2)))
 		return res;
 	switch (expr->data.subexpr.op) {
 	case sensors_add:
@@ -504,7 +518,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 
 			res = sensors_eval_expr(chip_features,
 						chip->sets[i].value, 0,
-						&value);
+						0, &value);
 			if (res) {
 				sensors_parse_error("Error parsing expression",
 						    chip->sets[i].lineno);

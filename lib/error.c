@@ -1,7 +1,7 @@
 /*
     error.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@ static const char *errorlist[] = {
 	/* SENSORS_ERR_PARSE     */ "General parse error",
 	/* SENSORS_ERR_ACCESS_W  */ "Can't write",
 	/* SENSORS_ERR_IO        */ "I/O error",
+	/* SENSORS_ERR_RECURSION */ "Evaluation recurses too deep",
 };
 
 const char *sensors_strerror(int errnum)
