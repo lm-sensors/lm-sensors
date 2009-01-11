@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN-HEAD
   libsensors: Add support for instantaneous power sensors
               Add support for current sensors
+              Fix error propagation during expression evaluation
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
            Don't bail out on transient errors (#2330)

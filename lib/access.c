@@ -437,10 +437,8 @@ int sensors_eval_expr(const sensors_chip_features *chip_features,
 		if (!(subfeature = sensors_lookup_subfeature_name(chip_features,
 							    expr->data.var)))
 			return -SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_value(&chip_features->chip,
-					      subfeature->number, result)))
-			return res;
-		return 0;
+		return sensors_get_value(&chip_features->chip,
+					 subfeature->number, result);
 	}
 	if ((res = sensors_eval_expr(chip_features, expr->data.subexpr.sub1,
 				     val, &res1)))
