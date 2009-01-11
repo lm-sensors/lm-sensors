@@ -49,8 +49,6 @@ sensors_bus *sensors_proc_bus = NULL;
 int sensors_proc_bus_count = 0;
 int sensors_proc_bus_max = 0;
 
-static int sensors_substitute_chip(sensors_chip_name *name, int lineno);
-
 /*
    Parse a chip name to the internal representation. These are valid names:
 
@@ -194,7 +192,7 @@ int sensors_parse_bus_id(const char *name, sensors_bus_id *bus)
 	return 0;
 }
 
-int sensors_substitute_chip(sensors_chip_name *name, int lineno)
+static int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 {
 	int i, j;
 	for (i = 0; i < sensors_config_busses_count; i++)
