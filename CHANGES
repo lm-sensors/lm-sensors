@@ -6,6 +6,7 @@ SVN-HEAD
               Add support for current sensors
               Fix error propagation during expression evaluation
               Detect excessive recursion depth during expression evaluation
+  lm_sensors.init.suse: Delete (actual SuSE script is much different)
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
            Don't bail out on transient errors (#2330)
