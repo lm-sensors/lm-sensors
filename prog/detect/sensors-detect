@@ -5117,7 +5117,6 @@ sub generate_modprobes
 		$bus_modules{"i2c-isa"}++;
 	}
 	if ($ipmi) {
-		$modprobes .= "# You must also install and load the IPMI modules\n";
 		$modprobes .= "modprobe ipmi-si\n";
 		$bus_modules{"ipmi-si"}++;
 	}
@@ -5127,7 +5126,8 @@ sub generate_modprobes
 	foreach $driver (keys %chips_detected) {
 		next if not @{$chips_detected{$driver}};
 		if ($driver eq "to-be-written") {
-			$modprobes .= "# no driver for ${$chips_detected{$driver}}[0]{chipname} yet\n";
+			print "Note: there is no driver for ${$chips_detected{$driver}}[0]{chipname} yet.\n".
+			      "Check http://www.lm-sensors.org/wiki/Devices for updates.\n\n";
 		} else {
 			open(local *INPUTFILE, "modprobe -l $driver 2>/dev/null |");
 			local $_;
@@ -5142,13 +5142,14 @@ sub generate_modprobes
 			# Check return value from modprobe in case modprobe -l
 			# isn't supported
 			if ((($? >> 8) == 0) && ! $modulefound) {
-				$modprobes .= "# Warning: the required module $driver is not currently installed\n".
-					      "# on your system. For status of 2.6 kernel ports check\n".
-					      "# http://www.lm-sensors.org/wiki/Devices. If driver is built\n".
-					      "# into the kernel, or unavailable, comment out the following line.\n";
+				print "Warning: the required module $driver is not currently installed\n".
+				      "on your system. If it is built into the kernel then it's OK.\n".
+				      "Otherwise, check http://www.lm-sensors.org/wiki/Devices for\n".
+				      "driver availability.\n\n";
+			} else {
+				$modprobes .= "modprobe $driver\n";
+				$hwmon_modules{$driver}++;
 			}
-			$modprobes .= "modprobe $driver\n";
-			$hwmon_modules{$driver}++;
 		}
 	}
 
@@ -5408,7 +5409,12 @@ sub main
 	print "\n";
 
 	my ($modprobes, $configfile, $bus_modules, $hwmon_modules) = generate_modprobes();
-	write_config($modprobes, $configfile, $bus_modules, $hwmon_modules);
+
+	if (@{$hwmon_modules}) {
+		write_config($modprobes, $configfile, $bus_modules, $hwmon_modules);
+	} else {
+		print "No modules to load, skipping modules configuration.\n\n";
+	}
 
 	unload_modules();
 }
