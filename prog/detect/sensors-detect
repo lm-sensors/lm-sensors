@@ -5055,7 +5055,7 @@ sub generate_modprobes
 {
 	my ($driver, $detection, $adap);
 	my ($isa, $ipmi);
-	my ($modprobes, $configfile);
+	my ($modprobes, $configfile, %bus_modules, %hwmon_modules);
 
 	foreach $driver (keys %chips_detected) {
 		foreach $detection (@{$chips_detected{$driver}}) {
@@ -5106,15 +5106,20 @@ sub generate_modprobes
 		next if not defined $configfile and not $adap->{used};
 		$modprobes .= "# I2C adapter drivers\n" unless defined $modprobes;
 		$modprobes .= "modprobe $adap->{driver}\n"
-			unless $modprobes =~ /modprobe $adap->{driver}\n/;
+			unless exists $bus_modules{$adap->{driver}};
+		$bus_modules{$adap->{driver}}++;
 	}
 
 	# i2c-isa is loaded automatically (as a dependency) since 2.6.14,
 	# and will soon be gone.
-	$modprobes .= "modprobe i2c-isa\n" if ($isa && !kernel_version_at_least(2, 6, 18));
+	if ($isa && !kernel_version_at_least(2, 6, 18)) {
+		$modprobes .= "modprobe i2c-isa\n";
+		$bus_modules{"i2c-isa"}++;
+	}
 	if ($ipmi) {
 		$modprobes .= "# You must also install and load the IPMI modules\n";
 		$modprobes .= "modprobe ipmi-si\n";
+		$bus_modules{"ipmi-si"}++;
 	}
 
 	# Now determine the chip probe lines
@@ -5143,10 +5148,13 @@ sub generate_modprobes
 					      "# into the kernel, or unavailable, comment out the following line.\n";
 			}
 			$modprobes .= "modprobe $driver\n";
+			$hwmon_modules{$driver}++;
 		}
 	}
 
-	return ($modprobes, $configfile);
+	my @bus_modules = sort keys %bus_modules;
+	my @hwmon_modules = sort keys %hwmon_modules;
+	return ($modprobes, $configfile, \@bus_modules, \@hwmon_modules);
 }
 
 sub main
@@ -5296,7 +5304,7 @@ sub main
 	}
 	print "\n";
 
-	my ($modprobes, $configfile) = generate_modprobes();
+	my ($modprobes, $configfile, $bus_modules, $hwmon_modules) = generate_modprobes();
 
 	if (defined $configfile) {
 		my $have_modprobe_d = -d '/etc/modprobe.d';
@@ -5345,11 +5353,9 @@ sub main
 #    MODULE_0, MODULE_1, MODULE_2, etc.
 
 EOT
-		my @modules = grep /^modprobe /, split "\n", $modprobes;
 		my $i = 0;
 		my $sysconfig = "";
-		foreach (@modules) {
-			s/^modprobe //;
+		foreach (@{$bus_modules}, @{$hwmon_modules}) {
 			$sysconfig .= "MODULE_$i=$_\n";
 			$i++;
 		}
