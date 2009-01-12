@@ -2105,6 +2105,20 @@ sub load_module
 	$modules_list{$normalized} = 1;
 }
 
+sub loaded_by_us
+{
+	my $sought = shift;
+	local $_;
+
+	$sought =~ tr/-/_/;
+	foreach (@modules_we_loaded) {
+		my $module = $_;
+		$module =~ tr/-/_/;
+		return 1 if $module eq $sought;
+	}
+	return 0;
+}
+
 sub initialize_modules_supported
 {
 	foreach my $chip (@chip_ids) {
@@ -5088,7 +5102,7 @@ sub generate_modprobes
 	# the adapter drivers so that the numbers will be the same. If not, then
 	# we only load the adapter drivers which are useful.
 	foreach $adap (@i2c_adapters) {
-		next unless contains($adap->{driver}, @modules_we_loaded);
+		next unless loaded_by_us($adap->{driver});
 		next if not defined $configfile and not $adap->{used};
 		$modprobes .= "# I2C adapter drivers\n" unless defined $modprobes;
 		$modprobes .= "modprobe $adap->{driver}\n"
