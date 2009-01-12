@@ -5354,12 +5354,10 @@ sub main
 
 EOT
 		my $i = 0;
-		my $sysconfig = "";
 		foreach (@{$bus_modules}, @{$hwmon_modules}) {
-			$sysconfig .= "MODULE_$i=$_\n";
+			print SYSCONFIG "MODULE_$i=$_\n";
 			$i++;
 		}
-		print SYSCONFIG $sysconfig;
 		close(SYSCONFIG);
 
 		print "Copy prog/init/lm_sensors.init to /etc/init.d/lm_sensors\n".
