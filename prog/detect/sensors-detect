@@ -5055,7 +5055,7 @@ sub generate_modprobes
 {
 	my ($driver, $detection, $adap);
 	my ($isa, $ipmi);
-	my ($modprobes, $configfile, %bus_modules, %hwmon_modules);
+	my ($configfile, %bus_modules, %hwmon_modules);
 
 	foreach $driver (keys %chips_detected) {
 		foreach $detection (@{$chips_detected{$driver}}) {
@@ -5104,25 +5104,19 @@ sub generate_modprobes
 	foreach $adap (@i2c_adapters) {
 		next unless loaded_by_us($adap->{driver});
 		next if not defined $configfile and not $adap->{used};
-		$modprobes .= "# I2C adapter drivers\n" unless defined $modprobes;
-		$modprobes .= "modprobe $adap->{driver}\n"
-			unless exists $bus_modules{$adap->{driver}};
 		$bus_modules{$adap->{driver}}++;
 	}
 
 	# i2c-isa is loaded automatically (as a dependency) since 2.6.14,
 	# and will soon be gone.
 	if ($isa && !kernel_version_at_least(2, 6, 18)) {
-		$modprobes .= "modprobe i2c-isa\n";
 		$bus_modules{"i2c-isa"}++;
 	}
 	if ($ipmi) {
-		$modprobes .= "modprobe ipmi-si\n";
 		$bus_modules{"ipmi-si"}++;
 	}
 
 	# Now determine the chip probe lines
-	$modprobes .= "# Chip drivers\n";
 	foreach $driver (keys %chips_detected) {
 		next if not @{$chips_detected{$driver}};
 		if ($driver eq "to-be-written") {
@@ -5147,7 +5141,6 @@ sub generate_modprobes
 				      "Otherwise, check http://www.lm-sensors.org/wiki/Devices for\n".
 				      "driver availability.\n\n";
 			} else {
-				$modprobes .= "modprobe $driver\n";
 				$hwmon_modules{$driver}++;
 			}
 		}
@@ -5155,12 +5148,12 @@ sub generate_modprobes
 
 	my @bus_modules = sort keys %bus_modules;
 	my @hwmon_modules = sort keys %hwmon_modules;
-	return ($modprobes, $configfile, \@bus_modules, \@hwmon_modules);
+	return ($configfile, \@bus_modules, \@hwmon_modules);
 }
 
 sub write_config
 {
-	my ($modprobes, $configfile, $bus_modules, $hwmon_modules) = @_;
+	my ($configfile, $bus_modules, $hwmon_modules) = @_;
 
 	if (defined $configfile) {
 		my $have_modprobe_d = -d '/etc/modprobe.d';
@@ -5245,12 +5238,17 @@ EOT
 	} else {
 		print "To load everything that is needed, add this to one of the system\n".
 		      "initialization scripts (e.g. /etc/rc.d/rc.local):\n\n";
-		print "#----cut here----\n".
-		      $modprobes.
-		      (-e '/usr/bin/sensors' ?
+		print "#----cut here----\n";
+		if (@{$bus_modules}) {
+			print "# Adapter drivers\n";
+			print "modprobe $_\n" foreach (@{$bus_modules});
+		}
+		print "# Chip drivers\n";
+		print "modprobe $_\n" foreach (@{$hwmon_modules});
+		print((-e '/usr/bin/sensors' ?
 		       "/usr/bin/sensors -s\n" :
 		       "/usr/local/bin/sensors -s\n").
-		      "#----cut here----\n\n";
+		      "#----cut here----\n\n");
 
 		print "If you have some drivers built into your kernel, the list above will\n".
 		      "contain too many modules. Skip the appropriate ones! You really\n".
@@ -5408,10 +5406,10 @@ sub main
 	}
 	print "\n";
 
-	my ($modprobes, $configfile, $bus_modules, $hwmon_modules) = generate_modprobes();
+	my ($configfile, $bus_modules, $hwmon_modules) = generate_modprobes();
 
 	if (@{$hwmon_modules}) {
-		write_config($modprobes, $configfile, $bus_modules, $hwmon_modules);
+		write_config($configfile, $bus_modules, $hwmon_modules);
 	} else {
 		print "No modules to load, skipping modules configuration.\n\n";
 	}
