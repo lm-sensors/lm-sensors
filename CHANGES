@@ -53,6 +53,7 @@ SVN-HEAD
                   Skip IPMI probing on laptops
                   Add Winbond/Nuvoton W83667HG support
                   Add Intel Core I7 support
+                  Generate new format for /etc/sysconfig/lm_sensors
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)
