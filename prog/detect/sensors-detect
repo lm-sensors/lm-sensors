@@ -5054,7 +5054,6 @@ sub print_chips_report
 sub generate_modprobes
 {
 	my ($driver, $detection, $adap);
-	my ($isa, $ipmi);
 	my ($configfile, %bus_modules, %hwmon_modules);
 
 	foreach $driver (keys %chips_detected) {
@@ -5065,12 +5064,15 @@ sub generate_modprobes
 				$i2c_adapters[$detection->{i2c_devnr}]->{used}++;
 			}
 
-			if (exists $detection->{isa_addr}) {
-				$isa = 1;
+			# i2c-isa is loaded automatically (as a dependency)
+			# since 2.6.14, and will soon be gone.
+			if (exists $detection->{isa_addr}
+			 && !kernel_version_at_least(2, 6, 18)) {
+				$bus_modules{"i2c-isa"}++
 			}
 		}
 		if ($driver eq "ipmisensors") {
-			$ipmi = 1;
+			$bus_modules{"ipmi-si"}++;
 		}
 	}
 
@@ -5105,15 +5107,6 @@ sub generate_modprobes
 		next unless loaded_by_us($adap->{driver});
 		next if not defined $configfile and not $adap->{used};
 		$bus_modules{$adap->{driver}}++;
-	}
-
-	# i2c-isa is loaded automatically (as a dependency) since 2.6.14,
-	# and will soon be gone.
-	if ($isa && !kernel_version_at_least(2, 6, 18)) {
-		$bus_modules{"i2c-isa"}++;
-	}
-	if ($ipmi) {
-		$bus_modules{"ipmi-si"}++;
 	}
 
 	# Now determine the chip probe lines
