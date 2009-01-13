@@ -596,6 +596,11 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 			entry.chip.addr = 0;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
 		entry.chip.bus.nr = 0;
+	} else if (subsys && !strcmp(subsys, "acpi")) {
+		entry.chip.bus.type = SENSORS_BUS_TYPE_ACPI;
+		/* For now we assume that acpi devices are unique */
+		entry.chip.bus.nr = 0;
+		entry.chip.addr = 0;
 	} else {
 		/* Ignore unknown device */
 		err = 0;

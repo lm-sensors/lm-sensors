@@ -362,6 +362,8 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 		return "SPI adapter";
 	case SENSORS_BUS_TYPE_VIRTUAL:
 		return "Virtual device";
+	case SENSORS_BUS_TYPE_ACPI:
+		return "ACPI interface";
 	}
 
 	/* bus types with several instances */

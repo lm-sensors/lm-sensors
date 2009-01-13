@@ -7,6 +7,8 @@ authors can quickly figure out how to test for the availability of a
 given new feature.
 
 0x402	lm-sensors SVN
+* Added bus type "acpi":
+  #define SENSORS_BUS_TYPE_ACPI
 * Added support for instantaneous power sensors
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST
