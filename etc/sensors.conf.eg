@@ -459,23 +459,9 @@ chip "w83792d-*"
 
     label in0 "VCoreA"
     label in1 "VCoreB"
-    label in2 "VIN0"
-    label in3 "VIN1"
-    label in4 "VIN2"
-    label in5 "VIN3"
     label in6 "5VCC"
     label in7 "5VSB"
     label in8 "VBAT"
-    label fan1 "Fan1"
-    label fan2 "Fan2"
-    label fan3 "Fan3"
-    label fan4 "Fan4"
-    label fan5 "Fan5"
-    label fan6 "Fan6"
-    label fan7 "Fan7"
-    label temp1 "Temp1"
-    label temp2 "Temp2"
-    label temp3 "Temp3"
 
 #    set in0_min 1.4
 #    set in0_max 1.6
@@ -1067,7 +1053,6 @@ chip "it87-*" "it8712-*"
 #    set   temp2_max   45
 #    set   temp2_min   15
 #   ignore temp3
-    label temp3       "Temp3"
 #    set   temp3_max   45
 #    set   temp3_min   15
 
@@ -1174,15 +1159,11 @@ chip "fscpos-*"
 
 # Temperature
 
-    label temp1       "Temp1/CPU"
-    label temp2       "Temp2/MB"
-    label temp3       "Temp3/AUX"
+    label temp1       "CPU Temp"
+    label temp2       "M/B Temp"
+    label temp3       "Aux Temp"
 
 # Fans
-
-    label fan1        "Fan1"
-    label fan2        "Fan2"
-    label fan3        "Fan3"
 
 # Voltage
 
@@ -1196,19 +1177,15 @@ chip "fscscy-*"
 
 # Temperature
 
-    label temp1       "Temp1/CPU0"
-    label temp2       "Temp2/CPU1"
-    label temp3       "Temp3/MB"
-    label temp4       "Temp4/AUX"
+    label temp1       "CPU0 Temp"
+    label temp2       "CPU1 Temp"
+    label temp3       "M/B Temp"
+    label temp4       "Aux Temp"
 
 # Fans
 
-    label  fan1       "Fan1/CPU0"
-    label  fan2       "Fan2/CPU0"
-    label  fan3       "Fan3"
-    label  fan4       "Fan4"
-    label  fan5       "Fan5"
-    label  fan6       "Fan6"
+    label  fan1       "CPU Fan"
+    label  fan2       "CPU Fan"
 
 # Voltage
 
@@ -1221,14 +1198,14 @@ chip "fscher-*"
 # Fujitsu-Siemens Hermes chip
 
 # Temperature
-    label temp1       "Temp1/CPU"
-    label temp2       "Temp2/MB"
-    label temp3       "Temp3/AUX"
+    label temp1       "CPU Temp"
+    label temp2       "M/B Temp"
+    label temp3       "Aux Temp"
 
 # Fans
-    label fan1        "Fan1/PS"
-    label fan2        "Fan2/CPU"
-    label fan3        "Fan3/AUX"
+    label fan1        "PSU Fan"
+    label fan2        "CPU Fan"
+    label fan3        "Aux Fan"
 
 # Voltage
     label in0         "+12V"
@@ -1707,10 +1684,7 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
    label temp3  "Remote Temp"
 
 # Fan inputs
-   label fan1   "CPU_Fan"
-#   label fan2   "Fan2"
-#   label fan3   "Fan3"
-#   label fan4   "Fan4"
+   label fan1   "CPU Fan"
 
 # Voltage scaling is done on-chip.  No 'compute' directive
 # should be necessary.  If in0 has external scaling set
@@ -2089,12 +2063,7 @@ chip "dme1737-*"
    label temp3   "CPU Temp"
 
 # Fan inputs
-   label fan1   "CPU_Fan"
-   label fan2   "Fan2"
-   label fan3   "Fan3"
-   label fan4   "Fan4"
-   label fan5   "Fan5"
-   label fan6   "Fan6"
+   label fan1   "CPU Fan"
 
 # Set voltage limits
 #   set in0_min   5.0 * 0.95
