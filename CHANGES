@@ -13,6 +13,7 @@ SVN-HEAD
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
   sensors.conf.8: Lots of additions and reworks
+  sensors.conf.default: New, minimum version of sensors.conf.eg
   sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
                    Move help section to sensors.conf.5
                    Add a section for the Asus/Fintek F8000
