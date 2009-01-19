@@ -22,7 +22,7 @@
 MODULE_DIR := etc
 ETC_DIR := $(MODULE_DIR)
 
-ETCTARGET := $(MODULE_DIR)/sensors.conf.eg
+ETCTARGET := $(MODULE_DIR)/sensors.conf.default
 ETCINSTALL := $(ETCDIR)/sensors3.conf
 
 
