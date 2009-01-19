@@ -58,6 +58,7 @@ SVN-HEAD
                   Add Intel Core I7 support
                   Generate new format for /etc/sysconfig/lm_sensors
                   Print warnings about missing modules on screen
+                  Fix detection of older DS1621
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)

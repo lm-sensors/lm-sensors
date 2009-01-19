@@ -3544,10 +3544,6 @@ sub ds1621_detect
 	my $conf = i2c_smbus_read_byte_data($file, 0xAC);
 	return if ($conf & 0x10);
 
-	my $counter = i2c_smbus_read_byte_data($file, 0xA8);
-	my $slope = i2c_smbus_read_byte_data($file, 0xA9);
-	return if ($slope != 0x10 || $counter > $slope);
-
 	my $temp = i2c_smbus_read_word_data($file, 0xAA);
 	return if $temp < 0 || ($temp & 0x0f00);
 	# On the DS1631, the following two checks are too strict in theory,
@@ -3560,7 +3556,11 @@ sub ds1621_detect
 
 	return if ($temp == 0 && $high == 0 && $low == 0 && $conf == 0);
 
-	return 3;
+	# Old versions of the DS1621 apparently don't have the counter and
+	# slope registers (or they return crap)
+	my $counter = i2c_smbus_read_byte_data($file, 0xA8);
+	my $slope = i2c_smbus_read_byte_data($file, 0xA9);
+	return ($slope == 0x10 && $counter <= $slope) ? 3 : 2;
 }
 
 # Registers used:
