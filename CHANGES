@@ -5,16 +5,16 @@ SVN-HEAD
   libsensors: Add support for instantaneous power sensors
               Add support for current sensors
               Fix error propagation during expression evaluation
-              Detect excessive recursion depth during expression evaluation
+              Detect excessive recursion depth during expression eval (#2365)
   lm_sensors.init.suse: Delete (actual SuSE script is much different)
-  Makefile: Install sensors.conf.default instead of sensors.conf.eg
+  Makefile: Install sensors.conf.default instead of sensors.conf.eg (#2333)
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
            Don't bail out on transient errors (#2330)
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
   sensors.conf.8: Lots of additions and reworks
-  sensors.conf.default: New, minimum version of sensors.conf.eg
+  sensors.conf.default: New, minimum version of sensors.conf.eg (#2333)
                         Add sections for the SMSC SCH311x and SCH5027
   sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
                    Move help section to sensors.conf.5
