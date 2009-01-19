@@ -14,6 +14,7 @@ SVN-HEAD
            Add support for current sensors
   sensors.conf.8: Lots of additions and reworks
   sensors.conf.default: New, minimum version of sensors.conf.eg
+                        Add sections for the SMSC SCH311x and SCH5027
   sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
                    Move help section to sensors.conf.5
                    Add a section for the Asus/Fintek F8000

@@ -292,6 +292,49 @@ chip "dme1737-*"
     set in6_max  3.0 * 1.10
 
 
+chip "sch311x-*"
+
+    label in1 "Vcore"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+    label in5 "3VSB"
+    label in6 "Vbat"
+
+    label temp2 "SIO Temp"
+
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in3_min  5.0 * 0.90
+    set in3_max  5.0 * 1.10
+    set in4_min 12.0 * 0.90
+    set in4_max 12.0 * 1.10
+    set in5_min  3.3 * 0.90
+    set in5_max  3.3 * 1.10
+    set in6_min  3.0 * 0.90
+    set in6_max  3.0 * 1.10
+
+
+chip "sch5027-*"
+
+    label in0 "5VSB"
+    label in1 "Vcore"
+    label in2 "+3.3V"
+    label in5 "3VSB"
+    label in6 "Vbat"
+
+    label temp2 "SIO Temp"
+
+    set in0_min  5.0 * 0.90
+    set in0_max  5.0 * 1.10
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in5_min  3.3 * 0.90
+    set in5_max  3.3 * 1.10
+    set in6_min  3.0 * 0.90
+    set in6_max  3.0 * 1.10
+
+
 chip "f71882fg-*"
 
     label in0 "+3.3V"
