@@ -1668,10 +1668,10 @@ chip "asb100-*"
 # Sample configuration for the Intel S845WD1-E
 # courtesy of Marcus Schopen
 #
-chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
+chip "lm85-*" "lm85b-*" "lm85c-*" "adm1027-*" "adt7463-*" "adt7468-*" "emc6d100-*" "emc6d102-*"
 
 # Voltage inputs
-# Depending on the hardware setup, the ADT7463 may not have in4.
+# Depending on the hardware setup, the ADT7463 and ADT7468 may not have in4.
    label in0   "V1.5"      # AGP on Intel S845WD1-E
    label in1   "VCore"
    label in2   "V3.3"
@@ -1724,7 +1724,7 @@ chip "lm85c-*" "adm1027-*" "adt7463-*" "lm85-*" "lm85b-*"
 #   set temp3_min 10
 #   set temp3_max 35
 
-chip "pc87366-*"
+chip "pc87365-*" "pc87366-*"
 
 # Voltage inputs
 
@@ -1866,8 +1866,10 @@ chip "lm92-*"
 chip "w83627ehf-*" "w83627dhg-*"
 
     label in0 "VCore"
+    label in1 "+12V"
     label in2 "AVCC"
     label in3 "3VCC"
+    label in6 "+5V"
     label in7 "VSB"
     label in8 "VBAT"
 
@@ -1914,7 +1916,7 @@ chip "w83627ehf-*" "w83627dhg-*"
 # This is the recommended wiring and resistor values from the F71805F/FG
 # datasheet. Your motherboard manufacturer may or may not have followed
 # these.
-chip "f71805f-*"
+chip "f71805f-*" "f71872f-*"
 # Voltages
    label in0 "+3.3V"
    label in1 "Vtt1.2V"
