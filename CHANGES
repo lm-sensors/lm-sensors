@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   File lm_sensors.lsm: Delete, don't advertise a legacy branch
   File doc/developers/release_checklist: Skip mail to lsm
+  Program sensors-detect: Fix detection of older DS1621
 
 2.10.8 (20081216)
   File doc/chips/lm90: Update datasheet links (2.6 backport)
