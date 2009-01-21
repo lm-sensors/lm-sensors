@@ -24,7 +24,6 @@ require 5.004;
 
 use strict;
 use Fcntl;
-use POSIX;
 use File::Basename;
 
 # We will call modprobe, which typically lives in either /sbin,
