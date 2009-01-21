@@ -5900,9 +5900,8 @@ sub main
   if (! @chips_detected) {
     print "Sorry, no sensors were detected.\n",
           "Either your sensors are not supported, or they are connected to an\n",
-          "I2C or SMBus adapter that is not supported. See doc/FAQ,\n",
-          "doc/lm_sensors-FAQ.html or http://www.lm-sensors.org/wiki/FAQ\n",
-          "(FAQ #4.24.3) for further information.\n",
+          "I2C or SMBus adapter that is not supported. See doc/FAQ or\n",
+          "doc/lm_sensors-FAQ.html (FAQ #4.24.3) for further information.\n",
           "If you find out what chips are on your board, check\n",
           "http://www.lm-sensors.org/wiki/Devices for driver status.\n";
     exit;
