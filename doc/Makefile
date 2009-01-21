@@ -8,7 +8,7 @@
 all::  lm_sensors-FAQ.html FAQ
 
 %.html: %.texi version.texi
-	makeinfo --html --no-split --number-sections $<
+	LANG=C makeinfo --html --no-split --number-sections $<
 
 FAQ: lm_sensors-FAQ.texi
-	makeinfo --no-headers --number-sections -o FAQ $<
+	LANG=C makeinfo --no-headers --number-sections -o FAQ $<
