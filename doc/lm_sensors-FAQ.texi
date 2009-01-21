@@ -1329,9 +1329,6 @@ Here's what you should send us:
 @item The output of (as root) @command{prog/detect/i2cdetect X}
 where X = the bus number (run @command{i2cdetect} with no arguments to list the busses)
 (please send this only if it's not all @samp{XX})
-@item The output of (as root) @command{prog/dump/i2cdump X 0xXX}
-where XX = the address of each chip you see in the output of @command{i2cdetect}. (run once for each chip)
-(please send this only if it's not all @samp{ff})
 @end itemize
 @item If an ISA sensor chip problem:
 @itemize

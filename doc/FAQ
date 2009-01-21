@@ -1139,7 +1139,7 @@ are running the `sensors' program it installed and not some older
 For chips on the ISA bus, did you insert i2c-isa?
 
    *Note What to do if a module wont insert: Section 5.2, if the
-modules didn't insert, also *Note Sensors says No sensors found:
+modules didn't insert, also *note Sensors says No sensors found:
 Section 4.21.
 
 4.29 Inserting modules hangs my board
@@ -1150,7 +1150,7 @@ There are several possible causes:
      inserted any chip drivers, to verify.
 
   2. Wrong chip driver. Verify that you have a chip supported by the
-     chip driver, see *Note What chips are on motherboard XYZ: Section
+     chip driver, see *note What chips are on motherboard XYZ: Section
      3.2.1.
 
   3. The chip driver is reinitializing the chip, which undoes critical
@@ -1202,7 +1202,7 @@ See support tickets 941, 840, and 841 for information.
 4.31.4 Tyan 2688
 ----------------
 
-For board hangs, see support ticket 721 for information.  Also *Note
+For board hangs, see support ticket 721 for information.  Also *note
 Inserting modules hangs my board: Section 4.29.
 
 4.32 Problems on particular systems
@@ -1278,11 +1278,6 @@ will be emailed automatically when your question has been answered.
         * The output of (as root) `prog/detect/i2cdetect X' where X =
           the bus number (run `i2cdetect' with no arguments to list the
           busses) (please send this only if it's not all `XX')
-
-        * The output of (as root) `prog/dump/i2cdump X 0xXX' where XX =
-          the address of each chip you see in the output of
-          `i2cdetect'. (run once for each chip) (please send this only
-          if it's not all `ff')
 
    * If an ISA sensor chip problem:
         * The output of (as root) `prog/dump/isadump 0x295 0x296' (only
