@@ -20,7 +20,7 @@ SVN-HEAD
                    Move help section to sensors.conf.5
                    Add a section for the Asus/Fintek F8000
   sensors-detect: Fix detection of ADT7463 and LM96000
-                  Add VIA VX800/VX820 support 
+                  Add VIA VX800/VX820 SMBus support 
                   Fix detection of Intel 5000 series FB-DIMM AMB
                   Fix detection of ADT7462
                   Fix detection of SMSC LPC47M292
@@ -59,6 +59,7 @@ SVN-HEAD
                   Generate new format for /etc/sysconfig/lm_sensors
                   Print warnings about missing modules on screen
                   Fix detection of older DS1621
+                  Add nNidia nForce MCP67, MCP73, MCP79 SMBus support
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
 
 3.0.3 (2008-09-28)

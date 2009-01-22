@@ -310,22 +310,37 @@ $revision =~ s/ \([^()]*\)//;
 	}, {
 		vendid	=> 0x10de,
 		devid	=> 0x0264,
-		procid	=> "nVidia Corporation nForce4 SMBus (MCP51)",
+		procid	=> "nVidia Corporation nForce SMBus (MCP51)",
 		driver	=> "i2c-nforce2",
 	}, {
 		vendid	=> 0x10de,
 		devid	=> 0x0368,
-		procid	=> "nVidia Corporation nForce4 SMBus (MCP55)",
+		procid	=> "nVidia Corporation nForce SMBus (MCP55)",
 		driver	=> "i2c-nforce2",
 	}, {
 		vendid	=> 0x10de,
 		devid	=> 0x03eb,
-		procid	=> "nVidia Corporation nForce4 SMBus (MCP61)",
+		procid	=> "nVidia Corporation nForce SMBus (MCP61)",
 		driver	=> "i2c-nforce2",
 	}, {
 		vendid	=> 0x10de,
 		devid	=> 0x0446,
-		procid	=> "nVidia Corporation nForce4 SMBus (MCP65)",
+		procid	=> "nVidia Corporation nForce SMBus (MCP65)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0542,
+		procid	=> "nVidia Corporation nForce SMBus (MCP67)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x07d8,
+		procid	=> "nVidia Corporation nForce SMBus (MCP73)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
+		devid	=> 0x0aa2,
+		procid	=> "nVidia Corporation nForce SMBus (MCP79)",
 		driver	=> "i2c-nforce2",
 	}, {
 		vendid	=> 0x1166,
