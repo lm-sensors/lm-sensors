@@ -62,6 +62,7 @@ SVN-HEAD
                   Fix detection of older DS1621
                   Add nNidia nForce MCP67, MCP73, MCP79 SMBus support
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
+  sysconfig-lm_sensors-convert: Sample config file conversion script (#2246)
 
 3.0.3 (2008-09-28)
   libsensors: Avoid namespace pollution
