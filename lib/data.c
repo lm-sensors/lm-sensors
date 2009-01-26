@@ -1,6 +1,7 @@
 /*
     data.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,19 +15,23 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
+
+/* this define needed for strndup() */
+#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <string.h>
 
+#include "access.h"
 #include "error.h"
 #include "data.h"
 #include "sensors.h"
 #include "../version.h"
 
 const char *libsensors_version = LM_VERSION;
-const char *libsensors_date = LM_DATE;
 
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
@@ -36,7 +41,7 @@ sensors_bus *sensors_config_busses = NULL;
 int sensors_config_busses_count = 0;
 int sensors_config_busses_max = 0;
 
-sensors_proc_chips_entry *sensors_proc_chips = NULL;
+sensors_chip_features *sensors_proc_chips = NULL;
 int sensors_proc_chips_count = 0;
 int sensors_proc_chips_max = 0;
 
@@ -44,10 +49,8 @@ sensors_bus *sensors_proc_bus = NULL;
 int sensors_proc_bus_count = 0;
 int sensors_proc_bus_max = 0;
 
-static int sensors_substitute_chip(sensors_chip_name *name,int lineno);
-
-/* Wow, this must be one of the ugliest functions I have ever written.
-   The idea is that it parses a chip name. These are valid names:
+/*
+   Parse a chip name to the internal representation. These are valid names:
 
      lm78-i2c-10-5e		*-i2c-10-5e
      lm78-i2c-10-*		*-i2c-10-*
@@ -56,225 +59,192 @@ static int sensors_substitute_chip(sensors_chip_name *name,int lineno);
      lm78-isa-10dd		*-isa-10dd
      lm78-isa-*			*-isa-*
      lm78-*			*-*
-     				*
-   Here 'lm78' can be any prefix. To complicate matters, such a prefix
-   can also contain dashes (like lm78-j, for example!). 'i2c' and 'isa' are
+
+   Here 'lm78' can be any prefix. 'i2c' and 'isa' are
    literal strings, just like all dashes '-' and wildcards '*'. '10' can
    be any decimal i2c bus number. '5e' can be any hexadecimal i2c device
    address, and '10dd' any hexadecimal isa address.
 
-   If '*' is used in prefixes, together with dashes, ambiguous parses are
-   introduced. In that case, the prefix is kept as small as possible.
-
    The 'prefix' part in the result is freshly allocated. All old contents
    of res is overwritten. res itself is not allocated. In case of an error
    return (ie. != 0), res is undefined, but all allocations are undone.
-
-   Don't tell me there are bugs in here, because I'll start screaming :-)
 */
 
-int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res)
+int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 {
-  char *part2, *part3, *part4;
-  char *name = strdup(orig_name);
-  int i;
+	char *dash;
 
-  /* Play it safe */
-  res->busname = NULL;
+	/* First, the prefix. It's either "*" or a real chip name. */
+	if (!strncmp(name, "*-", 2)) {
+		res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
+		name += 2;
+	} else {
+		if (!(dash = strchr(name, '-')))
+			return -SENSORS_ERR_CHIP_NAME;
+		res->prefix = strndup(name, dash - name);
+		if (!res->prefix)
+			sensors_fatal_error("sensors_parse_chip_name",
+					    "Allocating name prefix");
+		name = dash + 1;
+	}
 
-  if (! name)
-    sensors_fatal_error("sensors_parse_chip_name","Allocating new name");
-  /* First split name in upto four pieces. */
-  if ((part4 = strrchr(name,'-')))
-    *part4++ = '\0';
-  if ((part3 = strrchr(name,'-')))
-    *part3++ = '\0';
-  if ((part2 = strrchr(name,'-')))
-    *part2++ = '\0';
+	/* Then we have either a sole "*" (all chips with this name) or a bus
+	   type and an address. */
+	if (!strcmp(name, "*")) {
+		res->bus.type = SENSORS_BUS_TYPE_ANY;
+		res->bus.nr = SENSORS_BUS_NR_ANY;
+		res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
+		return 0;
+	}
 
-  /* No dashes found? */
-  if (! part4) {
-    if (!strcmp(name,"*")) {
-      res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-      res->bus = SENSORS_CHIP_NAME_BUS_ANY;
-      res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
-      goto SUCCES;
-    } else
-      goto ERROR;
-  }
+	if (!(dash = strchr(name, '-')))
+		goto ERROR;
+	if (!strncmp(name, "i2c", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_I2C;
+	else if (!strncmp(name, "isa", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_ISA;
+	else if (!strncmp(name, "pci", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_PCI;
+	else if (!strncmp(name, "spi", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_SPI;
+	else if (!strncmp(name, "virtual", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_VIRTUAL;
+	else if (!strncmp(name, "acpi", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_ACPI;
+	else
+		goto ERROR;
+	name = dash + 1;
 
-  /* At least one dash found. Now part4 is either '*', or an address */
-  if (!strcmp(part4,"*"))
-    res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
-  else {
-    if ((strlen(part4) > 4) || (strlen(part4) == 0))
-      goto ERROR;
-    res->addr = 0;
-    for (i = 0; ; i++) {
-      switch (part4[i]) {
-      case '0': case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7': case '8': case '9':
-        res->addr = res->addr * 16 + part4[i] - '0';
-        break;
-      case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-        res->addr = res->addr * 16 + part4[i] - 'a' + 10;
-        break;
-      case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-        res->addr = res->addr * 16 + part4[i] - 'A' + 10;
-        break;
-      case 0:
-        goto DONE;
-      default:
-        goto ERROR;
-      }
-    }
-DONE:;
-  }
+	/* Some bus types (i2c, spi) have an additional bus number.
+	   For these, the next part is either a "*" (any bus of that type)
+	   or a decimal number. */
+	switch (res->bus.type) {
+	case SENSORS_BUS_TYPE_I2C:
+	case SENSORS_BUS_TYPE_SPI:
+		if (!strncmp(name, "*-", 2)) {
+			res->bus.nr = SENSORS_BUS_NR_ANY;
+			name += 2;
+			break;
+		}
 
-  /* OK. So let's look at part3. It must either be the number of the
-     i2c bus (and then part2 *must* be "i2c"), or it must be "isa",
-     or, if part4 was "*", it belongs to 'prefix'. Or no second dash
-     was found at all, of course. */
-  if (! part3) {
-    if (res->addr == SENSORS_CHIP_NAME_ADDR_ANY) {
-      res->bus = SENSORS_CHIP_NAME_BUS_ANY;
-    } else
-      goto ERROR;
-  } else if (!strcmp(part3,"isa")) {
-    res->bus = SENSORS_CHIP_NAME_BUS_ISA;
-    if (part2)
-      *(part2-1) = '-';
-  } else if (!strcmp(part3,"pci")) {
-    res->bus = SENSORS_CHIP_NAME_BUS_PCI;
-    if (part2)
-      *(part2-1) = '-';
-  } else if (part2 && !strcmp(part2,"i2c") && !strcmp(part3,"*"))
-    res->bus = SENSORS_CHIP_NAME_BUS_ANY_I2C;
-  else if (part2 && !strcmp(part2,"i2c")) {
-    if ((strlen(part3) > 3) || (strlen(part3) == 0))
-      goto ERROR;
-    res->bus = 0;
-    for (i = 0; ; i++) {
-      switch (part3[i]) {
-      case '0': case '1': case '2': case '3': case '4':
-      case '5': case '6': case '7': case '8': case '9':
-        res->bus = res->bus * 10 + part3[i] - '0';
-        break;
-      case 0:
-        goto DONE2;
-      default:
-        goto ERROR;
-      }
-    }
-DONE2:;
-  } else if (res->addr == SENSORS_CHIP_NAME_ADDR_ANY) {
-    res->bus = SENSORS_CHIP_NAME_BUS_ANY;
-    if (part2)
-      *(part2-1) = '-';
-    *(part3-1) = '-';
-  } else if(part3 && part4) {
-    res->bus = SENSORS_CHIP_NAME_BUS_DUMMY;
-    if (! (res->busname = strdup(part3)))
-      sensors_fatal_error("sensors_parse_chip_name","Allocating new busname");
-  } else
-    goto ERROR;
+		res->bus.nr = strtoul(name, &dash, 10);
+		if (*name == '\0' || *dash != '-' || res->bus.nr < 0)
+			goto ERROR;
+		name = dash + 1;
+		break;
+	default:
+		res->bus.nr = SENSORS_BUS_NR_ANY;
+	}
 
-  if (!strcmp(name,"*"))
-    res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-  else if (! (res->prefix = strdup(name)))
-    sensors_fatal_error("sensors_parse_chip_name", "Allocating name prefix");
-  goto SUCCES;
+	/* Last part is the chip address, or "*" for any address. */
+	if (!strcmp(name, "*")) {
+		res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
+	} else {
+		res->addr = strtoul(name, &dash, 16);
+		if (*name == '\0' || *dash != '\0' || res->addr < 0)
+			goto ERROR;
+	}
 
-SUCCES:
-  free(name);
-  return 0;
+	return 0;
 
 ERROR:
-  free(name);
-  return -SENSORS_ERR_CHIP_NAME;
+	free(res->prefix);
+	return -SENSORS_ERR_CHIP_NAME;
 }
 
-int sensors_parse_i2cbus_name(const char *name, int *res)
+int sensors_snprintf_chip_name(char *str, size_t size,
+			       const sensors_chip_name *chip)
 {
-  int i;
+	if (sensors_chip_name_has_wildcards(chip))
+		return -SENSORS_ERR_WILDCARDS;
 
-  if (! strcmp(name,"isa")) {
-    *res = SENSORS_CHIP_NAME_BUS_ISA;
-    return 0;
-  }
-  if (strncmp(name,"i2c-",4)) {
-    *res = SENSORS_CHIP_NAME_BUS_DUMMY;
-    return 0;
-  }
-  name += 4;
-  if ((strlen(name) > 3) || (strlen(name) == 0))
-    return -SENSORS_ERR_BUS_NAME;
-  *res = 0;
-  for (i = 0; ; i++) {
-    switch (name[i]) {
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      *res = *res * 10 + name[i] - '0';
-      break;
-    case 0:
-      return 0;
-    default:
-      return -SENSORS_ERR_BUS_NAME;
-    }
-  }
+	switch (chip->bus.type) {
+	case SENSORS_BUS_TYPE_ISA:
+		return snprintf(str, size, "%s-isa-%04x", chip->prefix,
+				chip->addr);
+	case SENSORS_BUS_TYPE_PCI:
+		return snprintf(str, size, "%s-pci-%04x", chip->prefix,
+				chip->addr);
+	case SENSORS_BUS_TYPE_I2C:
+		return snprintf(str, size, "%s-i2c-%hd-%02x", chip->prefix,
+				chip->bus.nr, chip->addr);
+	case SENSORS_BUS_TYPE_SPI:
+		return snprintf(str, size, "%s-spi-%hd-%x", chip->prefix,
+				chip->bus.nr, chip->addr);
+	case SENSORS_BUS_TYPE_VIRTUAL:
+		return snprintf(str, size, "%s-virtual-%x", chip->prefix,
+				chip->addr);
+	case SENSORS_BUS_TYPE_ACPI:
+		return snprintf(str, size, "%s-acpi-%x", chip->prefix,
+				chip->addr);
+	}
+
+	return -SENSORS_ERR_CHIP_NAME;
 }
 
-
-#define SENSORS_CHIP_NAME_BUS_IGNORE -42
-
-int sensors_substitute_chip(sensors_chip_name *name,int lineno)
+int sensors_parse_bus_id(const char *name, sensors_bus_id *bus)
 {
-  int i,j;
-  for (i = 0; i < sensors_config_busses_count; i++)
-    if (sensors_config_busses[i].number == name->bus)
-      break;
+	char *endptr;
 
-  if (i == sensors_config_busses_count) {
-    sensors_parse_error("Undeclared i2c bus referenced",lineno);
-    name->bus = SENSORS_CHIP_NAME_BUS_IGNORE;
-    return -SENSORS_ERR_BUS_NAME;
-  }
-
-  /* We used to compare both the adapter and the algorithm names for
-     bus matching, but Linux 2.6 has no more names for algorithms, and
-     it was redundant anyway. So we now only rely on the adapter name. */
-  for (j = 0; j < sensors_proc_bus_count; j++) {
-    if (!strcmp(sensors_config_busses[i].adapter,
-                sensors_proc_bus[j].adapter)) {
-      name->bus = sensors_proc_bus[j].number;
-      return 0;
-    }
-  }
-
-  /* We did not find a matching bus name, simply ignore this chip
-     config entry. */
-  name->bus = SENSORS_CHIP_NAME_BUS_IGNORE;
-  return 0;
+	if (strncmp(name, "i2c-", 4)) {
+		return -SENSORS_ERR_BUS_NAME;
+	}
+	name += 4;
+	bus->type = SENSORS_BUS_TYPE_I2C;
+	bus->nr = strtoul(name, &endptr, 10);
+	if (*name == '\0' || *endptr != '\0' || bus->nr < 0)
+		return -SENSORS_ERR_BUS_NAME;
+	return 0;
 }
 
+static int sensors_substitute_chip(sensors_chip_name *name, int lineno)
+{
+	int i, j;
+	for (i = 0; i < sensors_config_busses_count; i++)
+		if (sensors_config_busses[i].bus.type == name->bus.type &&
+		    sensors_config_busses[i].bus.nr == name->bus.nr)
+			break;
+
+	if (i == sensors_config_busses_count) {
+		sensors_parse_error("Undeclared bus id referenced", lineno);
+		name->bus.nr = SENSORS_BUS_NR_IGNORE;
+		return -SENSORS_ERR_BUS_NAME;
+	}
+
+	/* Compare the adapter names */
+	for (j = 0; j < sensors_proc_bus_count; j++) {
+		if (!strcmp(sensors_config_busses[i].adapter,
+			    sensors_proc_bus[j].adapter)) {
+			name->bus.nr = sensors_proc_bus[j].bus.nr;
+			return 0;
+		}
+	}
+
+	/* We did not find a matching bus name, simply ignore this chip
+	   config entry. */
+	name->bus.nr = SENSORS_BUS_NR_IGNORE;
+	return 0;
+}
 
 int sensors_substitute_busses(void)
 {
-  int err,i,j,lineno;
-  sensors_chip_name_list *chips;
-  int res=0;
+	int err, i, j, lineno;
+	sensors_chip_name_list *chips;
+	int res = 0;
 
-  for(i = 0; i < sensors_config_chips_count; i++) {
-    lineno = sensors_config_chips[i].lineno;
-    chips = &sensors_config_chips[i].chips;
-    for(j = 0; j < chips->fits_count; j++)
-      if ((chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ISA) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_PCI) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_DUMMY) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-          (chips->fits[j].bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
-        if ((err = sensors_substitute_chip(chips->fits+j, lineno)))
-          res = err;
-  }
-  return res;
+	for (i = 0; i < sensors_config_chips_count; i++) {
+		lineno = sensors_config_chips[i].lineno;
+		chips = &sensors_config_chips[i].chips;
+		for (j = 0; j < chips->fits_count; j++) {
+			/* We can only substitute if a specific bus number
+			   is given. */
+			if (chips->fits[j].bus.nr == SENSORS_BUS_NR_ANY)
+				continue;
+
+			err = sensors_substitute_chip(&chips->fits[j], lineno);
+			if (err)
+				res = err;
+		}
+	}
+	return res;
 }

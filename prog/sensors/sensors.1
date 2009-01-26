@@ -1,4 +1,5 @@
 .\" Copyright 1999 Frodo Looijaard <frodol@dds.nl>
+.\" Copyright (C) 2007 Jean Delvare <khali@linux-fr.org>
 .\" sensors is distributed under the GPL
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
@@ -21,7 +22,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensors 1  "October 2006" "" "Linux User's Manual"
+.TH sensors 1  "October 2007" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors \- print sensors information
 .SH SYNOPSIS
@@ -34,6 +35,8 @@ sensors \- print sensors information
 .B sensors -s [
 .I chips
 .B ]
+.br
+.B sensors --bus-list
 
 .SH DESCRIPTION
 .B sensors
@@ -41,18 +44,15 @@ is used to show the current readings of all sensor chips.
 .br
 .B sensors -s
 is used to set all limits as specified in the configuration file.
-
-.B sensors
-knows about certain chips, and outputs nicely formatted readings for them; but
-it can also display the information of unknown chips, as long as 
-.I libsensors
-knows about them.
+.br
+.B sensors --bus-list
+is used to generate bus statements suitable for the configuration file.
 
 .SH OPTIONS
 .IP "-c config-file"
-Specify a configuration file. If no file is specified, `/etc/sensors.conf'
-is used. Use `-c /dev/null' to temporarily disable this default configuration
-file.
+Specify a configuration file. If no file is specified, the libsensors
+default configuration file is used. Use `-c /dev/null' to temporarily
+disable this default configuration file.
 .IP -h
 Print a help text and exit.
 .IP -s
@@ -61,24 +61,28 @@ be `root' to do this. If this parameter is not specified, no `set' statement
 is evaluated.
 .IP -A
 Do not show the adapter for each chip.
-.IP -U
-Hide unknown chips.
 .IP -u
-Treat all chips as unknown ones. Output will be of much lower quality;
-this option is only added for testing purposes.
+Raw output. This mode is only meant for debugging.
 .IP -v
 Print the program version and exit.
 .IP -f
 Print the temperatures in degrees Fahrenheit instead of Celsius.
+.IP --bus-list
+Generate bus statements suitable for using in sensors.conf. Such bus statements
+are only needed if you have several chips sharing the same address on different
+buses of the same type. As bus numbers are usually not guaranteed to be stable
+over reboots, these statements let you refer to each bus by its name rather
+than numbers.
 .SH FILES
+.I /etc/sensors3.conf
+.br
 .I /etc/sensors.conf
 .RS
 The system wide configuration file. See
 .BR sensors.conf (5)
 for further details.
 .RE
-.SH "CONFORMING TO"
-lm_sensors-2.x
+
 .SH SEE ALSO
 sensors.conf(5)
 

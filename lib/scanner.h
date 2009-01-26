@@ -14,14 +14,15 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #ifndef LIB_SENSORS_SCANNER_H
 #define LIB_SENSORS_SCANNER_H
 
-extern int sensors_scanner_init(FILE *input);
-extern void sensors_scanner_exit(void);
+int sensors_scanner_init(FILE *input);
+void sensors_scanner_exit(void);
 
 #endif
 

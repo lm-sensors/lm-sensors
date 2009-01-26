@@ -47,7 +47,7 @@ How to change fan divisors
 --------------------------
 
 Put an entry "set fanN_div X" in the appropriate section of
-/etc/sensors.conf and run 'sensors -s'
+/etc/sensors3.conf and run 'sensors -s'
 (N is the number of the fan, and X is the divisor you want).
 
 
@@ -87,7 +87,7 @@ outputs 4 pulses by revolution, instead of the standard 2.
 
 As we learned above, you can _not_ fix this by changing
 the fan divisor. You must add entries into the appropriate
-section of /etc/sensors.conf:
+section of /etc/sensors3.conf:
 
 	compute fanN  @/2,  2*@
 

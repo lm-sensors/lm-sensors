@@ -204,6 +204,9 @@ pc87360
 	pc87365		2	11	3	3 pwm	no	yes (LPC)
 	pc87366		3-4	11	3	3 pwm	no	yes (LPC)
 
+pcf8591
+	pcf8591		-	2-4	-	1 dac	yes	no
+
 sis5595
 	sis5595		0-1	4-5	2	-	no	yes
 
@@ -244,9 +247,6 @@ w83627hf
 	w83687thf	3	7	3	3 pw/da	no	yes (LPC)
 	w83697hf	2	8	2	2 pwm	no	yes (LPC)
 
-w83627ehf
-	w83627ehf	3	10	3-5	4 pwm	no	yes (LPC)
-
 w83781d
 	as99127f	3	7	3	-	yes	no
 	w83781d		3	7	3	-	yes	yes
@@ -265,51 +265,6 @@ xeontemp
 	xeontemp	1	-	-	-	yes	no
 
 
-
-SUPPORTED NON-SENSOR CHIPS
---------------------------
-
-Driver  Chips
-------  -----
-
-bmcsensors
-	An interface to an IPMI BMC (Baseboard management controller)
-
-bt869
-	bt869 video modulator chip
-
-ddcmon
-	DDC-compliant monitor integrated eeproms - reads locations only
-
-ds1307
-	real-time clock
-
-eeprom
-	Memory SPD (serial presence detect) eeproms - reads locations only
-	Xeon scratch eeproms - reads locations only
-
-ltc1710
-	ltc1710	two switches only
-
-matorb
-	Matrix Orbital LCD displays
-
-pca9540
-	2-channel I2C multiplexer
-
-pcf8574 & pcf8574a
-	Simple eight-bit parallel I/O
-
-pcf8591
-	Quad A/D + one D/A
-
-saa1064
-	4-digit LED-driver
-
-smbus-arp
-	An SMBus 2.0 ARP client
-
-
 -----------------------------------------------------------------------------
 
 COMPANY ID LIST
@@ -320,25 +275,22 @@ Many SMBus chips have a company ID at location 0x3E or 0xFE.
 Here is a partial list.
 This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 
-0x00	National (on LM84)
 0x01	National
 0x12C3	Asus (at 0x4F)
 0x1934	Fintek (at 0x5D-0x5E)
-0x23	Analog Devices
-0x41	Analog Devices (also at 0x16)
+0x23	Analog Devices (old products) or Fintek
+0x41	Analog Devices (new products)
 0x49	TI
 0x4D	Maxim
 0x54	On Semi
-0x54	Microchip (at 0x7)
 0x5C	SMSC
 0x5D 	SMSC
 0x55	SMSC
 0x5CA3	Winbond (at 0x4F)
 0x61	Andigilog
 0x90	ITE (at 0x58)
-0xA1	Philips (at 0x05 too)
+0xA1	Philips
 0xA3	Winbond (at 0x4F)
-0xAC	Myson (at 0x58)
 0xC3	Asus (at 0x4F)
 0xDA	Dallas
 

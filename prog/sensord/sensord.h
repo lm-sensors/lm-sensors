@@ -17,7 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA.
  */
 
 #include "lib/sensors.h"
@@ -49,16 +50,11 @@ extern int parseChips (int argc, char **argv);
 
 /* from lib.c */
 
-extern int initLib (void);
-extern int loadLib (void);
-extern int reloadLib (void);
+extern int loadLib (const char *cfgPath);
+extern int reloadLib (const char *cfgPath);
 extern int unloadLib (void);
 
 /* from sense.c */
-
-extern int getValid (sensors_chip_name name, int feature, int *valid);
-extern int getLabel (sensors_chip_name name, int feature, char **label);
-extern int getRawLabel (sensors_chip_name name, int feature, const char **label);
 
 extern int readChips (void);
 extern int scanChips (void);
@@ -84,7 +80,6 @@ typedef enum {
   DataType_voltage = 0,
   DataType_rpm,
   DataType_temperature,
-  DataType_mhz,
   DataType_other = -1
 } DataType;
 
@@ -92,16 +87,17 @@ typedef struct {
   FormatterFN format;
   RRDFN rrd;
   DataType type;
-  int alarmMask;
-  int beepMask;
-  const int dataNumbers[MAX_DATA + 1]; /* First entry is used for the label */
+  int alarmNumber;
+  int beepNumber;
+  const sensors_feature *feature;
+  int dataNumbers[MAX_DATA + 1];
 } FeatureDescriptor;
 
 typedef struct {
-  const char * const *names;
-  const FeatureDescriptor *features;
-  int alarmNumber;
-  int beepNumber;
+  const sensors_chip_name *name;
+  FeatureDescriptor *features;
 } ChipDescriptor;
 
-extern const ChipDescriptor * const knownChips[];
+extern ChipDescriptor * knownChips;
+extern int initKnownChips (void);
+extern void freeKnownChips (void);

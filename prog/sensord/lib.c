@@ -17,7 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA.
  */
 
 #include <stdio.h>
@@ -31,78 +32,36 @@
 #include "sensord.h"
 #include "lib/error.h"
 
-static const char *sensorsCfgPaths[] = {
-  "/etc", "/usr/local/etc", "/usr/lib/sensors", "/usr/local/lib/sensors", "/usr/lib", "/usr/local/lib", NULL
-};
-
-#define CFG_PATH_LEN 4096
-
-static char cfgPath[CFG_PATH_LEN + 1];
-
-static time_t cfgLastModified;
-
-int
-initLib
-(void) {
-  cfgPath[CFG_PATH_LEN] = '\0';
-  if (!strcmp (sensorsCfgFile, "-")) {
-    strncpy (cfgPath, sensorsCfgFile, CFG_PATH_LEN);
-  } else if (sensorsCfgFile[0] == '/') {
-    strncpy (cfgPath, sensorsCfgFile, CFG_PATH_LEN);
-  } else if (strchr (sensorsCfgFile, '/')) {
-    char *cwd = getcwd (NULL, 0);
-    snprintf (cfgPath, CFG_PATH_LEN, "%s/%s", cwd, sensorsCfgFile);
-    free (cwd);
-  } else {
-    int index0;
-    struct stat stats;
-    for (index0 = 0; sensorsCfgPaths[index0]; ++ index0) {
-      snprintf (cfgPath, CFG_PATH_LEN, "%s/%s", sensorsCfgPaths[index0], sensorsCfgFile);
-      if (stat (cfgPath, &stats) == 0)
-        break;
-    }
-    if (!sensorsCfgPaths[index0]) {
-      sensorLog (LOG_ERR, "Error locating sensors configuration file: %s", sensorsCfgFile);
-      return 9;
-    }
-  }
-  return 0;
-}
-
 static int
 loadConfig
-(int reload) {
+(const char *cfgPath, int reload) {
   struct stat stats;
   FILE *cfg = NULL;
   int ret = 0;
 
-  if (!strcmp (cfgPath, "-")) {
+  if (cfgPath && !strcmp (cfgPath, "-")) {
     if (!reload) {
       if ((ret = sensors_init (stdin))) {
-        if (ret == -SENSORS_ERR_PROC)
-          sensorLog (LOG_ERR, "Error reading /proc or /sys; modules probably not loaded");
-        else
-          sensorLog (LOG_ERR, "Error %d loading sensors configuration file: <stdin>", ret);
+        sensorLog (LOG_ERR, "Error loading sensors configuration file <stdin>: %s",
+                   sensors_strerror (ret));
         ret = 12;
       }
     }
-  } else if (stat (cfgPath, &stats) < 0) {
+  } else if (cfgPath && stat (cfgPath, &stats) < 0) {
     sensorLog (LOG_ERR, "Error stating sensors configuration file: %s", cfgPath);
     ret = 10;
-  } else if (!reload || (difftime (stats.st_mtime, cfgLastModified) > 0.0)) {
-    if (reload)
+  } else {
+    if (reload) {
       sensorLog (LOG_INFO, "configuration reloading");
-    if (!(cfg = fopen (cfgPath, "r"))) {
+      sensors_cleanup ();
+    }
+    if (cfgPath && !(cfg = fopen (cfgPath, "r"))) {
       sensorLog (LOG_ERR, "Error opening sensors configuration file: %s", cfgPath);
       ret = 11;
     } else if ((ret = sensors_init (cfg))) {
-      if (ret == -SENSORS_ERR_PROC)
-        sensorLog (LOG_ERR, "Error reading /proc or /sys; modules probably not loaded");
-      else
-        sensorLog (LOG_ERR, "Error %d loading sensors configuration file: %s", ret, cfgPath);
+      sensorLog (LOG_ERR, "Error loading sensors configuration file %s: %s",
+                 cfgPath ? cfgPath : "(default)", sensors_strerror (ret));
       ret = 11;
-    } else {
-      cfgLastModified = stats.st_mtime;
     }
     if (cfg)
       fclose (cfg);
@@ -113,19 +72,29 @@ loadConfig
 
 int
 loadLib
-(void) {
-  return loadConfig (0);
+(const char *cfgPath) {
+  int ret;
+  ret = loadConfig (cfgPath, 0);
+  if (!ret)
+    ret = initKnownChips ();
+  return ret;
 }
 
 int
 reloadLib
-(void) {
-  return loadConfig (1);
+(const char *cfgPath) {
+  int ret;
+  freeKnownChips ();
+  ret = loadConfig (cfgPath, 1);
+  if (!ret)
+    ret = initKnownChips ();
+  return ret;
 }
 
 int
 unloadLib
 (void) {
+  freeKnownChips ();
   sensors_cleanup ();
   return 0;  
 }

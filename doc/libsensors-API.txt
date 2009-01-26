@@ -1,0 +1,41 @@
+libsensors API history
+======================
+
+SENSORS_API_VERSION tracks the evolutions made to the libsensors API
+over time. This document summarizes these evolutions so that application
+authors can quickly figure out how to test for the availability of a
+given new feature.
+
+0x402	lm-sensors SVN
+* Added bus type "acpi":
+  #define SENSORS_BUS_TYPE_ACPI
+* Added support for instantaneous power sensors
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_INPUT_LOWEST
+* Added support for current sensors
+  enum sensors_feature_type SENSORS_FEATURE_CURR
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_INPUT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MIN
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MAX
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MIN_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_MAX_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_BEEP
+* Added error value for excessive recursion depth
+  #define SENSORS_ERR_RECURSION 11
+
+0x401	lm-sensors 3.0.2 to 3.0.3
+* Added bus type "virtual":
+  #define SENSORS_BUS_TYPE_VIRTUAL
+* Added support for power and energy sensors
+  enum sensors_feature_type SENSORS_FEATURE_POWER
+  enum sensors_feature_type SENSORS_FEATURE_ENERGY
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_AVERAGE
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_ENERGY_INPUT
+
+0x400	lm-sensors 3.0.0 to 3.0.1
+* Initial API.

@@ -13,7 +13,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301 USA.
 
 MODULE_DIR := prog/pwm
 PROGPWMDIR := $(MODULE_DIR)
@@ -22,8 +23,14 @@ PROGPWMMAN8DIR := $(MANDIR)/man8
 PROGPWMMAN8FILES := $(MODULE_DIR)/fancontrol.8 $(MODULE_DIR)/pwmconfig.8
 
 PROGPWMTARGETS := $(MODULE_DIR)/fancontrol \
-                  $(MODULE_DIR)/fancontrol.pl \
                   $(MODULE_DIR)/pwmconfig
+
+# The vt1211_pwm script is not installed by default, pass VT1211_PWM=1
+# to get it 
+ifeq ($(VT1211_PWM),1)
+PROGPWMMAN8FILES += $(MODULE_DIR)/vt1211_pwm.8
+PROGPWMTARGETS += $(MODULE_DIR)/vt1211_pwm
+endif
 
 REMOVEPWMBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGPWMTARGETS))
 REMOVEPWMMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGPWMMAN8DIR)/%,$(PROGPWMMAN8FILES))

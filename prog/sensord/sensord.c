@@ -17,7 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA.
  */
 
 #include <stdio.h>
@@ -37,6 +38,7 @@
 static int logOpened = 0;
 
 static volatile sig_atomic_t done = 0;
+static volatile sig_atomic_t reload = 0;
 
 #define LOG_BUFFER 4096
 
@@ -69,6 +71,9 @@ signalHandler
     case SIGTERM:
       done = 1;
       break;
+    case SIGHUP:
+      reload = 1;
+      break;
   }
 }
 
@@ -86,9 +91,12 @@ sensord
   sensorLog (LOG_INFO, "sensord started");
 
   while (!done) {
-    ret = reloadLib ();
-    if (ret)
-      sensorLog (LOG_NOTICE, "config reload error (%d)", ret);
+    if (reload) {
+      ret = reloadLib (sensorsCfgFile);
+      if (ret)
+        sensorLog (LOG_NOTICE, "config reload error (%d)", ret);
+      reload = 0;
+    }
     if (scanTime && (scanValue <= 0)) {
       if ((ret = scanChips ()))
         sensorLog (LOG_NOTICE, "sensor scan error (%d)", ret);
@@ -156,8 +164,9 @@ daemonize
   }
   
   /* I should use sigaction but... */
-  if (signal (SIGTERM, signalHandler) == SIG_ERR) {
-    perror ("signal(SIGTERM)");
+  if (signal (SIGTERM, signalHandler) == SIG_ERR ||
+      signal (SIGHUP, signalHandler) == SIG_ERR) {
+    perror ("signal");
     exit (EXIT_FAILURE);
   }
 
@@ -198,8 +207,7 @@ main
       parseChips (argc, argv))
     exit (EXIT_FAILURE);
   
-  if (initLib () ||
-      loadLib ())
+  if (loadLib (sensorsCfgFile))
     exit (EXIT_FAILURE);
 
   if (isDaemon)

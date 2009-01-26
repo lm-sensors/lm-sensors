@@ -15,7 +15,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #include <stdlib.h>
@@ -73,10 +74,6 @@ FLOAT   [[:digit:]]*\.?[[:digit:]]+
  /* Only positive whole numbers are recognized here */
 
 NUM	0|([1-9][[:digit:]]*)
-
- /* Only number between 1 and 255, octally represented. */
-
-OCTESC		(1[0-7]{0,2})|([2-7][0-7]?)|(0[1-7][0-7]?)|(00[1-7])
 
 
 %%
@@ -311,24 +308,10 @@ ignore{BLANK}*	{
 \\t		buffer_add_char("\t");
 \\v		buffer_add_char("\v");
 
- /* We can't support \0, this would cause havoc! */
-
-\\{OCTESC}	{
-		  int res;
-		  sscanf(sensors_yytext+1,"%o",&res);
-		  buffer_add_char(&res);
-		}
-
  /* Other escapes: just copy the character behind the slash */
 
 \\.		{
 		  buffer_add_char(&sensors_yytext[1]);
-		}
-
- /* This prevents backing up; it is otherwise purely redundant */
-
-\\00		{
-		  buffer_add_char("00");
 		}
 
  /* Anything else (including a bare '\' which may be followed by EOF) */

@@ -15,7 +15,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #define YYERROR_VERBOSE
@@ -81,7 +82,7 @@ static sensors_chip *current_chip = NULL;
   void *nothing;
   sensors_chip_name_list chips;
   sensors_expr *expr;
-  int bus;
+  sensors_bus_id bus;
   sensors_chip_name chip;
   int line;
 }  
@@ -105,9 +106,8 @@ static sensors_chip *current_chip = NULL;
 
 %type <chips> chip_name_list
 %type <expr> expression
-%type <bus> i2cbus_name
+%type <bus> bus_id
 %type <name> adapter_name
-%type <name> algorithm_name
 %type <name> function_name
 %type <name> string
 %type <chip> chip_name
@@ -121,7 +121,6 @@ input:	  /* empty */
 ;
 
 line:	  bus_statement EOL
-	| busalgo_statement EOL
 	| label_statement EOL
 	| set_statement EOL
 	| chip_statement EOL
@@ -130,24 +129,13 @@ line:	  bus_statement EOL
 	| error	EOL
 ;
 
-bus_statement:	  BUS i2cbus_name adapter_name
+bus_statement:	  BUS bus_id adapter_name
 		  { sensors_bus new_el;
 		    new_el.lineno = $1;
-                    new_el.number = $2;
+		    new_el.bus = $2;
                     new_el.adapter = $3;
 		    bus_add_el(&new_el);
 		  }
-;
-
-/* for compatibility, deprecated */
-busalgo_statement:	  BUS i2cbus_name adapter_name algorithm_name
-			  { sensors_bus new_el;
-			    new_el.lineno = $1;
-	                    new_el.number = $2;
-	                    new_el.adapter = $3;
-			    free($4);
-			    bus_add_el(&new_el);
-			  }
 ;
 
 label_statement:	  LABEL function_name string
@@ -307,24 +295,18 @@ expression:	  FLOAT
 		  }
 ;
 
-i2cbus_name:	  NAME
-		  { int res = sensors_parse_i2cbus_name($1,&$$);
+bus_id:		  NAME
+		  { int res = sensors_parse_bus_id($1,&$$);
 		    free($1);
 		    if (res) {
-                      sensors_yyerror("Parse error in i2c bus name");
+                      sensors_yyerror("Parse error in bus id");
 		      YYERROR;
                     }
 		  }
 ;
 
 adapter_name:	  NAME
-		  { sensors_strip_of_spaces($1);
-		    $$ = $1; }
-;
-
-algorithm_name:	  NAME
-		  { sensors_strip_of_spaces($1);
-		    $$ = $1; }
+		  { $$ = $1; }
 ;
 
 function_name:	  NAME

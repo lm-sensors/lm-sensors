@@ -1,6 +1,7 @@
 /*
     sensors.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,13 +15,15 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #ifndef LIB_SENSORS_SENSORS_H
 #define LIB_SENSORS_SENSORS_H
 
 #include <stdio.h>
+#include <limits.h>
 
 /* Publicly accessible library functions */
 
@@ -28,129 +31,228 @@
    when the API + ABI breaks), the third digit is incremented to track small
    API additions like new flags / enum values. The second digit is for tracking
    larger additions like new methods. */
-#define SENSORS_API_VERSION 0x300
+#define SENSORS_API_VERSION		0x402
 
-#define SENSORS_CHIP_NAME_PREFIX_ANY NULL
-#define SENSORS_CHIP_NAME_BUS_ISA -1
-#define SENSORS_CHIP_NAME_BUS_ANY -2
-#define SENSORS_CHIP_NAME_BUS_ANY_I2C -3
-#define SENSORS_CHIP_NAME_BUS_DUMMY -4
-#define SENSORS_CHIP_NAME_BUS_PCI -5
-#define SENSORS_CHIP_NAME_ADDR_ANY -1
+#define SENSORS_CHIP_NAME_PREFIX_ANY	NULL
+#define SENSORS_CHIP_NAME_ADDR_ANY	(-1)
+
+#define SENSORS_BUS_TYPE_ANY		(-1)
+#define SENSORS_BUS_TYPE_I2C		0
+#define SENSORS_BUS_TYPE_ISA		1
+#define SENSORS_BUS_TYPE_PCI		2
+#define SENSORS_BUS_TYPE_SPI		3
+#define SENSORS_BUS_TYPE_VIRTUAL	4
+#define SENSORS_BUS_TYPE_ACPI		5
+#define SENSORS_BUS_NR_ANY		(-1)
+#define SENSORS_BUS_NR_IGNORE		(-2)
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+extern const char *libsensors_version;
+
+typedef struct sensors_bus_id {
+	short type;
+	short nr;
+} sensors_bus_id;
+
 /* A chip name is encoded in this structure */
 typedef struct sensors_chip_name {
-  char *prefix;
-  int bus;
-  int addr;
-  char *busname;	/* if dummy */
+	char *prefix;
+	sensors_bus_id bus;
+	int addr;
+	char *path;
 } sensors_chip_name;
 
-/* (Re)load the configuration file and the detected chips list. If this
-    returns a value unequal to zero, you are in trouble; you can not
-    assume anything will be initialized properly. */
-extern int sensors_init(FILE *input);
+/* Load the configuration file and the detected chips list. If this
+   returns a value unequal to zero, you are in trouble; you can not
+   assume anything will be initialized properly. If you want to
+   reload the configuration file, call sensors_cleanup() below before
+   calling sensors_init() again. */
+int sensors_init(FILE *input);
 
 /* Clean-up function: You can't access anything after
    this, until the next sensors_init() call! */
-extern void sensors_cleanup(void);
+void sensors_cleanup(void);
 
 /* Parse a chip name to the internal representation. Return 0 on success, <0
    on error. */
-extern int sensors_parse_chip_name(const char *orig_name,
-                                   sensors_chip_name *res);
+int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res);
 
-/* Compare two chips name descriptions, to see whether they could match.
-   Return 0 if it does not match, return 1 if it does match. */
-extern int sensors_match_chip(sensors_chip_name chip1,
-                              sensors_chip_name chip2);
+/* Print a chip name from its internal representation. Note that chip should
+   not contain wildcard values! Return the number of characters printed on
+   success (same as snprintf), <0 on error. */
+int sensors_snprintf_chip_name(char *str, size_t size,
+			       const sensors_chip_name *chip);
 
-/* Check whether the chip name is an 'absolute' name, which can only match
-   one chip, or whether it has wildcards. Returns 0 if it is absolute, 1
-   if there are wildcards. */
-extern int sensors_chip_name_has_wildcards(sensors_chip_name chip);
-
-/* This function returns the adapter name of a bus number,
+/* This function returns the adapter name of a bus,
    as used within the sensors_chip_name structure. If it could not be found,
    it returns NULL */
-extern const char *sensors_get_adapter_name(int bus_nr);
+const char *sensors_get_adapter_name(const sensors_bus_id *bus);
 
-/* This function is deprecated and will be dropped soon. */
-extern const char *sensors_get_algorithm_name(int bus_nr);
+typedef struct sensors_feature sensors_feature;
 
-/* Look up the label which belongs to this chip. Note that chip should not
-   contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.
+/* Look up the label for a given feature. Note that chip should not
+   contain wildcard values! The returned string is newly allocated (free it
+   yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-extern int sensors_get_label(sensors_chip_name name, int feature,
-                             char **result);
+char *sensors_get_label(const sensors_chip_name *name,
+			const sensors_feature *feature);
 
-/* Looks up whether a feature should be ignored. Returns <0 on failure,
-   0 if it should be ignored, 1 if it is valid. This function takes
-   logical mappings into account. */
-extern int sensors_get_ignored(sensors_chip_name name, int feature);
-
-/* Read the value of a feature of a certain chip. Note that chip should not
+/* Read the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure.  */
-extern int sensors_get_feature(sensors_chip_name name, int feature,
-                               double *result);
+int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+		      double *value);
 
-/* Set the value of a feature of a certain chip. Note that chip should not
+/* Set the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-extern int sensors_set_feature(sensors_chip_name name, int feature,
-                               double value);
+int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
+		      double value);
 
 /* Execute all set statements for this particular chip. The chip may contain
    wildcards!  This function will return 0 on success, and <0 on failure. */
-extern int sensors_do_chip_sets(sensors_chip_name name);
+int sensors_do_chip_sets(const sensors_chip_name *name);
 
-/* Execute all set statements for all detected chips. This is the same as
-   calling sensors_do_chip_sets with an all wildcards chip name */
-extern int sensors_do_all_sets(void);
+/* This function returns all detected chips that match a given chip name,
+   one by one. If no chip name is provided, all detected chips are returned.
+   To start at the beginning of the list, use 0 for nr; NULL is returned if
+   we are at the end of the list. Do not try to change these chip names, as
+   they point to internal structures! */
+const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+						    *match, int *nr);
 
-/* This function returns all detected chips, one by one. To start at the
-   beginning of the list, use 0 for nr; NULL is returned if we are
-   at the end of the list. Do not try to change these chip names, as
-   they point to internal structures! Do not use nr for anything else. */
-extern const sensors_chip_name *sensors_get_detected_chips(int *nr);
+/* These defines are used in the flags field of sensors_subfeature */
+#define SENSORS_MODE_R			1
+#define SENSORS_MODE_W			2
+#define SENSORS_COMPUTE_MAPPING		4
 
+typedef enum sensors_feature_type {
+	SENSORS_FEATURE_IN		= 0x00,
+	SENSORS_FEATURE_FAN		= 0x01,
+	SENSORS_FEATURE_TEMP		= 0x02,
+	SENSORS_FEATURE_POWER		= 0x03,
+	SENSORS_FEATURE_ENERGY		= 0x04,
+	SENSORS_FEATURE_CURR		= 0x05,
+	SENSORS_FEATURE_VID		= 0x10,
+	SENSORS_FEATURE_BEEP_ENABLE	= 0x18,
+	SENSORS_FEATURE_UNKNOWN		= INT_MAX,
+} sensors_feature_type;
 
-/* These defines are used in the mode field of sensors_feature_data */
-#define SENSORS_MODE_NO_RW 0
-#define SENSORS_MODE_R 1
-#define SENSORS_MODE_W 2
-#define SENSORS_MODE_RW 3
+/* All the sensor types (in, fan, temp, vid) are a multiple of 0x100 apart,
+   and sensor subfeatures which have no compute mapping have bit 7 set. */
+typedef enum sensors_subfeature_type {
+	SENSORS_SUBFEATURE_IN_INPUT = SENSORS_FEATURE_IN << 8,
+	SENSORS_SUBFEATURE_IN_MIN,
+	SENSORS_SUBFEATURE_IN_MAX,
+	SENSORS_SUBFEATURE_IN_ALARM = (SENSORS_FEATURE_IN << 8) | 0x80,
+	SENSORS_SUBFEATURE_IN_MIN_ALARM,
+	SENSORS_SUBFEATURE_IN_MAX_ALARM,
+	SENSORS_SUBFEATURE_IN_BEEP,
 
-/* This define is used in the mapping field of sensors_feature_data if no
-   mapping is available */
-#define SENSORS_NO_MAPPING -1
+	SENSORS_SUBFEATURE_FAN_INPUT = SENSORS_FEATURE_FAN << 8,
+	SENSORS_SUBFEATURE_FAN_MIN,
+	SENSORS_SUBFEATURE_FAN_ALARM = (SENSORS_FEATURE_FAN << 8) | 0x80,
+	SENSORS_SUBFEATURE_FAN_FAULT,
+	SENSORS_SUBFEATURE_FAN_DIV,
+	SENSORS_SUBFEATURE_FAN_BEEP,
 
-/* This structure is used when you want to get all features of a specific
-   chip. */
-typedef struct sensors_feature_data {
-  int number;
-  const char *name;
-  int mapping;
-  int compute_mapping;
-  int mode;
-} sensors_feature_data;
+	SENSORS_SUBFEATURE_TEMP_INPUT = SENSORS_FEATURE_TEMP << 8,
+	SENSORS_SUBFEATURE_TEMP_MAX,
+	SENSORS_SUBFEATURE_TEMP_MAX_HYST,
+	SENSORS_SUBFEATURE_TEMP_MIN,
+	SENSORS_SUBFEATURE_TEMP_CRIT,
+	SENSORS_SUBFEATURE_TEMP_CRIT_HYST,
+	SENSORS_SUBFEATURE_TEMP_ALARM = (SENSORS_FEATURE_TEMP << 8) | 0x80,
+	SENSORS_SUBFEATURE_TEMP_MAX_ALARM,
+	SENSORS_SUBFEATURE_TEMP_MIN_ALARM,
+	SENSORS_SUBFEATURE_TEMP_CRIT_ALARM,
+	SENSORS_SUBFEATURE_TEMP_FAULT,
+	SENSORS_SUBFEATURE_TEMP_TYPE,
+	SENSORS_SUBFEATURE_TEMP_OFFSET,
+	SENSORS_SUBFEATURE_TEMP_BEEP,
 
-/* This returns all features of a specific chip. They are returned in
-   bunches: everything with the same mapping is returned just after each
-   other, with the master feature in front (that feature does not map to
-   itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are
-   two internally used variables. Set both to zero to start again at the
-   begin of the list. If no more features are found NULL is returned.
+	SENSORS_SUBFEATURE_POWER_AVERAGE = SENSORS_FEATURE_POWER << 8,
+	SENSORS_SUBFEATURE_POWER_AVERAGE_HIGHEST,
+	SENSORS_SUBFEATURE_POWER_AVERAGE_LOWEST,
+	SENSORS_SUBFEATURE_POWER_INPUT,
+	SENSORS_SUBFEATURE_POWER_INPUT_HIGHEST,
+	SENSORS_SUBFEATURE_POWER_INPUT_LOWEST,
+	SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL = (SENSORS_FEATURE_POWER << 8) | 0x80,
+
+	SENSORS_SUBFEATURE_ENERGY_INPUT = SENSORS_FEATURE_ENERGY << 8,
+
+	SENSORS_SUBFEATURE_CURR_INPUT = SENSORS_FEATURE_CURR << 8,
+	SENSORS_SUBFEATURE_CURR_MIN,
+	SENSORS_SUBFEATURE_CURR_MAX,
+	SENSORS_SUBFEATURE_CURR_ALARM = (SENSORS_FEATURE_CURR << 8) | 0x80,
+	SENSORS_SUBFEATURE_CURR_MIN_ALARM,
+	SENSORS_SUBFEATURE_CURR_MAX_ALARM,
+	SENSORS_SUBFEATURE_CURR_BEEP,
+
+	SENSORS_SUBFEATURE_VID = SENSORS_FEATURE_VID << 8,
+
+	SENSORS_SUBFEATURE_BEEP_ENABLE = SENSORS_FEATURE_BEEP_ENABLE << 8,
+
+	SENSORS_SUBFEATURE_UNKNOWN = INT_MAX,
+} sensors_subfeature_type;
+
+/* Data about a single chip feature (or category leader) */
+struct sensors_feature {
+	char *name;
+	int number;
+	sensors_feature_type type;
+	/* Members below are for libsensors internal use only */
+	int first_subfeature;
+	int padding1;
+};
+
+/* Data about a single chip subfeature:
+   name is the string name used to refer to this subfeature (in config files)
+   number is the internal subfeature number, used in many functions to refer
+     to this subfeature
+   type is the subfeature type
+   mapping is the number of a main feature this subfeature belongs to
+     (for example subfeatures fan1_input, fan1_min, fan1_div and fan1_alarm
+      are mapped to main feature fan1)
+   flags is a bitfield, its value is a combination of SENSORS_MODE_R (readable),
+     SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING (affected by the
+     computation rules of the main feature) */
+typedef struct sensors_subfeature {
+	char *name;
+	int number;
+	sensors_subfeature_type type;
+	int mapping;
+	unsigned int flags;
+} sensors_subfeature;
+
+/* This returns all main features of a specific chip. nr is an internally
+   used variable. Set it to zero to start at the begin of the list. If no
+   more features are found NULL is returned.
    Do not try to change the returned structure; you will corrupt internal
    data structures. */
-extern const sensors_feature_data *sensors_get_all_features
-             (sensors_chip_name name, int *nr1,int *nr2);
+const sensors_feature *
+sensors_get_features(const sensors_chip_name *name, int *nr);
+
+/* This returns all subfeatures of a given main feature. nr is an internally
+   used variable. Set it to zero to start at the begin of the list. If no
+   more features are found NULL is returned.
+   Do not try to change the returned structure; you will corrupt internal
+   data structures. */
+const sensors_subfeature *
+sensors_get_all_subfeatures(const sensors_chip_name *name,
+			    const sensors_feature *feature, int *nr);
+
+/* This returns the subfeature of the given type for a given main feature,
+   if it exists, NULL otherwise.
+   Do not try to change the returned structure; you will corrupt internal
+   data structures. */
+const sensors_subfeature *
+sensors_get_subfeature(const sensors_chip_name *name,
+		       const sensors_feature *feature,
+		       sensors_subfeature_type type);
 
 #ifdef __cplusplus
 }

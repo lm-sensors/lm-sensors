@@ -1,4 +1,4 @@
-.TH SENSORS-DETECT 8 "March 2004"
+.TH SENSORS-DETECT 8 "December 2008" "lm-sensors 3"
 .SH NAME
 sensors-detect \- detect hardware monitoring chips
 
@@ -11,15 +11,42 @@ process of scanning your system for various hardware monitoring chips,
 or sensors, supported by libsensors(3), or more generally by the lm_sensors
 tool suite.
 
-.SH CONFORMING TO
-lm_sensors-2.x
+sensors-detect will look for the following devices, in order:
+.IP \(bu
+Sensors embedded in CPUs, south bridges and memory controllers.
+.IP \(bu
+Sensors embedded in Super I/O chips.
+.IP \(bu
+Hardware monitoring chips accessed through ISA I/O ports.
+.IP \(bu
+Hardware monitoring chips reachable over the SMBus or more generally
+any I2C bus on your system.
+.PP
+As the last two detection steps can cause trouble on some systems, they
+are normally not attempted if the second detection step led to the
+discovery of a Super I/O chip with complete hardware monitoring features.
+However, the user is always free to ask for all detection steps if so is
+his/her wish. This can be useful if a given system has more than one
+hardware monitoring chip. Some vendors are known to do this, most notably
+Asus and Tyan.
+
+.SH WARNING
+sensors-detect needs to access the hardware for most of the chip detections.
+By definition, it doesn't know which chips are there before it manages to
+identify them. This means that it can access chips in a way these chips do
+not like, causing problems ranging from SMBus lockup to permanent hardware
+damage (a rare case, thankfully.)
+
+The authors made their best to make the detection as safe as possible, and
+it turns out to work just fine in most cases, however it is impossible to
+guarantee that sensors-detect will not lock or kill a specific system. So,
+as a rule of thumb, you should not run sensors-detect on production servers,
+and you should not run sensors-detect if can't afford replacing a random
+part of your system. Also, it is recommended to not force a detection step
+which would have been skipped by default, unless you know what you are doing.
 
 .SH SEE ALSO
-sensors(1), libsensors(3), i2cdetect(8)
+sensors(1), libsensors(3)
 
 .SH AUTHOR
-Frodo Looijaard and the lm_sensors group
-http://www.lm-sensors.org/
-This manual page was written by Joey Hess <joey@debian.org>, for
-the Debian GNU/Linux system. It was then reviewed by the lm_sensors team and
-is now part of the lm_sensors source distribution.
+Frodo Looijaard and Jean Delvare

@@ -1,6 +1,6 @@
 /*
-    conf.h - Part of libsensors, a Linux library for reading sensor data.
-    Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    main.h - Part of sensors, a user-space program for hardware monitoring
+    Copyright (C) 2007       Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,16 +18,10 @@
     MA 02110-1301 USA.
 */
 
-#ifndef LIB_SENSORS_CONF_H
-#define LIB_SENSORS_CONF_H
+#ifndef PROG_SENSORS_MAIN_H
+#define PROG_SENSORS_MAIN_H
 
-/* This is defined in conf-lex.l */
-int sensors_yylex(void);
-extern char sensors_lex_error[];
-extern int sensors_yylineno;
-extern FILE *sensors_yyin;
+extern int fahrenheit;
+extern char degstr[5];
 
-/* This is defined in conf-parse.y */
-int sensors_yyparse(void);
-
-#endif /* LIB_SENSORS_CONF_H */
+#endif /* PROG_SENSORS_MAIN_H */

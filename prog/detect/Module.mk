@@ -13,7 +13,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301 USA.
 
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
@@ -22,27 +23,17 @@ MODULE_DIR := prog/detect
 PROGDETECTDIR := $(MODULE_DIR)
 
 PROGDETECTMAN8DIR := $(MANDIR)/man8
-PROGDETECTMAN8FILES := $(MODULE_DIR)/i2cdetect.8 $(MODULE_DIR)/sensors-detect.8
+PROGDETECTMAN8FILES := $(MODULE_DIR)/sensors-detect.8
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
-PROGDETECTTARGETS := $(MODULE_DIR)/i2cdetect
-PROGDETECTSOURCES := $(MODULE_DIR)/i2cdetect.c
-PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect \
-                         $(MODULE_DIR)/i2cdetect
-
-# Include all dependency files. We use '.rd' to indicate this will create
-# executables.
-INCLUDEFILES += $(PROGDETECTSOURCES:.c=.rd)
+PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
 
 REMOVEDETECTBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGDETECTSBININSTALL))
 REMOVEDETECTMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDETECTMAN8DIR)/%,$(PROGDETECTMAN8FILES))
 
-all-prog-detect: $(PROGDETECTTARGETS)
+all-prog-detect:
 user :: all-prog-detect
-
-$(MODULE_DIR)/i2cdetect: $(MODULE_DIR)/i2cdetect.ro prog/dump/i2cbusses.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
 
 install-prog-detect: all-prog-detect
 	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGDETECTMAN8DIR)
@@ -55,5 +46,4 @@ user_uninstall::
 	$(RM) $(REMOVEDETECTMAN)
 
 clean-prog-detect:
-	$(RM) $(PROGDETECTDIR)/*.rd $(PROGDETECTDIR)/*.ro $(PROGDETECTTARGETS)
 clean :: clean-prog-detect

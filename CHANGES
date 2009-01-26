@@ -1,1849 +1,207 @@
-lm_sensors CHANGES file
+lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
-  File lm_sensors.lsm: Delete, don't advertise a legacy branch
-  File doc/developers/release_checklist: Skip mail to lsm
-  Program sensors-detect: Fix detection of older DS1621
-
-2.10.8 (20081216)
-  File doc/chips/lm90: Update datasheet links (2.6 backport)
-  File doc/chips/pc87360: Drop dead links to datasheets (2.6 backport)
-  File i2c-dev.h: Drop I2C_FUNC_SMBUS_*I2C_BLOCK_2 defines
-  Library: Avoid namespace pollution
-           Add support for the IT8720F chip
-           Support separate prefixes lm89, max6658, max6659, max6681,
-            max6646, max6647 and max6649
-           Add alternative feature name for f71882fg temperature alarms
-  Module i2c-i801: Remove verbose debugging messages (2.6 backport)
-                   Properly report bus arbitration lost (2.6 backport)
-                   Add support for PCH (Ibex Peak) (2.6 backport)
-  Module i2c-piix4: Minor cleanups (2.6 backport)
-  Module i2c-viapro: Add VX800/VX820 support (2.6 backport)
-  Module lm78: Prevent misdetection of Winbond chips
-  Module lm90: Don't spam the kernel log (2.6 backport)
-  Module max1619: Use inline functions instead of macros (2.6 backport)
-  Program decode-dimms.pl: Only export the ceil function from POSIX 
-                           Fix decoding of SDR SDRAM bytes 12-14
-  Program pwmconfig: Fix MINSTOP and MINSTART test functions (#2340)
-                     Change default for MINTEMP from 0 to 20 degrees C
-  Program sensord: Add it8720 support
-                   Add lm89, max6658, max6659, max6681, max6646, max6647
-                    and max6649 support
-                   Accept negative temperatures in RRD database
-                   Don't bail out on transient errors (#2330)
-  Program sensors: Recognize it87 thermal sensor type 4 as thermistor
-                   Add it8720 support
-                   Add lm89, max6658, max6659, max6681, max6646, max6647
-                    and max6649 support
-  Program sensors-detect: Add VIA VT1212 support
-                          Add SMSC EMC2700LPC support
-                          Add ITE IT8720F support
-                          Add Texas Instruments TMP411 support
-                          Prevent misdetection of W83627DHG on I2C as LM78
-                          W83627DHG has no subclients
-                          Add VIA VX800/VX820 support
-                          Fix detection of Intel 5000 series FB-DIMM AMB
-                          Fix detection of ADT7462
-                          Fix detection of SMSC LPC47M292
-                          Add SMSC LPC47M233 support
-                          Fix SMBus detection of W83627EHF and W83627DHG
-                          Add Intel Core I7 support
-
-2.10.7 (20080701)
-  Library: Don't choke on unrecognized devices, part 2
-           Parse the configuration file in C locale (#2312)
-  Makefile: Fallback to simple depmod if System.map can't be found
-  Module asb100: Remove some dead code (2.6 backport)
-  Module i2c-amd756: Fix functionality flags (2.6 backport)
-  Module i2c-amd756-s4882: Fix an error path (2.6 backport)
-  Module i2c-i801: Drop broken I2C block read support
-                   Add ICH10 support
-  Module i2c-piix4: Minor cleanups (2.6 backport)
-  Module i2c-sis5595: Minor cleanups (2.6 backport)
-  Module lm75: Fix an incorrect comment (2.6 backport)
-  Module lm90: Fix LM86 detection (#2335)
-  Module w83l785ts: Don't ask user to report failures (2.6 backport)
-  Program fancontrol: Don't use named pipes when we don't need them (#2319)
-  Program sensord: Add lm90, adm1032, lm99, lm86, max6657, adt7461 support
-                   Fix adm1021, adm1023 support with 2.6 kernel (#2334)
-  Program sensors-detect: New device ID for the SMSC SCH5317
-                          Add SMSC SCH5127 detection
-                          Add National Semiconductor LM64 detection
-                          Add Asus F8000 detection
-                          Add Intel ICH10 (bus) detection
-                          Don't probe I2C addresses 0x40-0x47
-                          Fix the parsing of I2C addresses not to scan
-                          Detect and skip 1-register-only I2C devices
-                          Avoid SMBus word transactions where possible
-                          Add Dallas DS1631 detection
-                          Fix Andigilog aSC7621 support
-                          Fix Analog Devices ADT7461 support
-                          Add VIA C7 support
-                          Fix Winbond W83L786NR/NG/R/G support (#2336)
-
-2.10.6 "Welcome Home Lina" (20080306)
-  Library: Fix fschrc and fschmd support
-           Fix sysfs presence detection
-           Don't choke on unrecognized devices, part 1 (#2087)
-           Fix lm93 vid2 access (#2295)
-           No in1 on w83783s
-           Support DOS-style configuration files again (#2284)
-  Makefile: Revert changeset 4738, fix bug #2187 differently
-  Module adm1026: Various cleanups
-  Module eeprom: Hide Sony Vaio serial numbers to regular users (2.6 backport)
-                 Drop useless debugging log messages
-                 Recognize VGN as a valid Sony Vaio name prefix (2.6 backport)
-  Module gl518sm: Fix fan speed reading (2.6 backport)
-  Module gl520sm: Fix fan speed reading (2.6 backport)
-  Module lm90: Use generic i2c reads during detection (2.6 backport)
-  Module w83627hf: Enable VBAT monitoring (#2282, 2.6 backport)
-  Program decode-dimms.pl: Fix DDR2 SDRAM module speed decoding
-                           Update manufacturer IDs.
-  Program decode-vaio.pl: Private data might not be readable by non-root users
-                          Print the asset tag
-                          Fix the timestamp decoding
-  Program i2cdump: Fix I2C block mode error code
-  Program fancontrol: Detect improperly formatted FCTEMPS value (#2293)
-  Program pwmconfig: Better diagnostics in pwmdisable
-                     Give the fans some time to spin up
-                     Really hide errors on sysfs writes
-                     Deal gracefully with read-only pwm_enable files
-                     Warn about outputs found in automatic mode
-                     Fix duplicate warning message when config file is broken
-  Program sensord: Add lm85 support
-  Program sensors: Hide spurious errors on missing f71872f voltage inputs
-                   Hide spurious errors on missing adm1026 inputs
-                   Fix W83783S prefix matching
-  Program sensors-detect: Add Texas Instruments TMP401 detection
-                          Mention the f75375s driver
-                          Add SMSC LPC47B367-NC detection (no sensors)
-                          Reduce w83781d/lm78 I2C address probing range
-                          Drop PCA9540 detection
-                          Add Intel Celeron 4xx and Penryn (CPU on 45nm)
-                           detection
-                          Improve sysconfig and modprobe.d integration
-                          Add SMSC SCH5514D-NS detection (no sensors)
-                          Lower the confidence of MAX6650/MAX6651
-                          Add Fintek F71858DG detection
-                          Add Fintek F81216D detection (no sensors)
-                          Add SMSC SCH5027D detection
-                          Do not access I/O ports on PPC
-                          Move south bridge sensor detection to the right
-                           section
-                          Run chip_special_cases() earlier
-  Program unhide_ICH_SMBus: Add support for the 82801AA (ICH)
-
-2.10.5 (20071024)
-  File i2c-dev.h: Rename I2C_FUNC_SMBUS_HWPEC_CALC to I2C_FUNC_SMBUS_PEC
-  File sensors.conf.eg: Add a thmc50 section
-  File useful_addresses.html: Moved to the wiki
-  Library: Fix a memory leak on error
-           Speed up sensors_get_ignored() a bit
-           Fix thmc50 support for Linux 2.6
-           Fix bmcsensors support for Linux 2.6
-           Fix lm93 VID support for Linux 2.6
-           Fix adm1024 support for Linux 2.6
-           Fix maxilife support for Linux 2.6
-           Fix magnitude of temperature offsets in Linux 2.6
-           Fix adm1026 critical temperature limits for Linux 2.6
-           Fix smsc47m192 temperature faults
-           Add sch311x support
-           Add support for adm1022 temp3
-  Makefile: Fix kernel version detection (#2187)
-  Man page sensord.8: Update
-  Module fscher: Add missing read of control register (2.6 backport)
-  Module i2c-i801: Add Tolapai support (2.6 backport)
-  Module i2c-nforce2: Declare PEC as supported (2.6 backport)
-  Module i2c-piix4: Add ATI SB700 and SB800 support (2.6 backport)
-  Module lm93: Fix an array overrun (2.6 backport)
-  Program sensord: Fix f71805f fans
-                   Synchronize the version with lm-sensors
-                   Fix a memory leak when daemonizing
-                   Fix memory leaks in command line parsing
-                   Add w83793 support
-                   Log the error code on failure
-                   Add lm87 support
-  Program sensors: Fix two memory leaks on error
-                   Add sch311x support
-                   Hide error on missing dme1737 fan and pwm
-                   Add thmc50/adm1022 support
-                   Hide error on missing adm1021 die code
-                   Handle gl518sm with no voltage input values
-  Program sensors-detect: Don't probe i2c-isa as a regular i2c bus
-                          Add Winbond W83L786NR/NG/R/G detection
-                          Add Winbond W83L771W/G detection
-                          Add Intel Tolapai SMBus detection
-                          Fix SMSC SCH311x detection
-                          Add AMD K10 CPU sensor detection 
-                          Fix SMSC LPC47B357/M967 detection
-                          Select the right driver for FSC chips
-  Program sensors-detect-stat.pl: Handle alternative chip lists
-
-
-2.10.4 (20070716)
-  File doc/vid: Update the sysfs paths, update the chip lists
-  File i2c-dev.h: Support I2C block reads with specified length
-  File sensors.conf.eg: Add a dme1737 section
-  File lm_sensors.sysconfig: Delete, now generated by sensors-detect
-  Library: Clean up pwm symbol names translation
-           Add dme1737 support
-           Add applesmc support
-           Add abituguru3 support
-           Add f71882fg support
-           Add w83627ehf support (for Linux 2.4)
-           Add support for the w83627ehf VID function
-           Add support for the w83627ehf thermal sensor types
-           Add support for it87 fan4 and fan5
-  Man page sensors.conf.5: Update the chip statement section
-  Module i2c-nforce2: Add nForce MCP61, MCP65 support (2.6 backport)
-  Module lm85: Fix setting the fan speed min limit to 0
-               Add support for the EMC6D102 extra resolution bits
-  Module thmc50: Fix the i2c address range
-  Module w83627ehf: New (2.6 backport)
-  Programs i2cdump, i2cget, i2cset: Do not force the slave address by default
-  Program i2cdump: Use the new I2C block read function
-  Program isadump: Detect when address bit 7 is a busy flag
-                   Fix Super-I/O exit sequence for Winbond/Fintek chips
-  Program fancontrol: Use let for arithmetic evaluation
-                      No longer need awk and grep
-                      Limit calls to external programs (Linux 2.6 only)
-                      Check for configuration file validity
-                      Support optional min and max PWM values
-                      Better integration with init scripts
-                      Use linear control instead of quadratic
-  Program pwmconfig: Use smaller steps for low PWM values
-                     Support optional min and max PWM values
-  Program mkpatch: Include w83627ehf
-  Program rrd: Support non-i2c devices (hwmon class)
-               Add missing shell declarations
-               Update URI
-  Program sensors: Drop ddcmon and eeprom support
-                   Add dme1737 support
-                   Add applesmc support
-                   Add max6680 support
-                   Add abituguru3 support
-                   Add f71882fg support
-                   Fix alignment of alarm for one-limit temperatures
-                   Add w83627ehf support (for Linux 2.4)
-                   Add support for the w83627ehf VID function
-                   Add support for the w83627ehf thermal sensor types
-                   Add support for it87 fan4 and fan5
-                   Display the extra resolution bits of the emc6d102
-  Program sensors-detect: Stop Super-I/O probe after first family success
-                          Fix SMSC DME1737 detection
-                          Add /usr/sbin to the PATH (#2199)
-                          Add ATI SB700 detection
-                          Add Maxim MAX6680/MAX6681 detection
-                          Add IT8726F detection
-                          Fix IPMI support for 2.6 kernels
-                          Add detection for non-standard SMSC Super-I/Os
-                          No longer depend on i2cdetect
-                          Add SMSC SCH5317 detection
-                          Drop detection of most non-sensors I2C chips
-                          Fix ADM1022 detection
-                          Add detection of many SMSC Super-I/O chips
-                          Add Fintek F71806FG and F71862FG detection
-
-
-2.10.3 (20070319)
-  Library: Do not skip i2c adapters with only a class device and no
-            physical device. This change is required to survive the
-            planned struct class_dev removal from future 2.6 kernels.
-           Add support for the SMSC LPC47M292 fans (prefix smsc47m2)
-           Recognize i2c-isa-based devices as such even after class_dev
-	    is gone
-           Compile with -D_REENTRANT
-           Fix support of Linux 2.6's max6650 driver
-           Fix max1619 support
-  Man page i2cdetect.8: Scanning range can be restricted
-  Module bmcsensors: Fix debugging messages
-  Module i2c-ali1563: Improve the status messages (2.6 backport)
-                      Fix device initialization (2.6 backport)
-  Module i2c-amd8111: Cleanups (2.6 backport)
-                      Fix initialization race (2.6 backport)
-  Module i2c-nforce2: Drop unused reference to pci_dev (2.6 backport)
-  Module i2c-piix4: Add ATI SB600 support (2.6 backport)
-  Module i2c-viapro: Add CX700 support (2.6 backport)
-  Module smsc47m1: Add SMSC LPC47M292 support
-                   Get rid of a useless semaphore (2.6 backport)
-  Programs i2cdetect, i2cdump, isadump: Flush output in real time
-  Program i2cdump: Cleaner output in SMBus block read mode
-  Program fancontrol.pl: Fix pwmN_enable access (#2190)
-  Program sensors: Add smsc47m2 support (fans)
-                   Fix -A option (hide adapter name) on error
-  Program sensors-detect: Only probe relevant I2C addresses
-                          Drop ARP-capable device detection
-                          Add Maxim MAX6655/MAX6656 detection
-                           (Olexiy Avramchenko)
-                          Add Maxim MAX1668, MAX1805, MAX1989 detection
-                          Add VIA CX700 detection
-                          Drop legacy W83627HF ISA detection
-                          Don't bufferize stdout during probes
-                          Speed up the LM75 and LM77 detection
-                          Clean up the EEPROM detection
-                          Add Dallas DS75 detection
-                          Add SMSC LPC47M292 detection
-                          Add nVidia MCP61 and MCP65 detection
-                          Fix ADM1028 detection
-                          Add Nat. Semi. PC8347L Super-I/O detection
-                          Add SMSC SCH5504 Super-I/O detection (no sensors)
-                          Make the LM78 and W83781D detection safer
-
-
-2.10.2 (20070115)
-  RPM: Obsolete, removed
-  File doc/fan-divisors: Update
-  File sensors_vid.h: Trim VID values to correct number of bits (2.6 backport)
-  Library: Add support for the pc87247 driver (fans only)
-           Probe for busses before chips
-           Drop support for algorithm names
-           Add support for coretemp driver   
-           Major update/optimization of config-file scanner
-           Add config-file scanner regression tests
-           Add f71872f support
-           Add w83627dhg support (David Holl, #2157)
-           Get the i2c adapter names from classdev.name
-           Add adm1029 support (Corentin Labbe)
-  Man page i2cdetect.8: Describe the output convention
-  Man page sensors.1: Update (option -c) and clean up
-  Module bmcsensors: Fix several warnings
-                     Fix fragile structure initialization
-  Module i2c-i801: Add ICH9 support
-  Module p4b_smbus: Add support for the ICH5
-  Module f71805f: Fix the device address decoding (2.6 backport)
-  Module icspll: Delete. It was useless and dangerous.
-  Program decode-dimms.pl: Remove spaces at end of lines
-  Program eepromer: Fix loads of warnings
-  Program i2cdetect: Make the output clearer
-  Program py-smbus: New! Python i2c-dev bindings (prog/py-smbus)
-  Program unhide_ICH_SMBus: New! Unhides the ICH SMBus for 2.6 kernels
-                            without need of recompilation.
-  Programs dump/*: More robust handling of user inputs
-  Programs pwmconfig, fancontrol: Handle write errors for bash 3.1
-                                  Add support for non-i2c drivers
-  Program fancontrol.pl: Disable debugging by default
-                         Add support for non-i2c drivers
-                         More tolerant config file parsing
-  Program sensord: Add pc87247 support (fans only)
-                   Add vt1211 support (#2150)
-                   Add w83627dhg support (David Holl, #2157)
-                   Add w83627ehf voltage support (Dave Platt)
-                   Add k8temp support (Dave Platt)
-  Program sensors: Add pc87247 support (fans only)
-                   Hide error on missing f71805f fan
-                   Handle option -c more efficiently
-                   Drop option -a (show algorithm names)
-                   Add f71872f support
-                   Add w83627dhg support (David Holl, #2157)
-                   Add adm1029 support (Corentin Labbe)
-                   Hide error on missing w83793 temp (Gong Jun)
-  Program sensors-detect: Add SMSC DME1737 detection
-                          Add Fintek F71882FG and EPoX EP1308 detection
-                          Add Intel Core thermal sensor detection
-                          Preallocate memory for I2C_FUNCS ioctl (#2138)
-                          Prevent misdetection of MAX6633/MAX6634/MAX6635
-                          Add Intel ICH9 detection
-                          Add Maxim MAX6648/MAX6692 detection
-                          Improve ADM1029 detection
-                          Add Andigilog chips detection
-                          Add Intel AMB FB-DIMM thermal sensor detection
-                          Add ATI SB600 detection
-
-
-2.10.1 (20060924)
-  File doc/developers/checklist renamed to dev/developers/release_checklist
-          with clarifications and updates for new SVN server.
-  File README.package: Delete.
-  File doc/busses/i2c-piix4: Update (2.6 backport)
-  File doc/developers/sysfs-interface: Update
-  File etc/sensors.conf.eg: Add an smsc47m192 section
-                            Comment out all set statements
-                            Add an it8716 section
-                            Add a w83793 section
-                            Adjust the vt1211 section to match the new driver
-                             interface
-  Library: Fix device scan when no i2c support is present
-           Add support for W83627EHF voltage inputs and alarms
-           Add support for the smsc47m192 driver
-           Fix all memory leaks (yeah!)
-           Fix no sensors being reported as an error
-           Add support for the IT8716F and IT8718F chips
-           Add support for the W83793 chip (Yuan Mu)
-           Map the 2.6 adm1026's fan8 to fan0
-           Missing sysfs busses and classes are not errors
-           Change vt1211 temp3-7 magnitude from 1 to 3
-  Makefile: Don't grep autoconf.h on user-space targets
-            Fix depmod on non-running kernel version
-            Remove empty include directories on make user_uninstall
-  Module i2c-ali1535: Drop redundant semaphore (2.6 backport)
-  Module i2c-amd756-s4882: Improve static semaphore initialization
-                           (2.6 backport)
-  Module i2c-i801: Disable PEC mode after every transaction (2.6 backport)
-                   Add ICH8 support (2.6 backport)
-                   Fix block transaction poll loops (2.6 backport)
-                   Remove PCI function check (2.6 backport)
-                   Cleanups (2.6 backport)
-  Module i2c-nforce2: Add nForce4 MCP51, MCP55 support (2.6 backport)
-  Module i2c-piix4: Add ServerWorks HT-1000 support (2.6 backport)
-                    Add ATI IXP200, IXP300, IXP400 support (2.6 backport)
-                    Drop the fix_hstcfg parameter (2.6 backport)
-  Module i2c-viapro: Fix compilation with kernels < 2.4.21
-                     Add VT8237A and VT8251
-  Module lm83: Add LM82 support (2.6 backport)
-  Module vt1211: The VT1211 has no in6
-                 Rework the voltage and temperature conversions and the
-                  temperature input order to match the Linux 2.6 driver
-  Module w83781d: Use real-time alarm registers when possible (2.6 backport)
-                  Add specific alarm and beep defines for the W83791D
-  Module w83792d: Fix PWM range (2.6 backport)
-  Program decode-dimms.pl: Decode depending on the memory type
-                           Decode the manufacturing date to an ISO8601 date
-                           Add the memory size computation and provide brief
-                            timing characteritics for SDRAM/DDR/DDR2 memory
-                           Add memory size computation for Rambus memory
-                           Various output cleanups and fixes
-  Program decode-edid.pl: Add /usr/sbin or /usr/local/sbin to $PATH if needed
-  Program decode-vaio.pl: Detect and skip false positives
-  Program i2cdetect: Add a mode to print adapter functionalities
-  Program i2cdump: Restore bank after bank switching
-                   Add new mode W (read word on even register addresses)
-  Program mkpatch: Fix typo breaking f71805f
-                   Turn warnings on (-w), and fix them
-                   Print a usage message on missing command line parameters
-  Program pwmconfig: Use mktemp instead of tempfile
-  Program sensors: No error messages on missing w83792d fan4-7 (Yuan Mu)
-                   Add smsc47m192 support
-                   Add abituguru support (Hans de Goede)
-                   Fix memory leak when printing an unknown chip
-                   Add it8716 and it8718 support
-                   Make each it87 fan and fan div optional
-                   Print missing w83791d values
-                   Add w83793 support (Yuan Mu)
-                   The adt7463 may not have in4 (#2119)
-                   Hide more vt1211 missing input errors
-                   Clearer error messages when no sensors found
-  Program sensors-detect: Add ServerWorks HT-1000 SMBus detection
-                          Add ATI IXP200/300/400 SMBus detection
-                          Prevent warning on 64-bit PCI addresses
-                          Add Fintek F75363SG, F75111R/RG/N, F75121R,
-                           F75122R/RG, F75373S/SG, F75375S/SP, F75383S/M,
-                           F75384S/M, F75387SG/RG and F81218D detection
-                          Add Winbond W83793R/G and W83627DHG detection
-                          Handle the W83791D driver difference between kernels
-                          Add nForce4 MCP04, MCP51 and MCP55 detection
-                          Add AMD Geode devices detection
-                          Add ITE IT8716F and IT8718F detection
-                          Add NatSemi/Winbond PC87427 detection
-                          Get driver information for busy addresses from
-                           sysfs (2.6 only)
-                          Drop the ISA IT87xxF detection
-                          Check i2c adapter functionalities before probing
-                          Add Intel ICH8 SMBus detection
-                          Add AMD K8 thermal sensors detection
-                          Simplify detection of SiS5595, VIA686 and VT8231
-                          Add Analog Devices ADM1033, ADM1034, ADT7462,
-                           ADT7466, ADT7470, ADT7473 and ADT7475 detection
-                          Check for root user at startup
-                          Attempt to be slightly more user-friendly
-                          Add VT8237A and VT8251
-                          Remove detection of nVidia graphics adapters
-                          Use sysfs for PCI device enumeration
-                          Add generic PCI SMBus adapter detection
-                          Add generic Super-I/O logical device detection
-                          Add SMSC LPC47M172/182 detection
-
-
-2.10.0 (20060214)
-  File doc/lm_sensors-FAQ.texi: Remove version 1 specifics part
-  File doc/busses/i2c-viapro: Update (2.6 backport)
-  File doc/chips/via686a: Update (2.6 backport)
-  File doc/chips/w83627hf: W83627THF VID clarification (2.6 backport)
-  File etc/sensors.conf.eg: Do not set vrm by default
-  File i2c-dev.h: Fix union i2c_smbus_data definition
-                  Sync i2c_msg definition with i2c.h (Hideki Iwamoto)
-                  Add missing parentheses around macros
-                  Drop I2C_FUNC_SMBUS_EMUL
-                  Drop I2C_FUNC_SMBUS_*_PEC
-                  Drop I2C_SMBUS_*_PEC
-  File sensors_vid.h: Drop default VRM
-  Library: NOTE: libsensors(3) will no longer see eeprom (SPD) chips
-           This is intentional.  Use decode-dimms.pl if you still
-           need your memory SPD data.
-  Library: Big update to use libsysfs.  More TODO though.
-           Fix bus matching code for Linux 2.6 (Karsten Petersen)
-           Add f71805f, w83687thf support
-           Add platform drivers support
-           Fix sysctl warnings on x86_64
-           Restore vt1211 temp1
-  Makefile: Compile user-space programs with -Wundef
-  Module i2c-i801: Simplify the hardware PEC code
-                   Always set PEC mode explicitly before each transaction
-  Module i2c-i810: Documentation update, PCI IDs cleanup
-  Module i2c-keywest: Remove bus probing code (2.6 backport)
-  Module i2c-nforce2: Remove dead code (2.6 backport)
-                      Add the ID of the nForce4 MCP-04 (2.6 backport)
-  Module i2c-via: Remove dead code
-  Module i2c-viapro: Remove dead code
-                     Support I2C block read (2.6 backport)
-                     Code cleanups (2.6 backport)
-                     Improve debug register dump (2.6 backport)
-  Modules i2c-ali1535, i2c-ali1563, i2c-ali15x3, i2c-amd756, i2c-amd8111,
-          i2c-i801, i2c-nforce2, i2c-piix4, i2c-sis5595, i2c-sis630,
-          i2c-sis645: Use pci_driver name to request I/O region; do
-                      not initialize i2c_adapter name to "unset" (2.6
-                      backport)
-  Modules i2c-amd8111, i2c-i801, i2c-nforce2: Drop software PEC code
-                                              (2.6 backport)
-  Module adm9240: Cleanups (2.6 backport)
-  Module f71805f: New, supports the Fintek F71805F/FG Super-I/O
-  Module it87: Minor cleanups
-               Fix fan3_div setting bug (Anton V. Staaf)
-  Module lm90: Support the ADM1032-2 and ADT7461-2 (2.6 backport)
-               Separate the register read function
-               Add PEC support for the ADM1032
-  Module via686a: Cleanups
-  Module w83627hf: Drop useless initialization step (2.6 backport)
-                   Fix in4 for W83627THF and W83637HF (Yuan Mu)
-                   Fix alarms (Yuan Mu)
-                   Preserve fan min on fan div change (Yuan Mu)
-                   Properly handle W83627THF without VID (Yuan Mu)
-                   Fix in0 limit settings in "VRM9" mode (Yuan Mu)
-                   Add W83687THF support
-  Module w83781d: Drop W83697HF support (Grant Coady)
-  Module w83792d: Bug fixes and code cleanups (Yuan Mu, 2.6 backport)
-                  Fix fan control mode (PWM/DC) reporting
-                  Fix fan div auto-adjust (Yuan Mu)
-                  Fix the subclient handling
-  Module w83l785ts: Minor cleanup (2.6 backport)
-  Module vt1211: Restore temp1
-  Modules vt1211, vt8231: Change default VRM to 9.1
-  Program decode-dimms.pl: Add lookup tables for manufacturer names
-                           Fix rounding error in PCxxxx speed computation
-                           Improve text output
-                           Improve speed under Linux 2.6
-                           Verify checksum before decoding anything
-                           Improve manufacturing location decoding
-                           Improve memory type detection
-                           Improve part number decoding
-  Program i2cdump: Drop now useless #ifdef tests
-                   Fix capability check for continuous byte mode
-  Program i2cget: New
-  Program i2cset: Add PEC support
-                  Fix argc check
-  Programs i2cdetect, i2cdump, i2cset: Stop printing the algorithm name
-                                       Print the correct bus type if bus
-                                       functionality can be queried
-  Program isadump: Display the real addresses in flat mode
-  Program mkdev.sh: Silently skip already existing nodes
-  Program mkpatch: Include f71805f
-  Program sensord: Do not log algorithm names
-                   Drop EEPROM support (Aurelien Jarno)
-                   Add W83627EHF, F71805F/FG support
-                   Fix PC87365/PC87366 alarms
-  Program sensors: Drop free_the_label
-                   Fix compilation with uclibc (no iconv)
-                   Add f71805f, w83687thf support
-  Program sensors-detect: Drop algorithm names
-                          Do not rely on i2cdetect -l printing algo names
-                          Simplify adapter name matching mechanism
-                          New address for ADM1032, ADT7461
-                          Improve ADT7467, ADT7468 support
-                          Fix MAX6659 reported driver
-                          Add Fintek F71805F detection
-                          Add Analog Devices ADT7476 detection
-                          Add Intel 82845G detection
-                          Add IT8201R/IT8203R/IT8206R/IT8266R detection
-                          Fix udev detection in some corner case
-                          Improve DS1621 detection
-                          Always prefer ISA access over SMBus access
-
-
-2.9.2 (20050906)
-  File doc/chips/*: Big update (2.6 backport)
-  Library: Drop ds1780-specific code (now use adm9240)
-           Fix memory leak in sensors_get_label()
-           Support /sys/class/hwmon (Linux 2.6.14+)
-           Limit stack usage in sensors_read_proc_chips()
-  Makefile: Detect 2.6+ kernels and check targets
-  Man page isaset.8: Fix typos
-  Module adm1031: Fix broken kfree() calls
-  Module i2c-ali1563: New (2.6 backport by Winbond)
-  Modules i2c-ipmb, i2c-ipmi: Support ipmi_request() additional argument
-  Modules it87, pc87360, sis5595, smsc47m1, vt1211, vt8231,
-          w83627hf.c: Tag find function __init
-  Module lm93: Fix memory leak
-  Module smsc47m1: Fix PWM enable polarity on read
-  Modules w83627hf, w83781d: Allow setting fan divisor to 128
-  Program decode-dimms.pl: Support Linux 2.6 (Burkart Lingner)
-  			   Added DDR/DDR2 frequency reporting in convenient
-			   form of DDRxxx PCyyyy
-  Program i2cdump: Properly handle short i2c block reads
-  Program fancontrol.pl: Fix compile errors
-  Program mkpatch: Include i2c-ali1563
-                   Include w83792d
-  Program pwmconfig: Fix unsafe temporary file use
-  Program rrd: Support 2.6 kernels
-  Program sensord: Add support for w83637hf
-                   Support pc87360 (Henrik Brix Andersen)
-  Program sensors: Support the VAIO "VGN" prefix for eeprom
-  Program sensors-detect: Add SMSC LPC47M15x/LPC47M192 SMBus detection
-                          Advertise the w83792d driver
-                          Improve IT8705F and IT8712F detection
-                          Merge LM82 and LM83 detection
-                          Add W83687THF detection
-
-
-2.9.1 (20050412)
-  File doc/busses/i2c-nforce2: Update
-  File doc/chips/it87: Update
-  File doc/chips/lm90: Update for adt7461
-  File doc/chips/mic74: New
-  File etc/sensors.conf.eg: New sections for lm92 and w83792d
-  Library: Add support for 2.6 fscpos driver (Stefan Ott)
-           Fix sis5595 in4 (Aurelien Jarno)
-           Add support for 2.6 gl520sm driver (Maarten Deprez)
-           Add support for 2.6 bmcsensors driver (Yani Ioannou)
-           Add support for w83792d (Chunhao Huang/Winbond)
-           Add support for 2.6 adt7461 (James Chapman)
-           Add support for 2.6 lm92
-           Add support for 2.6 vt1211
-           Add preliminary support for 2.6 w83627ehf
-  Makefile: Support mips, sparc32 and sparc64 (Aurelien Jarno)
-            Use -fno-strict-aliasing on all architectures
-  Man pages pwmconfig, fancontrol: New (Aurelien Jarno)
-  Module bmcsensors: Fix compile error
-                     Support IPMI V0.9 (Yani Ioannou/Vladislav Bogdanov)
-  Module ds1621: Fix detection (Aurelien Jarno)
-  Module eeprom: Discard SPD-centric checksum module parameter
-                 Cleanup detection function (backport from Linux 2.6)
-  Module i2c-ali1535: Add delay loops for reliability (Ubel Walter)
-  Module i2c-i801: Temporarily disable broken I2C block read
-  Module i2c-ipmi: Fix bogus return in a middle of a function (Sergio
-                   Gelato)
-  Module i2c-nforce2: Add nForce4 support (Hans-Frieder Vogt)
-  Module i2c-viapro: Prevent repeated resets
-  Module it87: Improve Super-I/O detection
-               Limit I2C address range
-               Support VID on the IT8712F
-  Module lm75: Only initialize CMP/INT bit
-  Module lm78: Fix bug with setting negative temperature limits
-  Module lm85: Properly differentiate between ADM1027 and ADT7463
-               Add EMC6D102 support
-  Module lm90: Fix MAX6657, MAX6658 and MAX6659 detection
-               Add limited ADT7461 support
-  Module lm93: Fix IN10 (+5V) scaling
-  Module mic74: New
-  Module w83627hf: Support secondary Super-I/O address
-                   Enable temp2 and temp3 if they are disabled
-  Module w83781d: Revert AS99127F temp2 and temp3 computation change
-                  Skip final initialization step for AS99127F chips
-  Module w83792d: New (Chunhao Huang/Winbond)
-  Program ddcmon: New; user-space replacement for the ddcmon driver
-  Program eeprog: Fix missing first char in ascii mode (J. A. McMahan Jr.)
-  Program isadump: Handle Super-I/O keys
-  Program lm_sensors.init: Cleanups (Axel Thimm)
-  Program mkdev.sh: Add basic command-line interface
-  Program mkpatch: Add adm1031, fscher, lm63, lm93 and max1619
-  Program pwmconfig: Secure the creation of temporary files (Aurelien Jarno)
-                     Don't complain about read-only enable files (lm85)
-                     Fix handling of alternate config file name
-  Program sensord: Fix erroneous error message (Aurelien Jarno)
-                   Support sis5595 in4 (Aurelien Jarno)
-                   Support w83627thf
-                   Support the separate it8712 prefix (Aurelien Jarno)
-  Program sensors: Display sis5595 in4 (Aurelien Jarno)
-                   No errors on missing pc87360 fans
-                   Add gl520sm support (Maarten Deprez)
-                   Improve vt1211 error/ignore handling (Michael Carland)
-                   Support w83792d, w83627ehf
-  Program sensors-detect: Fix MAX6657, MAX6658 and MAX6659 detection
-                          Improve IT8705F and IT8712F detection
-                          Improve udev detection
-                          Fix DS1621 detection
-                          Add W83627EHF detection
-                          Add ATI SMBus detection
-                          Add VT1211 alias detection
-                          Warn if chip modules not found
-                          Add i2c-ipmi to list if bmcsensors is on it
-                          Add PC87591 detection
-                          Search for correct udev db file name
-                          Add nForce3 250Gb and nForce4 detection
-
-
-2.9.0 (20041228)
-  NOTE: Requires i2c-2.9.0 or newer!
-  File README.thinkpad: Update
-  File doc/chips/it87: Cleanups
-  File doc/chips/lm63: New
-  File etc/sensors.conf.eg: Set via686a voltage limits
-  File kernel/chips/Module.mk: Resync module list with mkpatch
-  File kernel/include/sensors_compat.h: Define __devexit_p if missing
-                                        (kernels 2.4.16 and older)
-  Modules (all bus drivers): Remove owner from i2c_adapter; restore inc_use
-                             and dec_use removed in release 2.8.0
-  Modules (all chip drivers): Remove owner from i2c_driver; pass
-                              controlling_mod to i2c_register_entry() again
-  Module bmcsensors: Support function 1/x
-  Module i2c-amd756: Display the real bus name
-  Module i2c-amd756-s4882: New; SMBus multiplexing on the Tyan S4882
-  Module i2c-i801: Support i2c block read (ICH5 and higher)
-                   Add PEC support for ICH6
-                   Add support for ICH7
-  Module i2c-ipmb: Remove from build since it doesn't work
-  Module i2c-nforce2: Support the nForce3 (Pro150 and 250Gb)
-  Module icspll: Fix compilation
-  Module lm63: New driver for the National Semiconductor LM63
-  Module lm83: Use signed types for temperatures
-               Check limits on register writes
-  Module lm87: Round voltages properly
-               Retry on read errors (David Knierim)
-               Less agressive init (no reset)
-  Module lm90: Use signed types for temperatures
-               Check limits on register writes
-  Module lm93: Added module parameter for VID pin input thresholds.
-               Fix typo in dynamic VID alarms
-               Adds a couple log messages for failed transactions (David
-               Knierim)
-               Fix compilation breaking C99-ism (Axel Thimm)
-               Fix block read retries
-  Module pc87360: Support secondary Super-I/O address
-  Module smsc47m1: Add support for 47M15x and 47M192 (fans only)
-  Library: Add lm63 support
-           Add lpc47b397 support
-  Programs *.init: Rename lockfile to match file name
-  Programs i2cset, isaset: Written byte/word can be masked
-  Program decode-vaio.pl: Find eeproms on non-0 i2c bus too
-  Program mkpatch: Include i2c-amd756-s4882
-  Program pwmconfig: Handle new (well, back to old) pwm files names for
-                     Linux 2.6.10 and up
-  Program sensord: Do not scale load average (Aurelien Jarno)
-  Program sensors: Add lm63, lpc47b397 support
-                   Support DDR2 memory module EEPROMs (Rudolf Marek)
-                   Support only one location for the default configuration file
-                   Display the default configuration file location in --help
-                   Simplify the configuration file opening code
-  Program sensors-detect: Improve LM63 detection
-                          Discard IBM Thinkpad detection code
-                          Add PCA9556, LPC47B397, ICH7 detection
-                          Fix W83792D detection, add W83791SD detection
-
-
-2.8.8 (20041007)
-  File doc/donations: Update
-  File doc/lm_sensors-FAQ.texi: Add 4.6.1
-                                Update 4.7
-  File doc/chips/gl518sm: Update "iterate" info
-  File doc/chips/it87: Discard outdated module parameters
-  File doc/chips/lm75: LM77 is not supported
-  File doc/chips/lm90: LM86, MAX6657 and MAX6658 are supported
-  File doc/chips/lm93: New
-  File doc/chips/w83l785ts: Improvements
-  File etc/sensors.conf.eg: Fix it87 lines order
-                            Update lm87 section
-  File kernel/include/sensors_vid.h: Support VRM 10.0
-  Library: Support 2.6 adm1025
-           Preliminary support for 2.6 lm87
-           Support 2.6 adm9240
-           Allow an alternative sysfs file name for chip features (2.6)
-           Fix lm83 critical limits (2.6)
-           Add lm93 support
-           Prevent some procfs errors from being silently ignored
-  Makefiles: Implement user_uninstall (Rudolf Marek)
-             Spoof LOGNAME and HOSTNAME when making html man pages
-  Module adm1025: Refine detection
-                  Update limit registers again (revert of 2.8.1)
-                  Init high limits if they read 0
-                  Fix conversions
-  Module lm75: Refine detection
-  Module lm78: Fix init
-  Module lm83: Default to kind lm83 if forced.
-               Fix temperature macros.
-  Module lm90: Add LM86, MAX6657 and MAX6658 support
-  Module lm93: New
-  Module mtp008: Fix the setting of limits on temp2
-  Module pca9540: Refine detection
-  Module pc87360: Change voltage/thermistor magnitude from 2 to 3
-                  Support VID
-                  Fix fan_div file when fan count is less than 3
-                  Additional init and debug
-  Module smsc47m1: Fix pwm_enable being inverted
-  Module w83627hf: Add alternate VCORE/in0 calculation method
-                   Remove reset of chip by driver on initialization
-  Module w83781d: Fix default VRM for w83791d
-  Module w83l785ts: Implement read error handling (backport from 2.6)
-  Programs i2cset, i2cdump, i2cdetect, isaset, isadump:
-                    Wait for user input to continue (as opposed to 5 sec
-                    delay), can be skipped with -y
-                    Various cleanups and code refactoring
-                    Update manual pages
-  Program fancontrol.init: New (Dean Takemori)
-  Program fancontrol.pl: Restore fans on many kinds of errors/interrupts
-  Program lm_sensors.init: Support 2.6 kernels and sensors in /usr/bin
-                           (Giuseppe Della Bianca)
-  Program mkdev.sh: Detect devfs and refuse to run
-                    Use mknod's mode instead of chmod
-  Program mkpatch: Include xeontemp and pc87360
-  Program sensors: Rework adm1025 support
-                   Display pc87365/pc87366 VID
-                   Improve smsc47m1 support
-                   Hide 2.6 adm1027 alarm_mask being missing
-                   Print VRM version for all supported chips
-  Program sensors-detect: Support LM93, LM77, LM63
-                          Support PC8739x Super-I/O family (no sensors)
-                          Fix PCA9540 support
-                          Refine ADM1025/ADM1025A detection
-                          Refine LM75 detection
-                          Ignore missing /proc/modules (Andras Bali)
-                          Script-wide Perl cleanups
-                          Support udev
-                          Support W83792D, LM96000
-
-
-2.8.7 (20040611)
-  File README.thinkpad: Update 24RF08 status
-  File doc/fan-divisors: More info on accuracy
-  File doc/lm_sensors-FAQ.texi: Update 4.27
-  File doc/chips/adm1031: New
-  File doc/chips/max1619: New
-  File doc/chips/pc87360-fan: Renamed to pc87360
-  File doc/chips/pc87360: Big update
-  File doc/chips/w83781d: Update AS99127F documentation
-  File etc/sensors.conf.eg: Add comments about BP6 voltages
-                            Add comment on Asus A7V8X-X VCore
-                            Misc fixes to lm80 section
-                            Update via686a section
-                            New lm99 section
-                            Add section for LM85-like chips
-                            Preliminary pc87366 section
-                            Add comment on GL520SM application modes
-                            Document beep_enable (Aurelien Jarno)
-                            Preliminary max1619 section
-                            Preliminary adm1030 and adm1031 sections
-  Library: Fix 2.6 VRM
-           Fix 2.6 hyst temp for 2.6 (lm75, lm78 and gl518sm)
-           Fully support the PC87360 family
-           Support the lm99
-           Add version and date strings
-           Support 2.6 max1619
-  Makefile: Do not run depmod on staged installs (Peter Breitenlohner)
-  Man page i2cdetect.8: document new command line flags
-  Man page i2cdump.8: More details on how i2cdump can write to a chip
-  Modules (all chip drivers): Rework memory allocation scheme.
-  Module adm1031: New (Alexandre d'Alton)
-  Module bmcsensors: Fix oops by creating thread for initialization
-  Modules dmi_scan, i2c-piix4: Move IBM detection into dmi_scan
-  Modules w83781d.c, smartbatt.c, lm75.c, gl520sm.c, gl518sm.c, ds1621.c,
-          asb100.c, lm92.c: Use swab16
-  Modules eeprom, ddcmon: Unconditional prevention of 24RF08 corruption
-  Module gl520sm: Less agressive initialization process
-                  Fix temp1 limits being unsettable in application
-                  Ensure that temp2 and in4 are not used at the same time
-  Module i2c-i801: Support 6300ESB and ICH6
-  Module i2c-piix4: Don't blacklist IBM with Serverworks chip
-  Module i2c-sis645: Add support for SiS655
-  Module it87: Discard non-standard Super-I/O exit sequence (Bjorn Mork)
-  Module lm90: Support LM99 and LM89
-  Module lm92: Support MAX6633, MAX6634, MAX6635 and LM76
-               Get rid of useless i2c_probe call
-  Module max1619: New (Alexey Fisher)
-  Module p4b_smbus: Add support for mobile versions of the 82801
-                    (Axel Thimm)
-  Module pc87360-fan: Renamed to pc87360
-  Module pc87360: Also support PC87365 and PC87366
-                  Add write support
-                  Correctly set the chip name depending on the type
-                  Add voltage and temperature support
-                  Fix fan speed computation
-                  Retrieve fans configuration from Super-I/O space
-                  Export pwm_enable (read-only)
-                  Honor pwm invert bits
-                  Clear fan alarms after we read them
-                  Do not read fan data when monitoring is disabled
-                  Do not include SENSORS_INSMOD stuff
-                  New module parameter: init
-                  Fan clock dividers change automatically
-                  Add thermistor dupport
-  Module smsc47m1: Lock on reads and writes
-                   Various PWM fixes
-  Module thmc50: Fix address range
-  Module via686a: Fix voltage roundings
-                  Simplify temperature conversions
-  Module w83781d: Drop PWM support for as99127f
-                  Invert AS99127F beep bits in driver rather than user-space
-  Programs pwmconfig, fancontrol: Switch to new sysfs naming scheme
-  Program fancontrol: restore fans on TERM and KILL (Stephen Kitt)
-  Program fancontrol.pl: New
-  Program i2cdetect: Adapt probing method to address
-                     Add -q and -r flags to force probing methods
-                     Allow probing range selection
-  Program isadump: Major improvements
-  Program isaset: New
-  Program mkpatch: Patch dmi_scan.c in kernel instead of adding our own
-                   module
-                   Include i2c-nforce2
-  Program sensord: New --rrd-no-average parameter
-                   Synchronize time slots with rrd
-                   Fix W83781D temp3 alarm (Aurelien Jarno)
-                   Add ASB100 support (Andrew May)
-  Program sensors: Fully support the PC87360 family
-                   Fix lm80 temperature alarms
-                   Support the lm99
-                   Do not invert AS99127F beep bits anymore
-                   Fix W83781D temp3 alarm (Aurelien Jarno)
-                   Print library version string
-  Program sensors-detect: Rework Super I/O detection
-                          Support SiS655/SiS96x
-                          Support ADT7461 and ADT7467
-                          Better support for ADM1027, ADT7460 and ADT7463
-                          Explicitly support ADM1028
-                          Scan all logical devices of PC87365 and PC87366
-                          Detect LM92, LM76, MAX6633, MAX6634, MAX6635
-                          Detect eeproms with software write protect (not
-                          enabled by default)
-                          Support ALi 1563 (2.6 only)
-                          Drop LTC1710 support
-                          Use byte reads for probing on ranges 0x30-0x37 and
-                          0x50-0x5F
-                          Improve LM89 and LM99 support
-                          Support GeForce FX 5900 video cards
-                          Fix devfs misdetection (Aurelien Jarno)
-                          Detect 6300ESB, ICH6
-                          Fix double detection of ISA chips
-                          Support MAX1619
-                          Support PC87373 Super-I/O
-                          Fix unknown adapters appearing multiple times
-                          Refine MAX6650/MAX6651 detection
-
-
-2.8.6 (20040405)
-  File README.thinkpad: Update status
-  File doc/chips/pca9540: New
-  File doc/chips/pc87360-fan: New
-  File etc/sensors.conf.eg: Update pcf8591 default configuration
-  Library: Switch to new sysfs naming standard
-           Fix gcc 3.3 warnings (Philipp Thomas)
-           Support 2.6 ds1621 and pcf8591
-           Change pcf8591 magnitudes
-           Support pc87360-fan
-  Makefile: Install shared library 755
-  Man pages i2cdump.8, i2cset.8, isadump.8: New (Debian team)
-  Man pages i2cdetect.8, sensors-detect.8: New (Debian team)
-  Modules ds1621, pcf8591: Check for capabilities before using them
-                           (Aurelien Jarno)
-  Modules pcf8574, pcf8591: Cleanups
-  Modules ddcmon, eeprom: Fix bogus init (Ralf Roesch)
-  Module adm1021: Better detection and initialization
-  Module pca9540: New driver for the Philips PCA9540
-  Module pc87360-fan: New driver for the National Semiconductor PC87360,
-                      PC87363 and PC87364 Super I/O chips
-  Module smsc47m1: Support the LPC47B27x
-  Programs i2cdetect, i2cdump, i2cset: Fix incorrect bus names if possible
-  Program i2cdetect: Skip special addresses by default
-  Program sensord: Prevent null pointer dereference (Tim Toohey)
-  Program sensors: Print the degree symbol in the terminal's current locale
-                   (Aurelien Jarno)
-                   Update pcf8591 print to support 2.6 driver
-                   Support pc87360-fan
-  Program sensors-detect: Support Maxim MAX6900, ALi M5879, Philips PCA9540
-                          Improved SiS chips support
-                          Add a white list of IBM systems
-                          Drop support of undetectable adapters
-                          Fix smart battery detection
-                          Add smart battery charger and manager detection
-                          Rework adm1021 and clones detection
-                          The PC87360, PC87363 and PC87364 Super I/O chips
-                          now have a (preliminary) driver
-                          Rework Super I/O detection
-                          Better support of devfs
-  Program sensors-detect-stat.pl: New
-
-
-2.8.5 (20040305)
-  File doc/chips/SUMMARY: Update
-  File etc/sensors.conf.eg: Epox 8K3A tweaks. (Kronos)
-  Makefiles hotplug and rrd: Remove -o and -g arguments to install
-  Module bmcsensors: Increase max SDRs to 100
-  Module fscher: Rename fanN_min to pwmN (Reinhard Nissl)
-  Module i2c-amd756: Don't register driver to avoid driver conflicts.
-                     (Daniel Rune Jensen)
-  Module it87: Better temperature sensor types handling (Takeru Komoriya)
-               Fix reset=1 (Takeru Komoriya)
-  Module lm80: Code cleanups
-  Module vt1211: Fix bitmask in uch_config read and write; remove in6 and temp1
-  Module vt8231: Fix bitmask in uch_config read and write; remove in6 and temp1
-  Module w83627hf: Add w83637hf support
-                   Fix exported name
-                   Fix PWM in w83627thf
-                   Preserve other bits when forcing temp2/3 to comparator mode
-  Module w83781d: Preserve other bits when forcing temp2/3 to comparator mode
-                  Remove asb100 support
-  Modules asb100, fscher, lm90, max6650, w83l785ts, xeontemp:
-          Define driver ID if i2c-id.h doesn't have it yet.
-  Modules i2c-ali1535, i2c-hydra, i2c-i801, i2c-sis5595:
-          Backport oops fix from Linux 2.6.
-  Modules (all chips): Get rid of useless headers
-  Program decode-edid.pl: Add sysfs support
-  Program sensors: Add w83637hf support
-                   Add support for Shuttle Ethernet EEPROMs
-                   Drop 2.6 subclient detection
-  Program sensors-detect: Add heuristics to the LM80 detection function
-                          Add support for W83L785R, improve W83L784R/AR
-                          Add GeForce FX 5600 as supported by rivatv
-                          More Super IO chips, better handling
-  Library: Update to match renames in fscher
-           Reverse temporary changes to w83l785ts mappings
-           Fix vt1211 and vt8231 uch_config not being writable
-           Add 2.6 lm80 support
-           Add w83637hf support
-           Remove in6 and temp1 from vt1211 and vt8231
-           Add support for Shuttle Ethernet EEPROMs
-           Remove unused as99127f features
-
-
-2.8.4 (20040207)
-  File doc/lm_sensors-FAQ.texi: Update 4.20.
-  File doc/chips/it87: Change hyst to low
-  File doc/chips/w83l785ts: New
-  File etc/sensors.conf.eg: Change it87 hyst to low
-                            Fix w83697hf supposed to have temp3
-                            Limits initialization for adm1025/ne1619
-                            Handle fscher voltage conversions
-                            Add Tyan Trinity S2495 KT400 setup (Eric
-                              Schumann)
-                            Fix fscher fan labels (Reinhard Nissl)
-  Library: Better 2.6 eeprom support
-           Change it87 hyst to low
-           Add 2.6 gl518sm, fscher support
-           Fix 2.6 negative voltages handling
-           Temporary fix to w83l785ts mappings
-  Module adm1025: Separate prefix for NE1619
-  Module adm1026: Remove use of temporary ID
-                  Define addresses as a range
-  Module bmcsensors: Fix reservations
-  Module fscher: Externalize voltage conversions
-  Module eeprom: Remove memtype
-  Module i2c-piix4: Fix resource release error
-                    Various cleanups
-  Program decode-vaio.pl: Add sysfs support
-  Program mkpatch: Add max6650, lm83, lm90, asb100 and w83l785ts
-                   Drop linux 2.2 support
-                   Add w83627hf
-  Program sensors: Do not show algorithm by default
-                   Cleanup temperature unit display code
-                   Cleanup label spacing code
-                   Fix output to UTF-8 terms (Marcel Sebek)
-                   Simplify gl518sm print
-                   Do not ignore errors in FSC chips prints
-                   Fix w83l785ts print
-                   Cleanup FSC chips prints
-  Program sensors-detect: Fix PATH issues
-                          Correctly point to the fscher driver
-
-
-2.8.3 (20040115)
-  File lm_sensors.spec: Update
-  Library: Add 2.6 eeprom, lm90 support
-           Fix 2.6 temp_hystX for 2.6.1-rc1 and later
-  Makefile: Update Alpha CMODFLAGS (Daniel Nilsson)
-  Makefiles: Remove -o and -g arguments to install; add DESTDIR where missing
-  Module i2c-amd756: Fix byte writes
-  Module i2c-tsunami: Cleanups (Daniel Nilsson)
-  Module it87: Fix sg_tlx writes; fix sensor type reporting;
-               add 8712 Super I/O detection;
-               remove initialization of temp_type and fan_ctl;
-               remove init and temp_type module parameters
-  Module lm90: Handle hysteresis differently
-  Module smartbatt: Fix detection, magnitudes, temp
-  Module w83781d: Fix negative voltages
-  Module w83l785ts: New
-  Program eeprog: Make 8 bit mode the default
-  Program fancontrol: Improvements, fixes, support 2.6 kernels
-  Program mkpatch: Add lm75.h
-  Program pwmconfig: Improvements, fixes, support 2.6 kernels
-  Program sensors: Add ASB100 support
-  Program sensors-detect: Add 8712 Super I/O detection;
-                          add W83L785TS detection
-
-
-2.8.2 (20031211)
-  IMPORTANT: Limit initialization removed from all chip drivers!
-             If you didn't run 'sensors -s' in the past you may need to now!
-  File sensors.conf.eg: Change lm75 scaling back to 1;
-                        Add example for asb100
-  Library: Fix bmcsensors scaling, increase number of sensors;
-           Add w83627thf support; Advance version to 3.0.0;
-           Add hermes, ADM1032, ASB100 support;
-           Add it87 sensor type support;
-           Add sysfs support for kernel 2.6;
-           Fix memory leaks
-  Makefiles: Install fancontrol, pwmconfig, decode-*.pl;
-             Fail if no kernel .config file exists;
-             Don't build module dependencies for user and user_install
-  Modules adm1021, adm1024, adm1025, adm9240, ds1621, gl518sm, gl520sm,
-          it87, lm75, lm78, lm80, lm83, lm87, lm90, mtp008, sis5595,
-          smsc47m1, thmc50, via686a, w83627hf, w83781d:
-          Remove initialization of limits by driver.
-  Modules it87, lm78, mtp008, sis5595, w83627hf: Fix IN_FROM_REG rounding
-  Modules (chip): Init cleanups
-  Module asb100: New
-  Module bmcsensors: Fix voltage scaling, voltage and fan limits
-  Modules ddcmon, eeprom: Add failure printks
-  Module fscher: New (Fujitsu-Siemens Hermes driver)
-  Module i2c-amd756: Fix AMD8111 support
-  Module i2c-amd8111: Fix byte writes
-  Module i2c-nforce2: Fix byte writes
-  Module i2c-piix4: Add support for CSB6; add fix_hstcfg option
-  Module i2c-sis630: Sync with 2.6.0-X driver version
-  Module i2c-viapro: Add support for Via 8237
-  Module it87: Add pwm and "smart guardian" support;
-               add it87 sensor type support
-  Module lm75: Fix negative voltages
-  Module lm90: Add ADM1032 support
-  Module w83781d: Fix 791d and 627hf detection
-  Module w83627hf: Add VID support
-  Program dmidecode: Remove (sensors-detect doesn't need it anymore)
-  Program eeprog: New
-  Programs i2cdetect, i2cdump, i2cset: add -v (version) option;
-                                       support sysfs for i2c bus search
-  Program i2cdetect: Add -l option to list busses
-  Program i2cdump: Add 'c' mode for consective address reads
-  Program mkpatch: Cleanups
-  Program pwmconfig: Handle multiple fans controlled by a single pwm
-  Program sensord: Remove ddcmon support
-  Program sensors: Add ADM1032 support; add messages for sysfs
-  Program sensors-detect: Prefer Super I/O drivers;
-                          Fix W83627HF and W83791D detection; detect CSB6;
-                          Detect ADM1029, ADM1030, ADM1031;
-                          Detect W83637HF, W83697UF;
-                          Add it87 sensor type support; add sysfs support
-                          Reduce lm80 misdetects; remove PCFxxxx "detection"
-                          Detect VT8237 (KT600)
-                          Use VPD instead of DMI+ACPI for Thinkpad detection
-                          Suggest new asb100 driver instead of w83781d
-
-
-2.8.1 (20031005)
-  NOTE: Requires i2c-2.8.1 or newer!
-  File sensors.conf.eg: Improved adm1025 section
-                        Default temp labels for as99127f
-                        Improved lm83 section
-                        Better support for Asus A7V8X-X
-  File doc/chips/SUMMARY: Add SMSC manufacturer ID
-  File doc/chips/adm1025: Add decent documentation (almost new)
-  File doc/chips/lm83: Known motherboards list update, misc updates
-  Library: Change adm1025 names (hyst/over become low/high)
-           Swap adm1025 temp1 and temp2 to match the driver's order
-           Advance version to 2.0.1
-           Update lm83 support
-           Add support for lm90, xeontemp, max6650
-           Add separate messages for read and write errors
-           Add missing message for parse error
-  Makefile: Move LINUX_HEADERS from ALL_CPPFLAGS to MODCPPFLAGS
-  Modules (various): Fix includes for compilation on Alpha
-                     Use the new i2c_delay function instead of the various
-                     do_pause functions
-  Module i2c-ali15x3: Fix resource leak (Daniele Bellucci)
-  Module i2c-nforce2: Cleanups
-  Module i2c-i810: Use readl/writel for portable access to PCI memory
-  Module i2c-piix4: Force CPCI735 bug workaround (Tom Rini)
-  Module i2c-savage4: Use readl/writel for portable access to PCI memory
-  Module i2c-sis630: Fix detection
-                     Add block data read/write support
-  Module i2c-sis645: Detection method change/bugfix
-  Module i2c-viapro: Prevent buffer overrun (Sergey Vlasov)
-  Module i2c-voodoo3: Use readl/writel for portable access to PCI memory
-  Module adm1025: Major driver update
-                  Add support for Philips NE1619
-                  Simplify the driver a lot (unified voltages, unified
-                  temperatures and much more)
-                  Fix default voltage limits
-                  Change default temperature limits
-                  Swap remote and local temperatures to match the internal
-                  registers order (make the code unification possible)
-                  Export remote diode fault through alarms
-  Module ddcmon: Major update
-                 Add half a dozen new features
-                 Add checksum parameter (same as for the eeprom module)
-                 Fix monitor limits
-  Module eeprom: Ignore Sony Vaio EEPROMs with a password set
-  Module lm78: Fix a fan_div/fan_min bug
-  Module lm83: Add t_crit and alarms support
-  Module lm90: New
-  Module max6650: New
-  Module saa1064: New
-  Module smsc47m1: Add support for 47M142
-  Module w83627hf: Fix 697HF PWM; fix 697HF VBAT and V5SB alarms;
-                   enhance w83627thf support
-  Module w83781d: Enhance chip detection; clean up error returns;
-                  fix 697HF and 791D PWM; fix 697HF VBAT and V5SB alarms
-  Module xeontemp: New
-  Program decode-dimms.pl: Add Direct Rambus (DRDRAM)
-                           Mark Rambus as unsupported
-  Program decode-edid.pl: New
-                          Interfaces between our eeprom module and
-                          parse-edid from the read-edid project
-  Program p4b_smbus: Fix SMP compilation
-  Program sensord: Add support for IT87 (Mike Black)
-                   Change ADM1025 support to match the changes made to
-                   the library
-  Program sensors: Rewrite and enhance EEPROM support
-                   Change LM83 and ADM1025 support to match the changes
-                   made to the library
-                   Add DRDRAM support to print_eeprom
-                   Exit(1) on /proc write failure (Malte Starostik)
-                   Add LM90, MAX6650 support
-  Program sensors-detect: Add support for PCF8574, PCF8574A, SAA1064
-                          Add support for LM82, LM86, LM89
-                          Improved W83781D family detection
-                          Add support for AS19927F rev.2, ASB100 Bach
-                          Add support for Asus Mozart-2 (3 types)
-                          Add support for NE1619
-                          Add support for FSC Hermes
-                          Make sure /sbin is in the user's path
-                          Fix EEPROM detection
-                          Automatic module.conf and /dev/i2c* detection
-                          Improve LM82 and LM83 detection
-                          Handle "to-be-written" cleanly
-                          Add detection for 47M14x Super I/O
-                          Handle the one-address-many-chips-same-driver
-                          case
-
-
-2.8.0 (20030714)
-  NOTE: Requires i2c-2.8.0 or newer!!!
-  Dropped all kernel 2.2 and 2.3 compatibility; 2.4.9 or later required;
-                  2.4.13 or later required for mkpatch.
-  File i2c-dev.h: Include userspace portion removed from i2c-dev.h in
-                  i2c package
-  File doc/chips/fscscy: Add watchdog documentation
-  File sensors.conf.eg: Fix vt1211/vt8231 thermistor calculations
-  File sensors.h: Now automatically generated
-  Library: Add support for exponents and logarithms for vt1211/vt8235 temps;
-           add adm1026, lm83, lm85, w83791d support;
-           Advance version to 2.0.0
-  Makefiles: Generate warnings if new library won't be found by ld.so;
-             Modules now install in kernel/drivers/i2c/[busses,chips];
-             Ensure that headers in /usr/local/include are used first;
-             Don't use /usr/include headers for modules;
-             Handle multiple UTS_RELEASE definitions in linux/version.h;
-             Automatically generate kernel/include/sensors.h;
-             Remove old gzipped modules; remove old misc directory if empty;
-             Remove pre-2.4 installation method;
-             -Wall now the default;
-             Add new targets user, user_install, and help;
-             Run depmod after module installation
-  Modules (all): Cleanups including
-		- Add #include <i2c-proc.h>
-		- C99 initializers
-		- Remove #ifdef MODULE
-		- Remove #ifndef THIS_MODULE
-		- Remove #ifndef MODULE_LICENSE
-		- Remove other 2.1/2.2 #ifdefs
-		- Remove #include "sensors.h", copy SYSCTL defs to module
-		- Remove excess #includes
-		- Remove argument in i2c_register_entry()
-		- Remove dummy xxx_command() definition
-		- Remove EXPORT_NO_SYMBOLS
-		- Remove init_MUTEX #define
-		- Remove xxx_inc_use() and xxx_dec_use() functions; modules
-                  no longer adjust their own refcounts
-		- Use module_init() and module_exit()
-		- Update to new i2c_driver struct definition
-  Modules (bus PCI): Convert to PCI-module-style initialization
-  Modules (several): Add support for AMD Opteron VRM (VID) encoding
-  Module adm1021: Set alarm on failed reads and report old value;
-                  merge changes from kernel 2.5.54
-  Module adm1026: New
-  Module bmcsensors: Fix compile when DEBUG=1
-  Modules ddcmon, eeprom: Use i2c block reads if possible;
-                          better error handling
-  Module ds1307: Add to Makefile
-  Module gl520sm: Fix temperature over/hyst writes
-  Module lm75: merge changes from kernel 2.5.54
-  Module lm83: New
-  Module lm85: New
-  Module i2c-ali1535: Check for invalid transaction
-  Module i2c-ali15x3: Check for invalid transaction
-  Module i2c-amd756: merge changes from kernel 2.5.54;
-                     check for invalid transaction
-  Module i2c-amd8111: merge changes from kernel 2.5.54
-  Module i2c-i801: Add support for 82801EB (ICH5)
-  Module i2c-i810: Fix for some chips
-  Module i2c-nforce2: New
-  Module i2c-piix4: Check for invalid transaction
-  Module i2c-sis5595: Check for invalid transaction; add more blacklist IDs
-  Module i2c-sis645: Add support for SiS648, SiS651, SiS745, and SiS746
-	north bridges; SiS962 and SiS963 south bridges
-  Module i2c-viapro: Check for invalid transaction
-  Modules mtp008, smsc47m1, vt1211, vt8231, w83781d: Standardize and improve
-          pwm and pwm enable support; update docs
-  Module smbus-arp: Check adapter for HW or SW PEC support;
-                    add reset option
-  Module w83781d: Add support for w83791d
-  Module w83627hf: New
-  Program decode-dimms.pl: Recognize DDR and Rambus
-  Program eeprom: Fix writes for small eeproms
-  Program eeprom, eepromer: Use local i2c-dev.h for build
-  Program fancontrol: New
-  Program lm_sensors.init: Call sensors -s in start()
-  Program mkpatch: Fix vt8231 compile; keep tsunami from menu on non-alpha;
-                   Add adm1026,lm85 support;
-                   Remove sensors.c file; add sensors_compat.h;
-                   Remove patches to i2c-core.c and drivers/char/mem.c;
-                   Now works only for kernels 2.4.13 or later
-  Program p4b_smbus: Fix 'make install';
-                     Install in same place as other modules;
-                     Clear correct bits in config word
-  Program pwmconfig: New
-  Program sensors: add adm1026, lm85, w83791d support
-  Program sensors-detect: Add super i/o detection (smsc47m1, vt1211,
-                          w83627hf, w83627thf, w83697hf);
-                          Add support for SiS651, SiS961, SiS745, SiS746;
-                          Support dmidecode 2.0 and later;
-                          Fix "C" format error;
-                          Add support for adm1026, 82801EB (ICH5), W83791D;
-                          Add support for w83l785ts, nForce2;
-                          Fix UTF-8 incompatibility;
-                          Better support for lm75;
-                          Add support for lm83
-
-2.7.0 (20021208)
-  NOTE: Requires i2c-2.7.0 or newer.
-  File doc/busses/i2c-ali1535: Add license, miscellaneous changes
-  File doc/busses/i2c-ali15x3: Add license, miscellaneous changes
-  File doc/busses/i2c-sis645: Add license
-  File doc/chips/lm92: Add license, features
-  File doc/chips/maxilife: Add license, parameters, features
-  File doc/chips/smartbatt: Complete rewrite
-  File doc/chips/vt8231: Add license, parameters
-  File sensors.conf.eg: Add section for lm75; complete the lm78 section
-  Library: Add support for MC1066; add multiple VRM version support for lm87;
-           enhance adm1023 support; initial support for Sony Vaio eeprom;
-           add support for bmcsensors; add hacks for additional dummy drivers
-  Makefile: Take kernel source location from /lib/modules/x.x.x/build;
-            add flags for x86_64 compiles
-  Module adm1021: Add support for MC1066
-  Module bmcsensors: New
-  Module dmi_scan: Rename symbol duplicated in kernel; apply fixes from
-                   kernel 2.5.43; fix 2.2 kernel compiles
-  Module gl518sm: Iterate allowed only for rev 0x00
-  Module i2c-amd756: Configure base address for nForce support;
-                     check for uninitialized base address;
-                     add support for amd8111 (SMBus 1.0)
-  Module i2c-amd8111: New (SMBus 2.0)
-  Module i2c-ipmb: New
-  Module i2c-ipmi: New
-  Module i2c-keywest: Sync with kernel 2.4.20
-  Module i2c-sis630: Add support for SiS730
-  Module i2c-sis645: Improve support for SiS645/961;
-                     add support for SiS645DX/961 and SiS735;
-                     fix 2.2 kernel compiles
-  Module i2c-viapro: Add support for VT8233A (new ID 0x3177) and VT8235
-  Module lm87: Add multiple VRM version support
-  Module vt1211: Fix inx limits and alarms; fix in0
-  Module vt8231: Fix inx limits and alarms; fix in0
-  Module w83781d: Fix in0/in1 initialization
-  Module smartbatt: New
-  Modules (several): Remove #ifndefs, require i2c-2.7.0; HZ fixes
-  Program decode-dimms.pl: Code cleanup; valid HTML; better HTML output;
-                           stop decoding on checksum error
-  Program dmidecode: Fix read bug; upgrade to version 1.8
-  Program doc-insmod: Complete rewrite; fix author output
-  Program doc-features: Complete rewrite; handle missing sysctl entries;
-                        handle unknown prefix with suggestion
-  Program lm_sensors.init: Remove spaces bug; add green/red output
-  Program mkpatch: Fix dmi_scan module compile; add sis630, sis645, amd8111
-  Program rrd: Add sanity limits to newly-created RRD.
-  Program sensord: (v0.6.2) Add sanity limits to newly-created RRD.
-  Program sensors: Add support for MC1066, Rambus Rimms;
-                   fix w83781d temp3 alarm; fix gl518sm rev 0x00 recognition;
-                   initial support for Sony Vaio eeprom
-  Program sensors-detect: Add support for MC1066, smart battery, 8235,
-                          IPMI, AMD8111; add help if no sensors found;
-                          add ACPI method for IBM system detection;
-                          work with old Perl versions again;
-                          initial support for Sony Vaio eeprom
-
-2.6.5 (20020915)
-  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  File sensors.conf.eg: Fix temp[23] for as99127f; add vt8231
-  Library: Fix fan3_div writes for w8378* and it87; add vt8231
-  Module dmi_scan: new
-  Module ds1621: Fix enable/disable
-  Module eeprom: Do not corrupt 24RF08's when checksum=1
-  Module i2c-i801: Check for uninitialized base address;
-                   enable if not enabled
-  Module i2c-piix4: Refuse to load on IBM systems to prevent 24RF08 corruption
-  Module i2c-sis630: new
-  Module i2c-sis645: new
-  Module lm92: Fix in-kernel initialization
-  Module via686a: Remove VT8231 support
-  Module vt8231: new
-  Module w83781: recognize Asus "ASB100 Bach" as AS99127F
-  Program dmidecode: new
-  Programs i2cdetect, i2cdump, i2cset, isadump: Now installed by 'make install'
-  Program mkpatch: Add Config.in entries for, lm92,
-                   pcf8574, pcf8591, smsc47m1, vt1211;
-                   add dmi_scan
-  Program p4b_smbus: Fix compile for SMP and MODVERSIONS; fix PCI ID problem
-  Program lm_sensors.init: fix stop()
-  Program sensord: (v0.6.1) Add /usr/local/etc to config file path;
-                   add support for logging loadavg in RRD;
-                   fix down-converting raw labels for RRD;
-                   update chip support, still behind sensors
-  Program sensors: Add /usr/local/etc to config file path;
-                   fix -c and -u flags; add vt8231
-  Program sensors-detect: recognize Asus "ASB100 Bach" as AS99127F;
-                          refuse to run on IBM systems;
-                          fix sysconfig module numbering;
-                          change quick write to not corrupt 24RF08's
-
-2.6.4 (20020719)
-  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  File doc/vid: New
-  File include/sensors_vid.h: New
-  File sensors.conf.eg: Add vt1211, smsc47m1
-  Library: Add multiple VRM version support for adm1025, w83781d;
-           fix 'flex scanner jammed' on some systems;
-           add vt1211, smsc47m1, lm92;
-           fix access mode checking
-  Makefiles: For 2.4+ kernels, modules now install in
-             kernel/drivers/[i2c,sensors] , not misc/ , and
-             'make install' removes old versions in misc/ .
-             Use $CFLAGS and $CPPFLAGS if defined.
-  Module adm1025: Add multiple VID version support
-  Module ds1307: new
-  Module i2c-amd756: Add nVidia nForce support; fix block read length;
-                     reliability improvements
-  Module i2c-hydra: Flush posted writes
-  Module i2c-i801: Add support for 82801DB (ICH4)
-  Module i2c-i810: Flush posted writes
-  Module i2c-savage4: new
-  Module i2c-viapro: Add support for VT8231 (0x8235), VT8233A (0x3147)
-  Module i2c-voodoo3: Flush posted writes
-  Module ds1307: New
-  Module lm92: New
-  Module smbus-arp: new
-  Module smsc47m1: new
-  Module via686a: Add support for VT8231 sensors
-  Module vt1211: new
-  Module w83781d: Add multiple VID version support; fix temp alarms
-  Program eeprom: new
-  Program i2cdump: Add smbus block command specification, add PEC support
-  Program lm_sensors.init: new
-  Program mkpatch: Add sensors_vid.h, i2c-savage4, lm92,
-                   pcf8574, pcf8591, smsc47m1, vt1211
-  Program p4b_smbus: Add support for ICH4
-  Program rrd: Fix swapped CPU and MB temps in summ_week.cgi
-  Program sensord.init: Renamed, was prog/init/sensors
-  Program sensord: Major update, now requires rrd source;
-                   not compiled by default
-  Program sensors: Recognize DDR SDRAM; add adm1025 VID; add -A
-                   (don't display algo. and adap.) option;
-                   add vt1211, smsc47m1, lm92
-  Program sensors-detect: Add VT8231, VT8233A, several S3 devices;
-                          add 82801DB, LM85; fix perl warnings;
-                          generate /etc/sysconfig/lm_sensors for
-                          lm_sensors.init script
-
-2.6.3 (20020322)
-  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  Chip modules (most): Allow THIS_MODULE definition for kernels 2.2.18+
-  File doc/chips/it87: add more temp_type help
-  File sensors.conf.eg: Un-ignore it87 in8, temp3, fan3;
-                        add adm1021 section; add lm87 AIN[1,2] template;
-                        swap negative voltage limits for 782d,783s,627hf,
-                        697hf,it87; add more it87 help; swap neg. voltage
-                        limits for lm78(-j), lm79, w83781d, as99127f
-  Library: Add PCF8591, W83697HF, ADM1023 support;
-           fix w83* fan_min computes;
-           swap neg. voltage limits for lm78(-j), lm79, w83781d, as99127f
-  Module adm1024: Add MODULE_LICENSE("GPL")
-  Module bt869: Add s-video out and DVD resolution support
-  Module eeprom: Add support for locations 128-255; rename /proc entries in hex
-  Module fscscy: implement min/max for voltages and fans
-  Module i2c-amd756: Add support for AMD768
-  Module i2c-i810: Add support for 810E
-  Module i2c-keywest: Big update, sync with kernel 2.4.18
-  Module i2c-piix4: Check for uninitialized base address
-  Module i2c-sis5595: Blacklist 645, 735
-  Module i2c-viapro: Check for uninitialized base address
-  Module gl518sm: Standardize /proc entries in0-3
-  Module lm87: Fix in0, in1, in5 initial limits; ain[1,2] -> in[6,7];
-               fan -> fan1; fix temp2 limit writes
-  Module pcf8574: Add support for PCF8574A; /proc interface changed
-  Module pcf8591: new
-  Module sis5595: Blacklist 645, 735
-  Module w83781d: Add W83697HF support; allow force_subclients parameter
-                  for Tyan 2460
-  Programs decode-dimms.pl, decode-xeon.pl: Update for new /proc names
-  Program decode-vaio.pl: new
-  Program i2cdump: Add i2c block read capability (requires i2c-2.6.3);
-                   add text output
-  Program init/sensors: New SysV init script
-  Program mkpatch.pl: Add support for fscscy, add more help entries
-  Program p4b_smbus: new
-  Program rrd: Install summ_week.cgi
-  Program sensors: Add PCF8591, W83697HF, ADM1023 support,
-                   clean up chassis intrusion prints
-  Program sensors-detect: Add several Nvidia chips, add PCF8591, add 810E;
-                          fix Via686a and it87 detection;
-                          add AMD768, IPMI-BMC-KCS and -SMIC; add Via 8231;
-                          fix uninitialized values; it87 beats lm78
-
-2.6.2 (20011118)
-  NOTE: Requires i2c-2.6.1 or newer, or kernel 2.4.13 or newer.
-  Chip Modules (all): malloc.h -> slab.h
-  Modules (all): Add MODULE_LICENSE("GPL")
-  File doc/FAQ: More updates and additions
-  File sensors.conf.eg: Fix it87 in5,in6 (-12,-5) calculations
-  Library: Add fscpos and fscscy support, fix gl520 in4 ID,
-           update it87 alarm ID's.
-  Module fscpos: new (Fujitsu-Siemens Poseidon driver)
-  Module fscscy: new (Fujitsu-Siemens Scylla driver)
-  Module i2c-amd756: Improve busy handling/printk's
-  Module i2c-i801: Add 82801CA/CAM support
-  Module i2c-keywest: Sync with PPC people, it works now
-  Module i2c-piix4: Add Intel 82443MX and SMSC Victory66 support
-  Module i2c-viapro: Add Via VT8233 support
-  Module it87: Merge alarm_* /proc entries to alarms
-  Module sis5595: Fix support for rev B0
-  Module via686a: Make limit initializations reliable
-  Module w83781d: Allow init=0 parameter to bypass initialization
-  Program isadump: Add flat address space (PCI) support
-  Program mkpatch.pl: Add support for i2c-ali1535, adm1024, ds1621,
-                      fscpos, it87, maxilife, mtp008
-  Program sensors: Fix w83781d temp precision
-  Program sensors-detect: Add ALI1535, Via VT8233, it87 (i2c),
-                          Fujitsu Poseidon and Scylla,
-                          Intel 82443MX and 82801CA/CAM detection,
-                          add ITE 8172G detection (driver in kernel 2.4.10)
-
-2.6.1 (20010830)
-  File BUGS: Updated
-  File doc/FAQ: More updates and additions
-  File doc/chips/adm1021: Claim support for Philips NE1617, NE1617A
-  File sensors.conf.eg: Fix/enhance it87 section
-  Library: ds1621 and it87 updates
-  Module i2c-ali15x3: Allow force_addr=0xaddr; enable if not enabled.
-  Module i2c-amd756: Add AMD 766 support
-  Module i2c-i801: Fix 82801BA detection broken by kernel 2.4.6
-  Module i2c-piix4: Add Serverworks CSB5 support
-  Module i2c-sis5595: Recognize unsupported chips and refuse to load
-  Module adm1025: Fixed temp2 min/max writes
-  Module ds1621: Add 12-bit precision mode
-  Module it87: Enable all alarms, add in8 support, add sensor type selection
-  Module sensors: Don't initialize i2c-proc (moved to i2c-core);
-                  remove support for module
-  Module sis5595: Recognize unsupported chips and refuse to load
-  Module w83781d: Fix fan speed for as99127f (broken by 2.6.0)
-  Program eepromer: new
-  Program mkpatch.pl: Fix dependencies on i2c-proc; disallow compilation
-                      of sensors.c as a module in kernel
-  Program sensors: it87 updates; adjust temp. precision for some chips
-  Program sensors-detect: Fix ADM1024 and ADM1025 detection;
-                          recognize unsupported SiS chips;
-                          recognize AMD 766 and Serverworks CSB5.
-
-2.6.0 (20010612)
-  NOTE: i2c-2.6.0 MUST BE be compiled AND installed first!!!
-        If your make fails because it can't find <linux/i2c-proc.h>, you
-        forgot this step!!!
-  File doc/FAQ: Many, many updates and additions
-  File doc/busses/i2c-sis5595: new
-  File doc/busses/i2c-tsunami: new
-  File doc/chips/it87: new
-  File doc/chips/via686a: Claim support for 686b.
-  File README.thinkpad: new
-  File sensors.conf.eg: Adjust as99127f in5 (-12V) and temp2 calculations;
-                        Add lm87, adm9240, ds1780, lm81 templates;
-                        Enhance help comments in file;
-                        Add Tyan S2510 dual-MTP008 example;
-                        Make separate sis5595 section.
-  Include file i2c-isa.h: No longer required, moved to i2c.h in i2c package
-  Include file sensors.h: Most contents moved to i2c-proc.h in i2c package
-  Library: Fix/standardize some lm87 and mtp008 entries; add sis5595 in4;
-           Add support for maxilife-nba and amd1024;
-           Change from sensors_* to i2c_* globals for new i2c-proc.[ch]
-  Chip Modules (all ISA): Remove #include "i2c-isa.h"
-  Chip Modules (all): Change from sensors_* to i2c_* globals
-                      for new i2c-proc.[ch]
-  Makefiles: enhance to support Alpha architecture
-  Module adm1021: Fix lm84 and gl523sm support
-  Module adm1024: new
-  Module i2c-i801: Chip detection cleanup
-  Module i2c-i810: Fixed i2c_i810_init() not found in patched kernel
-  Module i2c-sis5595: Allow force_addr=0xaddr; enable if not enabled.
-  Module i2c-tsunami: New
-  Module i2c-via: Ensure i2c bus is tristated correctly.
-  Module it87: new driver for IT8705, IT8712, Sis950 chips
-  Module lm78: Recognize chipid=0x20
-  Module lm87: Fix in0, in1 (2.5V and Vccp1) calculations
-  Module mtp008: Fix temp initializations;
-                 Save BIOS pin configuration of temps and fans;
-                 Fix sensor type reads/writes and fan min writes;
-                 Fix spurious invalid sensor type messages
-  Module sensors: Disabled, moved to i2c package as i2c-proc.c; only
-                  used for patched kernel now.
-                  Add xxx_init() calls for drivers added to mkpatch in 2.5.5.
-  Module sis5595: Fix temp, add in4 for chip revision 0xc0;
-                  Allow force_addr=0xaddr
-  Module via686a: Allow force_addr=0xaddr (for A7V/K7V boards)
-  Module w83781d: Don't reinitialize as99127f chip; this may cause fan/temp
-                  reading changes; Add messages for subclient
-                  registration failure
-  Programs i2cdetect, i2cdump: add devfs /dev/i2c/x support
-  Program i2cset: new
-  Program isadump: fix for Alpha arch. compiles
-  Program mkpatch.pl: Fix adm9240 typos; Add more chips to Configure.help;
-                      Remove ltc1710; Fix i2c_sis5595 typo;
-                      Support kernel 2.4.5 makefile change;
-                      Add i2c-tsunami; fixed i2c-voodoo3 configuration
-  Program sens_update_rrd: new
-  Program sensord: Add -d (debug) and -p (pid-file) options
-  Program sensors: Change reported version from 1.3 to the lm_sensors version;
-                   Fix swapped limit and hysteresis on 9240, 5595, 686a;
-                   Change mtp008 temps from max/min to limit/hyst;
-                   Add maxilife-nba, adm1024, it87 support.
-  Program sensors-detect: Recognize lm78 with chipid=0x20;
-                          Recognize SMSC Victory66 South Bridge;
-                          Add devfs /dev/i2c/x support;
-                          Add adm1024, it87xx support; Add thinkpad warning.
-  Program tellerstats: new
-
-2.5.5 (20010115)
-  NOTE: i2c-2.5.5 MUST BE be compiled and installed first, UNLESS
-        you have kernel 2.4.0-prerelease or greater.
-  Chip modules (all): Update mutex definition (works now for new 2.2 kernels)
-  File doc/developers/proc: new
-  File sensors.conf.eg: Add mtp008 entries, adm1025 entries
-  Library: Add ds1621, mtp008 support
-  Module adm1021: Add support for adm1021a / adm1023
-  Modules adm1021, thmc50: Rename /proc entries to temp[1-2]
-  Module adm1025: Add support for remote temp; rename /proc entries to
-                  in[0-5] and temp[1-2]; fix negative temp readings
-  Module adm9240: Rename /proc entries to in[0-5]
-  Module ddcmon: allow force and force_ddcmon parameters
-  Module ds1621: new
-  Module i2c-ali1535: Enhance error checking and recovery; add mutex
-  Module i2c-i810: Add "dummy write" before reads per Intel prog. ref.
-  Module i2c-piix4: add support for ServerWorks southbridge OSB4
-  Module lm87: cleanup, update voltage calculations
-  Module mtp008: new
-  Module pcf8574: change update time to 5 seconds
-  Modules sis5595, i2c-sis5595: Check for uninitialized base addresses
-  Module w83781d: fix beep setting via /proc
-  Programs editticket, readticket: new
-  Program mkpatch.pl: only works with 2.2 and 2.4 kernels; 2.3 support removed
-  Program mkpatch.pl: more fixes; now adds many more modules
-  Program sensors: Add ds1621, mtp008 support; add -f (Fahrenheit) option;
-                   add adm1025 temp2; report temp limits correctly as
-                   min/max or limit/hysteresis; print message if no
-                   sensors are found. Removed false errors from lm87 reads.
-  Program sensors-detect: Add ds1621, mtp008 detection;
-                          add ServerWorks detection
-
-2.5.4 (20001012)
-  Module i2c-viapro: Add support for Via 596B (0x3051)
-  Program m7101: moved to CVS tree, updated for 2.4.0 kernels
-  Program mkpatch.pl: fixed infinite loop
-  Program sensors-detect: Detect Via 596B (0x3051)
-
-2.5.3 (20001008)
-  NOTE: i2c 2.5.3 MUST BE be compiled and installed first.
-  File useful_addresses.html: update
-  Library: Add lm87 support
-  Module pcf8574: new
-  Module i2c-ali1535: new
-  Module i2c-ali15x3: removed force #ifdef.
-  Module i2c-i801: support Intel 82801BA (815E chipset)
-  Module i2c-i801: add i2c block write support, fix smbus block bugs
-                   (requires i2c 2.5.3 package)
-  Module i2c-i810: support Intel 82815
-  Module lm87: new
-  Module sensors: Fix for kernel 2.4.0-test8
-                  (remove copy_to_user_ret and put_user_ret)
-  Module w83781d: limit fan divisors to 8 max. for as99127f
-  Program decode-dimms: Add html output option, update for SPD spec 1.2B.
-  Program i2cdump: Add smbus block read support
-  Programs i2cdetect, i2cdump: Improve error reporting
-  Program sensors: new switch -u (--unknown)
-  Program sensors-detect: detect Intel 82801BA (815E chipset)
-  Program sensors-detect: detect Intel 82815
-  Program sensors-detect: detect ITE IT8705F / IT8712F (no driver yet)
-  Program sensors-detect: detect National LM87
-  Program sensors-detect: detect nVidia devices supported by i2c-riva.o
-  Program sensors-detect: Improve error reporting
-
-2.5.2 (20000709)
-  File sensors.conf.eg: Fix lm80 in8 calculation
-  Module w83781d: W83783S no longer crashes on unloading
-  Program sensors-detect: more robustness in case of unknown i2c adapters
-  Program sensors-detect, libsensors: fix eeprom size reporting
-  Program sensord: more flexibility, support for alarm scanning etc.
-  Program sensors: support for ignore setting on sensor alarms.
-  Programs: understand /dev/i2c* files (instead of /dev/i2c-*) too.
-
-2.5.1 (20000618)
-  Library: Add adm1025 support
-  Module adm1025: new
-  Module ddcmon: Fixed bus scan which could hang SMBus
-  Module i2c-keywest: new
-  Module maxilife: Add support for Maxilife '99 (NBA)
-  Module via686a: Enable sensors if not enabled by BIOS
-  Module w83781d: Improve w83783s support, w83627hf always has 2 pwm
-  Module w83781d: Fix sensor2&3 selection, enable VBAT (in8) monitoring
-  Module w83781d: Remove as99127f entries for in7-8, pwm3-4, sensor1-3
-  Module w83781d: Fis as99127f fan speed (was 66% too high)
-  Module w83781d: Improve beep input checking
-  Program i2cdump: Add Winbond-style bank selection
-  Program isadump: Add Winbond-style bank selection
-  Program sensors: Add adm1025 support.
-  Program sensors: Remove some as99127f entries, fix as99127 "(beep)"
-  Program sensors-detect: Fix i801 detection, add adm1025 driver entry
-  File sensors.conf.eg: Add Maxilife '99 entries
-  File sensors.conf.eg: Remove some as99127f entries.
-    Note: For as99127f, reinstall sensors.conf.eg manually (make install
-          won't reinstall it) or else 'sensors -s' will fail.
-
-2.5.0 (20000312)
-  Dropped all kernel 2.0 and 2.1 compatibility
-  Module i2c-i810: new
-  Module ddcmon: new
-  Module via686a: new
-  Module i2c-amd756: fixed region request
-  Module i2c-voodoo3: Converted to use i2c-algo-bit layer
-  Module w83781d: Don't change pin settings at initialization;
-                  also fix chip detection.
-  Library: Support for ddcmon and via686a
-  Program sensors-detect: Support for ddcmon and via686a
-  Program sensors: Support for eeprom, ddcmon and via686a
-
-2.4.5 (20000116)
-  Introduced DESTDIR installation prefix
-  Module lm80: fixes, temperature now read and set correctly
-  Module i2c-voodoo3: driver enhancements
-  Module w83781d: fixes, AS99127 works much better now
-  Library: New ignore keyword in config file
-  Programs: Support for new ignore keyword
-  Program sensors-detect: Support for MGA detections
-
-2.4.4 (19991201)
-  Addition of the alpha release of AMD 756 SMBus host support.
-  Many fixes and updates to the gl518sm driver
-  Updates and fixes for device detection
-
-2.4.0 (19990920)
-  Too much to list.
-  i2c and smbus parts are split off to a separate i2c package.
-  New drivers and other stuff.
-
-2.3.4 (19990616)
-  Module matorb: driver for Matrix-Orbital Displays (small LCD and VFDs)
-  All: Now compiles against kernel 2.0.x (again ;)
-  Module gl518sm: some updates and refinements
-
-2.3.3 (19990603)
-  All: Now compiles against kernel 2.3.x (x >= 1)
-  Module i2c-voodoo3: Timing issue fixes
-  Module bt869: Seems to be functional and relatively well tested
-  Many modules were modified to be more compatible with the new
-   Mutex structure in the new experimental kernels.
-
-2.3.2 (19990507)
-  Module i2c-hydra: Now compiles on 2.0.x kernels
-  Module i2c-lm75: Slightly better detection
-  * New, but not compiled by default:
-  Module i2c-voodoo3: beginning of Voodoo3 I2C bus driver
-  Module bt869: Beginning of BT869 (PAL/NTSC video converter) driver
-
-2.3.1 (19990501)
-  All: Now compiles on PPC
-  Module i2c-hydra: NEW
-  Module i2c-proc: Buffer overflow removed: `less /proc/bus-i2c-0' now works
-  Module w83781d: Removed deadlock (mutex was not initialized)
-  Documentation: A few glitches removed
-  Makefile: default module installation directory is now
-            /lib/modules/current/extra/misc
-  Program sensors-detect: PPC Hydra now detected
-  Program sensors: Now prints complete GL518SM information
-  Program sensors: SIS5595, ADM1021, MAX1617(A), ADM9240, DS1780 added
-
-2.3.0 (19990422)
-  All: Many, many changes and improvements
-  All: Many small bugs and problems removed
-  Modules: New insmod parameters
-  Modules: Much improved chip detection
-  Module maxilife: NEW
-  Module adm1021: MAX1617A now also supported
-  Module adm9240: DS1780 now also supported
-  Module w83781d: W83782D and W83783S now also supported
-  Program sensors-detect: NEW
-  Library: All chips now supported
-  Documentation: Very much improved
-
-2.2.2 (199903??)
-  Just some minor updates and bug fixes.
-
-2.2.1 (19990218)
-  All: Removed compile warnings
-  Module i2c-dev: Small bug removed if DEBUG=1 was used
-  Module sis5595: Now compiles for 2.0 kernels
-  Module adm1021: Detection corrected
-
-2.2.0 (19990216)
-  All: Set copyrights to include 1999
-  All: Small bugfixes
-  I2C: Upgraded to newest archive of Simon Vogl
-  Module i2c-dev: NEW
-  Module i2c-ali15x3: NEW
-  Module i2c-via: This is old module bit-mb, now moved to the main lm_sensors
-     directories, and somewhat improved
-  Module sis5595: NEW
-  Modules: Renamed all bus modules to i2c-*, new directory lay-out
-  Library: Support for new chip drivers, several small bugs fixed
-  Library manual pages: NEW
-  Program i2cdetect: Moved to detect directory
-  Program detect.pl: NEW
-  Program doc-features: NEW
-  Program sensors: Added man-page
-  Document BUGS: Added cdrom bug and kernel i2c conflict
-
-2.1.2 (19990116)
-  Modules lm80.o, w83781d.o: fan-related Segmentation fault corrected
-  Module gl518sm.o: yet more bug fixes. It should at long last be usable now
-  Documentation in doc/kernel: NEW
-
-2.1.1 (19990107)
-  Module i2c-proc.o: Hack to make /proc/bus/ possible for kernels 2.0.35
-                     and older
-  Module gl518sm.o: Miscelaneous bugs and problems solved
-  Program isadump: NEW
-
-2.1.0 (19981230)
-  Library: Completely NEW
-  Program sensors: NEW
-  Program grab_busses: NEW
-  Program decode-dimms: More information
-  Module bit-mb.o: Removed spurious semicolon; now runs on more VIA chipsets
-  Module w83781d.o: NEW
-  Module lm80.o: NEW
-  Module gl518sm.o: new procfile beep, several small updates
-  Modules: Now use pin readings, no more scaling within the kernel (use the
-           library instead)
-
-2.0.2 (19981214)
-  Module eeprom.o: NEW
-  Program decode-dimms: NEW
-  Modules: fill_inode fix, will stop segfaults on unloading in kernels after
-           2.1.58
-  Modules: Somewhat less verbose on transfers
-  Module lm78.o now recognizes and handles lm78-j and lm79
-
-2.0.1 (1998121?)
-  Module gl518sm.o updates, to make it actually work
-  Module lm75.o high/low-byte swapping write bug fixed
-
-2.0.0 (19981209)
+  libsensors: Add support for instantaneous power sensors
+              Add support for current sensors
+              Fix error propagation during expression evaluation
+              Detect excessive recursion depth during expression eval (#2365)
+  lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
+                   Drop support for kernels 2.4 and earlier
+  lm_sensors.init.suse: Delete (actual SuSE script is much different)
+  Makefile: Install sensors.conf.default instead of sensors.conf.eg (#2333)
+  maxilife scripts: Delete (driver never ported to Linux 2.6)
+  sensord: Accept negative temperatures in RRD database
+           Don't bail out on transient errors (#2330)
+  sensors: Add support for instantaneous power sensors
+           Add support for current sensors
+  sensors.conf.8: Lots of additions and reworks
+  sensors.conf.default: New, minimum version of sensors.conf.eg (#2333)
+                        Add sections for the SMSC SCH311x and SCH5027
+  sensors.conf.eg: The LM99 offset is now handled in the lm90 driver
+                   Move help section to sensors.conf.5
+                   Add a section for the Asus/Fintek F8000
+  sensors-detect: Fix detection of ADT7463 and LM96000
+                  Add VIA VX800/VX820 SMBus support 
+                  Fix detection of Intel 5000 series FB-DIMM AMB
+                  Fix detection of ADT7462
+                  Fix detection of SMSC LPC47M292
+                  Add SMSC LPC47M233 support
+                  Drop support for Linux 2.4 (#2325)
+                  Handle special case chips more efficiently
+                  Fix SMBus detection of W83627EHF and W83627DHG
+                  Get I2C adapter driver names from sysfs (#2328)
+                  Drop old SiS I2C adapter entries
+                  Drop separate LM78-J entry
+                  Merge all Mozart-2 entries
+                  Merge both GL518SM entries into one
+                  Complete GL520SM detection
+                  Improve GL525SM detection a bit
+                  Let kernel 2.6.28 and later handle chips aliases
+                  Unload kernel drivers when we are done with them (#2329)
+                  Fix handling of bus driver names with an underscore
+                  Simplify loading of bus drivers
+                  Fix bus number prediction logic (#2327)
+                  Suggest the sbs driver for smart batteries
+                  Drop alias detection for Super-I/O chips
+                  Move alias detection after all chip detections
+                  Probe chip types from safest to more risky (#2322)
+                  Add an option to skip ISA probes except IPMI
+                  Skip ISA detection by default if a Super I/O was found (#2322)
+                  Do not scan I2C adapters on multimedia cards by default
+                  Skip SMBus probing by default if a Super I/O was found (#2322)
+                  Display I2C address statictics with --stat
+                  Document the new detection order and rules
+                  Gather DMI data and print it at start-up
+                  Always probe the SMBus on Asus, Tyan and Supermicro boards
+                  Move IPMI interface detection to its own section
+                  Skip IPMI probing on laptops
+                  Add Winbond/Nuvoton W83667HG support
+                  Add Intel Core I7 support
+                  Generate new format for /etc/sysconfig/lm_sensors (#2246)
+                  Print warnings about missing modules on screen
+                  Fix detection of older DS1621
+                  Add nNidia nForce MCP67, MCP73, MCP79 SMBus support
+  sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
+  sysconfig-lm_sensors-convert: Sample config file conversion script (#2246)
+
+3.0.3 (2008-09-28)
+  libsensors: Avoid namespace pollution
+  fancontrol: Don't use named pipes when we don't need them (#2319)
+  pwmconfig: Tell the user about gnuplot if it isn't installed
+             Fix MINSTOP and MINSTART test functions (#2340)
+             Test MINSTOP before MINSTART
+             Use better step values for MINSTOP test
+             Print the revision and date at start-up
+             Detect and report obviously incorrect fan speeds
+             Determine MINSTOP automatically
+             Skip MINSTOP and MINSTART tests if fan can't stop
+             Change default for MINTEMP from 0 to 20 degrees C
+             Add support for attributes in the hwmon class device (#2260)
+             Update manual page
+  sensors.conf.eg: Drop "label temp#_crit" statements
+  sensors-detect: Add Intel SCH (bus) support
+                  Add SMSC EMC6D103 support
+                  Improve MAX6657, MAX6658, MAX6659 detection
+                  Cache the byte data reads (#2326)
+                  Add Maxim MAX6654/MAX6690 support
+                  Add National Semiconductor LM95231 support
+                  Add Analog Devices ADT7481 support
+                  Refactor alias detection functions
+                  Fix Andigilog aSC7621 support
+                  Add Texas Instruments THMC51 support
+                  Fix Analog Devices ADT7461 support
+                  Add VIA C7 support
+                  Fix Winbond W83L786NR/NG/R/G support (#2336)
+                  Add Maxim MAX6646/MAX6647/MAX6649 support
+                  Add VIA VT1212 support
+                  Add SMSC EMC2700LPC support
+                  Add ITE IT8720F support
+                  Add Texas Instruments TMP411 support
+                  Prevent misdetection of W83627DHG on I2C as LM78
+                  W83627DHG has no subclients
+                  Add Maxim MAX1618 support
+
+3.0.2 (2008-05-18)
+  documentation: Delete the FAQ, now maintained on the wiki
+  libsensors: Use __func__ instead of __FUNCTION__
+              Parse the configuration file in C locale
+              Late compute statements override early ones
+              Support virtual hwmon devices (#2309)
+              Support power and energy sensors
+              Support DOS-style configuration files again (#2284)
+  pwmconfig: Don't create the configuration file before it's needed
+             Don't preserve configuration file customizations
+             Fix permissions of the configuration file
+             Don't start if fancontrol is running (#2299)
+  fancontrol: Don't start if already running (#2299)
+              Delete fancontrol.pid at exit time (#2299)
+  sensord: Fix support of multiple chip names on the command line (#2321)
+  sensors: Print energy and power sensors with automatically scaled units
+  sensors-detect: Add SMSC SCH5027D detection
+                  Do not access I/O ports on PPC
+                  Move south bridge sensor detection to the right section
+                  Run chip_special_cases() earlier
+                  New device ID for the SMSC SCH5317
+                  Add SMSC SCH5127 detection
+                  Add National Semiconductor LM64 detection
+                  Add Asus F8000 detection
+                  Add Intel ICH10 (bus) detection
+                  Don't probe I2C addresses 0x40-0x47
+                  Fix the parsing of I2C addresses not to scan
+                  Detect and skip 1-register-only I2C devices
+                  Avoid SMBus word transactions where possible
+                  Add Dallas DS1631 detection
+
+3.0.1 (2008-01-28)
+  documentation: Update the application writing guidelines
+  libsensors: No longer depend on libsysfs (#2262)
+              Don't guess the bus type from the device ID format (#2240)
+              Add support for attributes in the hwmon class device (#2260)
+  Makefile: No warnings about ld configuration for staged installations
+            Document the variable overriding mechanism (#2296)
+  pwmconfig: Really hide errors on sysfs writes
+             Deal gracefully with read-only pwm_enable files
+             Warn about outputs found in automatic mode
+             Repeat available configuration options before prompt (#2289)
+             Fix duplicate warning message when config file is broken
+  fancontrol: Detect improperly formatted FCTEMPS value (#2293)
+  sensord: Fix rrd support (#2276)
+           Use the same colors for daily and weekly charts
+           Drop workaround needed by old versions of rrdtool
+  sensors: Fix error path on library initialization error
+  sensors.conf.eg: Fix voltage value references (g520sm, lm80, pc87366)
+  sensors-detect: Drop PCA9540 detection
+                  Improve sysconfig and modprobe.d integration
+                  Add SMSC SCH5514D-NS detection (no sensors)
+                  Lower the confidence of MAX6650/MAX6651
+                  Add Fintek F71858DG detection
+                  Add Fintek F81216D detection (no sensors)
+  unhide_ICH_SMBus: Add support for the 82801AA (ICH)
+
+3.0.0 (2007-11-24)
+  Makefile: Fix MODULE_DIR usage in etc
+            Fix build on PPC
+  pwmconfig: Better diagnostics in pwmdisable
+             Give the fans some time to spin up
+  sensors-detect: Add Texas Instruments TMP401 detection
+                  Mention the f75375s driver
+                  Add SMSC LPC47B367-NC detection (no sensors)
+                  Reduce w83781d/lm78 I2C address probing range
+                  Add Intel Celeron 4xx and Penryn (CPU on 45nm) detection 
+
+3.0.0-rc3 (2007-10-28)
+  libsensors: Add a default configuration file
+              Fix memory leaks on initialization error
+              Make the configuration file optional
+              Change the default configuration file to /etc/sensors3.conf
+  sensord: Reload config on SIGHUP rather than automatically
+           No default configuration file name
+  sensors: Fix file handle leak on library initialization error
+           Handle the case where voltage measurements aren't available
+           No default configuration file name
+           Install as sensors again
+  sensors.conf.eg: Install as sensors3.conf
+  sensors-detect: Fix SMSC LPC47B357/M967 detection
+                  Select the right driver for FSC chips
+  sensors-detect-stat.pl: Handle alternative chip lists
+
+3.0.0-rc2 (2007-10-10)
+  useful_addresses.html: Moved to the wiki
+  Makefile: Add sensors-conf-convert to make install
+  libsensors: Notify the caller when writing a value fails
+              Differentiate between different read error types
+              Report I/O errors as such
+  sensord: Log the error code on failure
+           Drop the configuration file search path mechanism (#2259)
+           Manual page update
+  sensors: Fix spurious critical temperature alarm
+           Print error messages to stderr
+           Make error messages more helpful and consistent
+           Better handling of the fault flags
+  sensors-conf-convert: Add a short help text
+  sensors-detect: Fix SMSC SCH311x detection
+                  Add AMD K10 CPU sensor detection 
+
+3.0.0-rc1 (2007-09-25)
   Initial release

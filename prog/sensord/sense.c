@@ -17,7 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA.
  */
 
 #include <stdio.h>
@@ -33,53 +34,12 @@
 #define DO_SET 2
 #define DO_RRD 3
 
-int
-getValid
-(sensors_chip_name name, int feature, int *valid) {
-  int err;
-  err = sensors_get_ignored (name, feature);
-  if (err >= 0) {
-    *valid = err;
-    err = 0;
-  }
-  return err;
-}
-
-int
-getLabel
-(sensors_chip_name name, int feature, char **label) {
-  int err;
-  err = sensors_get_label (name, feature, label);
-  return err;
-}
-
-int
-getRawLabel
-(sensors_chip_name name, int feature, const char **label) {
-  const sensors_feature_data *rawFeature;
-  int nr1 = 0, nr2 = 0, err = 0;
-  do {
-    rawFeature = sensors_get_all_features (name, &nr1, &nr2);
-  } while (rawFeature && (rawFeature->number != feature));
-  /* TODO: Ensure labels match RRD construct and are not repeated! */
-  if (!rawFeature) {
-    err = -1;
-  } else {
-    *label = rawFeature->name;
-  }
-  return err;
-}
-
 static const char *
 chipName
 (const sensors_chip_name *chip) {
   static char buffer[256];
-  if (chip->bus == SENSORS_CHIP_NAME_BUS_ISA)
-    sprintf (buffer, "%s-isa-%04x", chip->prefix, chip->addr);
-  else if (chip->bus == SENSORS_CHIP_NAME_BUS_PCI)
-	    sprintf (buffer, "%s-pci-%04x", chip->prefix, chip->addr);
-  else
-    sprintf (buffer, "%s-i2c-%d-%02x", chip->prefix, chip->bus, chip->addr);
+  if (sensors_snprintf_chip_name(buffer, 256, chip) < 0)
+    return NULL;
   return buffer;
 }
 
@@ -89,7 +49,7 @@ idChip
   const char *adapter;
 
   sensorLog (LOG_INFO, "Chip: %s", chipName (chip));
-  adapter = sensors_get_adapter_name (chip->bus);
+  adapter = sensors_get_adapter_name (&chip->bus);
   if (adapter)
     sensorLog (LOG_INFO, "Adapter: %s", adapter);
   
@@ -97,90 +57,50 @@ idChip
 }
 
 static int
-readUnknownChip
-(const sensors_chip_name *chip) {
-  const sensors_feature_data *sensor;
-  int index0 = 0, index1 = 0;
-  int ret = 0;
-
-  ret = idChip (chip);
-
-  while ((ret == 0) && ((sensor = sensors_get_all_features (*chip, &index0, &index1)) != NULL)) {
-    char *label = NULL;
-    int valid = 0;
-    double value;
-    
-    if (getValid (*chip, sensor->number, &valid)) {
-      sensorLog (LOG_ERR, "Error getting sensor validity: %s/%s", chip->prefix, sensor->name);
-      ret = 20;
-    } else if (getLabel (*chip, sensor->number, &label)) {
-      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, sensor->name);
-      ret = 21;
-    } else if (!valid) {
-      /* skip invalid */
-    } else if (!(sensor->mode & SENSORS_MODE_R)) {
-      sensorLog (LOG_INFO, "%s: %s", sensor->name, label);
-    } else if ((ret = sensors_get_feature (*chip, sensor->number, &value))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/%s: %s", chip->prefix, sensor->name, sensors_strerror (ret));
-      ret = 22;
-    } else {
-      sensorLog (LOG_INFO, "  %s%s: %.2f", (sensor->mapping == SENSORS_NO_MAPPING) ? "" : "-", label, value);
-    }
-    if (label)
-      free (label);
-  }
-  
-  return ret;
-}
-
-static int
 doKnownChip
 (const sensors_chip_name *chip, const ChipDescriptor *descriptor, int action) {
   const FeatureDescriptor *features = descriptor->features;
-  int alarms = 0, beeps = 0;
   int index0, subindex;
   int ret = 0;
   double tmp;
 
   if (action == DO_READ)
     ret = idChip (chip);
-  if (!ret && descriptor->alarmNumber) {
-    if ((ret = sensors_get_feature (*chip, descriptor->alarmNumber, &tmp))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->alarmNumber, sensors_strerror (ret));
-      ret = 20;
-    } else {
-      alarms = (int) (tmp + 0.5);
-    }
-  }
-  if (!ret && descriptor->beepNumber) {
-    if ((ret = sensors_get_feature (*chip, descriptor->beepNumber, &tmp))) {
-      sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, descriptor->beepNumber, sensors_strerror (ret));
-      ret = 21;
-    } else {
-      beeps = (int) (tmp + 0.5);
-    }
-  }
   for (index0 = 0; (ret == 0) && features[index0].format; ++ index0) {
     const FeatureDescriptor *feature = features + index0;
-    int labelNumber = feature->dataNumbers[0];
-    int alarm = alarms & feature->alarmMask;
-    int beep = beeps & feature->beepMask;
+    int alarm, beep;
     char *label = NULL;
-    int valid = 0;
 
-    if ((action == DO_SCAN) && !alarm) {
-      continue;
-    } else if (getValid (*chip, labelNumber, &valid)) {
-      sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
+    if (!(label = sensors_get_label (chip, feature->feature))) {
+      sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, feature->feature->name);
       ret = 22;
-    } else if (getLabel (*chip, labelNumber, &label)) {
-      sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
-      ret = 22;
-    } else if (valid) {
+    } else {
       double values[MAX_DATA];
 
+      alarm = 0;
+      if (!ret && feature->alarmNumber != -1) {
+        if ((ret = sensors_get_value (chip, feature->alarmNumber, &tmp))) {
+          sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->alarmNumber, sensors_strerror (ret));
+          ret = 20;
+        } else {
+          alarm = (int) (tmp + 0.5);
+        }
+      }
+      if ((action == DO_SCAN) && !alarm)
+        continue;
+
+      beep = 0;
+      if (!ret && feature->beepNumber != -1) {
+        if ((ret = sensors_get_value (chip, feature->beepNumber, &tmp))) {
+          sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->beepNumber, sensors_strerror (ret));
+          ret = 21;
+        } else {
+          beep = (int) (tmp + 0.5);
+        }
+      }
+
       for (subindex = 0; !ret && (feature->dataNumbers[subindex] >= 0); ++ subindex) {
-        if ((ret = sensors_get_feature (*chip, feature->dataNumbers[subindex], values + subindex))) {
+        if ((ret = sensors_get_value (chip, feature->dataNumbers[subindex], values + subindex))) {
           sensorLog (LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->dataNumbers[subindex], sensors_strerror (ret));
           ret = 23;
         }
@@ -215,7 +135,7 @@ setChip
   int ret = 0;
   if ((ret = idChip (chip))) {
     sensorLog (LOG_ERR, "Error identifying chip: %s", chip->prefix);
-  } else if ((ret = sensors_do_chip_sets (*chip))) {
+  } else if ((ret = sensors_do_chip_sets (chip))) {
     sensorLog (LOG_ERR, "Error performing chip sets: %s: %s", chip->prefix, sensors_strerror (ret));
     ret = 50;
   } else {
@@ -231,15 +151,17 @@ doChip
   if (action == DO_SET) {
     ret = setChip (chip);
   } else {
-    int index0, subindex, chipindex = -1;
-    for (index0 = 0; knownChips[index0]; ++ index0)
-      for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
-        if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
-          chipindex = index0;
+    int index0, chipindex = -1;
+    for (index0 = 0; knownChips[index0].features; ++ index0)
+      /* Trick: we compare addresses here. We know it works because both
+         pointers were returned by sensors_get_detected_chips(), so they
+         refer to libsensors internal structures, which do not move. */
+      if (knownChips[index0].name == chip) {
+        chipindex = index0;
+        break;
+      }
     if (chipindex >= 0)
-      ret = doKnownChip (chip, knownChips[chipindex], action);
-    else if (action == DO_READ)
-      ret = readUnknownChip (chip);
+      ret = doKnownChip (chip, &knownChips[chipindex], action);
   }
   return ret;
 }
@@ -248,13 +170,12 @@ static int
 doChips
 (int action) {
   const sensors_chip_name *chip;
-  int i = 0, j, ret = 0;
+  int i, j, ret = 0;
 
-  while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
-    for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
-      if (sensors_match_chip (*chip, chipNames[j])) {
-        ret = doChip (chip, action);
-      }
+  for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+    i = 0;
+    while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
+      ret = doChip (chip, action);
     }
   }
 

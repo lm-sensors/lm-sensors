@@ -24,7 +24,7 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "October 2006" "" "Linux Programmer's Manual"
+.TH libsensors 3  "October 2007" "lm-sensors 3" "Linux Programmer's Manual"
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
 .SH SYNOPSIS
@@ -35,26 +35,30 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B void sensors_cleanup(void);
 .B int sensors_parse_chip_name(const char *orig_name,
                             \fBsensors_chip_name *res);\fP
-.B int sensors_match_chip(sensors_chip_name chip1, 
-                       \fBsensors_chip_name chip2);\fP
-.B int sensors_chip_name_has_wildcards(sensors_chip_name chip);
 .B const char *sensors_get_adapter_name(int bus_nr);
-.B int sensors_get_label(sensors_chip_name name, int feature, 
-                      \fBchar **result);\fP
-.B int sensors_get_feature(sensors_chip_name name, int feature,
-                        \fBdouble *result);\fP
-.B int sensors_set_feature(sensors_chip_name name, int feature,
-                        \fBdouble value);\fP
-.B int sensors_do_chip_sets(sensors_chip_name name);
-.B extern int sensors_do_all_sets(void);
-.B const sensors_chip_name *sensors_get_detected_chips(int *nr);
-.B const sensors_feature_data *sensors_get_all_features 
-             \fB(sensors_chip_name name, int *nr1,int *nr2);\fP
+.B char *sensors_get_label(const sensors_chip_name *name, const sensors_feature *feature);\fP
+.B int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+                      \fBdouble *value);\fP
+.B int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
+                      \fBdouble value);\fP
+.B int sensors_do_chip_sets(const sensors_chip_name *name);
+.B const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+                                                    \fB*match, int *nr);\fP
+.B const sensors_feature *sensors_get_features(const sensors_chip_name *name, int *nr);\fP
+.B const sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
+.B const sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
+.B const char *libsensors_version;
 .fi
 .SH DESCRIPTION
 .B int sensors_init(FILE *input);
 .br
-(Re)load the configuration file and the detected chips list. If this returns a value unequal to zero, you are in trouble; you can not assume anything will be initialized properly.
+Load the configuration file and the detected chips list. If this returns a
+value unequal to zero, you are in trouble; you can not assume anything will
+be initialized properly. If you want to reload the configuration file, call
+sensors_cleanup() below before calling sensors_init() again.
+
+If FILE is NULL, the default configuration file is used (see the FILES
+section below). Most applications will want to do that.
 
 .B void sensors_cleanup(void);
 .br
@@ -66,83 +70,117 @@ Clean-up function: You can't access anything after this, until the next sensors_
 .br
 Parse a chip name to the internal representation. Return 0 on succes, <0 on error.
 
-\fBint sensors_match_chip(sensors_chip_name chip1,
-                       sensors_chip_name chip2);\fP
-.br
-Compare two chips name descriptions, to see whether they could match. Return 0 if it does not match, return 1 if it does match.
-
-\fBint sensors_chip_name_has_wildcards
-    (sensors_chip_name chip);\fP
-.br
-Check whether the chip name is an 'absolute' name, which can only match one chip, or whether it has wildcards. Returns 0 if it is absolute, 1 if there are wildcards.
-
 .B const char *sensors_get_adapter_name(int bus_nr);
 .br
 This function returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
 
-.B const char *sensors_get_algorithm_name(int bus_nr);
+\fBchar *sensors_get_label(const sensors_chip_name *name, const sensors_feature *feature);\fP
 .br
-This function used to return the algorithm name of a bus number.
-It is now deprecated and returns an arbitrary string. It will be dropped
-in a later version of the library so you should stop using it.
+Look up the label which belongs to this chip. Note that chip should not
+contain wildcard values! The returned string is newly allocated (free it
+yourself). On failure, NULL is returned.
+If no label exists for this feature, its name is returned itself.
 
-\fBint sensors_get_label(sensors_chip_name name, int feature,
-                      char **result);\fP
+\fBint sensors_get_value(const sensors_chip_name *name, int subfeat_nr, double *value);\fP
 .br
-Look up the label which belongs to this chip. Note that chip should not contain wildcard values! *result is newly allocated (free it yourself). This function will return 0 on success, and <0 on failure.
+Read the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
 
-\fBint sensors_get_feature(sensors_chip_name name,
-                        int feature, double *result);\fP
+\fBint sensors_set_value(const sensors_chip_name *name, int subfeat_nr, double value);\fP
 .br
-Read the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
+Set the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
 
-\fBint sensors_set_feature(sensors_chip_name name,
-                        int feature, double value);\fP
-.br
-Set the value of a feature of a certain chip. Note that chip should not contain wildcard values! This function will return 0 on success, and <0 on failure.
-
-.B int sensors_do_chip_sets(sensors_chip_name name);
+.B int sensors_do_chip_sets(const sensors_chip_name *name);
 .br
 Execute all set statements for this particular chip. The chip may contain wildcards!  This function will return 0 on success, and <0 on failure.
 
-.B int sensors_do_all_sets(void);
+\fBconst sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+                                                    *match, int *nr);\fP
 .br
-Execute all set statements for all detected chips. This is the same as calling sensors_do_chip_sets with an all wildcards chip name
+This function returns all detected chips that match a given chip name,
+one by one. If no chip name is provided, all detected chips are returned.
+To start at the beginning of the list, use 0 for nr; NULL is returned if
+we are at the end of the list. Do not try to change these chip names, as
+they point to internal structures!
 
-\fBconst sensors_chip_name *sensors_get_detected_chips
-                        (int *nr);\fP
+This structure contains information related to a given feature of a
+specific chip.
 .br
-This function returns all detected chips, one by one. To start at the beginning of the list, use 0 for nr; NULL is returned if we are at the end of the list. Do not try to change these chip names, as they point to internal structures! Do not use nr for anything else.
-
-This structure is used when you want to get all features of a specific chip.
-.br
-\fBtypedef struct sensors_feature_data {
-.br
-  int number;
+\fBtypedef struct sensors_feature {
 .br
   const char *name;
 .br
+  int number;
+.br
+  sensors_feature_type type;
+.br
+} sensors_feature;\fP
+.br
+There are other member not documented here, which are only meant for libsensors
+internal use.
+
+This structure contains information related to a given subfeature of a
+specific chip feature.
+.br
+\fBtypedef struct sensors_subfeature {
+.br
+  const char *name;
+.br
+  int number;
+.br
+  sensors_subfeature_type type;
+.br
   int mapping;
 .br
-  int unused;
+  unsigned int flags;
 .br
-  int mode;
+} sensors_subfeature;\fP
 .br
-} sensors_feature_data;\fP
-.br
-The mode field can be one of:
-.br
-SENSORS_MODE_NO_RW, SENSORS_MODE_R, SENSORS_MODE_W or SENSORS_MODE_RW.
+The flags field is a bitfield, its value is a combination of
+SENSORS_MODE_R (readable), SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING
+(affected by the computation rules of the main feature).
 
-\fBconst sensors_feature_data *sensors_get_all_features
-      (sensors_chip_name name, int *nr1,int *nr2);\fP
+\fBconst sensors_feature *sensors_get_features(const sensors_chip_name *name, int *nr);\fP
 .br
-This returns all features of a specific chip. They are returned in bunches: everything with the same mapping is returned just after each other, with the master feature in front (that feature does not map to itself, but has SENSORS_NO_MAPPING as mapping field). nr1 and nr2 are two internally used variables. Set both to zero to start again at the begin of the list. If no more features are found NULL is returned. Do not try to change the returned structure; you will corrupt internal data structures.
+This returns all main features of a specific chip. nr is an internally
+used variable. Set it to zero to start at the begin of the list. If no
+more features are found NULL is returned.
+Do not try to change the returned structure; you will corrupt internal
+data structures.
 
+\fBconst sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
+.br
+This returns all subfeatures of a given main feature. nr is an internally
+used variable. Set it to zero to start at the begin of the list. If no
+more subfeatures are found NULL is returned.
+Do not try to change the returned structure; you will corrupt internal
+data structures.
 
-.SH "CONFORMING TO"
-lm_sensors-2.x
+\fBconst sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
+.br
+This returns the subfeature of the given type for a given main feature,
+if it exists, NULL otherwise.
+Do not try to change the returned structure; you will corrupt internal
+data structures.
+
+\fBconst char *libsensors_version;\fP
+.br
+A string representing the version of libsensors.
+
+.SH FILES
+.I /etc/sensors3.conf
+.br
+.I /etc/sensors.conf
+.RS
+The system-wide
+.BR libsensors (3)
+configuration file. /etc/sensors3.conf is tried first, and if it doesn't exist,
+/etc/sensors.conf is used instead.
+
 .SH SEE ALSO
 sensors.conf(5)
 

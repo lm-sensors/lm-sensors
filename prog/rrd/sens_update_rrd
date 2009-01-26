@@ -3,9 +3,9 @@
 #    sens_update_rrd -
 #	Update a sensors rrd database.
 #	Sample usage:
-#		sens_update_rrd /var/lib/database.rrd w83781d-isa-0290
+#		sens_update_rrd /var/lib/database.rrd hwmon0
 #	Sample cron entry:
-#		*/5 * * * * /usr/local/bin/sens_update_rrd /var/lib/sensors-rrd/sensors.rrd w83781d-isa-0290
+#		*/5 * * * * /usr/local/bin/sens_update_rrd /var/lib/sensors-rrd/sensors.rrd hwmon0
 #
 #################################################################
 #
@@ -23,112 +23,65 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#    MA 02110-1301 USA.
 #
 #################################################################
 #
-if [ $# -ne 2 ]
+if [ $# -lt 1 -o $# -gt 2 ]
 then
-	echo "usage: $0 database.rrd sensor"
-	echo "       sensor example: w83781d-isa-0290 (2.4 kernel)"
-	echo "                       0-0290 (early 2.6 kernel)"
-	echo "                       hwmon0 (kernel 2.6.14 or later)"
+	echo "usage: $0 database.rrd [hwmonN]"
 	exit 1
+elif [ $# -eq 2 ]
+then
+	HWMON=$2
+else
+	HWMON=hwmon0
 fi
 #
-RRDPATH=/usr/local/rrdtool/bin
+RRDPATH=/usr/bin
 RRDB=$1
 
-SENSDIR=/proc/sys/dev/sensors
-SDIR=/sys/bus/i2c/devices
-HWMONDIR=/sys/class/hwmon
-SENSDEV=$2
-if [ -d $HWMONDIR ]
-then
-	SYSFS=1
-	SENSDIR=$HWMONDIR
-	SENSDEV=$SENSDEV/device
-elif [ -d $SDIR ]
-then
-	SYSFS=1
-	SENSDIR=$SDIR
-elif [ ! -d $SENSDIR]
-then
-	echo $0: 'No sensors found! (modprobe sensor modules?)'
-	exit 1
-fi
+SENSDIR=/sys/class/hwmon
+SENS=$SENSDIR/$HWMON/device
 
-SENS=$SENSDIR/$SENSDEV
-if [ ! -r $SENS ]
+if [ ! -d $SENS ]
 then
-	echo $0: 'No sensors found! (modprobe sensor modules?)'
+	echo "No sensors found in: $SENS"
+	echo "(modprobe sensor modules?)"
 	exit 1
 fi
 
 STRING=N
-if [ "$SYSFS" = "1" ]
-then
-	#
-	# Get the value from these sensor files (/sys)
-	#
-	SENSORS="fan1 fan2 fan3"
-	for i in $SENSORS
-	do
-		V="`cat $SENSDIR/$SENSDEV/${i}_input 2> /dev/null`"
-		if [ $? -ne 0 ]
-		then
-			STRING="${STRING}:U"
-		else
-			STRING="${STRING}:${V}"
-		fi
-	done
-	#
-	# Get the value from these sensor files (/sys) and divide by 1000
-	#
-	SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
-	for i in $SENSORS
-	do
-		V="`cat $SENSDIR/$SENSDEV/${i}_input 2> /dev/null`"
-		if [ $? -ne 0 ]
-		then
-			STRING="${STRING}:U"
-		else
-			V=`echo "3k0 ${V/-/_} 1000/p"|dc`
-			STRING="${STRING}:${V}"
-		fi
-	done
-else
-	#
-	# Get the second value from these sensor files (/proc)
-	#
-	SENSORS="fan1 fan2 fan3"
-	for i in $SENSORS
-	do
-		V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
-		if [ $? -ne 0 ]
-		then
-			STRING="${STRING}:U"
-		else
-			V="`echo $V | cut -d ' ' -f 2`"
-			STRING="${STRING}:${V}"
-		fi
-	done
-	#
-	# Get the third value from these sensor files (/proc)
-	#
-	SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
-	for i in $SENSORS
-	do
-		V="`cat $SENSDIR/$SENSDEV/$i 2> /dev/null`"
-		if [ $? -ne 0 ]
-		then
-			STRING="${STRING}:U"
-		else
-			V="`echo $V | cut -d ' ' -f 3`"
-			STRING="${STRING}:${V}"
-		fi
-	done
-fi
+#
+# Get the value from these sensor files (/sys)
+#
+SENSORS="fan1 fan2 fan3"
+for i in $SENSORS
+do
+	V="`cat $SENS/${i}_input 2> /dev/null`"
+	if [ $? -ne 0 ]
+	then
+		STRING="${STRING}:U"
+	else
+		STRING="${STRING}:${V}"
+	fi
+done
+#
+# Get the value from these sensor files (/sys) and divide by 1000
+#
+SENSORS="temp1 temp2 temp3 in0 in1 in2 in3 in4 in5 in6"
+for i in $SENSORS
+do
+	V="`cat $SENS/${i}_input 2> /dev/null`"
+	if [ $? -ne 0 ]
+	then
+		STRING="${STRING}:U"
+	else
+		V=`echo "3k0 ${V/-/_} 1000/p"|dc`
+		STRING="${STRING}:${V}"
+	fi
+done
 
 #
 # Get the first value from these /proc files

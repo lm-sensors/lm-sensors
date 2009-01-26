@@ -2,35 +2,46 @@ CHECKLIST FOR NEW RELEASES
 ==========================
 
 Release steps:
-- Check out i2c and lm-sensors
+- Check out lm-sensors
 - Update if necessary, the version number of libsensors
   (edit lib/Module.mk and change LIBMAINVER and/or LIBMINORVER)
   Remember: update main number when interface changes, minor if new
   functionality is added, and patch if only bugs are fixed.
   `svn diff -r Vx-y-z lib' is your friend.
-- Update both CHANGES files (add the release date)
-- Verify i2c dependency instructions in README, QUICKSTART, and INSTALL,
-  update if necessary
-- Update lm_sensors2/version.h and i2c/kernel/i2c.h
+- Update the CHANGES file (set version and release date)
+- Update lm_sensors.lsm (Version, Entered-date and Primary-site)
+- Update libsensors-API.txt
+- Update version.h
 - Commit
 - Tag the release using SVN:
-  svn copy http://lm-sensors.org/svn/lm-sensors/trunk \
-      http://lm-sensors.org/svn/lm-sensors/tags/V2-x-x \
-      -m "Create tag 'V2-x-x'."
-- Remove 'SVN' related files/directories (e.g. rm -fR `find . -name .svn`)
-- Rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
-- Tar it up and post it (sign it)
-- Make sure the file permissions on both the archives and the signatures
-  are correct (664)
+  svn copy http://lm-sensors.org/svn/lm-sensors/branches/lm-sensors-3.0.0 \
+      http://lm-sensors.org/svn/lm-sensors/tags/V3-x-x \
+      -m "3.x.x release"
+
+- Move to a temporary directory and get a copy of the freshly tagged code:
+  svn export http://lm-sensors.org/svn/lm-sensors/tags/V3-x-x lm_sensors-3.x.x
+- Tar it up:
+  tar jcf lm_sensors-3.x.x.tar.bz2 lm_sensors-3.x.x
+- Sign it:
+  gpg -b lm_sensors-3.x.x.tar.bz2
+- Post it:
+  scp lm_sensors-3.x.x.tar.bz2* \
+      devel.atrpms.net:/srv/lm-sensors.org/dl/lm-sensors/releases
+- Set correct permissions:
+  ssh devel.atrpms.net chmod 664 \
+      '/srv/lm-sensors.org/dl/lm-sensors/releases/lm_sensors-3.x.x.tar.bz2*'
 
 After release, remember to:
 - Copy to mirrors
+- Update the Download page on lm-sensors.org, then add a news item
+- Announce on the lm-sensors mailing list
 - Announce on Freshmeat
-- Put back ???? for dates
-- Prep CHANGES files for next release
+- Add "+SVN" to version.h and commit
 - Mark the corresponding release milestone as complete using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 2.10.2 2006-12-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.0.0 now'
 - Create a new version for the bug tracking system using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 2.10.2 2006-12-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac version add 3.0.0 now'
 - Create a new release milestone using trac-admin
-  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 2.10.3 2007-03-31'
+  e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.0.1 2008-02-15'
+- Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
+  subject `add' (no quotes)

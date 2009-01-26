@@ -1,13 +1,15 @@
 What is it?
 -----------
 
-It unhides the SMBus of Intel ICH southbridges hidden
-on ASUS P4B series. It is implemented as a module (p4b_smbus.o),
-or a shell script for the 2.6 kernel (unhide_ICH_SMBus).
+It unhides the SMBus of Intel ICH southbridges hidden on Asus P4B series
+and some other Asus and non-Asus systems. It is implemented as a shell
+script for the 2.6 kernel: unhide_ICH_SMBus.
 
 It works with the following chips:
  * ICH2   (82801BA)
  * ICH2-M (82801BAM)
+ * ICH3   (82801CA)
+ * ICH3-M (82801CAM)
  * ICH4   (82801DB)
  * ICH4-M (82801DBM)
  * ICH5   (82801EB)
@@ -17,13 +19,15 @@ with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
-This module is for 2.4 kernels only. For 2.6 kernels, activation is
-handled by the code in drivers/pci/quirks.c in the kernel source. If you
-have the 2.6 kernel and the quirks code does not activate your SMBus,
-you may:
+For 2.6 kernels, activation is normally handled by the code in
+drivers/pci/quirks.c in the kernel source. If you have the 2.6 kernel and
+the quirks code does not activate your SMBus, you may:
 
- * check if you have kernel version from 2.6.17 to 2.6.19
-   If so you, need to disable ACPI sleep support and recompile kernel. 
+ * first of all, read the paragraph "Hidden ICH SMBus" in
+   Documentation/i2c/busses/i2c-i801 in the kernel source.
+
+ * check if you have kernel version from 2.6.16 to 2.6.19
+   If so, you need to disable ACPI sleep support and recompile kernel. 
    If you don't use suspend try below instead of recompilation.
 
  * run as root the ./unhide_ICH_SMBus script. It will unhide the bus 
@@ -33,77 +37,3 @@ you may:
  * if above script works and you have latest kernel, you may 
    try to fix the quirks.c, recompile and test your new kernel,
    and then submit a patch to us. Contact us if you need assistance.
-
-Information for 2.4 users continues below.
-
-NOTE: As of kernel 2.4.23, the kernel activates the SMBus PCI device
-on the following boards:
- * Asus P4B
- * Asus P4B533
- * Asus P4PE
- * Asus P4T533
- * Asus P4G8X Deluxe
-So this module is no longer required for these boards. For the other 
-affected boards, it still is.
-
-What does the module do?
-------------------------
-(Note: the following instructions assume the ICH2. For the ICH4,
-the PCI IDs are 24C0 and 24C3)
-
-It turnes off (!) the bits number 8 and 3 in the LPC register of the ICH2.
-This you can also try as root with setpci and pcitweak.
-First do a:
-
-setpci -d 8086:2440 f2.w
-
-You will get an hex number VAL - in my case 148 (Hex)-, where you have to 
-erase the two bits - in my case you get 40 (Hex).
-Then do a:
-
-setpci -d 8086:2440 f2.w=VAL
-
-Running "lspci -n" you will not see any new device, but with "pcitweak -l" you
-should get a line similar to this in the output:
-
-PCI: 00:1f:3: chip 8086,2443 card 1043,8028 rev 12 class 0c,05,00 hdr 00
-
-The important thing is the "8086,2443" here.
-The device is activated, but not included in /proc/pci and 
-/proc/bus/pci/devices. This is the reason for running the module.
-
-What are the system requirements?
----------------------------------
-
-- Obviously a board with Intel i801BA/DB/EB ICH2/4/5 with broken BIOS.
-- A linux working with a 2.4 kernel AND hotplug support in it! 
-- A installed kernel tree and gcc.
-- i2c and sensor modules installed.
-
-How to install?
----------------
-
-Simply do a:
-
-make -f Makefile.p4b
-insmod p4b_smbus.o
-modprobe  i2c-core
-modprobe  i2c-i801
-modprobe  i2c-dev
-modprobe  i2c-proc
-
-Then run your sensor:
-
-modprobe  w83781d
-
-What should i never do?
------------------------
-
-Do not try to do a "rmmod p4b_smbus" before a "rmmod i2c-i801".
-The other way around should be okay. Otherwise you remove the PCI device
-without notifying the i2c driver.
-
-
--------------------------------
-Ilja Rauhut <IljaRauhut@web.de>
- 

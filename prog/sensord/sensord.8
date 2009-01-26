@@ -21,7 +21,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensord 8  "October 2007" "" "Linux System Administration"
+.TH sensord 8  "October 2007" "lm-sensors 3" "Linux System Administration"
 .SH NAME
 sensord \- Sensor information logging daemon.
 .SH SYNOPSIS
@@ -40,11 +40,6 @@ or a round-robin database (RRD)
 and to alert when a sensor alarm is signalled; for example, if a
 fan fails, a temperature limit is exceeded, etc.
 
-.B Sensord
-knows about certain chips, and outputs nicely formatted readings for them; but
-it can also display the information of unknown chips, as long as 
-.BR libsensors (3)
-knows about them.
 .SH OPTIONS
 .IP "-i, --interval time"
 Specify the interval between scanning for sensor alarms; the default is to
@@ -84,12 +79,9 @@ below for more details.
 .IP "-c, --config-file file"
 Specify a
 .BR libsensors (3)
-configuration file. If no file is specified, the name `sensors.conf'
-is used.
+configuration file. If no file is specified, the libsensors default
+configuration file is used.
 
-If the sensors configuration name does not contain a directory separator,
-the following paths are searched for the file:
-`/etc', `/usr/lib/sensors', `/usr/local/lib/sensors', `/usr/lib', `/usr/local/lib'.
 .IP "-p, --pid-file file"
 Specify what PID file to write; the default is to write the file
 `/var/run/sensord.pid'. You should always specify an absolute path
@@ -141,6 +133,9 @@ modules for chips in which you have no interest.
 Upon receipt of a SIGTERM (see
 .BR signal (7)
 for details) this daemon should gracefully shut down.
+
+Upon receipt of a SIGHUP, this daemon will rescan the kernel interface
+for chips and features, and reload the libsensors configuration file.
 .SH LOGGING
 All messages from this daemon are logged to
 .BR syslog (3)
@@ -208,28 +203,11 @@ failure or an unacceptable temperature or voltage. However, some
 sensor chips do not support alarms, while others are incorrectly
 configured and may signal alarms incorrectly.
 
-Sometimes, uninteresting alarms (e.g., chassis
-intrusion detection) will be repeated continuously. You can
-configure
-.BR libsensors (3)
-to ignore unwanted sensor reading such as these by placing an
-`ignore' entry in the appropriate chip-specific section of the
-.BR sensors.conf (5)
-configuration file.
+Note that some drivers may lack support for alarm reporting
+even though the chips they support do have alarms. As of Linux 2.6.23,
+many drivers still don't report alarms in a format suitable for
+libsensors 3.
 
-For example, I have the following entry:
-.IP
-.nf
-# Sample /etc/sensors.conf entry
-chip "w83782d-*"
-    ignore "alarms"
-.fi
-.PP
-In this case, `alarms' was the sensor label reported in
-the relevant sensor log message.
-
-Alternatively, you may be able to reset the alarm with your
-BIOS.
 .SH BEEPS
 If you see `(beep)' beside any sensor reading, that just means that
 your system is configured to issue an audio warning from the
@@ -382,6 +360,8 @@ after which the daemon will exit.
 Round-robin database support doesn't cope with
 multiple sensor chips having duplicate sensor labels.
 .SH FILES
+.I /etc/sensors3.conf
+.br
 .I /etc/sensors.conf
 .RS
 The system-wide
@@ -400,14 +380,10 @@ configuration file. See
 .BR syslog.conf (5)
 for further details.
 .RE
-.SH "CONFORMING TO"
-lm_sensors-2.x
+
 .SH SEE ALSO
 sensors.conf(5)
 .SH AUTHORS
 .B Sensord
-was written by Merlin Hughes <merlin@merlin.org>. Chip-specific formatting
-code was ripped from
-.BR sensors
-which was written by Frodo Looijaard <frodol@dds.nl>. Basics of round-robin
+was written by Merlin Hughes <merlin@merlin.org>. Basics of round-robin
 databases were misappropriated from Mark D. Studebaker.

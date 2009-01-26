@@ -6,7 +6,7 @@ graphs of sensor data.
 
 The RRD (Round Robin Database) package is REQUIRED.
 Get this package from
-         http://oss.oetiker.ch/rrdtool
+         http://oss.oetiker.ch/rrdtool/
 
 A web server with CGI support is required.
 
@@ -26,7 +26,7 @@ following advantages:
 If you are looking for something a little simpler,
 that does not require RRD, try ../tellerstats.
 
-The RRD scripts read /proc or /sys entries and do not use libsensors.
+The RRD scripts read /sys entries and do not use libsensors.
 Therefore the scale factors in /etc/sensors.conf are not used,
 and you may have to change the scale factors in the cgi scripts.
 
@@ -51,7 +51,7 @@ INSTALLATION INSTRUCTIONS
 		Cron user
 			USER=httpd
 		Path to rrdtool and rrdcgi
-			RRDPATH=/usr/local/rrdtool/bin
+			RRDPATH=/usr/bin
 		Place to install sens_update_rrd script
 			BINPATH=/usr/local/bin
 		Place to store the database
@@ -61,12 +61,7 @@ INSTALLATION INSTRUCTIONS
 			APACHDIR=$(APACHE)/senspix
 		The sensor device in your system
 		(isa recommended over i2c if both are available)
-		2.4 kernel - look in /proc/sys/dev/sensors:
-			SENSDEV=w83781d-isa-0290
-		2.6 kernel up to 2.6.13 - look in /sys/i2c/bus/devices:
-			SENSDEV=0-0290
-		2.6.14+ kernel - look in /sys/class/hwmon:
-			SENSDEV=hwmon0
+			SENSDEV=hwmon0           (look in /sys/class/hwmon)
 	- make
 	- (as root) make install, which does the following.
 	  If you don't want it to do this, install by hand!!!
@@ -76,7 +71,7 @@ INSTALLATION INSTRUCTIONS
 	- Manually add the following line to the crontab for
 	  the user specified above, which will call the data gathering
 	  script every 5 minutes (adjust paths as necessary)
-		*/5 * * * *	/usr/local/bin/sens_update_rrd /var/lib/sensors-rrd/sensors.rrd w83781d-isa-0290
+		*/5 * * * *	/usr/local/bin/sens_update_rrd /var/lib/sensors-rrd/sensors.rrd hwmon0
 	- Load http://localhost/senspix/sens_day.cgi in your web browser
 		to test
 

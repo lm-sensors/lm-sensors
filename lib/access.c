@@ -1,6 +1,7 @@
 /*
     access.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,56 +15,51 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <limits.h>
 #include "access.h"
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
-#include "proc.h"
-#include "general.h"
 #include "sysfs.h"
+#include "general.h"
 
-static int sensors_eval_expr(sensors_chip_name chipname, 
-                             const sensors_expr *expr,
-                             double val, double *result);
+/* We watch the recursion depth for variables only, as an easy way to
+   detect cycles. */
+#define DEPTH_MAX	8
 
-static int sensors_do_this_chip_sets(sensors_chip_name name);
+static int sensors_eval_expr(const sensors_chip_features *chip_features,
+			     const sensors_expr *expr,
+			     double val, int depth, double *result);
 
 /* Compare two chips name descriptions, to see whether they could match.
    Return 0 if it does not match, return 1 if it does match. */
-int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
+static int sensors_match_chip(const sensors_chip_name *chip1,
+		       const sensors_chip_name *chip2)
 {
-	if ((chip1.prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
-	    (chip2.prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
-	    strcasecmp(chip1.prefix, chip2.prefix))
+	if ((chip1->prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
+	    (chip2->prefix != SENSORS_CHIP_NAME_PREFIX_ANY) &&
+	    strcmp(chip1->prefix, chip2->prefix))
 		return 0;
 
-	if ((chip1.bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-	    (chip2.bus != SENSORS_CHIP_NAME_BUS_ANY) &&
-	    (chip1.bus != chip2.bus)) {
+	if ((chip1->bus.type != SENSORS_BUS_TYPE_ANY) &&
+	    (chip2->bus.type != SENSORS_BUS_TYPE_ANY) &&
+	    (chip1->bus.type != chip2->bus.type))
+		return 0;
 
-		if ((chip1.bus == SENSORS_CHIP_NAME_BUS_ISA) ||
-		    (chip2.bus == SENSORS_CHIP_NAME_BUS_ISA))
-			return 0;
+	if ((chip1->bus.nr != SENSORS_BUS_NR_ANY) &&
+	    (chip2->bus.nr != SENSORS_BUS_NR_ANY) &&
+	    (chip1->bus.nr != chip2->bus.nr))
+		return 0;
 
-		if ((chip1.bus == SENSORS_CHIP_NAME_BUS_PCI) ||
-		    (chip2.bus == SENSORS_CHIP_NAME_BUS_PCI))
-			return 0;
-
-		if ((chip1.bus != SENSORS_CHIP_NAME_BUS_ANY_I2C) &&
-		    (chip2.bus != SENSORS_CHIP_NAME_BUS_ANY_I2C))
-			return 0;
-	}
-
-	if ((chip1.addr != chip2.addr) &&
-	    (chip1.addr != SENSORS_CHIP_NAME_ADDR_ANY) &&
-	    (chip2.addr != SENSORS_CHIP_NAME_ADDR_ANY))
+	if ((chip1->addr != chip2->addr) &&
+	    (chip1->addr != SENSORS_CHIP_NAME_ADDR_ANY) &&
+	    (chip2->addr != SENSORS_CHIP_NAME_ADDR_ANY))
 		return 0;
 
 	return 1;
@@ -76,8 +72,9 @@ int sensors_match_chip(sensors_chip_name chip1, sensors_chip_name chip2)
    the struct the return value points to! 
    Note that this visits the list of chips from last to first. Usually,
    you want the match that was latest in the config file. */
-sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
-					   const sensors_chip * last)
+static sensors_chip *
+sensors_for_all_config_chips(const sensors_chip_name *name,
+			     const sensors_chip *last)
 {
 	int nr, i;
 	sensors_chip_name_list chips;
@@ -87,303 +84,361 @@ sensors_chip *sensors_for_all_config_chips(sensors_chip_name chip_name,
 
 		chips = sensors_config_chips[nr].chips;
 		for (i = 0; i < chips.fits_count; i++) {
-			if (sensors_match_chip(chips.fits[i], chip_name))
+			if (sensors_match_chip(&chips.fits[i], name))
 				return sensors_config_chips + nr;
 		}
 	}
 	return NULL;
 }
 
-/* Look up a resource in the intern chip list, and return a pointer to it. 
-   Do not modify the struct the return value points to! Returns NULL if 
+/* Look up a chip in the intern chip list, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_nr(const char *prefix,
-						      int feature)
+static const sensors_chip_features *
+sensors_lookup_chip(const sensors_chip_name *name)
 {
-	int i, j;
-	const sensors_chip_feature *features;
+	int i;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
-			features = sensors_chip_features_list[i].feature;
-			for (j = 0; features[j].data.name; j++)
-				if (features[j].data.number == feature)
-					return features + j;
-		}
+	for (i = 0; i < sensors_proc_chips_count; i++)
+		if (sensors_match_chip(&sensors_proc_chips[i].chip, name))
+			return &sensors_proc_chips[i];
+
 	return NULL;
 }
 
-/* Look up a resource in the intern chip list, and return a pointer to it. 
+/* Look up a subfeature of the given chip, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
+   not found.*/
+static const sensors_subfeature *
+sensors_lookup_subfeature_nr(const sensors_chip_features *chip,
+			     int subfeat_nr)
+{
+	if (subfeat_nr < 0 ||
+	    subfeat_nr >= chip->subfeature_count)
+		return NULL;
+	return chip->subfeature + subfeat_nr;
+}
+
+/* Look up a feature of the given chip, and return a pointer to it.
+   Do not modify the struct the return value points to! Returns NULL if
+   not found.*/
+static const sensors_feature *
+sensors_lookup_feature_nr(const sensors_chip_features *chip, int feat_nr)
+{
+	if (feat_nr < 0 ||
+	    feat_nr >= chip->feature_count)
+		return NULL;
+	return chip->feature + feat_nr;
+}
+
+/* Look up a subfeature by name, and return a pointer to it.
    Do not modify the struct the return value points to! Returns NULL if 
    not found.*/
-const sensors_chip_feature *sensors_lookup_feature_name(const char *prefix,
-							const char *feature)
+static const sensors_subfeature *
+sensors_lookup_subfeature_name(const sensors_chip_features *chip,
+			       const char *name)
 {
-	int i, j;
-	const sensors_chip_feature *features;
+	int j;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, prefix)) {
-			features = sensors_chip_features_list[i].feature;
-			for (j = 0; features[j].data.name; j++)
-				if (!strcasecmp(features[j].data.name, feature))
-					return features + j;
-		}
+	for (j = 0; j < chip->subfeature_count; j++)
+		if (!strcmp(chip->subfeature[j].name, name))
+			return chip->subfeature + j;
 	return NULL;
 }
 
 /* Check whether the chip name is an 'absolute' name, which can only match
    one chip, or whether it has wildcards. Returns 0 if it is absolute, 1
    if there are wildcards. */
-int sensors_chip_name_has_wildcards(sensors_chip_name chip)
+int sensors_chip_name_has_wildcards(const sensors_chip_name *chip)
 {
-	if ((chip.prefix == SENSORS_CHIP_NAME_PREFIX_ANY) ||
-	    (chip.bus == SENSORS_CHIP_NAME_BUS_ANY) ||
-	    (chip.bus == SENSORS_CHIP_NAME_BUS_ANY_I2C) ||
-	    (chip.addr == SENSORS_CHIP_NAME_ADDR_ANY))
+	if ((chip->prefix == SENSORS_CHIP_NAME_PREFIX_ANY) ||
+	    (chip->bus.type == SENSORS_BUS_TYPE_ANY) ||
+	    (chip->bus.nr == SENSORS_BUS_NR_ANY) ||
+	    (chip->addr == SENSORS_CHIP_NAME_ADDR_ANY))
 		return 1;
 	else
 		return 0;
 }
 
-/* Look up the label which belongs to this chip. Note that chip should not
-   contain wildcard values! *result is newly allocated (free it yourself).
-   This function will return 0 on success, and <0 on failure.
+/* Look up the label for a given feature. Note that chip should not
+   contain wildcard values! The returned string is newly allocated (free it
+   yourself). On failure, NULL is returned.
    If no label exists for this feature, its name is returned itself. */
-int sensors_get_label(sensors_chip_name name, int feature, char **result)
+char *sensors_get_label(const sensors_chip_name *name,
+			const sensors_feature *feature)
 {
+	char *label;
 	const sensors_chip *chip;
-	const sensors_chip_feature *featureptr;
+	char buf[128], path[PATH_MAX];
+	FILE *f;
 	int i;
 
-	*result = NULL;
 	if (sensors_chip_name_has_wildcards(name))
-		return -SENSORS_ERR_WILDCARDS;
-	if (!(featureptr = sensors_lookup_feature_nr(name.prefix, feature)))
-		return -SENSORS_ERR_NO_ENTRY;
+		return NULL;
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
-			if (!strcasecmp(featureptr->data.name,chip->labels[i].name)){
-				*result = strdup(chip->labels[i].value);
+			if (!strcmp(feature->name, chip->labels[i].name)) {
+				label = strdup(chip->labels[i].value);
 				goto sensors_get_label_exit;
 			}
 
-	if (sensors_found_sysfs) {
-		char buf[128], path[PATH_MAX];
-		FILE *f;
-
-		/* No user specified label, check for a _label sysfs file */
-		snprintf(path, PATH_MAX, "%s/%s_label", name.busname,
-			featureptr->data.name);
-
-		if ((f = fopen(path, "r"))) {
-			i = fread(buf, 1, sizeof(buf) - 1, f);
-			fclose(f);
-			if (i > 0) {
-				/* i - 1 to strip the '\n' at the end */
-				buf[i - 1] = 0;
-				*result = strdup(buf);
-				goto sensors_get_label_exit;
-			}
+	/* No user specified label, check for a _label sysfs file */
+	snprintf(path, PATH_MAX, "%s/%s_label", name->path, feature->name);
+	
+	if ((f = fopen(path, "r"))) {
+		i = fread(buf, 1, sizeof(buf) - 1, f);
+		fclose(f);
+		if (i > 0) {
+			/* i - 1 to strip the '\n' at the end */
+			buf[i - 1] = 0;
+			label = strdup(buf);
+			goto sensors_get_label_exit;
 		}
 	}
 
 	/* No label, return the feature name instead */
-	*result = strdup(featureptr->data.name);
+	label = strdup(feature->name);
 	
 sensors_get_label_exit:
-	if (*result == NULL)
+	if (!label)
 		sensors_fatal_error("sensors_get_label",
 				    "Allocating label text");
+	return label;
+}
+
+/* Looks up whether a feature should be ignored. Returns
+   1 if it should be ignored, 0 if not. */
+static int sensors_get_ignored(const sensors_chip_name *name,
+			       const sensors_feature *feature)
+{
+	const sensors_chip *chip;
+	int i;
+
+	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
+		for (i = 0; i < chip->ignores_count; i++)
+			if (!strcmp(feature->name, chip->ignores[i].name))
+				return 1;
 	return 0;
 }
 
-int sensors_get_ignored(sensors_chip_name name, int feature)
-{
-	const sensors_chip *chip;
-	const sensors_chip_feature *featureptr;
-	const sensors_chip_feature *alt_featureptr;
-	int i;
-
-	if (sensors_chip_name_has_wildcards(name))
-		return -SENSORS_ERR_WILDCARDS;
-	if (!(featureptr = sensors_lookup_feature_nr(name.prefix, feature)))
-		return -SENSORS_ERR_NO_ENTRY;
-	if (featureptr->data.mapping == SENSORS_NO_MAPPING)
-		alt_featureptr = NULL;
-	else if (!(alt_featureptr =
-		   sensors_lookup_feature_nr(name.prefix,
-					     featureptr->data.mapping)))
-		return -SENSORS_ERR_NO_ENTRY;
-	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
-		for (i = 0; i < chip->ignores_count; i++)
-			if (!strcasecmp(featureptr->data.name, chip->ignores[i].name) ||
-			    (alt_featureptr &&
-			     !strcasecmp(alt_featureptr->data.name, chip->ignores[i].name)))
-				return 0;
-	/* valid */
-	return 1;
-}
-
-/* Read the value of a feature of a certain chip. Note that chip should not
+/* Read the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_get_feature(sensors_chip_name name, int feature, double *result)
+static int __sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+			       int depth, double *result)
 {
-	const sensors_chip_feature *main_feature;
-	const sensors_chip_feature *alt_feature;
-	const sensors_chip *chip;
+	const sensors_chip_features *chip_features;
+	const sensors_subfeature *subfeature;
 	const sensors_expr *expr = NULL;
 	double val;
 	int res, i;
-	int final_expr = 0;
 
+	if (depth >= DEPTH_MAX)
+		return -SENSORS_ERR_RECURSION;
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(chip_features = sensors_lookup_chip(name)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
-		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
-					main_feature->data.compute_mapping)))
+	if (!(subfeature = sensors_lookup_subfeature_nr(chip_features,
+							subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (!(main_feature->data.mode & SENSORS_MODE_R))
+	if (!(subfeature->flags & SENSORS_MODE_R))
 		return -SENSORS_ERR_ACCESS_R;
-	for (chip = NULL;
-	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
-		for (i = 0; !final_expr && (i < chip->computes_count); i++) {
-			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
-				expr = chip->computes[i].from_proc;
-				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
-					       chip->computes[i].name)) {
-				expr = chip->computes[i].from_proc;
+
+	/* Apply compute statement if it exists */
+	if (subfeature->flags & SENSORS_COMPUTE_MAPPING) {
+		const sensors_feature *feature;
+		const sensors_chip *chip;
+
+		feature = sensors_lookup_feature_nr(chip_features,
+					subfeature->mapping);
+
+		chip = NULL;
+		while (!expr &&
+		       (chip = sensors_for_all_config_chips(name, chip)))
+			for (i = 0; i < chip->computes_count; i++) {
+				if (!strcmp(feature->name,
+					    chip->computes[i].name)) {
+					expr = chip->computes[i].from_proc;
+					break;
+				}
 			}
-		}
-	if (sensors_read_proc(name, feature, &val))
-		return -SENSORS_ERR_PROC;
+	}
+
+	res = sensors_read_sysfs_attr(name, subfeature, &val);
+	if (res)
+		return res;
 	if (!expr)
 		*result = val;
-	else if ((res = sensors_eval_expr(name, expr, val, result)))
+	else if ((res = sensors_eval_expr(chip_features, expr, val, depth,
+					  result)))
 		return res;
 	return 0;
 }
 
-/* Set the value of a feature of a certain chip. Note that chip should not
+int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
+		      double *result)
+{
+	return __sensors_get_value(name, subfeat_nr, 0, result);
+}
+
+/* Set the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
-int sensors_set_feature(sensors_chip_name name, int feature, double value)
+int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
+		      double value)
 {
-	const sensors_chip_feature *main_feature;
-	const sensors_chip_feature *alt_feature;
-	const sensors_chip *chip;
+	const sensors_chip_features *chip_features;
+	const sensors_subfeature *subfeature;
 	const sensors_expr *expr = NULL;
 	int i, res;
-	int final_expr = 0;
 	double to_write;
 
 	if (sensors_chip_name_has_wildcards(name))
 		return -SENSORS_ERR_WILDCARDS;
-	if (!(main_feature = sensors_lookup_feature_nr(name.prefix, feature)))
+	if (!(chip_features = sensors_lookup_chip(name)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (main_feature->data.compute_mapping == SENSORS_NO_MAPPING)
-		alt_feature = NULL;
-	else if (!(alt_feature = sensors_lookup_feature_nr(name.prefix,
-					     main_feature->data.compute_mapping)))
+	if (!(subfeature = sensors_lookup_subfeature_nr(chip_features,
+							subfeat_nr)))
 		return -SENSORS_ERR_NO_ENTRY;
-	if (!(main_feature->data.mode & SENSORS_MODE_W))
+	if (!(subfeature->flags & SENSORS_MODE_W))
 		return -SENSORS_ERR_ACCESS_W;
-	for (chip = NULL;
-	     !expr && (chip = sensors_for_all_config_chips(name, chip));)
-		for (i = 0; !final_expr && (i < chip->computes_count); i++)
-			if (!strcasecmp(main_feature->data.name, chip->computes[i].name)) {
-				expr = chip->computes->to_proc;
-				final_expr = 1;
-			} else if (alt_feature && !strcasecmp(alt_feature->data.name,
-					       chip->computes[i].name)) {
-				expr = chip->computes[i].to_proc;
+
+	/* Apply compute statement if it exists */
+	if (subfeature->flags & SENSORS_COMPUTE_MAPPING) {
+		const sensors_feature *feature;
+		const sensors_chip *chip;
+
+		feature = sensors_lookup_feature_nr(chip_features,
+					subfeature->mapping);
+
+		chip = NULL;
+		while (!expr &&
+		       (chip = sensors_for_all_config_chips(name, chip)))
+			for (i = 0; i < chip->computes_count; i++) {
+				if (!strcmp(feature->name,
+					    chip->computes[i].name)) {
+					expr = chip->computes[i].to_proc;
+					break;
+				}
 			}
+	}
 
 	to_write = value;
 	if (expr)
-		if ((res = sensors_eval_expr(name, expr, value, &to_write)))
+		if ((res = sensors_eval_expr(chip_features, expr,
+					     value, 0, &to_write)))
 			return res;
-	if (sensors_write_proc(name, feature, to_write))
-		return -SENSORS_ERR_PROC;
-	return 0;
+	return sensors_write_sysfs_attr(name, subfeature, to_write);
 }
 
-const sensors_chip_name *sensors_get_detected_chips(int *nr)
+const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
+						    *match, int *nr)
 {
 	const sensors_chip_name *res;
-	res = (*nr >= sensors_proc_chips_count ?
-			NULL : &sensors_proc_chips[*nr].name);
-	(*nr)++;
-	return res;
+
+	while (*nr < sensors_proc_chips_count) {
+		res = &sensors_proc_chips[(*nr)++].chip;
+		if (!match || sensors_match_chip(res, match))
+			return res;
+	}
+	return NULL;
 }
 
-const char *sensors_get_adapter_name(int bus_nr)
+const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 {
 	int i;
 
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_ISA)
+	/* bus types with a single instance */
+	switch (bus->type) {
+	case SENSORS_BUS_TYPE_ISA:
 		return "ISA adapter";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_PCI)
+	case SENSORS_BUS_TYPE_PCI:
 		return "PCI adapter";
-	if (bus_nr == SENSORS_CHIP_NAME_BUS_DUMMY)
-		return "Dummy adapter";
+	/* SPI should not be here, but for now SPI adapters have no name
+	   so we don't have any custom string to return. */
+	case SENSORS_BUS_TYPE_SPI:
+		return "SPI adapter";
+	case SENSORS_BUS_TYPE_VIRTUAL:
+		return "Virtual device";
+	case SENSORS_BUS_TYPE_ACPI:
+		return "ACPI interface";
+	}
+
+	/* bus types with several instances */
 	for (i = 0; i < sensors_proc_bus_count; i++)
-		if (sensors_proc_bus[i].number == bus_nr)
+		if (sensors_proc_bus[i].bus.type == bus->type &&
+		    sensors_proc_bus[i].bus.nr == bus->nr)
 			return sensors_proc_bus[i].adapter;
 	return NULL;
 }
 
-/* This function is deprecated and will be dropped soon. */
-const char *sensors_get_algorithm_name(int bus_nr)
+const sensors_feature *
+sensors_get_features(const sensors_chip_name *name, int *nr)
 {
-	return "No longer available";
+	const sensors_chip_features *chip;
+
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
+
+	while (*nr < chip->feature_count
+	    && sensors_get_ignored(name, &chip->feature[*nr]))
+		(*nr)++;
+	if (*nr >= chip->feature_count)
+		return NULL;
+	return &chip->feature[(*nr)++];
 }
 
-/* nr1-1 is the last main feature found; nr2-1 is the last subfeature found */
-const sensors_feature_data *sensors_get_all_features(sensors_chip_name name,
-						     int *nr1, int *nr2)
+const sensors_subfeature *
+sensors_get_all_subfeatures(const sensors_chip_name *name,
+			const sensors_feature *feature, int *nr)
 {
-	sensors_chip_feature *feature_list;
+	const sensors_chip_features *chip;
+	const sensors_subfeature *subfeature;
+
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
+
+	/* Seek directly to the first subfeature */
+	if (*nr < feature->first_subfeature)
+		*nr = feature->first_subfeature;
+
+	if (*nr >= chip->subfeature_count)
+		return NULL;	/* end of list */
+	subfeature = &chip->subfeature[(*nr)++];
+	if (subfeature->mapping == feature->number)
+		return subfeature;
+	return NULL;	/* end of subfeature list */
+}
+
+const sensors_subfeature *
+sensors_get_subfeature(const sensors_chip_name *name,
+		       const sensors_feature *feature,
+		       sensors_subfeature_type type)
+{
+	const sensors_chip_features *chip;
 	int i;
 
-	for (i = 0; sensors_chip_features_list[i].prefix; i++)
-		if (!strcasecmp(sensors_chip_features_list[i].prefix, name.prefix)) {
-			feature_list = sensors_chip_features_list[i].feature;
-			if (!*nr1 && !*nr2) {	/* Return the first entry */
-				if (!feature_list[0].data.name)	/* The list may be empty */
-					return NULL;
-				*nr1 = *nr2 = 1;
-				return &feature_list->data;
-			}
-			for ((*nr2)++; feature_list[*nr2 - 1].data.name; (*nr2)++)
-				if (feature_list[*nr2 - 1].data.mapping ==
-				    feature_list[*nr1 - 1].data.number)
-					return &((feature_list + *nr2 - 1)->data);
-			for ((*nr1)++;
-			     feature_list[*nr1 - 1].data.name
-			     && (feature_list[*nr1 - 1].data.mapping !=
-				 SENSORS_NO_MAPPING); (*nr1)++) ;
-			*nr2 = *nr1;
-			if (!feature_list[*nr1 - 1].data.name)
-				return NULL;
-			return &((feature_list + *nr1 - 1)->data);
-		}
-	return NULL;
+	if (!(chip = sensors_lookup_chip(name)))
+		return NULL;	/* No such chip */
+
+	for (i = feature->first_subfeature; i < chip->subfeature_count &&
+	     chip->subfeature[i].mapping == feature->number; i++) {
+		if (chip->subfeature[i].type == type)
+			return &chip->subfeature[i];
+	}
+	return NULL;	/* No such subfeature */
 }
 
 /* Evaluate an expression */
-int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
-		      double val, double *result)
+int sensors_eval_expr(const sensors_chip_features *chip_features,
+		      const sensors_expr *expr,
+		      double val, int depth, double *result)
 {
 	double res1, res2;
 	int res;
-	const sensors_chip_feature *feature;
+	const sensors_subfeature *subfeature;
 
 	if (expr->kind == sensors_kind_val) {
 		*result = expr->data.val;
@@ -394,17 +449,19 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 		return 0;
 	}
 	if (expr->kind == sensors_kind_var) {
-		if (!(feature = sensors_lookup_feature_name(chipname.prefix,
+		if (!(subfeature = sensors_lookup_subfeature_name(chip_features,
 							    expr->data.var)))
 			return -SENSORS_ERR_NO_ENTRY;
-		if (!(res = sensors_get_feature(chipname, feature->data.number, result)))
-			return res;
-		return 0;
+		return __sensors_get_value(&chip_features->chip,
+					   subfeature->number, depth + 1,
+					   result);
 	}
-	if ((res = sensors_eval_expr(chipname, expr->data.subexpr.sub1, val, &res1)))
+	if ((res = sensors_eval_expr(chip_features, expr->data.subexpr.sub1,
+				     val, depth, &res1)))
 		return res;
 	if (expr->data.subexpr.sub2 &&
-	    (res = sensors_eval_expr(chipname, expr->data.subexpr.sub2, val, &res2)))
+	    (res = sensors_eval_expr(chip_features, expr->data.subexpr.sub2,
+				     val, depth, &res2)))
 		return res;
 	switch (expr->data.subexpr.op) {
 	case sensors_add:
@@ -439,83 +496,60 @@ int sensors_eval_expr(sensors_chip_name chipname, const sensors_expr * expr,
 /* Execute all set statements for this particular chip. The chip may not 
    contain wildcards!  This function will return 0 on success, and <0 on 
    failure. */
-int sensors_do_this_chip_sets(sensors_chip_name name)
+static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 {
+	const sensors_chip_features *chip_features;
 	sensors_chip *chip;
 	double value;
-	int i, j;
+	int i;
 	int err = 0, res;
-	const sensors_chip_feature *feature;
-	int *feature_list = NULL;
-	int feature_count = 0;
-	int feature_max = 0;
-	int feature_nr;
+	const sensors_subfeature *subfeature;
+
+	chip_features = sensors_lookup_chip(name);	/* Can't fail */
 
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->sets_count; i++) {
-			feature = sensors_lookup_feature_name(name.prefix,
+			subfeature = sensors_lookup_subfeature_name(chip_features,
 							chip->sets[i].name);
-			if (!feature) {
+			if (!subfeature) {
 				sensors_parse_error("Unknown feature name",
 						    chip->sets[i].lineno);
 				err = -SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
-			feature_nr = feature->data.number;
 
-			/* Check whether we already set this feature */
-			for (j = 0; j < feature_count; j++)
-				if (feature_list[j] == feature_nr)
-					break;
-			if (j != feature_count)
-				continue;
-			sensors_add_array_el(&feature_nr, &feature_list,
-					     &feature_count, &feature_max,
-					     sizeof(int));
-
-			res = sensors_eval_expr(name, chip->sets[i].value, 0,
-					      &value);
+			res = sensors_eval_expr(chip_features,
+						chip->sets[i].value, 0,
+						0, &value);
 			if (res) {
 				sensors_parse_error("Error parsing expression",
 						    chip->sets[i].lineno);
 				err = res;
 				continue;
 			}
-			if ((res = sensors_set_feature(name, feature_nr, value))) {
-				sensors_parse_error("Failed to set feature",
+			if ((res = sensors_set_value(name, subfeature->number,
+						     value))) {
+				sensors_parse_error("Failed to set value",
 						chip->sets[i].lineno);
 				err = res;
 				continue;
 			}
 		}
-	free(feature_list);
 	return err;
 }
 
 /* Execute all set statements for this particular chip. The chip may contain
    wildcards!  This function will return 0 on success, and <0 on failure. */
-int sensors_do_chip_sets(sensors_chip_name name)
+int sensors_do_chip_sets(const sensors_chip_name *name)
 {
 	int nr, this_res;
 	const sensors_chip_name *found_name;
 	int res = 0;
 
-	for (nr = 0; (found_name = sensors_get_detected_chips(&nr));)
-		if (sensors_match_chip(name, *found_name)) {
-			this_res = sensors_do_this_chip_sets(*found_name);
-			if (!res)
-				res = this_res;
-		}
+	for (nr = 0; (found_name = sensors_get_detected_chips(name, &nr));) {
+		this_res = sensors_do_this_chip_sets(found_name);
+		if (this_res)
+			res = this_res;
+	}
 	return res;
-}
-
-/* Execute all set statements for all detected chips. This is the same as
-   calling sensors_do_chip_sets with an all wildcards chip name */
-int sensors_do_all_sets(void)
-{
-	sensors_chip_name name = { SENSORS_CHIP_NAME_PREFIX_ANY,
-		SENSORS_CHIP_NAME_BUS_ANY,
-		SENSORS_CHIP_NAME_ADDR_ANY
-	};
-	return sensors_do_chip_sets(name);
 }

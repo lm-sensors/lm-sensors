@@ -14,7 +14,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #ifndef LIB_SENSORS_GENERAL
@@ -25,15 +26,14 @@
    made between the current number of elements and the maximum number.
    You can only add elements at the end. Primitive, but very useful
    for internal use. */
-extern void sensors_malloc_array(void *list, int *num_el, int *max_el,
-                                 int el_size);
-extern void sensors_free_array(void *list, int *num_el, int *max_el);
-extern void sensors_add_array_el(const void *el, void *list, int *num_el,
-                                 int *max_el, int el_size);
-extern void sensors_add_array_els(const void *els, int nr_els, void *list,
-                                  int *num_el, int *max_el, int el_size);
+void sensors_malloc_array(void *list, int *num_el, int *max_el,
+			  int el_size);
+void sensors_free_array(void *list, int *num_el, int *max_el);
+void sensors_add_array_el(const void *el, void *list, int *num_el,
+			  int *max_el, int el_size);
+void sensors_add_array_els(const void *els, int nr_els, void *list,
+			   int *num_el, int *max_el, int el_size);
 
-/* Strip a string of all terminating spaces */
-extern void sensors_strip_of_spaces(char *name);
+#define ARRAY_SIZE(arr)	(int)(sizeof(arr) / sizeof((arr)[0]))
 
 #endif /* LIB_SENSORS_GENERAL */

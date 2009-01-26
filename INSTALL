@@ -1,305 +1,83 @@
-=============================================================================
+INSTALLATION INSTRUCTIONS
+=========================
 
-DETAILED INSTALLATION INSTRUCTIONS
-See QUICKSTART for the simple version.
-
-The driver modules in this package are ONLY for 2.4 kernels 2.4.10 or later!
-
-This package REQUIRES i2c-2.9.0 or later! The i2c subsystem found in the
-Linux 2.4 kernel trees, even the latest ones, is outdated and won't work.
-
-FOR 2.5/2.6 KERNELS, do not attempt to compile the modules in this package.
-    Use the drivers already in the 2.5/2.6 kernel tree.
-    If you are running a 2.5/2.6 kernel, the ONLY thing you need to
-    do is 'make user' and 'make user_install'. Do NOT follow the rest
-    of these instructions. Please check the QUICKSTART instead.
+The lm-sensors package, version 3, provides user-space support for the
+hardware monitoring drivers in Linux 2.6.5 and later. For older kernel
+versions, you have to use lm-sensors version 2.
 
 
-=============================================================================
-These are the installation instruction for the lm_sensors package.
+Dependencies
+============
 
-There are two ways in which you can compile and install this package.
-Option 1 is much easier and is recommended.
+Build-time dependencies:
+* GNU make
+* gcc
+* bison
+* flex
+* rrd header files (optional, for sensord)
 
- 1. Complete separate from kernel compilation
-    (only for 2.4 kernels 2.4.10 or later)
-    This will generate a set of modules which can be inserted and removed
-    as needed; nothing will be written into the kernel tree;
-
- 2. Patching of the kernel
-    (only for 2.4 kernels 2.4.13 or later)
-    This will patch your kernel source tree. You must recompile your kernel
-    to take advantage of this. But it makes it possible to compile drivers
-    into the kernel itself, instead of having to add them as modules.
-    ** AFTER YOU COMPILED AND INSTALLED YOUR KERNEL, YOU WILL STILL HAVE TO 
-    ** COMPILE THIS PACKAGE TO GET THE USERLAND UTILITIES!
-    ** NOT ALL MODULES ARE PATCHED INTO THE KERNEL. SEE BELOW.
+Run-time dependencies:
+* perl (for sensors-detect)
+* rrdtool >= 1.2.1 (optional, for sensord)
+* proper kernel configuration (see below)
 
 
-
-Each of these ways will be described below in detail.
-
-NOTE: MAKE SURE YOU HAVE THE I2C-ALGO-BIT DRIVER (PART OF THE I2C PACKAGE)
-      COMPILED INTO YOUR KERNEL OR AVAILABLE AS A MODULE; SOME I2C/SMBUS
-      MASTER DRIVERS DEPEND ON IT!
-
-NOTE: IN EACH CASE, YOU WILL HAVE TO GET AND INSTALL THE I2C PACKAGE FIRST!
-      SET COMPILE_KERNEL TO 0 IN THE MAIN MAKEFILE FOR OPTION 2, UNLESS
-      YOU NEED ALPHA OR BETA DRIVERS (SEE BELOW)
-
-NOTE: PLEASE READ THE DOCUMENTATION IN THE DOC SUBDIRECTORY IF YOU GET STUCK!
-
-
-Installing the i2c package
-==========================
-
-This lm_sensors release REQUIRES i2c-2.9.0 or later, which is not in
-any 2.4 kernel (and will never be).
-Therefore, you must download and install the i2c package with
-the same version number or higher as this lm_sensors package.
-
-All i2c components are distributed in
-a separate package. There are install instructions in that package. If
-you want to use compilation option 2 (patching the kernel) for lm_sensors,
-you will have to use compilation option 3 (patching the kernel) for i2c
-too. If you want to use compilation option 1 (compiling as modules) for
-lm_sensors, you may use either compilation option 1 or 2 (compiling as
-modules) or compilation option 3 (patching the kernel for i2c). See the
-table below.
-
-                                          LM_SENSORS
-I2C                      | option 1 (modules)      option 2 (patch kernel)
--------------------------+------------------------------------------------
-option 1 (modules)       |      YES                      NO
-option 2 (modules)       |      YES                      YES
-option 3 (patch kernel)  |      YES                      YES
-
-
-If you use compilation option 1 (compiling as modules) for lm_sensors, you
-will have to make very sure the correct i2c header files are found. If you
-get weird compilation errors, this is almost certainly going wrong. The
-i2c header files are in a i2c subdirectory of either /usr/local/include 
-(i2c compilation option 1) or /usr/src/linux*/include (i2c compilation
-options 2 and 3). Especially if you have in the past placed the header
-files in /usr/local/include, this will probably go wrong. See below on
-how to fix this.
-
-NOTE: option 3 only works with 2.4 kernels 2.4.13 or later;
-      options 1 and 2 only work with 2.4 kernels 2.4.10 or later.
-
-
-Mixing old and new, and using beta drivers (compilation option 1)
-=================================================================
-
-It is possible that you are running a previously patched kernel, or
-a very new kernel which already has limited or full i2c or lm_sensors
-support, but you want to use newer versions of the drivers. This is
-possible, but there are some pitfalls.
-
-If you had compiled all i2c and lm_sensors drivers as modules, you are 
-in luck. You can simply compile the newest versions of i2c and
-lm_sensors and install them. Just make sure the right modules are
-loaded (best bet: remove the old ones first).
-
-If you have a certain driver compiled into your kernel, you may
-encounter bad problems. We do not guarantee to keep internal kernel
-interfaces unchanged. In plain language, this means that an older driver
-may not work together with a newer driver, and your kernel may crash. 
-On the other hand, if you know what you are doing, compilation will 
-be smart. Drivers that are compiled right into your kernel will not 
-be compiled as a module again.  You could do nothing with them anyway.
-
-Sometimes, you want to patch your kernel, but find that certain alpha
-or beta drivers are not included in the patch. This is on purpose: we
-do not want to polute the kernel tree with things of which we are not
-confident they work. In this case, patch the kernel, compile it, and
-then compile lm_sensors with COMPILE_KERNEL set to 1.
-
-
-Having a proper kernel tree (compilation option 1)
-==================================================
-
-Usually, if you compile a user-space application, you can get away with
-having a different version of the kernel running than the version of the
-kernel header files against which you compiled it. But a perfect match
-is needed for the first two compilation options above.
-
-Let's say you want to use the lm_sensors modules with the kernel 2.4.32 you
-are running now. What you need, is the original tree in which you
-compiled that 2.4.32 kernel. A freshly unpacked 2.4.32 kernel will not
-cut it, because `make *config dep' creates some files that are needed.
-And even then, you will run into trouble, because you may not have
-selected the exact same configuration variables. Plain advise: if you
-do not have your original kernel tree anymore, recompile your kernel
-first.
-
-Note that there is no need for a perfect match at compilation time, just
-at run-time. This means you can cross-compile against a different kernel
-version, and the Makefile does not check for this.
-
-Usually problems if the match is imperfect, is that either this package
-won't compile at all (because it was a freshly unpacked tree without
-some files generated by `make *config dep'), or that you can't insert
-modules because of either a `kernel-module version mismatch' or because
-of `unresolved kernel symbols'. If you get either of these messages,
-check your kernel tree!
-
-To keep problems to a minimum, please use a 'vanilla' kernel tree,
-as distributed on ftp://ftp.kernel/org/pub/linux/kernel, and not one
-patched by your distribution.
-
-
-Separate from kernel compilation (compilation option 1)
-=======================================================
-
-This will compile and install the complete lm_sensors package. Though 
-nothing is written to your kernel tree, a proper tree is still needed 
-for this. See earlier for what a proper kernel tree is.
+Compilation
+===========
 
 At the top of the Makefile are a couple of configuration variables that
-you may want to change. As far as possible, the Makefile tries to figure
-out by itself their settings, but it is possible to overrule them. A list
-is found below. Most important are the variables that determine where
-your kernel is located (LINUX=/lib/modules/KERNELVERSION/build, usually
-links to /usr/src/linux or something similar), where the i2c header files
-are (I2C_HEADERS=/usr/local/include) and where you want to install 
-your modules (MODDIR=/lib/modules/KERNELVERSION) and header files
-(LINUX_INCLUDE_DIR=/usr/local/include/linux). You can see that the
-installation locations are choosen in such a way that they are separate
-from the true kernel.
+you may want to change. There's a description of what each variable does
+in the Makefile itself.
 
-Compilation is done by `make all'; `make install' installs the package.
-You will get a lot of warnings about files which are not found, all 
-ending on `.*d'. You can safely ignore this; they contain dependency
-information, which is regenerated on the spot.
+Compilation is done by `make all'. You will get a lot of warnings about
+files which are not found, all ending in `.*d'. You can safely ignore
+this; they contain dependency information, which is regenerated on the
+spot.
 
-Please continue reading this file before you start compiling.
+`make install' installs the package (to /usr/local by default).
 
 
-Makefile configuration variables (compilation option 1)
-==============================================================
+Kernel configuration
+====================
 
-SHELL (default: /bin/sh)
-  You may have to specify the full path to Bash here, if /bin/sh is some
-  other shell. There have been conflicting reports on whether this is 
-  needed.
-KERNELVERSION
-  The version of the currently running kernel.
-LINUX (default: /lib/modules/$(KERNELVERSION)/build)
-  The location of your kernel tree.
-COMPILE_KERNEL
-  Determine whether you want to consider the kernel modules for compilation
-  at all. By default, compilation option 1 will only compile and install
-  those modules which are not built into the kernel.
-  If some modules are built into your kernel, and this package is much 
-  newer, you may find you can not insert the newly compiled modules. 
-  Sorry.
-  You may want to set this to 0 if you have just patched and compiled
-  your kernel using the same version of this package, and just want to
-  compile the user-space tools.
-I2C_HEADERS (default: /usr/local/include)
-  This lists where the i2c headers are found. If you used compilation
-  option 1 for the i2c package, the default will be right. If you used
-  compilation options 2 or 3, it will not, and may actually cause
-  problems if you have the left-overs of a previous installation.
-  If you have weird compilation problems, try to change this to
-  $(LINUX_HEADERS).
-SMP
-  This must be set to 1 for a SMP kernel. The magic invocation should
-  determine this automatically, so you should not have to bother with 
-  this.
-MODVER
-  This must be set to 1 if CONFIG_MODVERSIONS is defined. The magic
-  invocation should determine this automatically, so you should not
-  have to bother with this.
-WARN (default: 0)
-  Generate additional compilation warnings; mainly interesting for
-  developers.
-DEBUG (default: 0)
-  Some drivers will issue more debug information if you set this to
-  1. Don't do it, unless you are a developer or are instructed to do
-  so by the lm_sensors team.
-PREFIX (default: /usr/local)
-  Prefix for almost all installation directories.
-MODPREF (default: /lib/modules/$(KERNELVERSION))
-  The location where the kernel modules will be installed.
-ETCDIR (default: /etc)
-  Installation location of the sensors.conf configuration file.
-LIBDIR (default: $(PREFIX)/lib)
-  Installation location of all static and shared libraries.
-BINDIR (default: $(PREFIX)/bin)
-  Installation directory of programs useful for users.
-SBINDIR (default: $(PREFIX)/sbin)
-  Installation directory of system administrator-only programs.
-INCLUDEDIR (default: $(PREFIX)/include)
-  Base installation directory for include files (see next two vars).
-SYSINCLUDEDIR (default: $(INCLUDEDIR)/linux)
-  Installation directory for system include files.
-LIBINCLUDEDIR (default: $(INCLUDEDIR)/sensors)
-  Installation directory for libsensors include files.
-MANDIR (default: $(PREFIX)/man)
-  Base installation directory for manual pages.
-
-
-Patching the kernel (compilation option 2)
-==========================================
-
-There is a special script which should be able to generate diffs against
-any 2.4 kernel (2.4.10 or later).  Please report any problems to our
-mailing list.  It *is* safe to run it if your kernel already has the
-lm_sensors drivers.  It will only work if you applied the i2c patches first.
-
-** Only a subset of the modules in lm_sensors are patched into the        **
-** kernel by the script. See the file mkpatch/FILES to see if the         **
-** modules you need are included. If a module you need is NOT listed      **
-** in mkpatch/FILES, it will not be patched, and you MUST use option 1.   **
-** If you are not sure what modules you need, run `sensors-detect' first. **
-
-The kernel diffs are generated by the program `mkpatch.pl' in the mkpatch
-subdirectory. It needs two arguments: the first one is the root of the
-lm_sensors package, the second one is the root of the kernel tree against
-which the diffs will be generated. For example:
-  cd /tmp/lm_sensors-2.10.0
-  mkpatch/mkpatch.pl . /usr/src/linux > /tmp/sensors-2.10.0.patch
-You can apply the diffs as usual:
-  cd /usr/src/linux
-  patch -p1 -E < /tmp/sensors-2.10.0.patch
-Generation and application can easily be done in one step:
-  mkpatch/mkpatch.pl . /usr/src/linux | patch -p1 -E -d /usr/src/linux
-The generated diffs are of course only valid for the kernel version 
-against which mkpatch.pl was run.
-
-Once you have applied the patches, you can configure and compile your
-kernel as usual. You will see the sensors configuration screen under the
-`Character Devices' menu in menuconfig, but it will only be available
-if you selected base I2C support.
+This package assumes that you have a properly configured kernel. If
+you run a distribution kernel, that should be the case. If you're
+building your own kernel, here are some recommendations:
+* Enable "I2C support" (CONFIG_I2C=y or m). On many motherboards, the
+  sensor chip is connected to the SMBus, which is supported by I2C
+  in the Linux kernel.
+* Enable "I2C device interface" (CONFIG_I2C_CHARDEV=m). sensors-detect
+  needs this to probe for SMBus hardware monitoring chips.
+* In I2C Hardware Bus support, enable all drivers you might need,
+  preferably as modules. If you're not sure, select them all.
+* Enable "Hardware Monitoring support" (CONFIG_HWMON=y or m).
+* Enable all hardware monitoring drivers you might need, preferably
+  as modules. If you're not sure, select them all.
 
 
 Using the sensors package
 =========================
 
-You can now load the modules by using `modprobe'. For example,
-`modprobe i2c-piix4' will load the i2c-piix4 module, and all i2c modules
-on which it depends.
-
-You can not use demand-loading; you will have to issue explicit modprobe
-instructions. 
-
-If you have an older installation, you will probably have to create the
-i2c device files in the /dev directory. They are called /dev/i2c-%d,
-and are character devices with major device number 89 and minor device 
-number %d. The script prog/mkdev/mkdev.sh will create the files for you.
-
 There is a scanning program installed called sensors-detect. It
-will scan all available I2C and SMBus adapters for all known devices,
-and will also look for ISA, PCI and Super-I/O chips with sensors,
-and give you a list of what modules you need to insert.
+will scan all available I2C and SMBus adapters for all known sensor
+devices, and will also look for ISA, PCI and Super-I/O chips with
+sensors, and give you a list of what kernel drivers you need to load
+(using modprobe).
 
-You can use the installed sensors program to get a report of all detected
-sensor devices. There is also a manual page for this program. Calling
-`sensors -s' will set the limits and other configuration settings 
-specified in /etc/sensors.conf. Again, read the manual pages for more
-information.
+After loading the suggested drivers, you can use the installed sensors
+program to get a report of all detected sensor devices. Check the manual
+page for available options.
+
+The initial output of `sensors' will not be perfect. You have to adjust
+the configuration file (/etc/sensors3.conf) to match your motherboard.
+This includes (re)labelling inputs, ignoring unused inputs, changing
+voltage compute lines and setting limits. Write down all the sensor
+information your BIOS displays as a hint to what you are supposed to
+obtain in the end. Make sure you modify the right chip section.
+
+Once you are done with editing the configuration file, calling
+`sensors -s' will set the new limits. Then the output of `sensors'
+should look much better.
 
 There are many auxiliary programs not installed. You can find them under
 the prog subdirectory. A list can be found in doc/progs.

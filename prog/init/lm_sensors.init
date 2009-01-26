@@ -16,7 +16,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
-#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#    MA 02110-1301 USA.
 
 # See also the lm_sensors homepage at:
 #     http://www.lm-sensors.org
@@ -24,9 +25,9 @@
 # It uses a config file /etc/sysconfig/lm_sensors that contains the modules
 # to be loaded/unloaded. That file is sourced into this one.
 
-# The format of that file a shell script that simply defines the modules 
-# in order as normal shell variables with the special names:
-#    MODULE_1, MODULE_2, MODULE_3, etc.
+# The format of this file is a shell script that simply defines variables:
+# HWMON_MODULES for hardware monitoring driver modules, and optionally
+# BUS_MODULES for any required bus driver module (for example for I2C or SPI).
 
 PSENSORS=/usr/local/bin/sensors
 
@@ -43,31 +44,8 @@ prog="lm_sensors"
 # This functions checks if sensor support is compiled into the kernel, if
 # sensors are configured, and loads the config file
 check_sensors() {
-	if grep -q sysfs /proc/mounts; then
-		WITHSYS=1
-	else
-		WITHSYS=0
-	fi
-
-	if [ $WITHSYS == "0" ]; then
-		# If sensors isn't supported by the kernel, try loading the module...
-		[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc >/dev/null 2>&1
-
-		# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
-		# support for sensors.
-		if ! [ -e /proc/sys/dev/sensors ]; then
-			echo -n "$1 $prog: kernel does not have sensors support"
-			echo_failure
-			echo
-			exit 5
-		fi
-
-		# If sensors was not already running, unload the module...
-		[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc >/dev/null 2>&1
-	fi
-
 	CONFIG=/etc/sysconfig/lm_sensors
-	if ! [ -r "$CONFIG" ] || ! grep '^MODULE_' $CONFIG >/dev/null 2>&1; then
+	if ! [ -r "$CONFIG" ] || ! grep '^HWMON_MODULES' $CONFIG >/dev/null 2>&1; then
 		echo -n "$1 $prog: not configured, run sensors-detect"
 		echo_warning
 		echo
@@ -83,13 +61,9 @@ start() {
 
 	echo -n "Starting $prog: loading module "
 
-	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-	i=0
-	while [ $i -lt $modules ] ; do
-		module=`eval echo '$'MODULE_$i`
+	for module in $BUS_MODULES $HWMON_MODULES ; do
 		echo -n "${module} "
 		/sbin/modprobe $module >/dev/null 2>&1
-		i=`expr $i + 1`
 	done
 	$PSENSORS -s
 
@@ -108,17 +82,9 @@ stop() {
 
 	echo -n "Stopping $prog: "
 
-	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-	i=`expr $modules`
-	while [ $i -ge 0 ] ; do
-		module=`eval echo '$'MODULE_$i`
+	for module in $HWMON_MODULES $BUS_MODULES ; do
 		/sbin/modprobe -r $module >/dev/null 2>&1
-		i=`expr $i - 1`
 	done
-
-	if [ $WITHSYS == "0" ]; then
-		/sbin/modprobe -r i2c-proc >/dev/null 2>&1
-	fi
 
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/lm_sensors ; then

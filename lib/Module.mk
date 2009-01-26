@@ -13,7 +13,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301 USA.
 
 # Note that MODULE_DIR (the directory in which this file resides) is a
 # 'simply expanded variable'. That means that its value is substituted
@@ -30,10 +31,9 @@ LIBMAN5FILES := $(MODULE_DIR)/sensors.conf.5
 # The main and minor version of the library
 # The library soname (major number) must be changed if and only if the interface is
 # changed in a backward incompatible way.  The interface is defined by
-# the public header files - in this case they are error.h, sensors.h,
-# chips.h.
-LIBMAINVER := 3
-LIBMINORVER := 1.7
+# the public header files - in this case they are error.h and sensors.h.
+LIBMAINVER := 4
+LIBMINORVER := 0.2
 LIBVER := $(LIBMAINVER).$(LIBMINORVER)
 
 # The static lib name, the shared lib name, and the internal ('so') name of
@@ -47,12 +47,8 @@ LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME) \
               $(MODULE_DIR)/$(LIBSHSONAME) $(MODULE_DIR)/$(LIBSHBASENAME)
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
-               $(MODULE_DIR)/error.c $(MODULE_DIR)/chips.c \
-               $(MODULE_DIR)/proc.c $(MODULE_DIR)/access.c \
-               $(MODULE_DIR)/init.c
-ifdef SYSFS_SUPPORT
-	LIBCSOURCES := $(LIBCSOURCES) $(MODULE_DIR)/sysfs.c
-endif
+               $(MODULE_DIR)/error.c $(MODULE_DIR)/access.c \
+               $(MODULE_DIR)/init.c $(MODULE_DIR)/sysfs.c
 
 LIBOTHEROBJECTS := $(MODULE_DIR)/conf-parse.o $(MODULE_DIR)/conf-lex.o
 LIBSHOBJECTS := $(LIBCSOURCES:.c=.lo) $(LIBOTHEROBJECTS:.o=.lo)
@@ -60,17 +56,11 @@ LIBSTOBJECTS := $(LIBCSOURCES:.c=.ao) $(LIBOTHEROBJECTS:.o=.ao)
 LIBEXTRACLEAN := $(MODULE_DIR)/conf-parse.h $(MODULE_DIR)/conf-parse.c \
                  $(MODULE_DIR)/conf-lex.c
 
-LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h \
-                  $(MODULE_DIR)/chips.h
+LIBHEADERFILES := $(MODULE_DIR)/error.h $(MODULE_DIR)/sensors.h
 
 # How to create the shared library
-ifdef SYSFS_SUPPORT
-$(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
-	$(CC) -shared -Wl,-soname,$(LIBSHSONAME) -o $@ $^ -lc -lm -lsysfs
-else
 $(MODULE_DIR)/$(LIBSHLIBNAME): $(LIBSHOBJECTS)
 	$(CC) -shared -Wl,-soname,$(LIBSHSONAME) -o $@ $^ -lc -lm
-endif
 
 $(MODULE_DIR)/$(LIBSHSONAME): $(MODULE_DIR)/$(LIBSHLIBNAME)
 	$(RM) $@
@@ -96,10 +86,18 @@ $(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
 
 # Special warning prevention for flex-generated files
+FLEXNOWARN:=-Wno-shadow -Wno-undef -Wno-unused -Wno-missing-prototypes -Wno-sign-compare
 $(MODULE_DIR)/conf-lex.ao: $(MODULE_DIR)/conf-lex.c
-	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -Wno-unused -c $< -o $@
+	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) $(FLEXNOWARN) -c $< -o $@
 $(MODULE_DIR)/conf-lex.lo: $(MODULE_DIR)/conf-lex.c
-	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) -Wno-unused -c $< -o $@
+	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) $(FLEXNOWARN) -c $< -o $@
+
+# Special warning prevention for bison-generated files
+YACCNOWARN:=-Wno-undef
+$(MODULE_DIR)/conf-parse.ao: $(MODULE_DIR)/conf-parse.c
+	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) $(YACCNOWARN) -c $< -o $@
+$(MODULE_DIR)/conf-parse.lo: $(MODULE_DIR)/conf-parse.c
+	$(CC) $(LIBCPPFLAGS) $(LIBCFLAGS) $(YACCNOWARN) -c $< -o $@
 
 REMOVELIBST := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSTLIBNAME))
 REMOVELIBSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(LIBDIR)/%,$(LIB_DIR)/$(LIBSHLIBNAME))
@@ -118,35 +116,35 @@ user :: all-lib
 # so we can't make any assumptions.
 install-lib: all-lib
 	$(MKDIR) $(DESTDIR)$(LIBDIR) $(DESTDIR)$(LIBINCLUDEDIR) $(DESTDIR)$(LIBMAN3DIR) $(DESTDIR)$(LIBMAN5DIR)
-	@if [ ! -e "$(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
+	@if [ -z "$(DESTDIR)" -a ! -e "$(LIBDIR)/$(LIBSHSONAME)" ] ; then \
 	     echo '******************************************************************************' ; \
 	     echo 'Warning: This is the first installation of the $(LIBSHSONAME)*' ; \
-	     echo '         library files in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         library files in $(LIBDIR)!' ; \
 	     echo '         You must update the library cache or the userspace tools may fail' ; \
 	     echo '         or have unpredictable results!' ; \
-		 echo '         Run the following command: /sbin/ldconfig' ; \
+	     echo '         Run the following command: /sbin/ldconfig' ; \
 	     echo '******************************************************************************' ; \
 	fi
 	$(INSTALL) -m 644 $(LIB_DIR)/$(LIBSTLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(INSTALL) -m 755 $(LIB_DIR)/$(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
-	@if [ "$(DESTDIR)$(LIBDIR)" != "/usr/lib" -a "$(DESTDIR)$(LIBDIR)" != "/lib" ] ; then \
+	@if [ -z "$(DESTDIR)" -a "$(LIBDIR)" != "/usr/lib" -a "$(LIBDIR)" != "/lib" ] ; then \
 	   if [ -e "/usr/lib/$(LIBSHSONAME)" -o -e "/usr/lib/$(LIBSHBASENAME)" ] ; then \
 	     echo '******************************************************************************' ; \
 	     echo 'Warning: You have at least one $(LIBSHBASENAME) library file in /usr/lib' ; \
-	     echo '         and the new library files are in $(DESTDIR)$(LIBDIR)!' ; \
+	     echo '         and the new library files are in $(LIBDIR)!' ; \
 	     echo '         These old files must be removed or the userspace tools may fail' ; \
 	     echo '         or have unpredictable results!' ; \
 	     echo '         Run the following command: rm /usr/lib/$(LIBSHBASENAME)*' ; \
 	     echo '******************************************************************************' ; \
 	   fi ; \
-	   grep -q '^$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '^$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(DESTDIR)$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
+	   grep -q '^$(LIBDIR)$$' /etc/ld.so.conf || \
+	   grep -q '^$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
+	   grep -q '[[:space:]:,]$(LIBDIR)$$' /etc/ld.so.conf || \
+	   grep -q '[[:space:]:,]$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
 		( echo '******************************************************************************' ; \
-		  echo 'Warning: Library directory $(DESTDIR)$(LIBDIR) is not in /etc/ld.so.conf!' ; \
+		  echo 'Warning: Library directory $(LIBDIR) is not in /etc/ld.so.conf!' ; \
 		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work.' ; \
 		  echo '******************************************************************************' ) ; \
 	fi

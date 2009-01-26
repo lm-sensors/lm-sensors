@@ -1,6 +1,7 @@
 /*
     init.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
+    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,16 +15,17 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301 USA.
 */
 
 #include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "sensors.h"
 #include "data.h"
-#include "proc.h"
 #include "error.h"
 #include "access.h"
 #include "conf.h"
@@ -31,170 +33,192 @@
 #include "scanner.h"
 #include "init.h"
 
-static void free_proc_chips_entry(sensors_proc_chips_entry entry);
-static void free_chip_name(sensors_chip_name name);
-static void free_bus(sensors_bus bus);
-static void free_chip(sensors_chip chip);
-static void free_label(sensors_label label);
-static void free_set(sensors_set set);
-static void free_compute(sensors_compute compute);
-static void free_ignore(sensors_ignore ignore);
+#define DEFAULT_CONFIG_FILE	ETCDIR "/sensors3.conf"
+#define ALT_CONFIG_FILE		ETCDIR "/sensors.conf"
 
 /* Wrapper around sensors_yyparse(), which clears the locale so that
    the decimal numbers are always parsed properly. */
 static int sensors_parse(void)
 {
-  int res;
-  char *locale;
+	int res;
+	char *locale;
 
-  /* Remember the current locale and clear it */
-  locale = setlocale(LC_ALL, NULL);
-  if (locale) {
-    locale = strdup(locale);
-    setlocale(LC_ALL, "C");
-  }
+	/* Remember the current locale and clear it */
+	locale = setlocale(LC_ALL, NULL);
+	if (locale) {
+		locale = strdup(locale);
+		setlocale(LC_ALL, "C");
+	}
 
-  res = sensors_yyparse();
+	res = sensors_yyparse();
 
-  /* Restore the old locale */
-  if (locale) {
-    setlocale(LC_ALL, locale);
-    free(locale);
-  }
+	/* Restore the old locale */
+	if (locale) {
+		setlocale(LC_ALL, locale);
+		free(locale);
+	}
 
-  return res;
+	return res;
 }
 
 int sensors_init(FILE *input)
 {
-  int res;
-  sensors_cleanup();
-  if (sensors_init_sysfs()) {
-    if ((res = sensors_read_sysfs_bus()) || (res = sensors_read_sysfs_chips()))
-      return res;
-  } else {
-    if ((res = sensors_read_proc_bus()) || (res = sensors_read_proc_chips()))
-      return res;
-  }
-  if ((res = sensors_scanner_init(input)))
-    return -SENSORS_ERR_PARSE;
-  if ((res = sensors_parse()))
-    return -SENSORS_ERR_PARSE;
-  if ((res = sensors_substitute_busses()))
-    return res;
-  return 0;
+	int res;
+
+	if (!sensors_init_sysfs())
+		return -SENSORS_ERR_KERNEL;
+	if ((res = sensors_read_sysfs_bus()) ||
+	    (res = sensors_read_sysfs_chips()))
+		goto exit_cleanup;
+
+	res = -SENSORS_ERR_PARSE;
+	if (input) {
+		if (sensors_scanner_init(input) ||
+		    sensors_parse())
+			goto exit_cleanup;
+	} else {
+		/* No configuration provided, use default */
+		input = fopen(DEFAULT_CONFIG_FILE, "r");
+		if (!input && errno == ENOENT)
+			input = fopen(ALT_CONFIG_FILE, "r");
+		if (input) {
+			if (sensors_scanner_init(input) ||
+			    sensors_parse()) {
+				fclose(input);
+				goto exit_cleanup;
+			}
+			fclose(input);
+		}
+	}
+
+	if ((res = sensors_substitute_busses()))
+		goto exit_cleanup;
+	return 0;
+
+exit_cleanup:
+	sensors_cleanup();
+	return res;
 }
 
-void sensors_cleanup(void)
+static void free_chip_name(sensors_chip_name *name)
 {
-  int i;
-
-  sensors_scanner_exit();
-
-  for (i = 0; i < sensors_proc_chips_count; i++)
-    free_proc_chips_entry(sensors_proc_chips[i]);
-  free(sensors_proc_chips);
-  sensors_proc_chips = NULL;
-  sensors_proc_chips_count = sensors_proc_chips_max = 0;
-  
-  for (i = 0; i < sensors_config_busses_count; i++)
-    free_bus(sensors_config_busses[i]);
-  free(sensors_config_busses);
-  sensors_config_busses = NULL;
-  sensors_config_busses_count = sensors_config_busses_max = 0;
-
-  for (i = 0; i < sensors_config_chips_count; i++)
-    free_chip(sensors_config_chips[i]);
-  free(sensors_config_chips);
-  sensors_config_chips = NULL;
-  sensors_config_chips_count = sensors_config_chips_max = 0;
-
-  for (i = 0; i < sensors_proc_bus_count; i++)
-    free_bus(sensors_proc_bus[i]);
-  free(sensors_proc_bus);
-  sensors_proc_bus = NULL;
-  sensors_proc_bus_count = sensors_proc_bus_max = 0;
+	free(name->prefix);
+	free(name->path);
 }
 
-void free_proc_chips_entry(sensors_proc_chips_entry entry)
+static void free_chip_features(sensors_chip_features *features)
 {
-    free_chip_name(entry.name);
+	int i;
+
+	for (i = 0; i < features->subfeature_count; i++)
+		free(features->subfeature[i].name);
+	free(features->subfeature);
+	for (i = 0; i < features->feature_count; i++)
+		free(features->feature[i].name);
+	free(features->feature);
 }
 
-void free_chip_name(sensors_chip_name name)
+static void free_bus(sensors_bus *bus)
 {
-  free(name.prefix);
-  free(name.busname);
+	free(bus->adapter);
 }
 
-void free_bus(sensors_bus bus)
+static void free_label(sensors_label *label)
 {
-  free(bus.adapter);
-}
-
-void free_chip(sensors_chip chip)
-{
-  int i;
-
-  for (i = 0; i < chip.chips.fits_count; i++)
-    free_chip_name(chip.chips.fits[i]);
-  free(chip.chips.fits);
-  chip.chips.fits_count = chip.chips.fits_max = 0;
-
-  for (i = 0; i < chip.labels_count; i++)
-    free_label(chip.labels[i]);
-  free(chip.labels);
-  chip.labels_count = chip.labels_max = 0;
-
-  for (i = 0; i < chip.sets_count; i++)
-    free_set(chip.sets[i]);
-  free(chip.sets);
-  chip.sets_count = chip.sets_max = 0;
-
-  for (i = 0; i < chip.computes_count; i++)
-    free_compute(chip.computes[i]);
-  free(chip.computes);
-  chip.computes_count = chip.computes_max = 0;
-
-  for (i = 0; i < chip.ignores_count; i++)
-    free_ignore(chip.ignores[i]);
-  free(chip.ignores);
-  chip.ignores_count = chip.ignores_max = 0;
-}
-
-void free_label(sensors_label label)
-{
-  free(label.name);
-  free(label.value);
-}
-
-void free_set(sensors_set set)
-{
-  free(set.name);
-  sensors_free_expr(set.value);
-}
-
-void free_compute(sensors_compute compute)
-{
-  free(compute.name);
-  sensors_free_expr(compute.from_proc);
-  sensors_free_expr(compute.to_proc);
-}
-
-void free_ignore(sensors_ignore ignore)
-{
-  free(ignore.name);
+	free(label->name);
+	free(label->value);
 }
 
 void sensors_free_expr(sensors_expr *expr)
 {
-  if ((expr->kind) == sensors_kind_var)
-    free(expr->data.var);
-  else if ((expr->kind) == sensors_kind_sub) {
-    if (expr->data.subexpr.sub1)
-      sensors_free_expr(expr->data.subexpr.sub1);
-    if (expr->data.subexpr.sub2)
-      sensors_free_expr(expr->data.subexpr.sub2);
-  }
-  free(expr);
+	if (expr->kind == sensors_kind_var)
+		free(expr->data.var);
+	else if (expr->kind == sensors_kind_sub) {
+		if (expr->data.subexpr.sub1)
+			sensors_free_expr(expr->data.subexpr.sub1);
+		if (expr->data.subexpr.sub2)
+			sensors_free_expr(expr->data.subexpr.sub2);
+	}
+	free(expr);
+}
+
+static void free_set(sensors_set *set)
+{
+	free(set->name);
+	sensors_free_expr(set->value);
+}
+
+static void free_compute(sensors_compute *compute)
+{
+	free(compute->name);
+	sensors_free_expr(compute->from_proc);
+	sensors_free_expr(compute->to_proc);
+}
+
+static void free_ignore(sensors_ignore *ignore)
+{
+	free(ignore->name);
+}
+
+static void free_chip(sensors_chip *chip)
+{
+	int i;
+
+	for (i = 0; i < chip->chips.fits_count; i++)
+		free_chip_name(&chip->chips.fits[i]);
+	free(chip->chips.fits);
+	chip->chips.fits_count = chip->chips.fits_max = 0;
+
+	for (i = 0; i < chip->labels_count; i++)
+		free_label(&chip->labels[i]);
+	free(chip->labels);
+	chip->labels_count = chip->labels_max = 0;
+
+	for (i = 0; i < chip->sets_count; i++)
+		free_set(&chip->sets[i]);
+	free(chip->sets);
+	chip->sets_count = chip->sets_max = 0;
+
+	for (i = 0; i < chip->computes_count; i++)
+		free_compute(&chip->computes[i]);
+	free(chip->computes);
+	chip->computes_count = chip->computes_max = 0;
+
+	for (i = 0; i < chip->ignores_count; i++)
+		free_ignore(&chip->ignores[i]);
+	free(chip->ignores);
+	chip->ignores_count = chip->ignores_max = 0;
+}
+
+void sensors_cleanup(void)
+{
+	int i;
+
+	sensors_scanner_exit();
+
+	for (i = 0; i < sensors_proc_chips_count; i++) {
+		free_chip_name(&sensors_proc_chips[i].chip);
+		free_chip_features(&sensors_proc_chips[i]);
+	}
+	free(sensors_proc_chips);
+	sensors_proc_chips = NULL;
+	sensors_proc_chips_count = sensors_proc_chips_max = 0;
+
+	for (i = 0; i < sensors_config_busses_count; i++)
+		free_bus(&sensors_config_busses[i]);
+	free(sensors_config_busses);
+	sensors_config_busses = NULL;
+	sensors_config_busses_count = sensors_config_busses_max = 0;
+
+	for (i = 0; i < sensors_config_chips_count; i++)
+		free_chip(&sensors_config_chips[i]);
+	free(sensors_config_chips);
+	sensors_config_chips = NULL;
+	sensors_config_chips_count = sensors_config_chips_max = 0;
+
+	for (i = 0; i < sensors_proc_bus_count; i++)
+		free_bus(&sensors_proc_bus[i]);
+	free(sensors_proc_bus);
+	sensors_proc_bus = NULL;
+	sensors_proc_bus_count = sensors_proc_bus_max = 0;
 }

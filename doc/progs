@@ -9,86 +9,19 @@ For more elaborate programs (for example, GUI sensor displays),
 see http://www.lm-sensors.org/wiki/UsefulLinks.
 
 
-* prog/config/grab_busses.sh (written in bash and awk, not installed)
-  This program helps you generate the `bus' statements for your configuration
-  file. It read /proc/bus/i2c (or the file specified on the command-line),
-  and prints to stdout `bus' statements reflecting the currently detected
-  adapters.
-
 * prog/daemon/healthd.sh (written in bash, not installed)
   An example of a very simple hardware health monitoring daemon.
-
-* prog/detect/i2cdetect (written in C, installed by 'make install')
-  This program scans your complete I2C or SMBus adapter for connected devices.
-  Syntax:
-    i2cdetect 0
-  Here the '0' stands for the bus number (run "i2cdetect -l"
-  to list all installed busses).
 
 * prog/detect/sensors-detect (written in Perl, installed by 'make install')
   This program tries to detect the available SMBus adapters and the chips
   connected to them, as well as Super-I/O and misc chips. It also generates
   modprobe lines and module options. This program is interactive.
 
-* prog/doc/doc-features.pl (written in Perl, not installed)
-  This program is used to help us generate driver documentation; it scans
-  some C source programs to do this. Syntax:
-    ./doc-features.pl BASE [PREFIX...]
-  BASE is the path to the base directory of the lm_sensors tree
-  PREFIX is one of more prefixes of chips you want documented; if left out,
-  all chips are documented.
-
-* prog/doc/doc-insmod.pl (written in Perl, not installed)
-  This program is used to help us generate driver documentation; it reads
-  all module information and outputs insmod parameter information. Syntax:
-    ./doc-insmod.pl DRIVER
-
-* prog/dump/i2cdump (written in C, installed by 'make install')
-  This program dumps the registers of an I2C device.
-  Usual syntax:
-    i2cdump 0 0x4c b
-  Here the '0' stands for the bus number (run i2cdump with no arguments 
-  to list all installed busses).
-  '0x49' is the device address, and 'b' or 'w' stands for byte
-  or word data.
-
-* prog/dump/i2cset (written in C, installed by 'make install')
-  prog/dump/i2cget (written in C, installed by 'make install')
-  These programs are used to write to or read from a register of an
-  I2C device. Usual syntax:
-    i2cset bus device address data
-    i2cget bus device address
-
 * prog/dump/isadump (written in C, installed by 'make install')
   This program dumps the registers of ISA or Super-I/O chips.
   Usual syntax:
      isadump 0x295 0x296
      isadump -k 0x55 0x2e 0x2f
-
-* prog/eeprom/decode-dimms.pl (perl script, installed by 'make install')
-  This program decodes the information found in a memory module SPD EEPROM.
-
-* prog/eeprom/decode-vaio.pl (perl script, installed by 'make install')
-  This program decodes the information in a Sony Vaio laptop
-  identification eeprom at 0x57.
-
-* prog/eeprom/ddcmon (perl script, installed by 'make install')
-  prog/eeprom/decode-edid.pl (perl script, installed by 'make install')
-  These programs decode the information found in a display EEPROM. They
-  require a bus driver for your video adapter, for DDC access to the display.
-
-* prog/eepromer/eepromer (written in C, not installed)
-  This program reads and writes eeproms.
-  Danger: Do not use this to write your DRAM DIMM eeproms.
-
-* prog/hotplug/m7101.o (kernel module, not installed)
-  An experimental kernel module to enable the Acer Labs 7101 PCI device.
-  See prog/hotplug/README for details.
-
-* prog/hotplug/p4b_smbus.o (kernel module, not installed)
-  An experimental kernel module to enable the i801 2443 PCI device
-  on Asus P4B boards.
-  See prog/hotplug/README.p4b for details.
 
 * prog/hotplug/unhide_ICH_SMBus (shell script, not installed)
   It unhides the ICH Intel SMBus for 2.6 kernels
@@ -101,19 +34,6 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
   A SysV init script to be installed in /etc/rc.d/init.d/
   It inserts the bus and chip modules and starts the sensord daemon.
 
-* prog/matorb/displayit.pl (written in Perl, not installed)
-  A simple Perl script to display a 'screen' on a Matrix Orbital Display.
-
-* prog/maxilife/sysinfo.sh (written in shell, not installed)
-  Write system information to the HP Maxilife LCD display using writelcd.sh.
-
-* prog/maxilife/writelcd.sh (written in shell, not installed)
-  Write a string to the HP Maxilife LCD display.
-
-* prog/mkdev/mkdev.sh (written in bash, not installed)
-  This script creates the /dev/i2c-* files. Please check the source before
-  you run it, as you may need to set some variables first.
-
 * prog/pwm/pwmconfig (shell script, installed by 'make install')
   Formerly pwmtest, tests the pwm (pulse width modulation) outputs of sensors
   for their effect on the fans and helps to setup the configfile for fancontrol.
@@ -121,9 +41,6 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
 * prog/pwm/fancontrol (shell script, installed by 'make install')
   Controls fanspeeds responding to changes on temperature sensors.
   Configuration through pwmconfig.
-
-* prog/pwm/fancontrol.pl (perl script, installed by 'make install')
-  Reimplementation of fancontrol in perl, with self-daemonizing.
 
 * prog/rrd/sens_update_rrd (written in bash, not installed)
   This script gathers sensors data and adds it to a round robin database
@@ -145,6 +62,3 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
 * prog/tellerstats/gather.sh, tellerstats.sh (written in bash, not installed)
   These scripts gather sensors data and graph the data for web pages.
   See prog/tellerstats/README for more information.
-
-* prog/xeon/decode-xeon.pl (written in Perl, installed by 'make install')
-  ID ROM data decoding for Xeon processors.

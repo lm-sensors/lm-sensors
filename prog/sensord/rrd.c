@@ -17,7 +17,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301 USA.
  */
 
 /*
@@ -40,11 +41,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <getopt.h>
 #include <rrd.h>
 
 #include "sensord.h"
-#include "lib/error.h"
 
 #define DO_READ 0
 #define DO_SCAN 1
@@ -137,43 +136,39 @@ static int
 applyToFeatures
 (FeatureFN fn, void *data) {
   const sensors_chip_name *chip;
-  int i = 0, j, ret = 0, num = 0;
+  int i, j, ret = 0, num = 0;
 
-  while ((ret == 0) && ((chip = sensors_get_detected_chips (&i)) != NULL)) {
-    for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
-      if (sensors_match_chip (*chip, chipNames[j])) {
-        int index0, subindex, chipindex = -1;
-        for (index0 = 0; knownChips[index0]; ++ index0)
-          for (subindex = 0; knownChips[index0]->names[subindex]; ++ subindex)
-            if (!strcmp (chip->prefix, knownChips[index0]->names[subindex]))
-              chipindex = index0;
-        if (chipindex >= 0) {
-          const ChipDescriptor *descriptor = knownChips[chipindex];
-          const FeatureDescriptor *features = descriptor->features;
+  for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+    i = 0;
+    while ((ret == 0) && ((chip = sensors_get_detected_chips (&chipNames[j], &i)) != NULL)) {
+      int index0, chipindex = -1;
+      for (index0 = 0; knownChips[index0].features; ++ index0)
+        /* Trick: we compare addresses here. We know it works because both
+           pointers were returned by sensors_get_detected_chips(), so they
+           refer to libsensors internal structures, which do not move. */
+        if (knownChips[index0].name == chip) {
+          chipindex = index0;
+          break;
+        }
+      if (chipindex >= 0) {
+        const ChipDescriptor *descriptor = &knownChips[chipindex];
+        const FeatureDescriptor *features = descriptor->features;
 
-          for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
-            const FeatureDescriptor *feature = features + index0;
-            int labelNumber = feature->dataNumbers[0];
-            const char *rawLabel = NULL;
-            char *label = NULL;
-            int valid = 0;
-            if (getValid (*chip, labelNumber, &valid)) {
-              sensorLog (LOG_ERR, "Error getting sensor validity: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (getRawLabel (*chip, labelNumber, &rawLabel)) {
-              sensorLog (LOG_ERR, "Error getting raw sensor label: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (getLabel (*chip, labelNumber, &label)) {
-              sensorLog (LOG_ERR, "Error getting sensor label: %s/#%d", chip->prefix, labelNumber);
-              ret = -1;
-            } else if (valid) {
-              rrdCheckLabel (rawLabel, num);
-              ret = fn (data, rrdLabels[num], label, feature);
-              ++ num;
-            }
-            if (label)
-              free (label);
+        for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++ index0) {
+          const FeatureDescriptor *feature = features + index0;
+          const char *rawLabel = feature->feature->name;
+          char *label = NULL;
+
+          if (!(label = sensors_get_label (chip, feature->feature))) {
+            sensorLog (LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, rawLabel);
+            ret = -1;
+          } else  {
+            rrdCheckLabel (rawLabel, num);
+            ret = fn (data, rrdLabels[num], label, feature);
+            ++ num;
           }
+          if (label)
+            free (label);
         }
       }
     }
@@ -190,6 +185,7 @@ struct ds {
 static int
 rrdGetSensors_DS
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
+  (void) label; /* no warning */
   if (!feature || feature->rrd) {
     struct ds *data = (struct ds *) _data;
     char *ptr = rrdBuff + data->num * RRD_BUFF;
@@ -207,10 +203,6 @@ rrdGetSensors_DS
       case DataType_temperature:
         min = "-100";
         max = "250";
-        break;
-      case DataType_mhz:
-        min = "0";
-        max = "U";
         break;
       default:
         min = max = "U";
@@ -260,10 +252,6 @@ rrdInit
         argc += num;
         argv[argc ++] = rraBuff;
         argv[argc] = NULL;
-        optind = 1;
-        opterr = 0;
-        optopt = '?';
-        optarg = NULL;
         if ((ret = rrd_create (argc, (char **) /* WEAK */ argv))) {
           sensorLog (LOG_ERR, "Error creating RRD file: %s: %s", rrdFile, rrd_get_error ());
         }
@@ -296,9 +284,34 @@ static int
 rrdCGI_DEF
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
+  (void) label; /* no warning */
   if (!feature || (feature->rrd && (feature->type == data->type)))
     printf ("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel, rrdFile, rawLabel);
   return 0;
+}
+
+/* Compute an arbitrary color based on the sensor label. This is preferred
+   over a random value because this guarantees that daily and weekly charts
+   will use the same colors. */
+static int
+rrdCGI_color
+(const char *label) {
+  unsigned long color = 0, brightness;
+  const char *c;
+
+  for (c = label; *c; c++) {
+    color = (color << 6) + (color >> (*c & 7));
+    color ^= (*c) * 0x401;
+  }
+  color &= 0xffffff;
+  /* Adjust very light colors */
+  brightness = (color & 0xff) + ((color >> 8) & 0xff) + (color >> 16);
+  if (brightness > 672)
+    color &= 0x7f7f7f;
+  /* Adjust very dark colors */
+  else if (brightness < 96)
+    color |= 0x808080;
+  return color;
 }
 
 static int
@@ -306,7 +319,7 @@ rrdCGI_LINE
 (void *_data, const char *rawLabel, const char *label, const FeatureDescriptor *feature) {
   struct gr *data = (struct gr *) _data;
   if (!feature || (feature->rrd && (feature->type == data->type)))
-    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, (int) random () & 0xffffff, label);
+    printf ("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel, rrdCGI_color(label), label);
   return 0;
 }
 
@@ -401,10 +414,6 @@ rrdUpdate
     const char *argv[] = {
       "sensord", rrdFile, rrdBuff, NULL
     };
-    optind = 1;
-    opterr = 0;
-    optopt = '?';
-    optarg = NULL;
     if ((ret = rrd_update (3, (char **) /* WEAK */ argv))) {
       sensorLog (LOG_ERR, "Error updating RRD file: %s: %s", rrdFile, rrd_get_error ());
     }
