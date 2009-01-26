@@ -25,9 +25,9 @@
 # It uses a config file /etc/sysconfig/lm_sensors that contains the modules
 # to be loaded/unloaded. That file is sourced into this one.
 
-# The format of that file a shell script that simply defines the modules 
-# in order as normal shell variables with the special names:
-#    MODULE_1, MODULE_2, MODULE_3, etc.
+# The format of this file is a shell script that simply defines variables:
+# HWMON_MODULES for hardware monitoring driver modules, and optionally
+# BUS_MODULES for any required bus driver module (for example for I2C or SPI).
 
 PSENSORS=/usr/local/bin/sensors
 
@@ -68,7 +68,7 @@ check_sensors() {
 	fi
 
 	CONFIG=/etc/sysconfig/lm_sensors
-	if ! [ -r "$CONFIG" ] || ! grep '^MODULE_' $CONFIG >/dev/null 2>&1; then
+	if ! [ -r "$CONFIG" ] || ! grep '^HWMON_MODULES' $CONFIG >/dev/null 2>&1; then
 		echo -n "$1 $prog: not configured, run sensors-detect"
 		echo_warning
 		echo
@@ -84,13 +84,9 @@ start() {
 
 	echo -n "Starting $prog: loading module "
 
-	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-	i=0
-	while [ $i -lt $modules ] ; do
-		module=`eval echo '$'MODULE_$i`
+	for module in $BUS_MODULES $HWMON_MODULES ; do
 		echo -n "${module} "
 		/sbin/modprobe $module >/dev/null 2>&1
-		i=`expr $i + 1`
 	done
 	$PSENSORS -s
 
@@ -109,12 +105,8 @@ stop() {
 
 	echo -n "Stopping $prog: "
 
-	modules=`grep \^MODULE_ $CONFIG | wc -l | tr -d ' '`
-	i=`expr $modules`
-	while [ $i -ge 0 ] ; do
-		module=`eval echo '$'MODULE_$i`
+	for module in $HWMON_MODULES $BUS_MODULES ; do
 		/sbin/modprobe -r $module >/dev/null 2>&1
-		i=`expr $i - 1`
 	done
 
 	if [ $WITHSYS == "0" ]; then

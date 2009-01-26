@@ -6,6 +6,7 @@ SVN-HEAD
               Add support for current sensors
               Fix error propagation during expression evaluation
               Detect excessive recursion depth during expression eval (#2365)
+  lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
   lm_sensors.init.suse: Delete (actual SuSE script is much different)
   Makefile: Install sensors.conf.default instead of sensors.conf.eg (#2333)
   maxilife scripts: Delete (driver never ported to Linux 2.6)
@@ -56,7 +57,7 @@ SVN-HEAD
                   Skip IPMI probing on laptops
                   Add Winbond/Nuvoton W83667HG support
                   Add Intel Core I7 support
-                  Generate new format for /etc/sysconfig/lm_sensors
+                  Generate new format for /etc/sysconfig/lm_sensors (#2246)
                   Print warnings about missing modules on screen
                   Fix detection of older DS1621
                   Add nNidia nForce MCP67, MCP73, MCP79 SMBus support
