@@ -44,29 +44,6 @@ prog="lm_sensors"
 # This functions checks if sensor support is compiled into the kernel, if
 # sensors are configured, and loads the config file
 check_sensors() {
-	if grep -q sysfs /proc/mounts; then
-		WITHSYS=1
-	else
-		WITHSYS=0
-	fi
-
-	if [ $WITHSYS == "0" ]; then
-		# If sensors isn't supported by the kernel, try loading the module...
-		[ -e /proc/sys/dev/sensors ] || /sbin/modprobe i2c-proc >/dev/null 2>&1
-
-		# Don't bother if /proc/sensors still doesn't exist, kernel doesn't have
-		# support for sensors.
-		if ! [ -e /proc/sys/dev/sensors ]; then
-			echo -n "$1 $prog: kernel does not have sensors support"
-			echo_failure
-			echo
-			exit 5
-		fi
-
-		# If sensors was not already running, unload the module...
-		[ -e /var/lock/subsys/lm_sensors ] || /sbin/modprobe -r i2c-proc >/dev/null 2>&1
-	fi
-
 	CONFIG=/etc/sysconfig/lm_sensors
 	if ! [ -r "$CONFIG" ] || ! grep '^HWMON_MODULES' $CONFIG >/dev/null 2>&1; then
 		echo -n "$1 $prog: not configured, run sensors-detect"
@@ -108,10 +85,6 @@ stop() {
 	for module in $HWMON_MODULES $BUS_MODULES ; do
 		/sbin/modprobe -r $module >/dev/null 2>&1
 	done
-
-	if [ $WITHSYS == "0" ]; then
-		/sbin/modprobe -r i2c-proc >/dev/null 2>&1
-	fi
 
 	RETVAL=$?
 	if [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/lm_sensors ; then
