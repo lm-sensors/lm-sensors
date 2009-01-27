@@ -12,12 +12,14 @@ output to a certain voltage. These pins are also connected to
 the sensor chip so that the VID setting can be read back
 by applications.
 
-There are generally 5 VID pins. Recent motherboards may use 6 pins.
-The VID codes are defined by Intel in documents titled
-"VRM X.X DC-DC Converter Design Guidelines".
+There are between 4 and 8 VID pins (the more recent the CPU, the more
+numerous the VID pins.) The VID codes are defined by Intel in documents
+titled "VRM X.X DC-DC Converter Design Guidelines".
 (VRM = Voltage Regulator Module), or
-"Voltage Regulator-Down (VRD) 10.0 Design Guide".
+"Voltage Regulator-Down (VRD) X.X Design Guide".
 These documents are available at http://developer.intel.com.
+There are equivalent documents for AMD processors (look for a table
+named "VID Code Voltages" in processor specifications.)
 
 There are several different VRM document versions.
 The common versions are as follows:
