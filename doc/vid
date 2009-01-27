@@ -49,6 +49,10 @@ Starting in lm_sensors 2.6.4 the VRM version is configurable.
 To configure the sensor chip for the correct voltage range,
 you must set the "vrm" correctly either via /proc, /sys,  or sensors.conf.
 
+Since Linux 2.6.9, the correct VRM version is selected automatically
+based on the CPU brand and model. For older kernels, you must set the
+correct VRM version yourself.
+
 To change the vrm version to 9.0, for example, do the following
 after the chip module (in this example, w83781d) is loaded:
 
@@ -109,9 +113,6 @@ The following chip drivers support all the VRM versions via
 The following chip drivers support only VRM 8.2 and cannot be changed:
 
 	adm1024, it87, mtp008, adm9240, gl520sm, lm78
-
-If you have a board with one of these chips which needs advanced
-VRM support please email us.
 
 The following chip drivers support only VRM 10.0 and cannot be changed:
 
