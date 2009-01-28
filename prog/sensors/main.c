@@ -243,7 +243,7 @@ static void print_bus_list(void)
 
 int main(int argc, char *argv[])
 {
-	int c, res, i, error, do_bus_list;
+	int c, res, i, error = 0, do_bus_list;
 	const char *config_file_name = NULL;
 
 	struct option long_opts[] =  {
@@ -344,5 +344,5 @@ int main(int argc, char *argv[])
 
 exit:
 	sensors_cleanup();
-	exit(res);
+	exit(error);
 }

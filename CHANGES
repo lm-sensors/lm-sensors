@@ -15,6 +15,7 @@ SVN-HEAD
            Don't bail out on transient errors (#2330)
   sensors: Add support for instantaneous power sensors
            Add support for current sensors
+           Fix exit code in error case
   sensors.conf.8: Lots of additions and reworks
   sensors.conf.default: New, minimum version of sensors.conf.eg (#2333)
                         Add sections for the SMSC SCH311x and SCH5027
