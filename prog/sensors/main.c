@@ -175,29 +175,29 @@ static void do_a_print(const sensors_chip_name *name)
 /* returns 1 on error */
 static int do_a_set(const sensors_chip_name *name)
 {
-	int res;
+	int err;
 
-	if ((res = sensors_do_chip_sets(name))) {
-		if (res == -SENSORS_ERR_KERNEL) {
+	if ((err = sensors_do_chip_sets(name))) {
+		if (err == -SENSORS_ERR_KERNEL) {
 			fprintf(stderr, "%s: %s;\n",
 				sprintf_chip_name(name),
-				sensors_strerror(res));
+				sensors_strerror(err));
 			fprintf(stderr, "Run as root?\n");
 			return 1;
-		} else if (res == -SENSORS_ERR_ACCESS_W) {
+		} else if (err == -SENSORS_ERR_ACCESS_W) {
 			fprintf(stderr,
 				"%s: At least one \"set\" statement failed\n",
 				sprintf_chip_name(name));
 		} else {
 			fprintf(stderr, "%s: %s\n", sprintf_chip_name(name),
-				sensors_strerror(res));
+				sensors_strerror(err));
 		}
 	}
 	return 0;
 }
 
 /* returns number of chips found */
-static int do_the_real_work(const sensors_chip_name *match, int *error)
+static int do_the_real_work(const sensors_chip_name *match, int *err)
 {
 	const sensors_chip_name *chip;
 	int chip_nr;
@@ -207,7 +207,7 @@ static int do_the_real_work(const sensors_chip_name *match, int *error)
 	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
 		if (do_sets) {
 			if (do_a_set(chip))
-				*error = 1;
+				*err = 1;
 		} else
 			do_a_print(chip);
 		cnt++;
@@ -243,7 +243,7 @@ static void print_bus_list(void)
 
 int main(int argc, char *argv[])
 {
-	int c, res, i, error = 0, do_bus_list;
+	int c, i, err, do_bus_list;
 	const char *config_file_name = NULL;
 
 	struct option long_opts[] =  {
@@ -303,9 +303,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	res = read_config_file(config_file_name);
-	if (res)
-		exit(res);
+	err = read_config_file(config_file_name);
+	if (err)
+		exit(err);
 
 	/* build the degrees string */
 	set_degstr();
@@ -313,12 +313,12 @@ int main(int argc, char *argv[])
 	if (do_bus_list) {
 		print_bus_list();
 	} else if (optind == argc) { /* No chip name on command line */
-		if (!do_the_real_work(NULL, &error)) {
+		if (!do_the_real_work(NULL, &err)) {
 			fprintf(stderr,
 				"No sensors found!\n"
 				"Make sure you loaded all the kernel drivers you need.\n"
 				"Try sensors-detect to find out which these are.\n");
-			error = 1;
+			err = 1;
 		}
 	} else {
 		int cnt = 0;
@@ -330,19 +330,19 @@ int main(int argc, char *argv[])
 					"Parse error in chip name `%s'\n",
 					argv[i]);
 				print_short_help();
-				error = 1;
+				err = 1;
 				goto exit;
 			}
-			cnt += do_the_real_work(&chip, &error);
+			cnt += do_the_real_work(&chip, &err);
 		}
 
 		if (!cnt) {
 			fprintf(stderr, "Specified sensor(s) not found!\n");
-			error = 1;
+			err = 1;
 		}
 	}
 
 exit:
 	sensors_cleanup();
-	exit(error);
+	exit(err);
 }
