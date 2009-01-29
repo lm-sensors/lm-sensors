@@ -100,9 +100,9 @@ VARIABLE2=[...]
 
 Each variable has its own line. The variable name is followed by an equal sign
 and the device=value pairs. These consist of the relative path to the pwm
-output (from /proc/sys/dev/sensors, /sys/bus/i2c/devices or /sys/class/hwmon
-depending on the kernel version) for which the value is valid, equal sign
-followed by the value and are separated by a blank.
+output (from /sys/bus/i2c/devices or /sys/class/hwmon depending on the kernel
+version) for which the value is valid, equal sign followed by the value and
+are separated by a blank.
 
 Example:
 

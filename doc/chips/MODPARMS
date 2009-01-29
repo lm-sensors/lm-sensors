@@ -1,5 +1,10 @@
 Parameters for modprobe and insmod
 ==================================
+
+PRELIMINARY WARNING:
+This documentation file is outdated and needs to be entirely reviewed
+and updated. Until then, don't blindly trust what you read here.
+
 ==================================
 SUMMARY
 
@@ -36,15 +41,16 @@ add parameters. Check 'dmesg' for clues to what went wrong.
 BUS NUMBERING
 -------------
 I2C/SMBus adapters are numbered in the order they are inserted. If you want
-to know what number an adapter has, please make sure module `i2c-proc' is 
-inserted, and look at file /proc/bus/i2c. The ISA bus always has the
-symbolic number 9191 (`I' is the ninth letter of the alphabet, `S' the
-nineteenth and `A' the first). Do not use the ISA Bus number from
-/proc/bus/i2c. If you want 'any I2C bus', use '-1' (or 65535).
-So to summarize:
-	-1	Any Bus
-	0-15	Specific I2C Bus
-	9191	ISA BUS
+to know what number an adapter has, use the following command:
+
+  grep . /sys/class/i2c-adapter/i2c-*/name
+
+Alternatively, if you have installed i2c-tools, you can do:
+
+  modprobe i2c-dev
+  i2cdetect -l
+
+If you want 'any I2C bus', use '-1'.
 
 
 ADDRESS NUMBERING

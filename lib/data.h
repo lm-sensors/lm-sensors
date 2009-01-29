@@ -25,7 +25,7 @@
 #include "sensors.h"
 
 /* This header file contains all kinds of data structures which are used
-   for the representation of the config file data and the /proc/...
+   for the representation of the config file data and the sensors
    data. */
 
 /* Kinds of expression operators recognized */
@@ -156,7 +156,7 @@ extern int sensors_proc_bus_max;
 	(el), &sensors_proc_bus, &sensors_proc_bus_count,\
 	&sensors_proc_bus_max, sizeof(struct sensors_bus))
 
-/* Substitute configuration bus numbers with real-world /proc bus numbers
+/* Substitute configuration bus numbers with real-world bus numbers
    in the chips lists */
 int sensors_substitute_busses(void);
 

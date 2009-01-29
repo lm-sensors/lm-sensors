@@ -56,8 +56,7 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
 * prog/sensors/sensors (written in C, installed by `make install')
   This pretty-prints the information provided by the modules. It is a normal
   console application, using stdout. It is essential, because
-  unlike the raw /proc/sys/dev/sensors/*/* files, it takes your configuration
-  file into account.
+  unlike the raw sysfs files, it takes your configuration file into account.
 
 * prog/tellerstats/gather.sh, tellerstats.sh (written in bash, not installed)
   These scripts gather sensors data and graph the data for web pages.
