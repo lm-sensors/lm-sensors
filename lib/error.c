@@ -33,7 +33,7 @@ void (*sensors_fatal_error) (const char *proc, const char *err) =
 						sensors_default_fatal_error;
 
 static const char *errorlist[] = {
-	/* Invalid error code    */ NULL,
+	/* Invalid error code    */ "Unknown error",
 	/* SENSORS_ERR_WILDCARDS */ "Wildcard found in chip name",
 	/* SENSORS_ERR_NO_ENTRY  */ "No such subfeature known",
 	/* SENSORS_ERR_ACCESS_R  */ "Can't read",

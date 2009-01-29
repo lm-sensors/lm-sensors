@@ -6,6 +6,7 @@ SVN-HEAD
               Add support for current sensors
               Fix error propagation during expression evaluation
               Detect excessive recursion depth during expression eval (#2365)
+              Return a string rather than NULL for unknown errors
   lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
                    Drop support for kernels 2.4 and earlier
   lm_sensors.init.suse: Delete (actual SuSE script is much different)
