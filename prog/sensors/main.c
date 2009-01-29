@@ -179,7 +179,7 @@ static int do_a_set(const sensors_chip_name *name)
 
 	if ((err = sensors_do_chip_sets(name))) {
 		if (err == -SENSORS_ERR_KERNEL) {
-			fprintf(stderr, "%s: %s;\n",
+			fprintf(stderr, "%s: %s\n",
 				sprintf_chip_name(name),
 				sensors_strerror(err));
 			fprintf(stderr, "Run as root?\n");
