@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Simple script implementing a temperature dependent fan speed control
+# Supported Linux kernel versions: 2.6.5 and later
 #
 # Version 0.68
 #
@@ -159,84 +160,67 @@ else
 	LoadConfig /etc/fancontrol
 fi
 
-DIR=/proc/sys/dev/sensors
+# Detect if config file uses the hwmon class or not yet
+if echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
+then
+	DIR=/sys/class/hwmon
+else
+	DIR=/sys/bus/i2c/devices
+fi
+
 if [ ! -d $DIR ]
 then
-	# For Linux 2.6, detect if config file uses the hwmon class or not yet
-	if echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
-	then
-		SDIR=/sys/class/hwmon
-	else
-		SDIR=/sys/bus/i2c/devices
-	fi
-
-	if [ ! -d $SDIR ]
-	then
-		echo $0: 'No sensors found! (did you load the necessary modules?)'
-		exit 1
-	else
-		SYSFS=1
-		DIR=$SDIR
-	fi
+	echo $0: 'No sensors found! (did you load the necessary modules?)'
+	exit 1
 fi
 cd $DIR
 
 # $1 = pwm file name
 function pwmdisable()
 {
-	if [ -n "$SYSFS" ]
+	ENABLE=${1}_enable
+	# No enable file? Just set to max
+	if [ ! -f $ENABLE ]
 	then
-		ENABLE=${1}_enable
-		# No enable file? Just set to max
-		if [ ! -f $ENABLE ]
-		then
-			echo $MAX > $1
-			return 0
-		fi
-
-		# Try pwmN_enable=0
-		echo 0 > $ENABLE 2> /dev/null
-		if [ `cat $ENABLE` -eq 0 ]
-		then
-			# Success
-			return 0
-		fi
-
-		# It didn't work, try pwmN_enable=1 pwmN=255
-		echo 1 > $ENABLE 2> /dev/null
 		echo $MAX > $1
-		if [ `cat $ENABLE` -eq 1 -a `cat $1` -ge 190 ]
-		then
-			# Success
-			return 0
-		fi
-
-		# Nothing worked
-		echo "$ENABLE stuck to" `cat $ENABLE` >&2
-		return 1
-	else
-		echo $MAX 0 > $1
+		return 0
 	fi
+
+	# Try pwmN_enable=0
+	echo 0 > $ENABLE 2> /dev/null
+	if [ `cat $ENABLE` -eq 0 ]
+	then
+		# Success
+		return 0
+	fi
+
+	# It didn't work, try pwmN_enable=1 pwmN=255
+	echo 1 > $ENABLE 2> /dev/null
+	echo $MAX > $1
+	if [ `cat $ENABLE` -eq 1 -a `cat $1` -ge 190 ]
+	then
+		# Success
+		return 0
+	fi
+
+	# Nothing worked
+	echo "$ENABLE stuck to" `cat $ENABLE` >&2
+	return 1
 }
 
 # $1 = pwm file name
 function pwmenable()
 {
-	if [ "$SYSFS" = "1" ]
+	ENABLE=${1}_enable
+	if [ -f $ENABLE ]
 	then
-		ENABLE=${1}_enable
-		if [ -f $ENABLE ]
+		echo 1 > $ENABLE 2> /dev/null
+		if [ $? -ne 0 ]
 		then
-			echo 1 > $ENABLE 2> /dev/null
-			if [ $? -ne 0 ]
-			then
-				return 1
-			fi
+			return 1
 		fi
-		echo $MAX > $1
-	else
-		echo $MAX 1 > $1
 	fi
+	echo $MAX > $1
 }
 
 function restorefans()
@@ -280,21 +264,12 @@ function UpdateFanSpeeds {
 			echo "Error reading temperature from $DIR/$tsens"
 			restorefans 1
 		fi
-		if [ "$SYSFS" != "1" ]
-		then
-			tval=`echo ${tval} | cut -d' ' -f3 | cut -d'.' -f1`
-			let tval="${tval}*1000"
-		fi
 
 		read pwmpval < ${pwmo}
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading PWM value from $DIR/$pwmo"
 			restorefans 1
-		fi
-		if [ "$SYSFS" != "1" ]
-		then
-			pwmpval=`echo ${pwmpval} | cut -d' ' -f1`
 		fi
 
 		# If fanspeed-sensor output shall be used, do it
@@ -305,10 +280,6 @@ function UpdateFanSpeeds {
 			then
 				echo "Error reading Fan value from $DIR/$fan"
 				restorefans 1
-			fi
-			if [ "$SYSFS" != "1" ]
-			then
-				fanval=`echo ${fanval} | cut -d' ' -f2`
 			fi
 		else
 			fanval=1  # set it to a non zero value, so the rest of the script still works

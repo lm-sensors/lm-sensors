@@ -10,7 +10,9 @@ SVN-HEAD
                    Drop support for kernels 2.4 and earlier
   lm_sensors.init.suse: Delete (actual SuSE script is much different)
   Makefile: Install sensors.conf.default instead of sensors.conf.eg (#2333)
+  pwmconfig: Drop support for kernels 2.4 and earlier
   fancontrol: Don't round temperature values
+              Drop support for kernels 2.4 and earlier
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
            Don't bail out on transient errors (#2330)

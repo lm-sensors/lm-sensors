@@ -2,6 +2,7 @@
 #
 # pwmconfig
 # Tests the pwm outputs of sensors and configures fancontrol
+# Supported Linux kernel versions: 2.6.5 and later
 #
 #    Warning!!! This program will stop your fans, one at a time,
 #    for approximately 5 seconds each!!!
@@ -9,7 +10,7 @@
 #    Verify that all fans are running at normal speed after this
 #    program has exited!!!
 #
-#    Copyright (C) 2007-2008 Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2007-2009 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -57,30 +58,22 @@ echo
 DELAY=5 # 3 seconds delay is too short for large fans, thus I increased it to 5
 MAX=255
 
-DIR=/proc/sys/dev/sensors
-if [ ! -d $DIR ]
+if [ -d "/sys/class/hwmon" ]
 then
-	if [ -d "/sys/class/hwmon" ]
-	then
-		SYSFS=2
-		DIR="/sys/class/hwmon"
-	elif [ -d "/sys/bus/i2c/devices" ]
-	then
-		SYSFS=1
-		DIR="/sys/bus/i2c/devices"
-	else
-		echo $0: 'No sensors found! (modprobe sensor modules?)'
-		exit 1
-	fi
+	SYSFS=2
+	DIR="/sys/class/hwmon"
+	PREFIX='hwmon*'
+elif [ -d "/sys/bus/i2c/devices" ]
+then
+	SYSFS=1
+	DIR="/sys/bus/i2c/devices"
+	PREFIX='*-*'
+else
+	echo $0: 'No sensors found! (modprobe sensor modules?)'
+	exit 1
 fi
 
 cd $DIR
-if [ "$SYSFS" = "2" ]
-then
-	PREFIX='hwmon*'
-else
-	PREFIX='*-*'
-fi
 DEVICES=`echo $PREFIX`
 if [ "$PREFIX" = "$DEVICES" ]
 then
@@ -88,7 +81,7 @@ then
 	exit 1
 fi
 
-# For sysfs, we may need to adjust the device path
+# We may need to adjust the device path
 if [ "$SYSFS" = "2" ]
 then
 	OLD_DEVICES="$DEVICES"
@@ -123,12 +116,7 @@ do
 	fi
 
 	# Find available fan monitoring inputs
-	if [ -n "$SYSFS" ]
-	then
-		MATCH=$device/'fan[1-9]_input'
-	else
-		MATCH=$device/'fan[1-9]'
-	fi
+	MATCH=$device/'fan[1-9]_input'
 	device_fan=`echo $MATCH`
 	if [ "$MATCH" != "$device_fan" ]
 	then
@@ -148,7 +136,6 @@ then
 fi
 
 # $1 = padding
-# Only works with Linux 2.6
 function print_devices()
 {
 	local name
@@ -164,15 +151,12 @@ function print_devices()
 # $1 = pwm file name
 function is_pwm_auto()
 {
-	if [ -n "$SYSFS" ]
+	ENABLE=${1}_enable
+	if [ -f $ENABLE ]
 	then
-		ENABLE=${1}_enable
-		if [ -f $ENABLE ]
+		if [ "`cat $ENABLE`" -gt 1 ]
 		then
-			if [ "`cat $ENABLE`" -gt 1 ]
-			then
-				return 0
-			fi
+			return 0
 		fi
 	fi
 
@@ -182,65 +166,55 @@ function is_pwm_auto()
 # $1 = pwm file name
 function pwmdisable()
 {
-	if [ -n "$SYSFS" ]
+	ENABLE=${1}_enable
+	# No enable file? Just set to max
+	if [ ! -f $ENABLE ]
 	then
-		ENABLE=${1}_enable
-		# No enable file? Just set to max
-		if [ ! -f $ENABLE ]
-		then
-			echo $MAX > $1
-			return 0
-		fi
-
-		# Try pwmN_enable=0
-		echo 0 2>/dev/null > $ENABLE
-		if [ "`cat $ENABLE`" -eq 0 ]
-		then
-			# Success
-			return 0
-		fi
-
-		# It didn't work, try pwmN_enable=1 pwmN=255
-		echo 1 2>/dev/null > $ENABLE
-		if [ "`cat $ENABLE`" -ne 1 ]
-		then
-			echo "$ENABLE stuck to `cat $ENABLE`" >&2
-			return 1
-		fi
-
 		echo $MAX > $1
-		if [ "`cat $1`" -ge 190 ]
-		then
-			# Success
-			return 0
-		fi
-
-		# Nothing worked
-		echo "$1 stuck to `cat $1`" >&2
-		return 1
-	else
-		echo $MAX 0 > $1
+		return 0
 	fi
+
+	# Try pwmN_enable=0
+	echo 0 2>/dev/null > $ENABLE
+	if [ "`cat $ENABLE`" -eq 0 ]
+	then
+		# Success
+		return 0
+	fi
+
+	# It didn't work, try pwmN_enable=1 pwmN=255
+	echo 1 2>/dev/null > $ENABLE
+	if [ "`cat $ENABLE`" -ne 1 ]
+	then
+		echo "$ENABLE stuck to `cat $ENABLE`" >&2
+		return 1
+	fi
+
+	echo $MAX > $1
+	if [ "`cat $1`" -ge 190 ]
+	then
+		# Success
+		return 0
+	fi
+
+	# Nothing worked
+	echo "$1 stuck to `cat $1`" >&2
+	return 1
 }
 
 # $1 = pwm file name
 function pwmenable()
 {
-	if [ -n "$SYSFS" ]
+	ENABLE=${1}_enable
+	if [ -w $ENABLE ]
 	then
-		ENABLE=${1}_enable
-		if [ -w $ENABLE ]
+		echo 1 2>/dev/null > $ENABLE
+		if [ $? -ne 0 ]
 		then
-			echo 1 2>/dev/null > $ENABLE
-			if [ $? -ne 0 ]
-			then
-				return 1
-			fi
+			return 1
 		fi
-		echo $MAX > $1
-	else
-		echo $MAX 1 > $1
 	fi
+	echo $MAX > $1
 }
 
 # $1 = pwm file name; $2 = pwm value 0-255
@@ -249,12 +223,9 @@ function pwmset()
 	echo $2 > $1
 }
 
-if [ -n "$SYSFS" ]
-then
-	echo 'Found the following devices:'
-	print_devices "   "
-	echo
-fi
+echo 'Found the following devices:'
+print_devices "   "
+echo
 
 echo 'Found the following PWM controls:'
 for i in $PWM
@@ -555,12 +526,7 @@ fi
 for device in $DEVICES
 do
 	# Find available temperature monitoring inputs
-	if [ -n "$SYSFS" ]
-	then
-		MATCH=$device/'temp[1-9]_input'
-	else
-		MATCH=$device/'temp[1-9]'
-	fi
+	MATCH=$device/'temp[1-9]_input'
 	device_temp=`echo $MATCH`
 	if [ "$MATCH" != "$device_temp" ]
 	then
@@ -785,21 +751,16 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 	"`echo ${pwmactive} |sed -e 's/ /\n/g' | egrep "${pwms}"`" )
 		pwmsed=`echo ${pwms} | sed -e 's/\//\\\\\//g'` #escape / for sed
 		echo
-		if [ -n "$SYSFS" ]
-		then
-			echo 'Devices:'
-			print_devices ""
-			echo
-		fi
+
+		echo 'Devices:'
+		print_devices ""
+		echo
+
 		echo 'Current temperature readings are as follows:'
 		for j in $TEMPS
 		do
-			# this will return the first field if there's only one (sysfs)
-			S=`cat $j | cut -d' ' -f3`
-			if [ -n "$SYSFS" ]
-			then
-				let S="$S / 1000"
-			fi
+			S=`cat $j`
+			let S="$S / 1000"
 			echo "$j	$S"
 		done
 		FAN=`echo $fanactive|cut -d' ' -f$REPLY`
