@@ -2,7 +2,7 @@
 #
 # Simple script implementing a temperature dependent fan speed control
 #
-# Version 0.67
+# Version 0.68
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -18,7 +18,7 @@
 #
 #
 #    Copyright 2003 Marius Reiner <marius.reiner@hdev.de>
-#    Copyright (C) 2007-2008 Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2007-2009 Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -267,8 +267,8 @@ function UpdateFanSpeeds {
 		pwmo=${AFCPWM[$fcvcount]}
 		tsens=${AFCTEMP[$fcvcount]}
 		fan=${AFCFAN[$fcvcount]}
-		mint=${AFCMINTEMP[$fcvcount]}
-		maxt=${AFCMAXTEMP[$fcvcount]}
+		let mint="${AFCMINTEMP[$fcvcount]}*1000"
+		let maxt="${AFCMAXTEMP[$fcvcount]}*1000"
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
@@ -280,11 +280,10 @@ function UpdateFanSpeeds {
 			echo "Error reading temperature from $DIR/$tsens"
 			restorefans 1
 		fi
-		if [ "$SYSFS" = "1" ]
+		if [ "$SYSFS" != "1" ]
 		then
-			let tval="($tval+500)/1000"
-		else
 			tval=`echo ${tval} | cut -d' ' -f3 | cut -d'.' -f1`
+			let tval="${tval}*1000"
 		fi
 
 		read pwmpval < ${pwmo}
