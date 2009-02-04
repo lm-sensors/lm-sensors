@@ -191,6 +191,11 @@ user_install::
 	@echo "***    If you have a custom configuration file using the old format, you"
 	@echo "***    can convert it using the sensors-conf-convert script. Otherwise just"
 	@echo "***    overwrite your old configuration file with the new default one."
+	@echo "***  * As off lm-sensors 3.1.0, the default configuration file only"
+	@echo "***    contains statements which do not depend on how chips are wired."
+	@echo "***    If you miss parts of the bigger configuration file that used to be"
+	@echo "***    the default, copy the relevant parts from etc/sensors.conf.eg to"
+	@echo "***    $(ETCDIR)/sensors3.conf."
 all :: user
 install :: all user_install
 
