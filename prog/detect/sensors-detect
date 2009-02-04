@@ -2043,8 +2043,36 @@ sub initialize_cpu_list
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
 # adapter present on the system. Each entry has the following keys: name
-# (directly taken from /sys/class/i2c-adapter) and driver.
+# (directly taken from /sys/class/i2c-adapter), driver and autoload.
 use vars qw(@i2c_adapters);
+
+# Find out whether the driver would be automatically loaded by the modalias
+# mechanism.
+sub classdev_driver_autoloads
+{
+	my $classdev = shift;
+	
+	my $modalias = sysfs_device_attribute("$classdev/device", "modalias");
+	if (!defined($modalias)) {
+		my $dev_link = readlink("$classdev/device");
+		if ($dev_link) {
+			$dev_link =~ s/\/[^\/]*$//;
+			$modalias = sysfs_device_attribute("$classdev/$dev_link",
+							   "modalias");
+		}
+	}
+	return 0 unless defined($modalias);
+
+	# At the moment we only handle PCI and USB drivers. Other driver
+	# types, most notably platform and i2c drivers, do not follow the
+	# device driver model to the letter, and often create their own
+	# devices. Such drivers appear to be autoloaded when they are not.
+	return 0 unless $modalias =~ m/^(pci|usb):/;
+
+	my $result = `modprobe -n -v --first-time $modalias 2>&1`;
+	return ($result =~ m/^insmod/ ||
+		$result =~ m/\balready in kernel\b/);
+}
 
 sub initialize_i2c_adapters_list
 {
@@ -2069,9 +2097,42 @@ sub initialize_i2c_adapters_list
 		$entry->{driver} = sysfs_device_driver("${class_dir}/i2c-$1/device")
 				|| find_i2c_adapter_driver($entry->{name})
 				|| 'UNKNOWN';
+
+		$entry->{autoload} = classdev_driver_autoloads("${class_dir}/i2c-$1");
 		$i2c_adapters[$1] = $entry;
 	}
 	closedir(ADAPTERS);
+}
+
+# %hwmon_autoloaded is a list of hwmon drivers which are autoloaded
+# (typically by udev.) We don't need to load these drivers ourselves.
+use vars qw(%hwmon_autoloaded);
+
+sub initialize_hwmon_autoloaded
+{
+	my $class_dir = "${sysfs_root}/class/hwmon";
+	opendir(local *HWMON, $class_dir) or return;
+
+	my ($hwmon, $driver);
+	while (defined($hwmon = readdir(HWMON))) {
+		next unless $hwmon =~ m/^hwmon\d+$/;
+
+		$driver = sysfs_device_driver("${class_dir}/$hwmon/device");
+		next unless defined($driver);
+
+		if (classdev_driver_autoloads("${class_dir}/$hwmon")) {
+			$driver =~ tr/-/_/;
+			$hwmon_autoloaded{$driver}++
+		}
+	}
+	closedir(HWMON);
+}
+
+sub hwmon_is_autoloaded
+{
+	my $driver = shift;
+	$driver =~ tr/-/_/;
+	return exists($hwmon_autoloaded{$driver});
 }
 
 ###########
@@ -2117,20 +2178,6 @@ sub load_module
 	my $normalized = $module;
 	$normalized =~ tr/-/_/;
 	$modules_list{$normalized} = 1;
-}
-
-sub loaded_by_us
-{
-	my $sought = shift;
-	local $_;
-
-	$sought =~ tr/-/_/;
-	foreach (@modules_we_loaded) {
-		my $module = $_;
-		$module =~ tr/-/_/;
-		return 1 if $module eq $sought;
-	}
-	return 0;
 }
 
 sub initialize_modules_supported
@@ -5118,7 +5165,8 @@ sub generate_modprobes
 	# the adapter drivers so that the numbers will be the same. If not, then
 	# we only load the adapter drivers which are useful.
 	foreach $adap (@i2c_adapters) {
-		next unless loaded_by_us($adap->{driver});
+		next if $adap->{autoload};
+		next if $adap->{driver} eq 'UNKNOWN';
 		next if not defined $configfile and not $adap->{used};
 		$bus_modules{$adap->{driver}}++;
 	}
@@ -5148,7 +5196,8 @@ sub generate_modprobes
 				      "Otherwise, check http://www.lm-sensors.org/wiki/Devices for\n".
 				      "driver availability.\n\n";
 			} else {
-				$hwmon_modules{$driver}++;
+				$hwmon_modules{$driver}++
+					unless hwmon_is_autoloaded($driver);
 			}
 		}
 	}
@@ -5405,10 +5454,13 @@ sub main
 	      "Just press ENTER to continue: ";
 	<STDIN>;
 
+	initialize_hwmon_autoloaded();
 	foreach my $driver (keys %chips_detected) {
 		next unless @{$chips_detected{$driver}};
 		find_aliases($chips_detected{$driver});
-		print "\nDriver `$driver':\n";
+		print "\nDriver `$driver'";
+		print " (autoloaded)" if hwmon_is_autoloaded($driver);
+		print ":\n";
 		print_chips_report($chips_detected{$driver});
 	}
 	print "\n";

@@ -67,6 +67,7 @@ SVN-HEAD
                   Print warnings about missing modules on screen
                   Fix detection of older DS1621
                   Add nNidia nForce MCP67, MCP73, MCP79 SMBus support
+                  Exclude auto-loaded PCI and USB drivers from list (#2368)
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
   sysconfig-lm_sensors-convert: Sample config file conversion script (#2246)
 
