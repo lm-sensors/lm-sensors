@@ -357,11 +357,14 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		sensors_fatal_error(__func__, "Out of memory");
 
 	while ((ent = readdir(dir))) {
-		char *name = ent->d_name;
+		char *name;
 		int nr;
 
-		if (ent->d_name[0] == '.')
+		/* Skip directories and symlinks */
+		if (ent->d_type != DT_REG)
 			continue;
+
+		name = ent->d_name;
 
 		sftype = sensors_subfeature_get_type(name, &nr);
 		if (sftype == SENSORS_SUBFEATURE_UNKNOWN)
