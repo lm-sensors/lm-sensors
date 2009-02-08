@@ -350,5 +350,15 @@ void sensors_scanner_exit(void)
 {
 	sensors_yy_delete_buffer(scan_buf);
 	scan_buf = (YY_BUFFER_STATE)0;
+
+/* As of flex 2.5.9, yylex_destroy() must be called when done with the
+   scaller, otherwise we'll leak memory. */
+#if defined(YY_FLEX_MAJOR_VERSION) && defined(YY_FLEX_MINOR_VERSION) && defined(YY_FLEX_SUBMINOR_VERSION)
+#if YY_FLEX_MAJOR_VERSION > 2 || \
+    (YY_FLEX_MAJOR_VERSION == 2 && (YY_FLEX_MINOR_VERSION > 5 || \
+				    (YY_FLEX_MINOR_VERSION == 5 && YY_FLEX_SUBMINOR_VERSION >= 9)))
+	sensors_yylex_destroy();
+#endif
+#endif
 }
 
