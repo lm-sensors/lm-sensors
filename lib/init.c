@@ -88,6 +88,9 @@ int sensors_init(FILE *input)
 				goto exit_cleanup;
 			}
 			fclose(input);
+		} else if (errno != ENOENT) {
+			sensors_parse_error(strerror(errno), 0);
+			goto exit_cleanup;
 		}
 	}
 
