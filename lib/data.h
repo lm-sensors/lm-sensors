@@ -23,6 +23,7 @@
 #define LIB_SENSORS_DATA_H
 
 #include "sensors.h"
+#include "general.h"
 
 /* This header file contains all kinds of data structures which are used
    for the representation of the config file data and the sensors

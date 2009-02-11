@@ -27,7 +27,6 @@
 #include "data.h"
 #include "error.h"
 #include "sysfs.h"
-#include "general.h"
 
 /* We watch the recursion depth for variables only, as an easy way to
    detect cycles. */
