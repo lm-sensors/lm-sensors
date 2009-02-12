@@ -162,7 +162,7 @@ extern int sensors_proc_bus_max;
 int sensors_substitute_busses(void);
 
 
-/* Parse a bus id into its components. Returns 0 on succes, a value from
+/* Parse a bus id into its components. Returns 0 on success, a value from
    error.h on failure. */
 int sensors_parse_bus_id(const char *name, sensors_bus_id *bus);
 
