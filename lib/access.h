@@ -50,7 +50,7 @@ extern const sensors_chip_feature *sensors_lookup_feature_name
 extern int sensors_substitute_busses(void);
 
 
-/* Parse an i2c bus name into its components. Returns 0 on succes, a value from
+/* Parse an i2c bus name into its components. Returns 0 on success, a value from
    error.h on failure. */
 extern int sensors_parse_i2cbus_name(const char *name, int *res);
 
