@@ -15,7 +15,8 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
 * prog/detect/sensors-detect (written in Perl, installed by 'make install')
   This program tries to detect the available SMBus adapters and the chips
   connected to them, as well as Super-I/O and misc chips. It also generates
-  modprobe lines and module options. This program is interactive.
+  modprobe lines and module options. This program is stand-alone (can be
+  run without installing lm-sensors) and interactive.
 
 * prog/dump/isadump (written in C, installed by 'make install')
   This program dumps the registers of ISA or Super-I/O chips.

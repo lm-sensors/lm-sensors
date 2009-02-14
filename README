@@ -16,8 +16,8 @@ The directories within this package:
   The user-space sensors support library code (libsensors).
 * prog
   Several supporting programs. The most important ones are:
-  - sensors-detect: A program for detecting installed hardware and
-    recommending specific modules to load.
+  - sensors-detect: A stand-alone program for detecting installed
+    hardware and recommending specific modules to load.
   - sensors: A console tool to report sensor readings and set new
     sensor limits.
   - sensord: A daemon to watch sensor values and log problems. It
