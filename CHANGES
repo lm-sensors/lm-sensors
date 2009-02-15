@@ -14,6 +14,9 @@ SVN-HEAD
               Free bus statements from the configuration file sooner
               Read extra configuration files from /etc/sensors.d (#2174)
               Report the configuration file name on parse errors
+  libsensors.3: Reformat for clarity
+                Document function sensors_snprintf_chip_name
+                Document error-related functions
   lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
                    Drop support for kernels 2.4 and earlier
   lm_sensors.init.suse: Delete (actual SuSE script is much different)
