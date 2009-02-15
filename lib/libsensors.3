@@ -26,30 +26,50 @@
 .\" References consulted:
 .\"     libsensors source code
 .TH libsensors 3  "February 2009" "lm-sensors 3" "Linux Programmer's Manual"
+
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
+
 .SH SYNOPSIS
 .nf
 .B #include <sensors/sensors.h>
 
-.B int sensors_init(FILE *input);
+/* Library initialization and clean-up */
+.BI "int sensors_init(FILE *" input ");"
 .B void sensors_cleanup(void);
-.B int sensors_parse_chip_name(const char *orig_name,
-                            \fBsensors_chip_name *res);\fP
-.B const char *sensors_get_adapter_name(int bus_nr);
-.B char *sensors_get_label(const sensors_chip_name *name, const sensors_feature *feature);\fP
-.B int sensors_get_value(const sensors_chip_name *name, int subfeat_nr,
-                      \fBdouble *value);\fP
-.B int sensors_set_value(const sensors_chip_name *name, int subfeat_nr,
-                      \fBdouble value);\fP
-.B int sensors_do_chip_sets(const sensors_chip_name *name);
-.B const sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
-                                                    \fB*match, int *nr);\fP
-.B const sensors_feature *sensors_get_features(const sensors_chip_name *name, int *nr);\fP
-.B const sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
-.B const sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
-.B const char *libsensors_version;
+.BI "const char *" libsensors_version ";"
+
+/* Chip name handling */
+.BI "int sensors_parse_chip_name(const char *" orig_name ","
+.BI "                            sensors_chip_name *" res ");"
+.BI "const char *sensors_get_adapter_name(const sensors_bus_id *" bus ");"
+
+/* Chips and features enumeration */
+.B const sensors_chip_name *
+.BI "sensors_get_detected_chips(const sensors_chip_name *" match ","
+.BI "                           int *" nr ");"
+.B const sensors_feature *
+.BI "sensors_get_features(const sensors_chip_name *" name ","
+.BI "                     int *" nr ");"
+.B const sensors_subfeature *
+.BI "sensors_get_all_subfeatures(const sensors_chip_name *" name ","
+.BI "                            const sensors_feature *" feature ","
+.BI "                            int *" nr ");"
+.B const sensors_subfeature *
+.BI "sensors_get_subfeature(const sensors_chip_name *" name ","
+.BI "                       const sensors_feature *" feature ","
+.BI "                       sensors_subfeature_type " type ");"
+
+/* Features access */
+.BI "char *sensors_get_label(const sensors_chip_name *" name ","
+.BI "                        const sensors_feature *" feature ");"
+.BI "int sensors_get_value(const sensors_chip_name *" name ", int " subfeat_nr ","
+.BI "                      double *" value ");"
+.BI "int sensors_set_value(const sensors_chip_name *" name ", int " subfeat_nr ","
+.BI "                      double " value ");"
+.BI "int sensors_do_chip_sets(const sensors_chip_name *" name ");"
 .fi
+
 .SH DESCRIPTION
 .B int sensors_init(FILE *input);
 .br
