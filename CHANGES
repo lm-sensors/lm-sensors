@@ -10,6 +10,7 @@ SVN-HEAD
               Skip non-file sysfs entries for speed
               Fix memory leak in scanner when using flex 2.5.9 or later
               Report configuration file read errors
+              Exit the configuration file parser sooner
   lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
                    Drop support for kernels 2.4 and earlier
   lm_sensors.init.suse: Delete (actual SuSE script is much different)

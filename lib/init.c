@@ -61,6 +61,20 @@ static int sensors_parse(void)
 	return res;
 }
 
+static int parse_config(FILE *input)
+{
+	int err;
+
+	if (sensors_scanner_init(input))
+		return -SENSORS_ERR_PARSE;
+	err = sensors_parse();
+	sensors_scanner_exit();
+	if (err)
+		return -SENSORS_ERR_PARSE;
+
+	return 0;
+}
+
 int sensors_init(FILE *input)
 {
 	int res;
@@ -71,10 +85,9 @@ int sensors_init(FILE *input)
 	    (res = sensors_read_sysfs_chips()))
 		goto exit_cleanup;
 
-	res = -SENSORS_ERR_PARSE;
 	if (input) {
-		if (sensors_scanner_init(input) ||
-		    sensors_parse())
+		res = parse_config(input);
+		if (res)
 			goto exit_cleanup;
 	} else {
 		/* No configuration provided, use default */
@@ -82,14 +95,14 @@ int sensors_init(FILE *input)
 		if (!input && errno == ENOENT)
 			input = fopen(ALT_CONFIG_FILE, "r");
 		if (input) {
-			if (sensors_scanner_init(input) ||
-			    sensors_parse()) {
-				fclose(input);
-				goto exit_cleanup;
-			}
+			res = parse_config(input);
 			fclose(input);
+			if (res)
+				goto exit_cleanup;
+
 		} else if (errno != ENOENT) {
 			sensors_parse_error(strerror(errno), 0);
+			res = -SENSORS_ERR_PARSE;
 			goto exit_cleanup;
 		}
 	}
@@ -196,8 +209,6 @@ static void free_chip(sensors_chip *chip)
 void sensors_cleanup(void)
 {
 	int i;
-
-	sensors_scanner_exit();
 
 	for (i = 0; i < sensors_proc_chips_count; i++) {
 		free_chip_name(&sensors_proc_chips[i].chip);
