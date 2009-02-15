@@ -61,18 +61,42 @@ static int sensors_parse(void)
 	return res;
 }
 
+static void free_bus(sensors_bus *bus)
+{
+	free(bus->adapter);
+}
+
+static void free_config_busses(void)
+{
+	int i;
+
+	for (i = 0; i < sensors_config_busses_count; i++)
+		free_bus(&sensors_config_busses[i]);
+	free(sensors_config_busses);
+	sensors_config_busses = NULL;
+	sensors_config_busses_count = sensors_config_busses_max = 0;
+}
+
 static int parse_config(FILE *input)
 {
 	int err;
 
-	if (sensors_scanner_init(input))
-		return -SENSORS_ERR_PARSE;
+	if (sensors_scanner_init(input)) {
+		err = -SENSORS_ERR_PARSE;
+		goto exit_cleanup;
+	}
 	err = sensors_parse();
 	sensors_scanner_exit();
-	if (err)
-		return -SENSORS_ERR_PARSE;
+	if (err) {
+		err = -SENSORS_ERR_PARSE;
+		goto exit_cleanup;
+	}
 
-	return 0;
+	err = sensors_substitute_busses();
+
+exit_cleanup:
+	free_config_busses();
+	return err;
 }
 
 int sensors_init(FILE *input)
@@ -107,8 +131,6 @@ int sensors_init(FILE *input)
 		}
 	}
 
-	if ((res = sensors_substitute_busses()))
-		goto exit_cleanup;
 	return 0;
 
 exit_cleanup:
@@ -132,11 +154,6 @@ static void free_chip_features(sensors_chip_features *features)
 	for (i = 0; i < features->feature_count; i++)
 		free(features->feature[i].name);
 	free(features->feature);
-}
-
-static void free_bus(sensors_bus *bus)
-{
-	free(bus->adapter);
 }
 
 static void free_label(sensors_label *label)
@@ -217,12 +234,6 @@ void sensors_cleanup(void)
 	free(sensors_proc_chips);
 	sensors_proc_chips = NULL;
 	sensors_proc_chips_count = sensors_proc_chips_max = 0;
-
-	for (i = 0; i < sensors_config_busses_count; i++)
-		free_bus(&sensors_config_busses[i]);
-	free(sensors_config_busses);
-	sensors_config_busses = NULL;
-	sensors_config_busses_count = sensors_config_busses_max = 0;
 
 	for (i = 0; i < sensors_config_chips_count; i++)
 		free_chip(&sensors_config_chips[i]);
