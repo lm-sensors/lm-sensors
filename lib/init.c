@@ -240,6 +240,7 @@ void sensors_cleanup(void)
 	free(sensors_config_chips);
 	sensors_config_chips = NULL;
 	sensors_config_chips_count = sensors_config_chips_max = 0;
+	sensors_config_chips_subst = 0;
 
 	for (i = 0; i < sensors_proc_bus_count; i++)
 		free_bus(&sensors_proc_bus[i]);

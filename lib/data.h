@@ -1,7 +1,7 @@
 /*
     data.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2009  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -135,6 +135,7 @@ typedef struct sensors_chip_features {
 
 extern sensors_chip *sensors_config_chips;
 extern int sensors_config_chips_count;
+extern int sensors_config_chips_subst;
 extern int sensors_config_chips_max;
 
 extern sensors_bus *sensors_config_busses;

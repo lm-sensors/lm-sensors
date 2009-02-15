@@ -1,7 +1,7 @@
 /*
     data.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2009  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ const char *libsensors_version = LM_VERSION;
 
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
+int sensors_config_chips_subst = 0;
 int sensors_config_chips_max = 0;
 
 sensors_bus *sensors_config_busses = NULL;
@@ -226,13 +227,17 @@ static int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 	return 0;
 }
 
+/* Bus substitution is on a per-configuration file basis, so we keep
+   memory (in sensors_config_chips_subst) of which chip entries have been
+   already substituted. */
 int sensors_substitute_busses(void)
 {
 	int err, i, j, lineno;
 	sensors_chip_name_list *chips;
 	int res = 0;
 
-	for (i = 0; i < sensors_config_chips_count; i++) {
+	for (i = sensors_config_chips_subst;
+	     i < sensors_config_chips_count; i++) {
 		lineno = sensors_config_chips[i].lineno;
 		chips = &sensors_config_chips[i].chips;
 		for (j = 0; j < chips->fits_count; j++) {
@@ -246,5 +251,6 @@ int sensors_substitute_busses(void)
 				res = err;
 		}
 	}
+	sensors_config_chips_subst = sensors_config_chips_count;
 	return res;
 }
