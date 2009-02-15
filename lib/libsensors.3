@@ -71,9 +71,8 @@ libsensors \- publicly accessible functions provided by the sensors library
 .fi
 
 .SH DESCRIPTION
-.B int sensors_init(FILE *input);
-.br
-Load the configuration file and the detected chips list. If this returns a
+.B sensors_init()
+loads the configuration file and the detected chips list. If this returns a
 value unequal to zero, you are in trouble; you can not assume anything will
 be initialized properly. If you want to reload the configuration file, call
 sensors_cleanup() below before calling sensors_init() again.
@@ -81,48 +80,39 @@ sensors_cleanup() below before calling sensors_init() again.
 If FILE is NULL, the default configuration files are used (see the FILES
 section below). Most applications will want to do that.
 
-.B void sensors_cleanup(void);
-.br
-Clean-up function: You can't access anything after this, until the next sensors_init() call!
-.br
+.B sensors_cleanup()
+cleans everything up: you can't access anything after this, until the next sensors_init() call!
 
-\fBint sensors_parse_chip_name(const char *orig_name,
-                            sensors_chip_name *res);\fP
-.br
-Parse a chip name to the internal representation. Return 0 on succes, <0 on error.
+.B sensors_parse_chip_name()
+parses a chip name to the internal representation. Return 0 on success,
+<0 on error.
 
-.B const char *sensors_get_adapter_name(int bus_nr);
-.br
-This function returns the adapter name of a bus number, as used within the
+.B sensors_get_adapter_name()
+returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
 
-\fBchar *sensors_get_label(const sensors_chip_name *name, const sensors_feature *feature);\fP
-.br
-Look up the label which belongs to this chip. Note that chip should not
+.B sensors_get_label()
+looks up the label which belongs to this chip. Note that chip should not
 contain wildcard values! The returned string is newly allocated (free it
 yourself). On failure, NULL is returned.
 If no label exists for this feature, its name is returned itself.
 
-\fBint sensors_get_value(const sensors_chip_name *name, int subfeat_nr, double *value);\fP
-.br
-Read the value of a subfeature of a certain chip. Note that chip should not
+.B sensors_get_value()
+Reads the value of a subfeature of a certain chip. Note that chip should not
 contain wildcard values! This function will return 0 on success, and <0 on
 failure.
 
-\fBint sensors_set_value(const sensors_chip_name *name, int subfeat_nr, double value);\fP
-.br
-Set the value of a subfeature of a certain chip. Note that chip should not
+.B sensors_set_value()
+sets the value of a subfeature of a certain chip. Note that chip should not
 contain wildcard values! This function will return 0 on success, and <0 on
 failure.
 
-.B int sensors_do_chip_sets(const sensors_chip_name *name);
-.br
-Execute all set statements for this particular chip. The chip may contain wildcards!  This function will return 0 on success, and <0 on failure.
+.B sensors_do_chip_sets()
+executes all set statements for this particular chip. The chip may contain
+wildcards!  This function will return 0 on success, and <0 on failure.
 
-\fBconst sensors_chip_name *sensors_get_detected_chips(const sensors_chip_name
-                                                    *match, int *nr);\fP
-.br
-This function returns all detected chips that match a given chip name,
+.B sensors_get_detected_chips()
+returns all detected chips that match a given chip name,
 one by one. If no chip name is provided, all detected chips are returned.
 To start at the beginning of the list, use 0 for nr; NULL is returned if
 we are at the end of the list. Do not try to change these chip names, as
@@ -133,11 +123,11 @@ specific chip.
 .br
 \fBtypedef struct sensors_feature {
 .br
-  const char *name;
+	const char *name;
 .br
-  int number;
+	int number;
 .br
-  sensors_feature_type type;
+	sensors_feature_type type;
 .br
 } sensors_feature;\fP
 .br
@@ -149,15 +139,15 @@ specific chip feature.
 .br
 \fBtypedef struct sensors_subfeature {
 .br
-  const char *name;
+	const char *name;
 .br
-  int number;
+	int number;
 .br
-  sensors_subfeature_type type;
+	sensors_subfeature_type type;
 .br
-  int mapping;
+	int mapping;
 .br
-  unsigned int flags;
+	unsigned int flags;
 .br
 } sensors_subfeature;\fP
 .br
@@ -165,32 +155,28 @@ The flags field is a bitfield, its value is a combination of
 SENSORS_MODE_R (readable), SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING
 (affected by the computation rules of the main feature).
 
-\fBconst sensors_feature *sensors_get_features(const sensors_chip_name *name, int *nr);\fP
-.br
-This returns all main features of a specific chip. nr is an internally
+.B sensors_get_features()
+returns all main features of a specific chip. nr is an internally
 used variable. Set it to zero to start at the begin of the list. If no
 more features are found NULL is returned.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 
-\fBconst sensors_subfeature *sensors_get_all_subfeatures(const sensors_chip_name *name, const sensors_feature *feature, int *nr);\fP
-.br
-This returns all subfeatures of a given main feature. nr is an internally
+.B sensors_get_all_subfeatures()
+returns all subfeatures of a given main feature. nr is an internally
 used variable. Set it to zero to start at the begin of the list. If no
 more subfeatures are found NULL is returned.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 
-\fBconst sensors_subfeature *sensors_get_subfeature(const sensors_chip_name *name, const sensors_feature *feature, sensors_subfeature_type type);\fP
-.br
-This returns the subfeature of the given type for a given main feature,
+.B sensors_get_subfeature()
+returns the subfeature of the given type for a given main feature,
 if it exists, NULL otherwise.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 
-\fBconst char *libsensors_version;\fP
-.br
-A string representing the version of libsensors.
+.B libsensors_version
+is a string representing the version of libsensors.
 
 .SH FILES
 .I /etc/sensors3.conf
