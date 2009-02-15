@@ -1,7 +1,7 @@
 /*
     access.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2009   Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -511,7 +511,8 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 			subfeature = sensors_lookup_subfeature_name(chip_features,
 							chip->sets[i].name);
 			if (!subfeature) {
-				sensors_parse_error("Unknown feature name",
+				sensors_parse_error_wfn("Unknown feature name",
+						    chip->sets[i].line.filename,
 						    chip->sets[i].line.lineno);
 				err = -SENSORS_ERR_NO_ENTRY;
 				continue;
@@ -521,14 +522,16 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 						chip->sets[i].value, 0,
 						0, &value);
 			if (res) {
-				sensors_parse_error("Error parsing expression",
+				sensors_parse_error_wfn("Error parsing expression",
+						    chip->sets[i].line.filename,
 						    chip->sets[i].line.lineno);
 				err = res;
 				continue;
 			}
 			if ((res = sensors_set_value(name, subfeature->number,
 						     value))) {
-				sensors_parse_error("Failed to set value",
+				sensors_parse_error_wfn("Failed to set value",
+						chip->sets[i].line.filename,
 						chip->sets[i].line.lineno);
 				err = res;
 				continue;

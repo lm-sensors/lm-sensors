@@ -332,10 +332,10 @@ chip_name:	  NAME
 void sensors_yyerror(const char *err)
 {
   if (sensors_lex_error[0]) {
-    sensors_parse_error(sensors_lex_error,sensors_yylineno);
+    sensors_parse_error_wfn(sensors_lex_error, sensors_yyfilename, sensors_yylineno);
     sensors_lex_error[0] = '\0';
   } else
-    sensors_parse_error(err,sensors_yylineno);
+    sensors_parse_error_wfn(err, sensors_yyfilename, sensors_yylineno);
 }
 
 sensors_expr *malloc_expr(void)

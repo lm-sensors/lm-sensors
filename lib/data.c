@@ -202,7 +202,8 @@ int sensors_parse_bus_id(const char *name, sensors_bus_id *bus)
 	return 0;
 }
 
-static int sensors_substitute_chip(sensors_chip_name *name, int lineno)
+static int sensors_substitute_chip(sensors_chip_name *name,
+				   const char *filename, int lineno)
 {
 	int i, j;
 	for (i = 0; i < sensors_config_busses_count; i++)
@@ -211,7 +212,8 @@ static int sensors_substitute_chip(sensors_chip_name *name, int lineno)
 			break;
 
 	if (i == sensors_config_busses_count) {
-		sensors_parse_error("Undeclared bus id referenced", lineno);
+		sensors_parse_error_wfn("Undeclared bus id referenced",
+					filename, lineno);
 		name->bus.nr = SENSORS_BUS_NR_IGNORE;
 		return -SENSORS_ERR_BUS_NAME;
 	}
@@ -238,10 +240,12 @@ int sensors_substitute_busses(void)
 {
 	int err, i, j, lineno;
 	sensors_chip_name_list *chips;
+	const char *filename;
 	int res = 0;
 
 	for (i = sensors_config_chips_subst;
 	     i < sensors_config_chips_count; i++) {
+		filename = sensors_config_chips[i].line.filename;
 		lineno = sensors_config_chips[i].line.lineno;
 		chips = &sensors_config_chips[i].chips;
 		for (j = 0; j < chips->fits_count; j++) {
@@ -250,7 +254,8 @@ int sensors_substitute_busses(void)
 			if (chips->fits[j].bus.nr == SENSORS_BUS_NR_ANY)
 				continue;
 
-			err = sensors_substitute_chip(&chips->fits[j], lineno);
+			err = sensors_substitute_chip(&chips->fits[j],
+						      filename, lineno);
 			if (err)
 				res = err;
 		}

@@ -24,6 +24,10 @@ given new feature.
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_BEEP
 * Added error value for excessive recursion depth
   #define SENSORS_ERR_RECURSION 11
+* Added parse error reporting function including the configuration file
+  name
+  extern void (*sensors_parse_error_wfn) (const char *err,
+  					  const char *filename, int lineno);
 
 0x401	lm-sensors 3.0.2 to 3.0.3
 * Added bus type "virtual":

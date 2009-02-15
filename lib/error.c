@@ -1,7 +1,7 @@
 /*
     error.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007, 2008  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2009   Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,10 +25,14 @@
 #include "general.h"
 
 static void sensors_default_parse_error(const char *err, int lineno);
+static void sensors_default_parse_error_wfn(const char *err,
+					    const char *filename, int lineno);
 static void sensors_default_fatal_error(const char *proc, const char *err);
 
 void (*sensors_parse_error) (const char *err, int lineno) =
 						sensors_default_parse_error;
+void (*sensors_parse_error_wfn) (const char *err, const char *filename,
+				 int lineno) = sensors_default_parse_error_wfn;
 void (*sensors_fatal_error) (const char *proc, const char *err) =
 						sensors_default_fatal_error;
 
@@ -62,6 +66,23 @@ void sensors_default_parse_error(const char *err, int lineno)
 		fprintf(stderr, "Error: Line %d: %s\n", lineno, err);
 	else
 		fprintf(stderr, "Error: %s\n", err);
+}
+
+void sensors_default_parse_error_wfn(const char *err,
+				     const char *filename, int lineno)
+{
+	/* If application provided a custom parse error reporting function
+	   but not the variant with the filename, fall back to the original
+	   variant without the filename, for backwards compatibility. */
+	if (sensors_parse_error != sensors_default_parse_error ||
+	    !filename)
+		return sensors_parse_error(err, lineno);
+
+	if (lineno)
+		fprintf(stderr, "Error: File %s, line %d: %s\n", filename,
+			lineno, err);
+	else
+		fprintf(stderr, "Error: File %s: %s\n", filename, err);
 }
 
 void sensors_default_fatal_error(const char *proc, const char *err)

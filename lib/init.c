@@ -125,7 +125,7 @@ static int add_config_from_dir(const char *dir)
 
 	count = scandir(dir, &namelist, config_file_filter, alphasort);
 	if (count < 0) {
-		sensors_parse_error(strerror(errno), 0);
+		sensors_parse_error_wfn(strerror(errno), NULL, 0);
 		return -SENSORS_ERR_PARSE;
 	}
 
@@ -147,7 +147,7 @@ static int add_config_from_dir(const char *dir)
 			fclose(input);
 		} else {
 			res = -SENSORS_ERR_PARSE;
-			sensors_parse_error(strerror(errno), 0);
+			sensors_parse_error_wfn(strerror(errno), path, 0);
 		}
 	}
 
@@ -187,7 +187,7 @@ int sensors_init(FILE *input)
 				goto exit_cleanup;
 
 		} else if (errno != ENOENT) {
-			sensors_parse_error(strerror(errno), 0);
+			sensors_parse_error_wfn(strerror(errno), name, 0);
 			res = -SENSORS_ERR_PARSE;
 			goto exit_cleanup;
 		}

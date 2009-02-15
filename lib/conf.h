@@ -24,6 +24,7 @@
 /* This is defined in conf-lex.l */
 int sensors_yylex(void);
 extern char sensors_lex_error[];
+extern const char *sensors_yyfilename;
 extern int sensors_yylineno;
 extern FILE *sensors_yyin;
 
