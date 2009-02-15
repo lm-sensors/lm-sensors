@@ -42,6 +42,8 @@ libsensors \- publicly accessible functions provided by the sensors library
 /* Chip name handling */
 .BI "int sensors_parse_chip_name(const char *" orig_name ","
 .BI "                            sensors_chip_name *" res ");"
+.BI "int sensors_snprintf_chip_name(char *" str ", size_t " size ","
+.BI "                               const sensors_chip_name *" chip ");"
 .BI "const char *sensors_get_adapter_name(const sensors_bus_id *" bus ");"
 
 /* Chips and features enumeration */
@@ -89,6 +91,11 @@ is a string representing the version of libsensors.
 .B sensors_parse_chip_name()
 parses a chip name to the internal representation. Return 0 on success,
 <0 on error.
+
+.B sensors_snprintf_chip_name()
+prints a chip name from its internal representation. Note that chip should
+not contain wildcard values! Return the number of characters printed on
+success (same as snprintf), <0 on error.
 
 .B sensors_get_adapter_name()
 returns the adapter name of a bus number, as used within the
