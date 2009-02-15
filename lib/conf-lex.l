@@ -34,6 +34,7 @@ static char *buffer;
 
 char sensors_lex_error[100];
 
+const char *sensors_yyfilename;
 int sensors_yylineno;
 
 #define buffer_malloc() sensors_malloc_array(&buffer,&buffer_count,\
@@ -110,37 +111,43 @@ NUM	0|([1-9][[:digit:]]*)
   */
 
 label{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return LABEL;
 		}
 
 set{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return SET;
 		}
 
 compute{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return COMPUTE;
 		}
 
 bus{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return BUS;
 		}
 
 chip{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return CHIP;
 		}
 
 ignore{BLANK}*	{
-		  sensors_yylval.line = sensors_yylineno;
+		  sensors_yylval.line.filename = sensors_yyfilename;
+		  sensors_yylval.line.lineno = sensors_yylineno;
 		  BEGIN(MIDDLE);
 		  return IGNORE;
 		}
@@ -335,13 +342,14 @@ ignore{BLANK}*	{
 
 static YY_BUFFER_STATE scan_buf = (YY_BUFFER_STATE)0;
 
-int sensors_scanner_init(FILE *input)
+int sensors_scanner_init(FILE *input, const char *filename)
 {
 	BEGIN(0);
 	if (!(scan_buf = sensors_yy_create_buffer(input, YY_BUF_SIZE)))
 		return -1;
 
 	sensors_yy_switch_to_buffer(scan_buf);
+	sensors_yyfilename = filename;
 	sensors_yylineno = 1;
 	return 0;
 }

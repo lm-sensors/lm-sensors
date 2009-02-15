@@ -512,7 +512,7 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 							chip->sets[i].name);
 			if (!subfeature) {
 				sensors_parse_error("Unknown feature name",
-						    chip->sets[i].lineno);
+						    chip->sets[i].line.lineno);
 				err = -SENSORS_ERR_NO_ENTRY;
 				continue;
 			}
@@ -522,14 +522,14 @@ static int sensors_do_this_chip_sets(const sensors_chip_name *name)
 						0, &value);
 			if (res) {
 				sensors_parse_error("Error parsing expression",
-						    chip->sets[i].lineno);
+						    chip->sets[i].line.lineno);
 				err = res;
 				continue;
 			}
 			if ((res = sensors_set_value(name, subfeature->number,
 						     value))) {
 				sensors_parse_error("Failed to set value",
-						chip->sets[i].lineno);
+						chip->sets[i].line.lineno);
 				err = res;
 				continue;
 			}

@@ -32,7 +32,7 @@ int main(void)
 	int result;
 
 	/* init the scanner */
-	if ((result = sensors_scanner_init(stdin)))
+	if ((result = sensors_scanner_init(stdin, NULL)))
 		return result;
 
 	do {

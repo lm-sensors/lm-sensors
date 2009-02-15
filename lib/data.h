@@ -60,12 +60,18 @@ typedef struct sensors_expr {
 	} data;
 } sensors_expr;
 
+/* Config file line reference */
+typedef struct sensors_config_line {
+	const char *filename;
+	int lineno;
+} sensors_config_line;
+
 /* Config file label declaration: a feature name, combined with the label
    value */
 typedef struct sensors_label {
 	char *name;
 	char *value;
-	int lineno;
+	sensors_config_line line;
 } sensors_label;
 
 /* Config file set declaration: a subfeature name, combined with an
@@ -73,7 +79,7 @@ typedef struct sensors_label {
 typedef struct sensors_set {
 	char *name;
 	sensors_expr *value;
-	int lineno;
+	sensors_config_line line;
 } sensors_set;
 
 /* Config file compute declaration: a feature name, combined with two
@@ -82,13 +88,13 @@ typedef struct sensors_compute {
 	char *name;
 	sensors_expr *from_proc;
 	sensors_expr *to_proc;
-	int lineno;
+	sensors_config_line line;
 } sensors_compute;
 
 /* Config file ignore declaration: a feature name */
 typedef struct sensors_ignore {
 	char *name;
-	int lineno;
+	sensors_config_line line;
 } sensors_ignore;
 
 /* A list of chip names, used to represent a config file chips declaration */
@@ -113,7 +119,7 @@ typedef struct sensors_chip {
 	sensors_ignore *ignores;
 	int ignores_count;
 	int ignores_max;
-	int lineno;
+	sensors_config_line line;
 } sensors_chip;
 
 /* Config file bus declaration: the bus type and number, combined with adapter
@@ -121,7 +127,7 @@ typedef struct sensors_chip {
 typedef struct sensors_bus {
 	char *adapter;
 	sensors_bus_id bus;
-	int lineno;
+	sensors_config_line line;
 } sensors_bus;
 
 /* Internal data about all features and subfeatures of a chip */
@@ -132,6 +138,14 @@ typedef struct sensors_chip_features {
 	int feature_count;
 	int subfeature_count;
 } sensors_chip_features;
+
+extern char **sensors_config_files;
+extern int sensors_config_files_count;
+extern int sensors_config_files_max;
+
+#define sensors_add_config_files(el) sensors_add_array_el( \
+	(el), &sensors_config_files, &sensors_config_files_count, \
+	&sensors_config_files_max, sizeof(char *))
 
 extern sensors_chip *sensors_config_chips;
 extern int sensors_config_chips_count;

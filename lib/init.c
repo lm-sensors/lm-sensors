@@ -83,11 +83,18 @@ static void free_config_busses(void)
 	sensors_config_busses_count = sensors_config_busses_max = 0;
 }
 
-static int parse_config(FILE *input)
+static int parse_config(FILE *input, const char *name)
 {
 	int err;
+	char *name_copy;
 
-	if (sensors_scanner_init(input)) {
+	/* Record configuration file name for error reporting */
+	name_copy = strdup(name);
+	if (!name_copy)
+		sensors_fatal_error(__func__, "Out of memory");
+	sensors_add_config_files(&name_copy);
+
+	if (sensors_scanner_init(input, name_copy)) {
 		err = -SENSORS_ERR_PARSE;
 		goto exit_cleanup;
 	}
@@ -136,7 +143,7 @@ static int add_config_from_dir(const char *dir)
 
 		input = fopen(path, "r");
 		if (input) {
-			res = parse_config(input);
+			res = parse_config(input, path);
 			fclose(input);
 		} else {
 			res = -SENSORS_ERR_PARSE;
@@ -163,16 +170,18 @@ int sensors_init(FILE *input)
 		goto exit_cleanup;
 
 	if (input) {
-		res = parse_config(input);
+		res = parse_config(input, NULL);
 		if (res)
 			goto exit_cleanup;
 	} else {
+		const char* name;
+
 		/* No configuration provided, use default */
-		input = fopen(DEFAULT_CONFIG_FILE, "r");
+		input = fopen(name = DEFAULT_CONFIG_FILE, "r");
 		if (!input && errno == ENOENT)
-			input = fopen(ALT_CONFIG_FILE, "r");
+			input = fopen(name = ALT_CONFIG_FILE, "r");
 		if (input) {
-			res = parse_config(input);
+			res = parse_config(input, name);
 			fclose(input);
 			if (res)
 				goto exit_cleanup;
@@ -305,4 +314,10 @@ void sensors_cleanup(void)
 	free(sensors_proc_bus);
 	sensors_proc_bus = NULL;
 	sensors_proc_bus_count = sensors_proc_bus_max = 0;
+
+	for (i = 0; i < sensors_config_files_count; i++)
+		free(sensors_config_files[i]);
+	free(sensors_config_files);
+	sensors_config_files = NULL;
+	sensors_config_files_count = sensors_config_files_max = 0;
 }

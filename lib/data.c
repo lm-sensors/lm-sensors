@@ -33,6 +33,10 @@
 
 const char *libsensors_version = LM_VERSION;
 
+char **sensors_config_files = NULL;
+int sensors_config_files_count = 0;
+int sensors_config_files_max = 0;
+
 sensors_chip *sensors_config_chips = NULL;
 int sensors_config_chips_count = 0;
 int sensors_config_chips_subst = 0;
@@ -238,7 +242,7 @@ int sensors_substitute_busses(void)
 
 	for (i = sensors_config_chips_subst;
 	     i < sensors_config_chips_count; i++) {
-		lineno = sensors_config_chips[i].lineno;
+		lineno = sensors_config_chips[i].line.lineno;
 		chips = &sensors_config_chips[i].chips;
 		for (j = 0; j < chips->fits_count; j++) {
 			/* We can only substitute if a specific bus number

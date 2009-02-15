@@ -84,7 +84,7 @@ static sensors_chip *current_chip = NULL;
   sensors_expr *expr;
   sensors_bus_id bus;
   sensors_chip_name chip;
-  int line;
+  sensors_config_line line;
 }  
 
 %left <nothing> '-' '+'
@@ -131,7 +131,7 @@ line:	  bus_statement EOL
 
 bus_statement:	  BUS bus_id adapter_name
 		  { sensors_bus new_el;
-		    new_el.lineno = $1;
+		    new_el.line = $1;
 		    new_el.bus = $2;
                     new_el.adapter = $3;
 		    bus_add_el(&new_el);
@@ -146,7 +146,7 @@ label_statement:	  LABEL function_name string
 			      free($3);
 			      YYERROR;
 			    }
-			    new_el.lineno = $1;
+			    new_el.line = $1;
 			    new_el.name = $2;
 			    new_el.value = $3;
 			    label_add_el(&new_el);
@@ -161,7 +161,7 @@ set_statement:	  SET function_name expression
 		      sensors_free_expr($3);
 		      YYERROR;
 		    }
-		    new_el.lineno = $1;
+		    new_el.line = $1;
 		    new_el.name = $2;
 		    new_el.value = $3;
 		    set_add_el(&new_el);
@@ -177,7 +177,7 @@ compute_statement:	  COMPUTE function_name expression ',' expression
 			      sensors_free_expr($5);
 			      YYERROR;
 			    }
-			    new_el.lineno = $1;
+			    new_el.line = $1;
 			    new_el.name = $2;
 			    new_el.from_proc = $3;
 			    new_el.to_proc = $5;
@@ -192,7 +192,7 @@ ignore_statement:	IGNORE function_name
 			    free($2);
 			    YYERROR;
 			  }
-			  new_el.lineno = $1;
+			  new_el.line = $1;
 			  new_el.name = $2;
 			  ignore_add_el(&new_el);
 			}
@@ -200,7 +200,7 @@ ignore_statement:	IGNORE function_name
 
 chip_statement:	  CHIP chip_name_list
 		  { sensors_chip new_el;
-		    new_el.lineno = $1;
+		    new_el.line = $1;
 		    new_el.labels = NULL;
 		    new_el.sets = NULL;
 		    new_el.computes = NULL;
