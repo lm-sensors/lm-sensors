@@ -83,6 +83,9 @@ section below). Most applications will want to do that.
 .B sensors_cleanup()
 cleans everything up: you can't access anything after this, until the next sensors_init() call!
 
+.B libsensors_version
+is a string representing the version of libsensors.
+
 .B sensors_parse_chip_name()
 parses a chip name to the internal representation. Return 0 on success,
 <0 on error.
@@ -91,69 +94,12 @@ parses a chip name to the internal representation. Return 0 on success,
 returns the adapter name of a bus number, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
 
-.B sensors_get_label()
-looks up the label which belongs to this chip. Note that chip should not
-contain wildcard values! The returned string is newly allocated (free it
-yourself). On failure, NULL is returned.
-If no label exists for this feature, its name is returned itself.
-
-.B sensors_get_value()
-Reads the value of a subfeature of a certain chip. Note that chip should not
-contain wildcard values! This function will return 0 on success, and <0 on
-failure.
-
-.B sensors_set_value()
-sets the value of a subfeature of a certain chip. Note that chip should not
-contain wildcard values! This function will return 0 on success, and <0 on
-failure.
-
-.B sensors_do_chip_sets()
-executes all set statements for this particular chip. The chip may contain
-wildcards!  This function will return 0 on success, and <0 on failure.
-
 .B sensors_get_detected_chips()
 returns all detected chips that match a given chip name,
 one by one. If no chip name is provided, all detected chips are returned.
 To start at the beginning of the list, use 0 for nr; NULL is returned if
 we are at the end of the list. Do not try to change these chip names, as
 they point to internal structures!
-
-This structure contains information related to a given feature of a
-specific chip.
-.br
-\fBtypedef struct sensors_feature {
-.br
-	const char *name;
-.br
-	int number;
-.br
-	sensors_feature_type type;
-.br
-} sensors_feature;\fP
-.br
-There are other member not documented here, which are only meant for libsensors
-internal use.
-
-This structure contains information related to a given subfeature of a
-specific chip feature.
-.br
-\fBtypedef struct sensors_subfeature {
-.br
-	const char *name;
-.br
-	int number;
-.br
-	sensors_subfeature_type type;
-.br
-	int mapping;
-.br
-	unsigned int flags;
-.br
-} sensors_subfeature;\fP
-.br
-The flags field is a bitfield, its value is a combination of
-SENSORS_MODE_R (readable), SENSORS_MODE_W (writable) and SENSORS_COMPUTE_MAPPING
-(affected by the computation rules of the main feature).
 
 .B sensors_get_features()
 returns all main features of a specific chip. nr is an internally
@@ -175,8 +121,65 @@ if it exists, NULL otherwise.
 Do not try to change the returned structure; you will corrupt internal
 data structures.
 
-.B libsensors_version
-is a string representing the version of libsensors.
+.B sensors_get_label()
+looks up the label which belongs to this chip. Note that chip should not
+contain wildcard values! The returned string is newly allocated (free it
+yourself). On failure, NULL is returned.
+If no label exists for this feature, its name is returned itself.
+
+.B sensors_get_value()
+Reads the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
+
+.B sensors_set_value()
+sets the value of a subfeature of a certain chip. Note that chip should not
+contain wildcard values! This function will return 0 on success, and <0 on
+failure.
+
+.B sensors_do_chip_sets()
+executes all set statements for this particular chip. The chip may contain
+wildcards!  This function will return 0 on success, and <0 on failure.
+
+.SH DATA STRUCTURES
+
+Structure \fBsensors_feature\fR contains information related to a given
+feature of a specific chip:
+
+\fBtypedef struct sensors_feature {
+.br
+	const char *name;
+.br
+	int number;
+.br
+	sensors_feature_type type;
+.br
+} sensors_feature;\fP
+
+There are other members not documented here, which are only meant for
+libsensors internal use.
+
+Structure \fBsensors_subfeature\fR contains information related to a given
+subfeature of a specific chip feature:
+
+\fBtypedef struct sensors_subfeature {
+.br
+	const char *name;
+.br
+	int number;
+.br
+	sensors_subfeature_type type;
+.br
+	int mapping;
+.br
+	unsigned int flags;
+.br
+} sensors_subfeature;\fP
+
+The flags field is a bitfield, its value is a combination of
+\fBSENSORS_MODE_R\fR (readable), \fBSENSORS_MODE_W\fR (writable) and
+\fBSENSORS_COMPUTE_MAPPING\fR (affected by the computation rules of the
+main feature).
 
 .SH FILES
 .I /etc/sensors3.conf
