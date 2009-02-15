@@ -1,7 +1,7 @@
 /*
     init.c - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2009  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,11 +19,16 @@
     MA 02110-1301 USA.
 */
 
+/* Needed for scandir() and alphasort() */
+#define _BSD_SOURCE
+
+#include <sys/types.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <dirent.h>
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
@@ -35,6 +40,7 @@
 
 #define DEFAULT_CONFIG_FILE	ETCDIR "/sensors3.conf"
 #define ALT_CONFIG_FILE		ETCDIR "/sensors.conf"
+#define DEFAULT_CONFIG_DIR	ETCDIR "/sensors.d"
 
 /* Wrapper around sensors_yyparse(), which clears the locale so that
    the decimal numbers are always parsed properly. */
@@ -99,6 +105,53 @@ exit_cleanup:
 	return err;
 }
 
+static int config_file_filter(const struct dirent *entry)
+{
+	return (entry->d_type == DT_REG || entry->d_type == DT_LNK)
+	    && entry->d_name[0] != '.';		/* Skip hidden files */
+}
+
+static int add_config_from_dir(const char *dir)
+{
+	int count, res, i;
+	struct dirent **namelist;
+
+	count = scandir(dir, &namelist, config_file_filter, alphasort);
+	if (count < 0) {
+		sensors_parse_error(strerror(errno), 0);
+		return -SENSORS_ERR_PARSE;
+	}
+
+	for (res = 0, i = 0; !res && i < count; i++) {
+		int len;
+		char path[PATH_MAX];
+		FILE *input;
+
+		len = snprintf(path, sizeof(path), "%s/%s", dir,
+			       namelist[i]->d_name);
+		if (len < 0 || len >= (int)sizeof(path)) {
+			res = -SENSORS_ERR_PARSE;
+			continue;
+		}
+
+		input = fopen(path, "r");
+		if (input) {
+			res = parse_config(input);
+			fclose(input);
+		} else {
+			res = -SENSORS_ERR_PARSE;
+			sensors_parse_error(strerror(errno), 0);
+		}
+	}
+
+	/* Free memory allocated by scandir() */
+	for (i = 0; i < count; i++)
+		free(namelist[i]);
+	free(namelist);
+
+	return res;
+}
+
 int sensors_init(FILE *input)
 {
 	int res;
@@ -129,6 +182,11 @@ int sensors_init(FILE *input)
 			res = -SENSORS_ERR_PARSE;
 			goto exit_cleanup;
 		}
+
+		/* Also check for files in default directory */
+		res = add_config_from_dir(DEFAULT_CONFIG_DIR);
+		if (res)
+			goto exit_cleanup;
 	}
 
 	return 0;

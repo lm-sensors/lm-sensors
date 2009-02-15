@@ -12,6 +12,7 @@ SVN-HEAD
               Report configuration file read errors
               Exit the configuration file parser sooner
               Free bus statements from the configuration file sooner
+              Read extra configuration files from /etc/sensors.d
   lm_sensors.init: Support new format of /etc/sysconfig/lm_sensors (#2246)
                    Drop support for kernels 2.4 and earlier
   lm_sensors.init.suse: Delete (actual SuSE script is much different)

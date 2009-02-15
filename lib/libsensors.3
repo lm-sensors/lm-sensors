@@ -1,4 +1,5 @@
-.\" Copyright 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
+.\" Copyright (C) 1998, 1999  Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
+.\" Copyright (C) 2007, 2009  Jean Delvare <khali@linux-fr.org>
 .\" based on sensors.h, part of libsensors by Frodo Looijaard
 .\" libsensors is distributed under the GPL
 .\"
@@ -24,7 +25,7 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "October 2007" "lm-sensors 3" "Linux Programmer's Manual"
+.TH libsensors 3  "February 2009" "lm-sensors 3" "Linux Programmer's Manual"
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
 .SH SYNOPSIS
@@ -57,7 +58,7 @@ value unequal to zero, you are in trouble; you can not assume anything will
 be initialized properly. If you want to reload the configuration file, call
 sensors_cleanup() below before calling sensors_init() again.
 
-If FILE is NULL, the default configuration file is used (see the FILES
+If FILE is NULL, the default configuration files are used (see the FILES
 section below). Most applications will want to do that.
 
 .B void sensors_cleanup(void);
@@ -180,6 +181,15 @@ The system-wide
 .BR libsensors (3)
 configuration file. /etc/sensors3.conf is tried first, and if it doesn't exist,
 /etc/sensors.conf is used instead.
+.RE
+
+.I /etc/sensors.d
+.RS
+A directory where you can put additional libsensors configuration files.
+Files found in this directory will be processed in alphabetical order after
+the default configuration file. Files with names that start with a dot are
+ignored.
+.RE
 
 .SH SEE ALSO
 sensors.conf(5)

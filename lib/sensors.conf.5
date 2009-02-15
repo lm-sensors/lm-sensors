@@ -1,6 +1,6 @@
 .\" Copyright (C) 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk> and
 .\"                          Frodo Looijaard <frodol@dds.nl>
-.\" Copyright (C) 2008       Jean Delvare <khali@linux-fr.org>
+.\" Copyright (C) 2008, 2009 Jean Delvare <khali@linux-fr.org>
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -21,7 +21,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "December 2008" "lm-sensors 3" "Linux User's Manual"
+.TH sensors.conf 5  "February 2009" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -273,6 +273,13 @@ statements together at the top of your configuration file.
 Running
 .B sensors --bus-list
 will generate these lines for you.
+
+In the case where multiple configuration files are used, the scope
+of each
+.I bus
+statement is the configuration file it was defined in. This makes it
+possible to have bus statements in all configuration files which will
+not unexpectedly interfere with each other.
 
 .SS STATEMENT ORDER
 
@@ -533,6 +540,15 @@ The system-wide
 .BR libsensors (3)
 configuration file. /etc/sensors3.conf is tried first, and if it doesn't exist,
 /etc/sensors.conf is used instead.
+.RE
+
+.I /etc/sensors.d
+.RS
+A directory where you can put additional libsensors configuration files.
+Files found in this directory will be processed in alphabetical order after
+the default configuration file. Files with names that start with a dot are
+ignored.
+.RE
 
 .SH SEE ALSO
 libsensors(3)
