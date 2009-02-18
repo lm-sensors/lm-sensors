@@ -3059,11 +3059,11 @@ sub scan_i2c_adapter
 		print "Adapter failed to provide its functionalities, skipping.\n";
 		return;
 	}
-	if (!($funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE))) {
+	if (!($funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE | I2C_FUNC_SMBUS_READ_BYTE_DATA))) {
 		print "Adapter cannot be probed, skipping.\n";
 		return;
 	}
-	if (~$funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE)) {
+	if (~$funcs & (I2C_FUNC_SMBUS_QUICK | I2C_FUNC_SMBUS_READ_BYTE | I2C_FUNC_SMBUS_READ_BYTE_DATA)) {
 		print "Adapter doesn't support all probing functions.\n",
 		      "Some addresses won't be probed.\n";
 	}
