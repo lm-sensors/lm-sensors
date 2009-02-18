@@ -125,6 +125,10 @@ static int add_config_from_dir(const char *dir)
 
 	count = scandir(dir, &namelist, config_file_filter, alphasort);
 	if (count < 0) {
+		/* Do not return an error if directory does not exist */
+		if (errno == ENOENT)
+			return 0;
+		
 		sensors_parse_error_wfn(strerror(errno), NULL, 0);
 		return -SENSORS_ERR_PARSE;
 	}
