@@ -2516,6 +2516,7 @@ use constant SMBUS_WORD_DATA	=> 3;
 
 use constant I2C_FUNC_SMBUS_QUICK	=> 0x00010000;
 use constant I2C_FUNC_SMBUS_READ_BYTE	=> 0x00020000;
+use constant I2C_FUNC_SMBUS_READ_BYTE_DATA	=> 0x00080000;
 
 # Get the i2c adapter's functionalities
 # $_[0]: Reference to an opened filehandle
@@ -2639,6 +2640,13 @@ sub i2c_probe
 		# protection address.
 		return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE);
 		return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE, []);
+	} elsif ($addr == 0x73) {
+		# Special case for FSC chips, as at least the Syleus locks
+		# up with our regular probe code. Note that to our current
+		# knowledge only FSC chips live on this address, and for them
+		# this probe method is safe.
+		return 0 unless ($funcs & I2C_FUNC_SMBUS_READ_BYTE_DATA);
+		return i2c_smbus_access($file, SMBUS_READ, 0, SMBUS_BYTE_DATA, []);
 	} else {
 		return 0 unless ($funcs & I2C_FUNC_SMBUS_QUICK);
 		return i2c_smbus_access($file, SMBUS_WRITE, 0, SMBUS_QUICK, []);
