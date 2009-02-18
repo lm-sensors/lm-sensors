@@ -1025,6 +1025,16 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x73],
 		i2c_detect => sub { fsc_detect(@_, 5); },
 	}, {
+		name => "FSC Hades",
+		driver => "fschmd",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 6); },
+	}, {
+		name => "FSC Syleus",
+		driver => "fschmd",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fsc_detect(@_, 7); },
+	}, {
 		name => "ALi M5879",
 		driver => "to-be-written",
 		i2c_addrs => [0x2c..0x2d],
@@ -4649,6 +4659,8 @@ sub fsc_detect
 	return if $chip == 3 and $id ne 'HER';	# Hermes
 	return if $chip == 4 and $id ne 'HMD';	# Heimdal
 	return if $chip == 5 and $id ne 'HRC';	# Heracles
+	return if $chip == 6 and $id ne 'HDS';	# Hades
+	return if $chip == 7 and $id ne 'SYL';	# Syleus
 
 	return 8;
 }
