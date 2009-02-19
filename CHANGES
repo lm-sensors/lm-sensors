@@ -80,6 +80,7 @@ SVN-HEAD
                   Exclude auto-loaded PCI and USB drivers from list (#2368)
                   Special case probing i2c address 0x73 (to not crash FSC ICs)
                   Add detection of FSC Hades and Syleus IC's
+                  Add detection of Winbond WPCD377I (no sensors)
   sensors-detect-stat.pl: Delete (functionality merged into sensors-detect)
   sysconfig-lm_sensors-convert: Sample config file conversion script (#2246)
 

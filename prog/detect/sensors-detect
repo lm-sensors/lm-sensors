@@ -2,7 +2,7 @@
 #
 #    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2008  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2004 - 2009  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -531,6 +531,11 @@ use vars qw(@i2c_adapter_names);
 		driver => "lm85",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm85_detect(@_, 6); },
+	}, {
+		name => "Winbond WPCD377I",
+		driver => "not-a-sensor",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 7); },
 	}, {
 		name => "Analog Devices ADT7462",
 		driver => "adt7462",
@@ -4126,7 +4131,8 @@ sub andigilog_aSC7511_detect
 }
 
 # Chip to detect: 0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
-#		  4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103
+#		  4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103,
+#		  7 = WPCD377I (no sensors)
 # Registers used:
 #   0x3e: Vendor register
 #   0x3d: Device ID register (Analog Devices only)
@@ -4141,7 +4147,7 @@ sub lm85_detect
 		return if $vendor != 0x01;	# National Semiconductor
 		return if $verstep != 0x60	# LM85 C
 		       && $verstep != 0x62;	# LM85 B
-	} elsif ($chip == 1) {
+	} elsif ($chip == 1 || $chip == 7) {
 		return if $vendor != 0x01;	# National Semiconductor
 		return if $verstep != 0x68	# LM96000
 		       && $verstep != 0x69;	# LM96000
@@ -4168,6 +4174,26 @@ sub lm85_detect
 		return if i2c_smbus_read_byte_data($file, 0x3d) != 0x27;
 		return 8;
 	}
+
+	if ($chip == 1 || $chip == 7) {
+		# Differenciate between real LM96000 and Winbond WPCD377I.
+		# The latter emulate the former except that it has no
+		# hardware monitoring function so the readings are always
+		# 0.
+		my ($in_temp, $fan, $i);
+		
+		for ($i = 0; $i < 8; $i++) {
+			$in_temp = i2c_smbus_read_byte_data($file, 0x20 + $i);
+			$fan = i2c_smbus_read_byte_data($file, 0x28 + $i);
+			if ($in_temp != 0x00 or $fan != 0xff) {
+				return 7 if $chip == 1;
+				return;
+			}
+		}
+		return 7 if $chip == 7;
+		return;
+	}
+
 	return 7;
 }
 
