@@ -188,9 +188,14 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_CURR:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
+		if (!name)
+			sensors_fatal_error(__func__, "Out of memory");
+
 		break;
 	default:
 		name = strdup(sfname);
+		if (!name)
+			sensors_fatal_error(__func__, "Out of memory");
 	}
 
 	return name;
@@ -419,6 +424,9 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* fill in the subfeature members */
 		all_subfeatures[i].type = sftype;
 		all_subfeatures[i].name = strdup(name);
+		if (!all_subfeatures[i].name)
+			sensors_fatal_error(__func__, "Out of memory");
+
 		if (!(sftype & 0x80))
 			all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
 		all_subfeatures[i].flags |= sensors_get_attr_mode(dev_path, name);

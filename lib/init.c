@@ -53,6 +53,9 @@ static int sensors_parse(void)
 	locale = setlocale(LC_ALL, NULL);
 	if (locale) {
 		locale = strdup(locale);
+		if (!locale)
+			sensors_fatal_error(__func__, "Out of memory");
+
 		setlocale(LC_ALL, "C");
 	}
 
