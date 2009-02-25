@@ -6,7 +6,7 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
-0x402	lm-sensors SVN
+0x410	lm-sensors 3.1.0
 * Added bus type "acpi":
   #define SENSORS_BUS_TYPE_ACPI
 * Added support for instantaneous power sensors
