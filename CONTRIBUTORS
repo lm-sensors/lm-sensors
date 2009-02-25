@@ -1,7 +1,7 @@
 Here is a list of the main contributors to lm-sensors version 3.
 
 * Frodo Looijaard
-  Original author of libsensors, sensors and isadump.
+  Original author of libsensors, sensors-detect, sensors and isadump.
 * Merlin Hughes
   Original author of sensord.
 * Bob Schlaermann
@@ -13,3 +13,5 @@ Here is a list of the main contributors to lm-sensors version 3.
   New libsensors API, and migration of sensors and sensord thereto.
   Many optimizations in libsensors and sensors.
   Configuration file converter.
+  Rewrite of sensors-detect.
+  Support for multiple configuration files in libsensors.
