@@ -91,11 +91,14 @@ static int parse_config(FILE *input, const char *name)
 	int err;
 	char *name_copy;
 
-	/* Record configuration file name for error reporting */
-	name_copy = strdup(name);
-	if (!name_copy)
-		sensors_fatal_error(__func__, "Out of memory");
-	sensors_add_config_files(&name_copy);
+	if (name) {
+		/* Record configuration file name for error reporting */
+		name_copy = strdup(name);
+		if (!name_copy)
+			sensors_fatal_error(__func__, "Out of memory");
+		sensors_add_config_files(&name_copy);
+	} else
+		name_copy = NULL;
 
 	if (sensors_scanner_init(input, name_copy)) {
 		err = -SENSORS_ERR_PARSE;
