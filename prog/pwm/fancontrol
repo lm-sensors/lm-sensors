@@ -54,6 +54,12 @@ declare -i pwmval
 
 function LoadConfig {
 	echo "Loading configuration from $1 ..."
+	if [ ! -r "$1" ]
+	then
+		echo "Error: Can't read configuration file"
+		exit 1
+	fi
+
 	# grep configuration from file
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`

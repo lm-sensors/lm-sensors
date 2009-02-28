@@ -24,6 +24,7 @@ SVN-HEAD
   pwmconfig: Drop support for kernels 2.4 and earlier
   fancontrol: Don't round temperature values
               Drop support for kernels 2.4 and earlier
+              Exit if configuration file can't be read
   maxilife scripts: Delete (driver never ported to Linux 2.6)
   sensord: Accept negative temperatures in RRD database
            Don't bail out on transient errors (#2330)
