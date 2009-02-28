@@ -43,13 +43,6 @@ PIDFILE="/var/run/fancontrol.pid"
 #DEBUG=1
 MAX=255
 
-if [ -f "$PIDFILE" ]
-then
-	echo "File $PIDFILE exists, is fancontrol already running?"
-	exit 1
-fi
-echo $$ > "$PIDFILE"
-
 declare -i pwmval
 
 function LoadConfig {
@@ -180,6 +173,13 @@ then
 	exit 1
 fi
 cd $DIR
+
+if [ -f "$PIDFILE" ]
+then
+	echo "File $PIDFILE exists, is fancontrol already running?"
+	exit 1
+fi
+echo $$ > "$PIDFILE"
 
 # $1 = pwm file name
 function pwmdisable()
