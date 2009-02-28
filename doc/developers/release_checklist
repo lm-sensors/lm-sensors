@@ -14,7 +14,7 @@ Release steps:
 - Update version.h
 - Commit
 - Tag the release using SVN:
-  svn copy http://lm-sensors.org/svn/lm-sensors/branches/lm-sensors-3.0.0 \
+  svn copy http://lm-sensors.org/svn/lm-sensors/trunk \
       http://lm-sensors.org/svn/lm-sensors/tags/V3-x-x \
       -m "3.x.x release"
 
