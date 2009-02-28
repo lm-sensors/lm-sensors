@@ -12,7 +12,7 @@ We presume that you have Subversion installed on your machine. To check out a
 working copy of the code for this project use the following commands:
 
 svn checkout http://lm-sensors.org/svn/i2c/trunk i2c
-svn checkout http://lm-sensors.org/svn/lm-sensors/trunk lm-sensors
+svn checkout http://lm-sensors.org/svn/lm-sensors/branches/lm-sensors-2.10 lm-sensors
 
 To update the code, do a svn update from within the i2c or lm-sensors
 directories. Please read the README and INSTALL files of your working copy

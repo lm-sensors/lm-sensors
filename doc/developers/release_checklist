@@ -14,9 +14,9 @@ Release steps:
 - Update lm_sensors2/version.h and i2c/kernel/i2c.h
 - Commit
 - Tag the release using SVN:
-  svn copy http://lm-sensors.org/svn/lm-sensors/trunk \
-      http://lm-sensors.org/svn/lm-sensors/tags/V2-x-x \
-      -m "Create tag 'V2-x-x'."
+  svn copy http://lm-sensors.org/svn/lm-sensors/branches/lm-sensors-2.10 \
+      http://lm-sensors.org/svn/lm-sensors/tags/V2-10-x \
+      -m "Create tag 'V2-10-x'."
 - Remove 'SVN' related files/directories (e.g. rm -fR `find . -name .svn`)
 - Rename i2c and lm_sensors2 to i2c-#.#.# and lm_sensors-#.#.#
 - Tar it up and post it (sign it)
