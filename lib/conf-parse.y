@@ -342,7 +342,6 @@ sensors_expr *malloc_expr(void)
 {
   sensors_expr *res = malloc(sizeof(sensors_expr));
   if (! res)
-    sensors_fatal_error("malloc_expr","Allocating a new expression");
+    sensors_fatal_error(__func__, "Allocating a new expression");
   return res;
 }
-  

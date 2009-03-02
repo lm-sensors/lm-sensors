@@ -88,7 +88,7 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 			return -SENSORS_ERR_CHIP_NAME;
 		res->prefix = strndup(name, dash - name);
 		if (!res->prefix)
-			sensors_fatal_error("sensors_parse_chip_name",
+			sensors_fatal_error(__func__,
 					    "Allocating name prefix");
 		name = dash + 1;
 	}

@@ -34,8 +34,7 @@ void sensors_malloc_array(void *list, int *num_el, int *max_el, int el_size)
 
 	*my_list = malloc(el_size*A_BUNCH);
 	if (! *my_list)
-		sensors_fatal_error("sensors_malloc_array",
-				    "Allocating new elements");
+		sensors_fatal_error(__func__, "Allocating new elements");
 	*max_el = A_BUNCH;
 	*num_el = 0;
 }
@@ -59,7 +58,7 @@ void sensors_add_array_el(const void *el, void *list, int *num_el,
 		new_max_el = *max_el + A_BUNCH;
 		*my_list = realloc(*my_list, new_max_el * el_size);
 		if (! *my_list)
-			sensors_fatal_error("sensors_add_array_el",
+			sensors_fatal_error(__func__,
 					    "Allocating new elements");
 		*max_el = new_max_el;
 	}
@@ -77,7 +76,7 @@ void sensors_add_array_els(const void *els, int nr_els, void *list,
 		new_max_el -= new_max_el % A_BUNCH;
 		*my_list = realloc(*my_list, new_max_el * el_size);
 		if (! *my_list)
-			sensors_fatal_error("sensors_add_array_els",
+			sensors_fatal_error(__func__,
 					    "Allocating new elements");
 		*max_el = new_max_el;
 	}

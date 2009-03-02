@@ -201,8 +201,7 @@ char *sensors_get_label(const sensors_chip_name *name,
 	
 sensors_get_label_exit:
 	if (!label)
-		sensors_fatal_error("sensors_get_label",
-				    "Allocating label text");
+		sensors_fatal_error(__func__, "Allocating label text");
 	return label;
 }
 
