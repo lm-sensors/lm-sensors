@@ -16,24 +16,15 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301 USA.
 
-# Note that MODULE_DIR (the directory in which this file resides) is a
-# 'simply expanded variable'. That means that its value is substituted
-# verbatim in the rules, until it is redefined. 
-MODULE_DIR := etc
-ETC_DIR := $(MODULE_DIR)
-
-ETCTARGET := $(MODULE_DIR)/sensors.conf.default
-ETCINSTALL := $(ETCDIR)/sensors3.conf
-ETCINSTALL_DIR_D := $(ETCDIR)/sensors.d
-
-
-# No all rule
+# Note: Don't confuse ETC_DIR (the directory in which this file resides)
+# with ETCDIR (the system directory in which configuration files will be
+# installed; typically /etc).
+ETC_DIR := etc
 
 install-etc:
-	$(MKDIR) $(DESTDIR)$(ETCDIR)
-	$(MKDIR) $(DESTDIR)$(ETCINSTALL_DIR_D)
-	if [ ! -e $(DESTDIR)$(ETCINSTALL) ] ; then \
-	  $(INSTALL) -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
+	$(MKDIR) $(DESTDIR)$(ETCDIR) $(DESTDIR)$(ETCDIR)/sensors.d
+	if [ ! -e $(DESTDIR)$(ETCDIR)/sensors3.conf ] ; then \
+	  $(INSTALL) -m 644 $(ETC_DIR)/sensors.conf.default $(DESTDIR)$(ETCDIR)/sensors3.conf ; \
 	fi
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 755 $(ETC_DIR)/sensors-conf-convert $(DESTDIR)$(BINDIR)
@@ -44,5 +35,3 @@ uninstall-etc:
 	$(RM) $(DESTDIR)$(BINDIR)/sensors-conf-convert
 
 user_uninstall :: uninstall-etc
-
-# No clean rule
