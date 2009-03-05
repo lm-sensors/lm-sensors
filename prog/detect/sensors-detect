@@ -339,6 +339,11 @@ $revision =~ s/ \([^()]*\)//;
 		driver	=> "i2c-nforce2",
 	}, {
 		vendid	=> 0x10de,
+		devid	=> 0x0752,
+		procid	=> "nVidia Corporation nForce SMBus (MCP78S)",
+		driver	=> "i2c-nforce2",
+	}, {
+		vendid	=> 0x10de,
 		devid	=> 0x0aa2,
 		procid	=> "nVidia Corporation nForce SMBus (MCP79)",
 		driver	=> "i2c-nforce2",
