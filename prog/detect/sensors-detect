@@ -3225,23 +3225,28 @@ sub probe_superio
 	outb($addrreg, $superio{logdevreg});
 	outb($datareg, $chip->{logdev});
 
-	# Check the activation register
-	outb($addrreg, $superio{actreg});
-	$val = inb($datareg);
-	if (!($val & $superio{actmask})) {
-		print "\n    (but not activated)\n";
-		return 0;
-	}
-
-	# Get the IO base register
+	# Get the IO base address
 	outb($addrreg, $superio{basereg});
 	$addr = inb($datareg);
 	outb($addrreg, $superio{basereg} + 1);
 	$addr = ($addr << 8) | inb($datareg);
+
+	# Check the activation register and base address
+	outb($addrreg, $superio{actreg});
+	$val = inb($datareg);
+	if (!($val & $superio{actmask})) {
+		if ($addr) {
+			printf "\n    (address 0x\%x, but not activated)\n", $addr;
+		} else {
+			print "\n    (but not activated)\n";
+		}
+		return 0;
+	}
 	if ($addr == 0) {
 		print "\n    (but no address specified)\n";
 		return 0;
 	}
+
 	print "Success!\n";
 	printf "    (address 0x\%x, driver `%s')\n", $addr, $chip->{driver};
 	my $new_hash = {

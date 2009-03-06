@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN-HEAD
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
+                  Display Super-I/O address even if LD is disabled
 
 3.1.0 "Happy Birthday Lina" (2009-02-28)
   libsensors: Add support for instantaneous power sensors
