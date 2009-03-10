@@ -23,7 +23,7 @@
 
 /*
  * RRD is the Round Robin Database
- * 
+ *
  * Get this package from:
  *   http://people.ee.ethz.ch/~oetiker/webtools/rrdtool/
  *
@@ -87,7 +87,7 @@ static void rrdCheckLabel(const char *rawLabel, int index0)
 {
 	char *buffer = rrdLabels[index0];
 	int i, j, okay;
-  
+
 	i = 0;
 	/* contrain raw label to [A-Za-z0-9_] */
 	while ((i < RAW_LABEL_LENGTH) && rawLabel[i]) {
@@ -243,7 +243,7 @@ int rrdInit(void)
 {
 	int ret = 0;
 	struct stat tmp;
-  
+
 	sensorLog(LOG_DEBUG, "sensor RRD init");
 	if (stat(rrdFile, &tmp)) {
 		if (errno == ENOENT) {
@@ -252,7 +252,7 @@ int rrdInit(void)
 			const char *argv[6 + MAX_RRD_SENSORS] = {
 				"sensord", rrdFile, "-s", stepBuff
 			};
-      
+
 			sensorLog(LOG_INFO, "creating round robin database");
 			num = rrdGetSensors(argv + argc);
 			if (num == 0) {
@@ -286,7 +286,7 @@ int rrdInit(void)
 		}
 	}
 	sensorLog(LOG_DEBUG, "sensor RRD inited");
-  
+
 	return ret;
 }
 
@@ -450,7 +450,7 @@ int rrdUpdate(void)
 		}
 	}
 	sensorLog(LOG_DEBUG, "sensor rrd updated");
-  
+
 	return ret;
 }
 
@@ -480,6 +480,6 @@ int rrdCGI(void)
 	}
 	printf("<p>\n<small><b>sensord</b> by <a href=\"mailto:merlin@merlin.org\">Merlin Hughes</a>, all credit to the <a href=\"http://www.lm-sensors.org/\">lm_sensors</a> crew.</small>\n</p>\n");
 	printf("</BODY>\n</HTML>\n");
-  
+
 	return ret;
 }

@@ -257,13 +257,13 @@ int parseArgs(int argc, char **argv)
 			"Error: Incompatible --set and --alarm-scan.\n");
 		return -1;
 	}
-  
+
 	if (rrdFile && doSet) {
 		fprintf(stderr,
 			"Error: Incompatible --set and --rrd-file.\n");
 		return -1;
 	}
-  
+
 	if (doScan && rrdFile) {
 		fprintf(stderr,
 			"Error: Incompatible --rrd-file and --alarm-scan.\n");
@@ -275,13 +275,13 @@ int parseArgs(int argc, char **argv)
 			"Error: Incompatible --rrd-cgi without --rrd-file.\n");
 		return -1;
 	}
-  
+
 	if (rrdFile && !rrdTime) {
 		fprintf(stderr,
 			"Error: Incompatible --rrd-file without --rrd-interval.\n");
 		return -1;
 	}
-  
+
 	if (!logTime && !scanTime && !rrdFile) {
 		fprintf(stderr,
 			"Error: No logging, alarm or RRD scanning.\n");

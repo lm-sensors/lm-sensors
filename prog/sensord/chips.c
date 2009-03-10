@@ -157,7 +157,7 @@ static void fillChipVoltage(FeatureDescriptor *voltage,
 	} else {
 		voltage->format = fmtVolt_2;
 	}
-  
+
 	/* terminate the list */
 	voltage->dataNumbers[pos] = -1;
 
@@ -213,7 +213,7 @@ static void fillChipTemperature(FeatureDescriptor *temperature,
 	} else {
 		temperature->format = fmtTemp_only;
 	}
-  
+
 	/* terminate the list */
 	temperature->dataNumbers[pos] = -1;
 
@@ -265,7 +265,7 @@ static void fillChipFan(FeatureDescriptor *fan,
 	} else {
 		fan->format = fmtFan_only;
 	}
-  
+
 	/* terminate the list */
 	fan->dataNumbers[pos] = -1;
 
