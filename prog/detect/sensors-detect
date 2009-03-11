@@ -1163,6 +1163,9 @@ use vars qw(@i2c_adapter_names);
 #  devid: The device ID we have to match (base device)
 #  devid_mask (optional): Bitmask to apply before checking the device ID
 #  logdev: The logical device containing the sensors
+#  check (optional): A function to refine the detection. Will be passed
+#      the index and data ports as parameters. Must return 1 for a matching
+#      device, 0 otherwise.
 #  features (optional): Features supported by this device, amongst:
 #      * FEAT_IN
 #      * FEAT_FAN
@@ -1177,11 +1180,25 @@ use constant FEAT_SMBUS	=> (1 << 7);
 
 @superio_ids_natsemi = (
 	{
-		name => "Nat. Semi. PC8374L Super IO Sensors",
+		name => "Nat. Semi. PC8374L Super IO Sensors",	# Also Nuvoton WPCD374L
 		driver => "to-be-written",
 		devid => 0xf1,
+		check => sub {
+			outb($_[0], 0x27);
+			# Guess work; seen so far: 0x11
+			return (inb($_[1]) < 0x80);
+		},
 		logdev => 0x08,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Nuvoton WPCD377I Super IO",	# Also WPCD376I
+		driver => "not-a-sensor",
+		devid => 0xf1,
+		check => sub {
+			outb($_[0], 0x27);
+			# Guess work; seen so far: 0x91 (twice)
+			return (inb($_[1]) >= 0x80);
+		},
 	}, {
 		name => "Nat. Semi. PC87351 Super IO Fan Sensors",
 		driver => "to-be-written",
@@ -3204,6 +3221,10 @@ sub probe_superio
 {
 	my ($addrreg, $datareg, $chip) = @_;
 	my ($val, $addr);
+
+	if (exists $chip->{check}) {
+		return 0 unless $chip->{check}($addrreg, $datareg);
+	}
 
 	printf "\%-60s", "Found `$chip->{name}'";
 
