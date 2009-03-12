@@ -2250,7 +2250,33 @@ sub unload_modules
 # DMI DATA #
 ############
 
-use vars qw(%dmi);
+use vars qw(%dmi $dmidecode_ok);
+
+# Returns: 1 if dmidecode is recent enough, 0 if not
+# Cache the result in case it is needed again later.
+sub check_dmidecode_version
+{
+	return $dmidecode_ok if defined $dmidecode_ok;
+
+	my $version;
+	if (open(local *DMIDECODE, "dmidecode --version 2>/dev/null |")) {
+		$version = <DMIDECODE>;
+		close(DMIDECODE);
+		chomp $version if defined $version;
+	}
+
+	if (!defined $version
+	 || !($version =~ m/^(\d+).(\d+)$/)
+	 || !(($1 == 2 && $2 >= 7) || $1 > 2)) {
+		print "# DMI data unavailable, please consider installing dmidecode 2.7\n".
+		      "# or later for better results.\n";
+		$dmidecode_ok = 0;
+	} else {
+		$dmidecode_ok = 1;
+	}
+
+	return $dmidecode_ok;
+}
 
 sub initialize_dmi_data
 {
@@ -2279,20 +2305,7 @@ sub initialize_dmi_data
 		}
 	} else {
 		# Else fallback on calling dmidecode
-		my $version;
-		if (open(local *DMIDECODE, "dmidecode --version 2>/dev/null |")) {
-			$version = <DMIDECODE>;
-			close(DMIDECODE);
-			chomp $version if defined $version;
-		}
-
-		if (!defined $version
-		 || !($version =~ m/^(\d+).(\d+)$/)
-		 || !(($1 == 2 && $2 >= 7) || $1 > 2)) {
-			print "# DMI data unavailable, please consider installing dmidecode 2.7\n".
-			      "# or later for better results.\n";
-			return;
-		}
+		return unless check_dmidecode_version();
 
 		foreach my $k (keys %items) {
 			next unless open(local *DMIDECODE,
@@ -5012,19 +5025,7 @@ sub ipmi_from_smbios
 {
 	my ($version, $if, @ipmi_if);
 
-	if (open(local *DMIDECODE, "dmidecode --version 2>/dev/null |")) {
-		$version = <DMIDECODE>;
-		close(DMIDECODE);
-		chomp $version if defined $version;
-	}
-
-	if (!defined $version
-	 || !($version =~ m/^(\d+).(\d+)$/)
-	 || !(($1 == 2 && $2 >= 7) || $1 > 2)) {
-		print "# DMI data unavailable, please consider installing dmidecode 2.7\n".
-		      "# or later for better results.\n";
-		return;
-	}
+	return 0 unless check_dmidecode_version();
 
 	# Parse the output of dmidecode into an array of IPMI interfaces.
 	# Each entry is a hash with the following keys: type and addr.
