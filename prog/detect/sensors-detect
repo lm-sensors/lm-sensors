@@ -5003,6 +5003,73 @@ sub w83781d_isa_detect
 	return 8;
 }
 
+########
+# IPMI #
+########
+
+# Returns: number of IPMI interfaces found
+sub ipmi_from_smbios
+{
+	my ($version, $if, @ipmi_if);
+
+	if (open(local *DMIDECODE, "dmidecode --version 2>/dev/null |")) {
+		$version = <DMIDECODE>;
+		close(DMIDECODE);
+		chomp $version if defined $version;
+	}
+
+	if (!defined $version
+	 || !($version =~ m/^(\d+).(\d+)$/)
+	 || !(($1 == 2 && $2 >= 7) || $1 > 2)) {
+		print "# DMI data unavailable, please consider installing dmidecode 2.7\n".
+		      "# or later for better results.\n";
+		return;
+	}
+
+	# Parse the output of dmidecode into an array of IPMI interfaces.
+	# Each entry is a hash with the following keys: type and addr.
+	$if = -1;
+	open(local *DMIDECODE, "dmidecode -t 38 2>/dev/null |") or return 0;
+	while (<DMIDECODE>) {
+		if (m/^IPMI Device Information/) {
+			$if++;
+			next;
+		}
+		next unless $if >= 0;
+
+		if (m/^\tInterface Type: (.*)$/) {
+			$ipmi_if[$if]->{type} = "IPMI BMC $1";
+			$ipmi_if[$if]->{type} =~ s/ \(.*//;
+			next;
+		}
+		if (m/^\tBase Address: (0x[0-9A-Fa-f]+) \(I\/O\)$/) {
+			$ipmi_if[$if]->{addr} = oct($1);
+			next;
+		}
+	}
+	close(DMIDECODE);
+
+	foreach $if (@ipmi_if) {
+		if (exists $if->{addr}) {
+			printf("\%-60s", sprintf("Found `\%s' at 0x\%x... ",
+						 $if->{type}, $if->{addr}));
+		} else {
+			printf("\%-60s", sprintf("Found `\%s'... ",
+						 $if->{type}));
+		}
+		print "Success!\n".
+		      "    (confidence 8, driver `ipmisensors')\n";
+		my $new_hash = {
+			conf => 8,
+			isa_addr => $if->{addr} || 0,
+			chipname => $if->{type},
+		};
+		add_isa_to_chips_detected("ipmisensors", $new_hash);
+	}
+
+	return scalar @ipmi_if;
+}
+
 # We simply look for a register at standard locations.
 # For KCS, use the STATUS register. For SMIC, use the FLAGS register.
 # Incidentally they live at the same offset.
@@ -5461,13 +5528,16 @@ sub main
 		unless (is_laptop()) {
 			print "Some systems (mainly servers) implement IPMI, a set of common interfaces\n".
 			      "through which system health data may be retrieved, amongst other things.\n".
-			      "We have to read from arbitrary I/O ports to probe for such interfaces.\n".
-			      "This is normally safe. Do you want to scan for IPMI interfaces?\n".
-			      "(YES/no): ";
+			      "We first try to get the information from SMBIOS. If we don't find it\n".
+			      "there, we have to read from arbitrary I/O ports to probe for such\n".
+			      "interfaces. This is normally safe. Do you want to scan for IPMI\n".
+			      "interfaces? (YES/no): ";
 			unless (<STDIN> =~ /^\s*n/i) {
-				initialize_ioports();
-				scan_isa_bus(\@ipmi_ifs);
-				close_ioports();
+				if (!ipmi_from_smbios()) {
+					initialize_ioports();
+					scan_isa_bus(\@ipmi_ifs);
+					close_ioports();
+				}
 			}
 			print "\n";
 		}
