@@ -3137,7 +3137,7 @@ sub scan_isa_bus
 	foreach $chip (@{$chip_list_ref}) {
 		next if not exists $chip->{isa_addrs} or not exists $chip->{isa_detect};
 		foreach $addr (@{$chip->{isa_addrs}}) {
-			printf("\%-60s", sprintf("Probing for `\%s'\ at 0x\%x... ",
+			printf("\%-60s", sprintf("Probing for `\%s' at 0x\%x... ",
 						 $chip->{name}, $addr));
 			$conf = &{$chip->{isa_detect}} ($addr);
 			print("No\n"), next if not defined $conf;
