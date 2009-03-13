@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   File lm_sensors.lsm: Delete, don't advertise a legacy branch
   File doc/developers/release_checklist: Skip mail to lsm
+  Module it87: Properly decode -128 degrees C (2.6 backport)
   Program sensors-detect: Fix detection of older DS1621
 
 2.10.8 (20081216)
