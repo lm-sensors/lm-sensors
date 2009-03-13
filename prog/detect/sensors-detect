@@ -648,6 +648,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2f],
 		i2c_detect => sub { w83793_detect(@_); },
 	}, {
+		name => "Nuvoton W83795G/ADG",
+		driver => "w83795",
+		i2c_addrs => [0x2c..0x2f],
+		i2c_detect => sub { w83795_detect(@_); },
+	}, {
 		name => "Winbond W83627HF",
 		driver => "use-isa-instead",
 		i2c_addrs => [0x28..0x2f],
@@ -4356,6 +4361,33 @@ sub w83793_detect
 	push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
 	push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
 	return @res;
+}
+
+# Registers used:
+#   0xfc: Full I2C Address
+#   0x00: Vendor ID byte selection, and bank selection(Bank 0, 1, 2)
+#   0xfd: Vendor ID(Bank 0, 1, 2)
+#   0xfe: Device ID(Bank 0, 1, 2)
+sub w83795_detect
+{
+	my ($bank, $reg);
+	my ($file, $addr) = @_;
+
+	$bank = i2c_smbus_read_byte_data($file, 0x00);
+	$reg = i2c_smbus_read_byte_data($file, 0xfd);
+
+	return unless (($bank & 0x80) == 0x00 and $reg == 0xa3) or
+		      (($bank & 0x80) == 0x80 and $reg == 0x5c);
+
+	$reg = i2c_smbus_read_byte_data($file, 0xfe);
+	return if $reg != 0x79;
+
+	# If bank 0 is selected, we can do more checks
+	return 6 unless ($bank & 0x07) == 0;
+	$reg = i2c_smbus_read_byte_data($file, 0xfc) & 0x7f;
+	return unless ($reg == $addr);
+
+	return 8;
 }
 
 # Registers used:
