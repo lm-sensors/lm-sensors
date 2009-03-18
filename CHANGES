@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   File lm_sensors.lsm: Delete, don't advertise a legacy branch
   File doc/developers/release_checklist: Skip mail to lsm
+  Module i2c-amd8111: Fix timeout handling (2.6 backport)
   Module it87: Properly decode -128 degrees C (2.6 backport)
   Program sensors-detect: Fix detection of older DS1621
 
