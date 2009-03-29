@@ -23,7 +23,7 @@
    Supports:
 	Intel PIIX4, 440MX
 	Serverworks OSB4, CSB5, CSB6, HT-1000
-	ATI IXP200, IXP300, IXP400, SB600, SB700, SB800
+	ATI IXP200, IXP300, IXP400, SB600, SB700
 	SMSC Victory66
 
    Note: we assume there can only be one device, with one SMBus interface.
