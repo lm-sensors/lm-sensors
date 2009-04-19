@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (getuid()) {
+	if (geteuid()) {
 		fprintf(stderr, "Error: Can only be run as root "
 		        "(or make it suid root)\n");
 		exit(1);

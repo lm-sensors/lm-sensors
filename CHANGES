@@ -2,6 +2,8 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN-HEAD
+  isadump: Use geteuid instead of getuid so that setuid bit works
+  isaset: Use geteuid instead of getuid so that setuid bit works
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
                   Display Super-I/O address even if LD is disabled
                   Differentiate between PC8374L and WPCD377I
