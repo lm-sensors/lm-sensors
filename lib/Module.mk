@@ -43,8 +43,11 @@ LIBSHLIBNAME := libsensors.so.$(LIBVER)
 LIBSTLIBNAME := libsensors.a
 LIBSHSONAME := libsensors.so.$(LIBMAINVER)
 
-LIBTARGETS := $(MODULE_DIR)/$(LIBSTLIBNAME) $(MODULE_DIR)/$(LIBSHLIBNAME) \
+LIBTARGETS := $(MODULE_DIR)/$(LIBSHLIBNAME) \
               $(MODULE_DIR)/$(LIBSHSONAME) $(MODULE_DIR)/$(LIBSHBASENAME)
+ifeq ($(BUILD_STATIC_LIB),1)
+LIBTARGETS += $(MODULE_DIR)/$(LIBSTLIBNAME)
+endif
 
 LIBCSOURCES := $(MODULE_DIR)/data.c $(MODULE_DIR)/general.c \
                $(MODULE_DIR)/error.c $(MODULE_DIR)/access.c \
@@ -125,7 +128,9 @@ install-lib: all-lib
 	     echo '         Run the following command: /sbin/ldconfig' ; \
 	     echo '******************************************************************************' ; \
 	fi
+ifeq ($(BUILD_STATIC_LIB),1)
 	$(INSTALL) -m 644 $(LIB_DIR)/$(LIBSTLIBNAME) $(DESTDIR)$(LIBDIR)
+endif
 	$(INSTALL) -m 755 $(LIB_DIR)/$(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
@@ -156,7 +161,10 @@ install-lib: all-lib
 user_install :: install-lib
 
 user_uninstall::
-	$(RM) $(REMOVELIBST) $(REMOVELIBSH) $(REMOVELNSO) $(REMOVELNBS) 
+	$(RM) $(REMOVELIBSH) $(REMOVELNSO) $(REMOVELNBS)
+ifeq ($(BUILD_STATIC_LIB),1)
+	$(RM) $(REMOVELIBST)
+endif
 	$(RM) $(REMOVELIBHF) $(REMOVEMAN3) $(REMOVEMAN5)
 # Remove directory if empty, ignore failure
 	$(RMDIR) $(DESTDIR)$(LIBINCLUDEDIR) 2> /dev/null || true

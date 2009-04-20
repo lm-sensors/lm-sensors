@@ -80,7 +80,10 @@ MANDIR := $(PREFIX)/man
 MACHINE := $(shell uname -m)
 
 # Extra non-default programs to build; e.g., sensord
-# PROG_EXTRA := sensord
+#PROG_EXTRA := sensord
+
+# Build and install static library
+BUILD_STATIC_LIB := 1
 
 # Set these to add preprocessor or compiler flags, or use
 # environment variables
