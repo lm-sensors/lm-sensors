@@ -83,7 +83,7 @@ $(MODULE_DIR)/conf-parse.c: $(MODULE_DIR)/conf-parse.y $(MODULE_DIR)/general.h \
 $(MODULE_DIR)/conf-parse.h: $(MODULE_DIR)/conf-parse.c
 
 # Include all dependency files
-INCLUDEFILES += $(LIBCSOURCES:.c=.ld) $(LIBCSOURCES:.c=.ad)
+INCLUDEFILES += $(LIBSHOBJECTS:.lo=.ld) $(LIBSTOBJECTS:.ao=.ad)
 
 # Special warning prevention for flex-generated files
 FLEXNOWARN:=-Wno-shadow -Wno-undef -Wno-unused -Wno-missing-prototypes -Wno-sign-compare
