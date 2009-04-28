@@ -246,10 +246,6 @@ manhtml:
 	$(SED) -e 's@^\(.*\)\.o:@$*.rd $*.ro: Makefile '`dirname $*.rd`/Module.mk' @' > $@
 
 
-%: %.ro
-	$(CC) $(EXLDFLAGS) -o $@ $^
-
-
 # .ao files are used for static archives
 %.ao: %.c
 	$(CC) $(ARCPPFLAGS) $(ARCFLAGS) -c $< -o $@
