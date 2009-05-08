@@ -1941,7 +1941,7 @@ use vars qw(@chip_kern24_ids @chip_kern26_ids
       },
       {
 	name => "Fintek F71862FG Super IO Sensors",
-	driver => "to-be-written",
+	driver => "f71882fg",
 	devid => 0x0601,
 	logdev => 0x04,
       },
