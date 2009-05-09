@@ -6,6 +6,7 @@ SVN-HEAD
   isaset: Use geteuid instead of getuid so that setuid bit works
   Makefile: Include generated source files in dependency checking
             Make it possible to skip building of the static library
+  fancontrol: Add support for absolute path to hwmon devices
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
                   Display Super-I/O address even if LD is disabled
                   Differentiate between PC8374L and WPCD377I

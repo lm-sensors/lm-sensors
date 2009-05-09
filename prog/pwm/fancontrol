@@ -159,8 +159,11 @@ else
 	LoadConfig /etc/fancontrol
 fi
 
-# Detect if config file uses the hwmon class or not yet
-if echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
+# Detect path to sensors
+if echo "${AFCPWM[0]}" | egrep -q '^/'
+then
+	DIR=/
+elif echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
 then
 	DIR=/sys/class/hwmon
 else

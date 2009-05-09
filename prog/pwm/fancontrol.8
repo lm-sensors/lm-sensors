@@ -81,12 +81,12 @@ VARIABLE2=...
 .fi
 .PP
 Each variable has its own line. The variable name is followed by an equal sign
-and the device=value pairs. These consist of the relative path to the pwm
-output (from /sys/bus/i2c/devices or /sys/class/hwmon
-depending on the kernel version) for which the value is valid, equal sign
-followed by the value and are separated by a blank. Example:
+and the device=value pairs. These consist of the path to the pwm output for
+which the value is valid, equal sign followed by the value and are separated
+by a blank. Path can be absolute or relative (from /sys/bus/i2c/devices or
+/sys/class/hwmon depending on the kernel version). Example:
 .IP
-MINTEMP=w83627hf-isa-0290/pwm2=40 w83627hf-isa-0290/pwm1=54
+MINTEMP=hwmon0/device/pwm1=40 hwmon0/device/pwm2=54
 .PP
 You have to play with the temperature values a bit to get happy. For initial
 setup I recommend using the \fBpwmconfig\fP script. Small changes can be made by
