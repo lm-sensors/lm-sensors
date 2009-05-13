@@ -65,7 +65,6 @@ void sensorLog(int priority, const char *fmt, ...)
 
 static void signalHandler(int sig)
 {
-	signal(sig, signalHandler);
 	switch (sig) {
 	case SIGTERM:
 		done = 1;
@@ -147,6 +146,31 @@ static void openLog(void)
 	logOpened = 1;
 }
 
+static void install_sighandler(void)
+{
+	struct sigaction new;
+	int ret;
+
+	memset(&new, 0, sizeof(struct sigaction));
+	new.sa_handler = signalHandler;
+	sigemptyset(&new.sa_mask);
+	new.sa_flags = SA_RESTART;
+
+	ret = sigaction(SIGTERM, &new, NULL);
+	if (ret == -1) {
+		fprintf(stderr, "Could not set sighandler for SIGTERM: %s\n",
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	ret = sigaction(SIGHUP, &new, NULL);
+	if (ret == -1) {
+		fprintf(stderr, "Could not set sighandler for SIGHUP: %s\n",
+			strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+}
+
 static void daemonize(void)
 {
 	int pid;
@@ -172,12 +196,7 @@ static void daemonize(void)
 		exit(EXIT_FAILURE);
 	}
 
-	/* I should use sigaction but... */
-	if (signal(SIGTERM, signalHandler) == SIG_ERR ||
-	    signal (SIGHUP, signalHandler) == SIG_ERR) {
-		perror("signal");
-		exit(EXIT_FAILURE);
-	}
+	install_sighandler();
 
 	if ((pid = fork()) == -1) {
 		perror("fork()");
