@@ -242,58 +242,51 @@ static int rrdGetSensors(const char **argv)
 
 int rrdInit(void)
 {
-	int ret = 0;
-	struct stat tmp;
+	int ret;
+	struct stat sb;
+	char stepBuff[STEP_BUFF], rraBuff[RRA_BUFF];
+	int argc = 4, num;
+	const char *argv[6 + MAX_RRD_SENSORS] = {
+		"sensord", sensord_args.rrdFile, "-s", stepBuff
+	};
 
 	sensorLog(LOG_DEBUG, "sensor RRD init");
-	if (stat(sensord_args.rrdFile, &tmp)) {
-		if (errno == ENOENT) {
-			char stepBuff[STEP_BUFF], rraBuff[RRA_BUFF];
-			int argc = 4, num;
-			const char *argv[6 + MAX_RRD_SENSORS] = {
-				"sensord", sensord_args.rrdFile, "-s", stepBuff
-			};
 
-			sensorLog(LOG_INFO, "creating round robin database");
-			num = rrdGetSensors(argv + argc);
-			if (num == 0) {
-				sensorLog(LOG_ERR,
-					  "Error creating RRD: %s: %s",
-					  sensord_args.rrdFile,
-					  "No sensors detected");
-				ret = 2;
-			} else if (num < 0) {
-				ret = -num;
-			} else {
-				sprintf(stepBuff, "%d", sensord_args.rrdTime);
-				sprintf(rraBuff, "RRA:%s:%f:%d:%d",
-					sensord_args.rrdNoAverage ? "LAST" :
-					"AVERAGE",
-					0.5 /* fraction of non-unknown samples needed per entry */,
-					1 /* samples per entry */,
-					7 * 24 * 60 * 60 /
-					sensord_args.rrdTime /* 1 week */);
+	/* Create RRD if it does not exist. */
+	if (stat(sensord_args.rrdFile, &sb)) {
+		if (errno != ENOENT) {
+			sensorLog(LOG_ERR, "Could not stat rrd file: %s\n",
+				  sensord_args.rrdFile);
+			return -1;
+		}
+		sensorLog(LOG_INFO, "Creating round robin database");
 
-				argc += num;
-				argv[argc ++] = rraBuff;
-				argv[argc] = NULL;
-				if ((ret = rrd_create(argc,
-						      (char **) /* WEAK */ argv))) {
-					sensorLog(LOG_ERR,
-						  "Error creating RRD file: %s: %s",
-						  sensord_args.rrdFile,
-						  rrd_get_error());
-				}
-			}
-		} else {
-			sensorLog(LOG_ERR, "Error stat()ing RRD: %s: %s",
-				  sensord_args.rrdFile, strerror(errno));
-			ret = 1;
+		num = rrdGetSensors(argv + argc);
+		if (num < 1) {
+			sensorLog(LOG_ERR, "Error creating RRD: %s: %s",
+				  sensord_args.rrdFile, "No sensors detected");
+			return -1;
+		}
+
+		sprintf(stepBuff, "%d", sensord_args.rrdTime);
+		sprintf(rraBuff, "RRA:%s:%f:%d:%d",
+			sensord_args.rrdNoAverage ? "LAST" :"AVERAGE",
+			0.5, 1, 7 * 24 * 60 * 60 / sensord_args.rrdTime);
+
+		argc += num;
+		argv[argc++] = rraBuff;
+		argv[argc] = NULL;
+
+		ret = rrd_create(argc, (char**) argv);
+		if (ret == -1) {
+			sensorLog(LOG_ERR, "Error creating RRD file: %s: %s",
+				  sensord_args.rrdFile, rrd_get_error());
+			return -1;
 		}
 	}
-	sensorLog(LOG_DEBUG, "sensor RRD inited");
 
-	return ret;
+	sensorLog(LOG_DEBUG, "sensor RRD initialized");
+	return 0;
 }
 
 #define RRDCGI "/usr/bin/rrdcgi"
