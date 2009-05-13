@@ -27,27 +27,18 @@
 #include <getopt.h>
 #include <syslog.h>
 
+#include "args.h"
 #include "sensord.h"
 #include "lib/error.h"
 #include "version.h"
 
-#define MAX_CHIP_NAMES 32
-
-int isDaemon = 0;
-const char *sensorsCfgFile = NULL;
-const char *pidFile = "/var/run/sensord.pid";
-const char *rrdFile = NULL;
-const char *cgiDir = NULL;
-int scanTime = 60;
-int logTime = 30 * 60;
-int rrdTime = 5 * 60;
-int rrdNoAverage = 0;
-int syslogFacility = LOG_LOCAL4;
-int doCGI = 0;
-int doLoad = 0;
-int debug = 0;
-sensors_chip_name chipNames[MAX_CHIP_NAMES];
-int numChipNames = 0;
+struct sensord_arguments sensord_args = {
+ 	.pidFile = "/var/run/sensord.pid",
+ 	.scanTime = 60,
+ 	.logTime = 30 * 60,
+ 	.rrdTime = 5 * 60,
+ 	.syslogFacility = LOG_LOCAL4,
+};
 
 static int parseTime(char *arg)
 {
@@ -148,53 +139,54 @@ int parseArgs(int argc, char **argv)
 {
 	int c;
 
-	isDaemon = (argv[0][strlen (argv[0]) - 1] == 'd');
-	if (!isDaemon) {
+	sensord_args.isDaemon = (argv[0][strlen (argv[0]) - 1] == 'd');
+	if (!sensord_args.isDaemon) {
 		fprintf(stderr, "Sensord no longer runs as an commandline"
 			" application.\n");
 		return -1;
-	}
+  	}
 
 	while ((c = getopt_long(argc, argv, shortOptions, longOptions, NULL))
 	       != EOF) {
 		switch(c) {
 		case 'i':
-			if ((scanTime = parseTime(optarg)) < 0)
+			if ((sensord_args.scanTime = parseTime(optarg)) < 0)
 				return -1;
 			break;
 		case 'l':
-			if ((logTime = parseTime(optarg)) < 0)
+			if ((sensord_args.logTime = parseTime(optarg)) < 0)
 				return -1;
 			break;
 		case 't':
-			if ((rrdTime = parseTime(optarg)) < 0)
+			if ((sensord_args.rrdTime = parseTime(optarg)) < 0)
 				return -1;
 			break;
 		case 'T':
-			rrdNoAverage = 1;
+			sensord_args.rrdNoAverage = 1;
 			break;
 		case 'f':
-			if ((syslogFacility = parseFacility(optarg)) < 0)
+			sensord_args.syslogFacility = parseFacility(optarg);
+			if (sensord_args.syslogFacility < 0)
 				return -1;
 			break;
 		case 'a':
-			doLoad = 1;
+			sensord_args.doLoad = 1;
 			break;
 		case 'c':
-			sensorsCfgFile = optarg;
+			sensord_args.cfgFile = optarg;
 			break;
 		case 'p':
-			pidFile = optarg;
+			sensord_args.pidFile = optarg;
 			break;
 		case 'r':
-			rrdFile = optarg;
+			sensord_args.rrdFile = optarg;
 			break;
 		case 'd':
-			debug = 1;
+			sensord_args.debug = 1;
 			break;
 		case 'g':
-			doCGI = 1;
-			cgiDir = optarg;
+			sensord_args.doCGI = 1;
+			sensord_args.cgiDir = optarg;
 			break;
 		case 'v':
 			printf("sensord version %s\n", LM_VERSION);
@@ -219,19 +211,20 @@ int parseArgs(int argc, char **argv)
 		}
 	}
 
-	if (doCGI && !rrdFile) {
+	if (sensord_args.doCGI && !sensord_args.rrdFile) {
 		fprintf(stderr,
 			"Error: Incompatible --rrd-cgi without --rrd-file.\n");
 		return -1;
 	}
 
-	if (rrdFile && !rrdTime) {
+	if (sensord_args.rrdFile && !sensord_args.rrdTime) {
 		fprintf(stderr,
 			"Error: Incompatible --rrd-file without --rrd-interval.\n");
 		return -1;
 	}
 
-	if (!logTime && !scanTime && !rrdFile) {
+	if (!sensord_args.logTime && !sensord_args.scanTime &&
+	    !sensord_args.rrdFile) {
 		fprintf(stderr,
 			"Error: No logging, alarm or RRD scanning.\n");
 		return -1;
@@ -243,11 +236,12 @@ int parseArgs(int argc, char **argv)
 int parseChips(int argc, char **argv)
 {
 	if (optind == argc) {
-		chipNames[0].prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-		chipNames[0].bus.type = SENSORS_BUS_TYPE_ANY;
-		chipNames[0].bus.nr = SENSORS_BUS_NR_ANY;
-		chipNames[0].addr = SENSORS_CHIP_NAME_ADDR_ANY;
-		numChipNames = 1;
+		sensord_args.chipNames[0].prefix =
+			SENSORS_CHIP_NAME_PREFIX_ANY;
+		sensord_args.chipNames[0].bus.type = SENSORS_BUS_TYPE_ANY;
+		sensord_args.chipNames[0].bus.nr = SENSORS_BUS_NR_ANY;
+		sensord_args.chipNames[0].addr = SENSORS_CHIP_NAME_ADDR_ANY;
+		sensord_args.numChipNames = 1;
 	} else {
 		int i, n = argc - optind, err;
 		if (n > MAX_CHIP_NAMES) {
@@ -256,15 +250,18 @@ int parseChips(int argc, char **argv)
 		}
 		for (i = 0; i < n; ++ i) {
 			char *arg = argv[optind + i];
-			if ((err = sensors_parse_chip_name(arg,
-							   chipNames + i))) {
+
+			err = sensors_parse_chip_name(arg,
+						      sensord_args.chipNames +
+						      i);
+			if (err) {
 				fprintf(stderr,
 					"Invalid chip name `%s': %s\n", arg,
 					sensors_strerror(err));
 				return -1;
 			}
 		}
-		numChipNames = n;
+		sensord_args.numChipNames = n;
 	}
 	return 0;
 }

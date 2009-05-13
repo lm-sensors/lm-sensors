@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "args.h"
 #include "sensord.h"
 
 static int logOpened = 0;
@@ -52,7 +53,7 @@ void sensorLog(int priority, const char *fmt, ...)
 	vsnprintf(buffer, LOG_BUFFER, fmt, ap);
 	buffer[LOG_BUFFER] = '\0';
 	va_end(ap);
-	if (debug || (priority < LOG_DEBUG)) {
+	if (sensord_args.debug || (priority < LOG_DEBUG)) {
 		if (logOpened) {
 			syslog(priority, "%s", buffer);
 		} else {
@@ -83,31 +84,33 @@ static int sensord(void)
 	 * First RRD update at next RRD timeslot to prevent failures due
 	 * one timeslot updated twice on restart for example.
 	 */
-	int rrdValue = rrdTime - time(NULL) % rrdTime;
+	int rrdValue = sensord_args.rrdTime - time(NULL) %
+		sensord_args.rrdTime;
 
 	sensorLog(LOG_INFO, "sensord started");
 
 	while (!done) {
 		if (reload) {
-			ret = reloadLib(sensorsCfgFile);
+			ret = reloadLib(sensord_args.cfgFile);
 			if (ret)
 				sensorLog(LOG_NOTICE,
 					  "config reload error (%d)", ret);
 			reload = 0;
 		}
-		if (scanTime && (scanValue <= 0)) {
+		if (sensord_args.scanTime && (scanValue <= 0)) {
 			if ((ret = scanChips()))
 				sensorLog(LOG_NOTICE,
 					  "sensor scan error (%d)", ret);
-			scanValue += scanTime;
+			scanValue += sensord_args.scanTime;
 		}
-		if (logTime && (logValue <= 0)) {
+		if (sensord_args.logTime && (logValue <= 0)) {
 			if ((ret = readChips()))
 				sensorLog(LOG_NOTICE,
 					  "sensor read error (%d)", ret);
-			logValue += logTime;
+			logValue += sensord_args.logTime;
 		}
-		if (rrdTime && rrdFile && (rrdValue <= 0)) {
+		if (sensord_args.rrdTime && sensord_args.rrdFile &&
+		    (rrdValue <= 0)) {
 			if ((ret = rrdUpdate()))
 				sensorLog(LOG_NOTICE,
 					  "rrd update error (%d)", ret);
@@ -116,12 +119,14 @@ static int sensord(void)
 			 * same method as in RRD instead of simply adding the
 			 * interval.
 			 */
-			rrdValue = rrdTime - time(NULL) % rrdTime;
+			rrdValue = sensord_args.rrdTime - time(NULL) %
+				sensord_args.rrdTime;
 		}
 		if (!done) {
-			int a = logTime ? logValue : INT_MAX;
-			int b = scanTime ? scanValue : INT_MAX;
-			int c = (rrdTime && rrdFile) ? rrdValue : INT_MAX;
+			int a = sensord_args.logTime ? logValue : INT_MAX;
+			int b = sensord_args.scanTime ? scanValue : INT_MAX;
+			int c = (sensord_args.rrdTime && sensord_args.rrdFile)
+				? rrdValue : INT_MAX;
 			int sleepTime = (a < b) ? ((a < c) ? a : c) :
 				((b < c) ? b : c);
 			sleep(sleepTime);
@@ -138,7 +143,7 @@ static int sensord(void)
 
 static void openLog(void)
 {
-	openlog("sensord", 0, syslogFacility);
+	openlog("sensord", 0, sensord_args.syslogFacility);
 	logOpened = 1;
 }
 
@@ -153,16 +158,16 @@ static void daemonize(void)
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(stat(pidFile, &fileStat)) &&
+	if (!(stat(sensord_args.pidFile, &fileStat)) &&
 	    ((!S_ISREG(fileStat.st_mode)) || (fileStat.st_size > 11))) {
 		fprintf(stderr,
 			"Error: PID file `%s' already exists and looks suspicious.\n",
-			pidFile);
+			sensord_args.pidFile);
 		exit(EXIT_FAILURE);
 	}
 
-	if (!(file = fopen(pidFile, "w"))) {
-		fprintf(stderr, "fopen(\"%s\"): %s\n", pidFile,
+	if (!(file = fopen(sensord_args.pidFile, "w"))) {
+		fprintf(stderr, "fopen(\"%s\"): %s\n", sensord_args.pidFile,
 			strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -197,7 +202,7 @@ static void daemonize(void)
 
 static void undaemonize(void)
 {
-	unlink(pidFile);
+	unlink(sensord_args.pidFile);
 	closelog();
 }
 
@@ -209,18 +214,18 @@ int main(int argc, char **argv)
 	    parseChips(argc, argv))
 		exit(EXIT_FAILURE);
 
-	if (loadLib(sensorsCfgFile))
+	if (loadLib(sensord_args.cfgFile))
 		exit(EXIT_FAILURE);
 
 	openLog();
 
-	if (rrdFile) {
+	if (sensord_args.rrdFile) {
 		ret = rrdInit();
 		if (ret)
 			exit(EXIT_FAILURE);
 	}
 
-	if (doCGI) {
+	if (sensord_args.doCGI) {
 		ret = rrdCGI();
 	} else {
 		daemonize();

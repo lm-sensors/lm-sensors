@@ -43,6 +43,7 @@
 
 #include <rrd.h>
 
+#include "args.h"
 #include "sensord.h"
 
 #define DO_READ 0
@@ -141,9 +142,9 @@ static int applyToFeatures(FeatureFN fn, void *data)
 	const sensors_chip_name *chip;
 	int i, j, ret = 0, num = 0;
 
-	for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+	for (j = 0; (ret == 0) && (j < sensord_args.numChipNames); ++ j) {
 		i = 0;
-		while ((ret == 0) && ((chip = sensors_get_detected_chips(&chipNames[j], &i)) != NULL)) {
+		while ((ret == 0) && ((chip = sensors_get_detected_chips(&sensord_args.chipNames[j], &i)) != NULL)) {
 			int index0, chipindex = -1;
 
 			/* Trick: we compare addresses here. We know it works
@@ -223,8 +224,8 @@ static int rrdGetSensors_DS(void *_data, const char *rawLabel,
 		 * number of seconds downtime during which average be used
 		 * instead of unknown
 		 */
-		sprintf(ptr, "DS:%s:GAUGE:%d:%s:%s", rawLabel, 5 * rrdTime,
-			min, max);
+		sprintf(ptr, "DS:%s:GAUGE:%d:%s:%s", rawLabel, 5 *
+			sensord_args.rrdTime, min, max);
 	}
 	return 0;
 }
@@ -234,7 +235,7 @@ static int rrdGetSensors(const char **argv)
 	int ret = 0;
 	struct ds data = { 0, argv};
 	ret = applyToFeatures(rrdGetSensors_DS, &data);
-	if (!ret && doLoad)
+	if (!ret && sensord_args.doLoad)
 		ret = rrdGetSensors_DS(&data, LOADAVG, LOAD_AVERAGE, NULL);
 	return ret ? -1 : data.num;
 }
@@ -245,12 +246,12 @@ int rrdInit(void)
 	struct stat tmp;
 
 	sensorLog(LOG_DEBUG, "sensor RRD init");
-	if (stat(rrdFile, &tmp)) {
+	if (stat(sensord_args.rrdFile, &tmp)) {
 		if (errno == ENOENT) {
 			char stepBuff[STEP_BUFF], rraBuff[RRA_BUFF];
 			int argc = 4, num;
 			const char *argv[6 + MAX_RRD_SENSORS] = {
-				"sensord", rrdFile, "-s", stepBuff
+				"sensord", sensord_args.rrdFile, "-s", stepBuff
 			};
 
 			sensorLog(LOG_INFO, "creating round robin database");
@@ -258,17 +259,21 @@ int rrdInit(void)
 			if (num == 0) {
 				sensorLog(LOG_ERR,
 					  "Error creating RRD: %s: %s",
-					  rrdFile, "No sensors detected");
+					  sensord_args.rrdFile,
+					  "No sensors detected");
 				ret = 2;
 			} else if (num < 0) {
 				ret = -num;
 			} else {
-				sprintf(stepBuff, "%d", rrdTime);
+				sprintf(stepBuff, "%d", sensord_args.rrdTime);
 				sprintf(rraBuff, "RRA:%s:%f:%d:%d",
-					rrdNoAverage?"LAST":"AVERAGE",
+					sensord_args.rrdNoAverage ? "LAST" :
+					"AVERAGE",
 					0.5 /* fraction of non-unknown samples needed per entry */,
 					1 /* samples per entry */,
-					7 * 24 * 60 * 60 / rrdTime /* 1 week */);
+					7 * 24 * 60 * 60 /
+					sensord_args.rrdTime /* 1 week */);
+
 				argc += num;
 				argv[argc ++] = rraBuff;
 				argv[argc] = NULL;
@@ -276,12 +281,13 @@ int rrdInit(void)
 						      (char **) /* WEAK */ argv))) {
 					sensorLog(LOG_ERR,
 						  "Error creating RRD file: %s: %s",
-						  rrdFile, rrd_get_error());
+						  sensord_args.rrdFile,
+						  rrd_get_error());
 				}
 			}
 		} else {
 			sensorLog(LOG_ERR, "Error stat()ing RRD: %s: %s",
-				  rrdFile, strerror(errno));
+				  sensord_args.rrdFile, strerror(errno));
 			ret = 1;
 		}
 	}
@@ -310,8 +316,8 @@ static int rrdCGI_DEF(void *_data, const char *rawLabel, const char *label,
 	struct gr *data = (struct gr *) _data;
 	(void) label; /* no warning */
 	if (!feature || (feature->rrd && (feature->type == data->type)))
-		printf("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel, rrdFile,
-		       rawLabel);
+		printf("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel,
+		       sensord_args.rrdFile, rawLabel);
 	return 0;
 }
 
@@ -420,7 +426,8 @@ static struct gr graphs[] = {
 int rrdUpdate(void)
 {
 	int ret = rrdChips ();
-	if (!ret && doLoad) {
+
+	if (!ret && sensord_args.doLoad) {
 		FILE *loadavg;
 		if (!(loadavg = fopen("/proc/loadavg", "r"))) {
 			sensorLog(LOG_ERR,
@@ -442,11 +449,11 @@ int rrdUpdate(void)
 	}
 	if (!ret) {
 		const char *argv[] = {
-			"sensord", rrdFile, rrdBuff, NULL
+			"sensord", sensord_args.rrdFile, rrdBuff, NULL
 		};
 		if ((ret = rrd_update(3, (char **) /* WEAK */ argv))) {
 			sensorLog(LOG_ERR, "Error updating RRD file: %s: %s",
-				  rrdFile, rrd_get_error());
+				  sensord_args.rrdFile, rrd_get_error());
 		}
 	}
 	sensorLog(LOG_DEBUG, "sensor rrd updated");
@@ -463,17 +470,17 @@ int rrdCGI(void)
 	while (graph->type != DataType_other) {
 		printf("<H2>%s</H2>\n", graph->h2);
 		printf("<P>\n<RRD::GRAPH %s/%s.png\n\t--imginfo '<IMG SRC=" WWWDIR "/%%s WIDTH=%%lu HEIGHT=%%lu>'\n\t-a PNG\n\t-h 200 -w 800\n",
-		       cgiDir, graph->image);
+		       sensord_args.cgiDir, graph->image);
 		printf("\t--lazy\n\t-v '%s'\n\t-t '%s'\n\t-x '%s'\n\t%s",
 		       graph->axisTitle, graph->title, graph->axisDefn,
 		       graph->options);
 		if (!ret)
 			ret = applyToFeatures(rrdCGI_DEF, graph);
-		if (!ret && doLoad && graph->loadAvg)
+		if (!ret && sensord_args.doLoad && graph->loadAvg)
 			ret = rrdCGI_DEF(graph, LOADAVG, LOAD_AVERAGE, NULL);
 		if (!ret)
 			ret = applyToFeatures(rrdCGI_LINE, graph);
-		if (!ret && doLoad && graph->loadAvg)
+		if (!ret && sensord_args.doLoad && graph->loadAvg)
 			ret = rrdCGI_LINE(graph, LOADAVG, LOAD_AVERAGE, NULL);
 		printf (">\n</P>\n");
 		++ graph;

@@ -27,22 +27,6 @@ extern void sensorLog(int priority, const char *fmt, ...);
 
 /* from args.c */
 
-extern int isDaemon;
-extern const char *sensorsCfgFile;
-extern const char *pidFile;
-extern const char *rrdFile;
-extern const char *cgiDir;
-extern int scanTime;
-extern int logTime;
-extern int rrdTime;
-extern int rrdNoAverage;
-extern int syslogFacility;
-extern int doCGI;
-extern int doLoad;
-extern int debug;
-extern sensors_chip_name chipNames[];
-extern int numChipNames;
-
 extern int parseArgs(int argc, char **argv);
 extern int parseChips(int argc, char **argv);
 

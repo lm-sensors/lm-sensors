@@ -26,6 +26,7 @@
 #include <string.h>
 #include <syslog.h>
 
+#include "args.h"
 #include "sensord.h"
 #include "lib/error.h"
 
@@ -189,11 +190,10 @@ static int doChips(int action)
 	const sensors_chip_name *chip;
 	int i, j, ret = 0;
 
-	for (j = 0; (ret == 0) && (j < numChipNames); ++ j) {
+	for (j = 0; (ret == 0) && (j < sensord_args.numChipNames); ++ j) {
 		i = 0;
 		while ((ret == 0) &&
-		       ((chip = sensors_get_detected_chips(&chipNames[j], &i))
-			!= NULL)) {
+		       ((chip = sensors_get_detected_chips(&sensord_args.chipNames[j], &i)) != NULL)) {
 			ret = doChip(chip, action);
 		}
 	}
