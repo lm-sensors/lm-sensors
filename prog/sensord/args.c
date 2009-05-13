@@ -43,8 +43,6 @@ int logTime = 30 * 60;
 int rrdTime = 5 * 60;
 int rrdNoAverage = 0;
 int syslogFacility = LOG_LOCAL4;
-int doScan = 0;
-int doSet = 0;
 int doCGI = 0;
 int doLoad = 0;
 int debug = 0;
@@ -127,22 +125,9 @@ static const char *daemonSyntax =
 	"the RRD file configuration must EXACTLY match the sensors that are used. If\n"
 	"your configuration changes, delete the old RRD file and restart sensord.\n";
 
-static const char *appSyntax =
-	"  -a, --alarm-scan          -- only scan for alarms\n"
-	"  -s, --set                 -- execute set statements (root only)\n"
-	"  -r, --rrd-file <file>     -- only update RRD file\n"
-	"  -c, --config-file <file>  -- configuration file\n"
-	"  -d, --debug               -- display some debug information\n"
-	"  -v, --version             -- display version and exit\n"
-	"  -h, --help                -- display help and exit\n"
-	"\n"
-	"Specify the filename `-' to read the config file from stdin.\n"
-	"\n"
-	"If no chips are specified, all chip info will be printed.\n";
+static const char *shortOptions = "i:l:t:Tf:r:c:p:advhg:";
 
-static const char *daemonShortOptions = "i:l:t:Tf:r:c:p:advhg:";
-
-static const struct option daemonLongOptions[] = {
+static const struct option longOptions[] = {
 	{ "interval", required_argument, NULL, 'i' },
 	{ "log-interval", required_argument, NULL, 'l' },
 	{ "rrd-interval", required_argument, NULL, 't' },
@@ -159,28 +144,16 @@ static const struct option daemonLongOptions[] = {
 	{ NULL, 0, NULL, 0 }
 };
 
-static const char *appShortOptions = "asr:c:dvh";
-
-static const struct option appLongOptions[] = {
-	{ "alarm-scan", no_argument, NULL, 'a' },
-	{ "set", no_argument, NULL, 's' },
-	{ "rrd-file", required_argument, NULL, 'r' },
-	{ "config-file", required_argument, NULL, 'c' },
-	{ "debug", no_argument, NULL, 'd' },
-	{ "version", no_argument, NULL, 'v' },
-	{ "help", no_argument, NULL, 'h' },
-	{ NULL, 0, NULL, 0 }
-};
-
 int parseArgs(int argc, char **argv)
 {
 	int c;
-	const char *shortOptions;
-	const struct option *longOptions;
 
 	isDaemon = (argv[0][strlen (argv[0]) - 1] == 'd');
-	shortOptions = isDaemon ? daemonShortOptions : appShortOptions;
-	longOptions = isDaemon ? daemonLongOptions : appLongOptions;
+	if (!isDaemon) {
+		fprintf(stderr, "Sensord no longer runs as an commandline"
+			" application.\n");
+		return -1;
+	}
 
 	while ((c = getopt_long(argc, argv, shortOptions, longOptions, NULL))
 	       != EOF) {
@@ -205,13 +178,7 @@ int parseArgs(int argc, char **argv)
 				return -1;
 			break;
 		case 'a':
-			if (isDaemon)
-				doLoad = 1;
-			else
-				doScan = 1;
-			break;
-		case 's':
-			doSet = 1;
+			doLoad = 1;
 			break;
 		case 'c':
 			sensorsCfgFile = optarg;
@@ -235,7 +202,7 @@ int parseArgs(int argc, char **argv)
 			break;
 		case 'h':
 			printf("Syntax: %s {options} {chips}\n%s", argv[0],
-			       isDaemon ? daemonSyntax : appSyntax);
+			       daemonSyntax);
 			exit(EXIT_SUCCESS);
 			break;
 		case ':':
@@ -250,24 +217,6 @@ int parseArgs(int argc, char **argv)
 			return -1;
 			break;
 		}
-	}
-
-	if (doScan && doSet) {
-		fprintf(stderr,
-			"Error: Incompatible --set and --alarm-scan.\n");
-		return -1;
-	}
-
-	if (rrdFile && doSet) {
-		fprintf(stderr,
-			"Error: Incompatible --set and --rrd-file.\n");
-		return -1;
-	}
-
-	if (doScan && rrdFile) {
-		fprintf(stderr,
-			"Error: Incompatible --rrd-file and --alarm-scan.\n");
-		return -1;
 	}
 
 	if (doCGI && !rrdFile) {

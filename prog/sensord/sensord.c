@@ -212,27 +212,20 @@ int main(int argc, char **argv)
 	if (loadLib(sensorsCfgFile))
 		exit(EXIT_FAILURE);
 
-	if (isDaemon)
-		openLog();
-	if (rrdFile)
-		ret = rrdInit();
+	openLog();
 
-	if (ret) {
-	} else if (doCGI) {
+	if (rrdFile) {
+		ret = rrdInit();
+		if (ret)
+			exit(EXIT_FAILURE);
+	}
+
+	if (doCGI) {
 		ret = rrdCGI();
-	} else if (isDaemon) {
+	} else {
 		daemonize();
 		ret = sensord();
 		undaemonize();
-	} else {
-		if (doSet)
-			ret = setChips();
-		else if (doScan)
-			ret = scanChips();
-		else if (rrdFile)
-			ret = rrdUpdate();
-		else
-			ret = readChips();
 	}
 
 	if (unloadLib())

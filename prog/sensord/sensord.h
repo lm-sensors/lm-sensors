@@ -37,8 +37,6 @@ extern int logTime;
 extern int rrdTime;
 extern int rrdNoAverage;
 extern int syslogFacility;
-extern int doScan;
-extern int doSet;
 extern int doCGI;
 extern int doLoad;
 extern int debug;
