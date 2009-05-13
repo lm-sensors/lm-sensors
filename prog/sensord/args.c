@@ -191,23 +191,19 @@ int parseArgs(int argc, char **argv)
 		case 'v':
 			printf("sensord version %s\n", LM_VERSION);
 			exit(EXIT_SUCCESS);
-			break;
 		case 'h':
 			printf("Syntax: %s {options} {chips}\n%s", argv[0],
 			       daemonSyntax);
 			exit(EXIT_SUCCESS);
-			break;
 		case ':':
 		case '?':
 			printf("Try `%s --help' for more information.\n",
 			       argv[0]);
 			return -1;
-			break;
 		default:
 			fprintf(stderr,
 				"Internal error while parsing options.\n");
 			return -1;
-			break;
 		}
 	}
 
