@@ -93,8 +93,8 @@ static int sensord(void)
 		if (reload) {
 			ret = reloadLib(sensord_args.cfgFile);
 			if (ret)
-				sensorLog(LOG_NOTICE,
-					  "config reload error (%d)", ret);
+				sensorLog(LOG_NOTICE, "configuration reload"
+					  " error");
 			reload = 0;
 		}
 		if (sensord_args.scanTime && (scanValue <= 0)) {
