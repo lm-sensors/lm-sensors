@@ -7,17 +7,18 @@ SVN-HEAD
   Makefile: Include generated source files in dependency checking
             Make it possible to skip building of the static library
   fancontrol: Add support for absolute path to hwmon devices
+  sensord: Remove the hidden commandline interface
+           Introduce struct sensord_arguments
+           Using sigaction for signal handlers
+           Convert to linux coding style
+           Cleanup and refactoring of the source code
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
                   Display Super-I/O address even if LD is disabled
                   Differentiate between PC8374L and WPCD377I
                   Use dmidecode to find IPMI interfaces if available
                   Add Nuvoton W83795G/ADG detection
                   Add National Semiconductor LM95241 detection
-  sensord: Remove the hidden commandline interface
-  	   Introduce struct sensord_arguments
-	   Using sigaction for signal handlers
-	   Convert to linux coding style
-	   Cleanup and refactoring of the source code
+                  Add Winbond/Nuvoton W83627DHG-P and W83627UHG detection
 
 3.1.0 "Happy Birthday Lina" (2009-02-28)
   libsensors: Add support for instantaneous power sensors
