@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN-HEAD
   isadump: Use geteuid instead of getuid so that setuid bit works
   isaset: Use geteuid instead of getuid so that setuid bit works
+  libsensors: Don't rely on dirent->dt_type being set
   Makefile: Include generated source files in dependency checking
             Make it possible to skip building of the static library
   fancontrol: Add support for absolute path to hwmon devices

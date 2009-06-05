@@ -23,12 +23,14 @@
 #define _BSD_SOURCE
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <locale.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <dirent.h>
+#include <unistd.h>
 #include "sensors.h"
 #include "data.h"
 #include "error.h"
@@ -120,8 +122,7 @@ exit_cleanup:
 
 static int config_file_filter(const struct dirent *entry)
 {
-	return (entry->d_type == DT_REG || entry->d_type == DT_LNK)
-	    && entry->d_name[0] != '.';		/* Skip hidden files */
+	return entry->d_name[0] != '.';		/* Skip hidden files */
 }
 
 static int add_config_from_dir(const char *dir)
@@ -143,6 +144,7 @@ static int add_config_from_dir(const char *dir)
 		int len;
 		char path[PATH_MAX];
 		FILE *input;
+		struct stat st;
 
 		len = snprintf(path, sizeof(path), "%s/%s", dir,
 			       namelist[i]->d_name);
@@ -150,6 +152,10 @@ static int add_config_from_dir(const char *dir)
 			res = -SENSORS_ERR_PARSE;
 			continue;
 		}
+
+		/* Only accept regular files */
+		if (stat(path, &st) < 0 || !S_ISREG(st.st_mode))
+			continue;
 
 		input = fopen(path, "r");
 		if (input) {
