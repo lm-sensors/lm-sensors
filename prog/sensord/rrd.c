@@ -366,7 +366,7 @@ static struct gr graphs[] = {
 		"Fan Speed",
 		"Speed (RPM)",
 		"HOUR:1:HOUR:3:HOUR:3:0:%b %d %H:00",
-		"-s -1d -l 0",
+		"-s -1d -l 0 -X 0",
 		0
 	}, {
 		DataType_voltage,
@@ -393,7 +393,7 @@ static struct gr graphs[] = {
 		"Fan Speed",
 		"Speed (RPM)",
 		"HOUR:6:DAY:1:DAY:1:86400:%a %b %d",
-		"-s -1w -l 0",
+		"-s -1w -l 0 -X 0",
 		0
 	}, {
 		DataType_voltage,
