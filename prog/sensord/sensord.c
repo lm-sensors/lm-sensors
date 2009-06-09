@@ -236,7 +236,8 @@ int main(int argc, char **argv)
 	if (loadLib(sensord_args.cfgFile))
 		exit(EXIT_FAILURE);
 
-	openLog();
+	if (!sensord_args.doCGI)
+		openLog();
 
 	if (sensord_args.rrdFile) {
 		ret = rrdInit();

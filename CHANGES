@@ -13,6 +13,7 @@ SVN-HEAD
            Using sigaction for signal handlers
            Convert to linux coding style
            Cleanup and refactoring of the source code
+           Don't use the system log when generating a CGI script
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
                   Display Super-I/O address even if LD is disabled
                   Differentiate between PC8374L and WPCD377I
