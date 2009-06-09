@@ -23,6 +23,8 @@
 
 #include "lib/sensors.h"
 
+#define ARRAY_SIZE(arr)	(int)(sizeof(arr) / sizeof((arr)[0]))
+
 extern void sensorLog(int priority, const char *fmt, ...);
 
 /* from args.c */

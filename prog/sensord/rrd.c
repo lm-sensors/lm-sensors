@@ -404,15 +404,6 @@ static struct gr graphs[] = {
 		"HOUR:6:DAY:1:DAY:1:86400:%a %b %d",
 		"-s -1w --alt-autoscale",
 		0
-	}, {
-		DataType_other,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		0
 	}
 };
 
@@ -456,11 +447,12 @@ int rrdUpdate(void)
 
 int rrdCGI(void)
 {
-	int ret = 0;
-	struct gr *graph = graphs;
+	int ret = 0, i;
 
 	printf("#!" RRDCGI "\n\n<HTML>\n<HEAD>\n<TITLE>sensord</TITLE>\n</HEAD>\n<BODY>\n<H1>sensord</H1>\n");
-	while (graph->type != DataType_other) {
+	for (i = 0; i < ARRAY_SIZE(graphs); i++) {
+		struct gr *graph = &graphs[i];
+
 		printf("<H2>%s</H2>\n", graph->h2);
 		printf("<P>\n<RRD::GRAPH %s/%s.png\n\t--imginfo '<IMG SRC=" WWWDIR "/%%s WIDTH=%%lu HEIGHT=%%lu>'\n\t-a PNG\n\t-h 200 -w 800\n",
 		       sensord_args.cgiDir, graph->image);
@@ -476,7 +468,6 @@ int rrdCGI(void)
 		if (!ret && sensord_args.doLoad && graph->loadAvg)
 			ret = rrdCGI_LINE(graph, LOADAVG, LOAD_AVERAGE, NULL);
 		printf (">\n</P>\n");
-		++ graph;
 	}
 	printf("<p>\n<small><b>sensord</b> by <a href=\"mailto:merlin@merlin.org\">Merlin Hughes</a>, all credit to the <a href=\"http://www.lm-sensors.org/\">lm_sensors</a> crew.</small>\n</p>\n");
 	printf("</BODY>\n</HTML>\n");
