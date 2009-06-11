@@ -37,7 +37,7 @@ struct sensord_arguments sensord_args = {
  	.scanTime = 60,
  	.logTime = 30 * 60,
  	.rrdTime = 5 * 60,
- 	.syslogFacility = LOG_LOCAL4,
+ 	.syslogFacility = LOG_DAEMON,
 };
 
 static int parseTime(char *arg)

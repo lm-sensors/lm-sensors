@@ -15,6 +15,7 @@ SVN-HEAD
            Cleanup and refactoring of the source code
            Don't use the system log when generating a CGI script
            Disable unit scaling for fan speeds
+           Use daemon logging facility instead of local4 by default
   sensors-detect: Add nNidia nForce MCP78S SMBus detection
                   Display Super-I/O address even if LD is disabled
                   Differentiate between PC8374L and WPCD377I

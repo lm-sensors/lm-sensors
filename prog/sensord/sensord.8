@@ -91,14 +91,13 @@ Specify the
 .BR syslog (3)
 facility to use when logging sensor readings and alarms; the default is
 to use
-.IR local4 .
+.IR daemon .
 
-Other possibile facilities include
+Other possible facilities include
 .IR local0
 through
 .IR local7 ,
-.IR daemon
-or
+and
 .IR user .
 .IP "-g, --rrd-cgi directory"
 Prints out a sample
@@ -140,7 +139,7 @@ for chips and features, and reload the libsensors configuration file.
 All messages from this daemon are logged to
 .BR syslog (3)
 under the program name `sensord' and facility
-.IR local4 ,
+.IR daemon ,
 or whatever is specified on the command line.
 
 Regular sensor readings are logged at the level
@@ -155,7 +154,8 @@ when debugging is enabled.
 You can use an appropriate `/etc/syslog.conf'
 file to direct these messages in a useful manner. See
 .BR syslog.conf (5)
-for full details, however the following is a sample configuration:
+for full details. Assuming you set the logging facility to local4,
+the following is a sample configuration:
 .IP
 .nf
 # Sample syslog.conf entries
