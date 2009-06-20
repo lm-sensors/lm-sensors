@@ -31,7 +31,7 @@
    when the API + ABI breaks), the third digit is incremented to track small
    API additions like new flags / enum values. The second digit is for tracking
    larger additions like new methods. */
-#define SENSORS_API_VERSION		0x410
+#define SENSORS_API_VERSION		0x420
 
 #define SENSORS_CHIP_NAME_PREFIX_ANY	NULL
 #define SENSORS_CHIP_NAME_ADDR_ANY	(-1)
@@ -79,6 +79,9 @@ void sensors_cleanup(void);
 /* Parse a chip name to the internal representation. Return 0 on success, <0
    on error. */
 int sensors_parse_chip_name(const char *orig_name, sensors_chip_name *res);
+
+/* Free memory allocated for the internal representation of a chip name. */
+void sensors_free_chip_name(sensors_chip_name *chip);
 
 /* Print a chip name from its internal representation. Note that chip should
    not contain wildcard values! Return the number of characters printed on

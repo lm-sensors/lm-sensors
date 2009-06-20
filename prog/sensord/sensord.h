@@ -31,6 +31,7 @@ extern void sensorLog(int priority, const char *fmt, ...);
 
 extern int parseArgs(int argc, char **argv);
 extern int parseChips(int argc, char **argv);
+extern void freeChips(void);
 
 /* from lib.c */
 

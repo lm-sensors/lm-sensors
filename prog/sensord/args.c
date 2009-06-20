@@ -255,10 +255,20 @@ int parseChips(int argc, char **argv)
 		if (err) {
 			fprintf(stderr,	"Invalid chip name `%s': %s\n", arg,
 				sensors_strerror(err));
+			for (i--; i >= 0; i--)
+				sensors_free_chip_name(sensord_args.chipNames + i);
 			return -1;
 		}
 	}
 	sensord_args.numChipNames = n;
 
 	return 0;
+}
+
+void freeChips()
+{
+	int i;
+
+	for (i = 0; i < sensord_args.numChipNames; i++)
+		sensors_free_chip_name(sensord_args.chipNames + i);
 }

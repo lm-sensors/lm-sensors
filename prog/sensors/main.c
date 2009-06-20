@@ -334,6 +334,7 @@ int main(int argc, char *argv[])
 				goto exit;
 			}
 			cnt += do_the_real_work(&chip, &err);
+			sensors_free_chip_name(&chip);
 		}
 
 		if (!cnt) {

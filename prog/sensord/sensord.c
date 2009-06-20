@@ -233,16 +233,20 @@ int main(int argc, char **argv)
 	    parseChips(argc, argv))
 		exit(EXIT_FAILURE);
 
-	if (loadLib(sensord_args.cfgFile))
+	if (loadLib(sensord_args.cfgFile)) {
+		freeChips();
 		exit(EXIT_FAILURE);
+	}
 
 	if (!sensord_args.doCGI)
 		openLog();
 
 	if (sensord_args.rrdFile) {
 		ret = rrdInit();
-		if (ret)
+		if (ret) {
+			freeChips();
 			exit(EXIT_FAILURE);
+		}
 	}
 
 	if (sensord_args.doCGI) {
@@ -253,6 +257,7 @@ int main(int argc, char **argv)
 		undaemonize();
 	}
 
+	freeChips();
 	if (unloadLib())
 		exit(EXIT_FAILURE);
 

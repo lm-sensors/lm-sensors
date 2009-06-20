@@ -54,6 +54,11 @@ sensors_bus *sensors_proc_bus = NULL;
 int sensors_proc_bus_count = 0;
 int sensors_proc_bus_max = 0;
 
+void sensors_free_chip_name(sensors_chip_name *chip)
+{
+	free(chip->prefix);
+}
+
 /*
    Parse a chip name to the internal representation. These are valid names:
 
