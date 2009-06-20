@@ -46,7 +46,7 @@ extern int numChipNames;
 
 extern int parseArgs (int argc, char **argv);
 extern int parseChips (int argc, char **argv);
-extern void freeChips ();
+extern void freeChips (void);
 
 /* from lib.c */
 
