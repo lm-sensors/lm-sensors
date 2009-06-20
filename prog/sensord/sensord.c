@@ -199,8 +199,10 @@ main
     exit (EXIT_FAILURE);
   
   if (initLib () ||
-      loadLib ())
+      loadLib ()) {
+    freeChips ();
     exit (EXIT_FAILURE);
+  }
 
   if (isDaemon)
     openLog ();
@@ -225,6 +227,7 @@ main
       ret = readChips ();
   }
   
+  freeChips ();
   if (unloadLib ())
     exit (EXIT_FAILURE);
   

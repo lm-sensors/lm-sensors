@@ -92,6 +92,14 @@ void print_version(void)
   printf("%s version %s with libsensors version %s\n", PROGRAM, VERSION, libsensors_version);
 }
 
+void free_chip_names()
+{
+  int i;
+
+  for (i = 0; i < chips_count; i++)
+    free(chips[i].prefix);
+}
+
 /* This examines global var config_file, and leaves the name there too. 
    It also opens config_file. */
 static void open_config_file(const char* config_file_name)
@@ -105,6 +113,7 @@ static void open_config_file(const char* config_file_name)
   if (!config_file) {
     fprintf(stderr, "Could not open config file\n");
     perror(config_file_name);
+    free_chip_names();
     exit(1);
   }
 }
@@ -221,10 +230,12 @@ int main (int argc, char *argv[])
     for(i = optind; i < argc; i++) 
       if ((res = sensors_parse_chip_name(argv[i],chips+chips_count))) {
         fprintf(stderr,"Parse error in chip name `%s'\n",argv[i]);
+        free_chip_names();
         print_short_help();
         exit(1);
       } else if (++chips_count == CHIPS_MAX) {
         fprintf(stderr,"Too many chips on command line!\n");
+        free_chip_names();
         exit(1);
       }
 
@@ -238,6 +249,7 @@ int main (int argc, char *argv[])
               "Kernel interface access error\n"
               "For 2.6 kernels, make sure you have mounted sysfs and libsensors\n"
               "was compiled with sysfs support!\n");
+    free_chip_names();
     sensors_cleanup();
     exit(1);
   }
@@ -246,6 +258,7 @@ int main (int argc, char *argv[])
   set_degstr();
 
   if(do_the_real_work(&error)) {
+    free_chip_names();
     sensors_cleanup();
     exit(error);
   } else {
@@ -256,6 +269,7 @@ int main (int argc, char *argv[])
 	            "Try sensors-detect to find out which these are.\n");
     else
 	    fprintf(stderr,"Specified sensor(s) not found!\n");
+    free_chip_names();
     sensors_cleanup();
     exit(1);
   }
