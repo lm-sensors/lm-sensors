@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN-HEAD
+3.1.1 (2009-06-21)
   isadump: Use geteuid instead of getuid so that setuid bit works
   isaset: Use geteuid instead of getuid so that setuid bit works
   libsensors: Don't rely on dirent->dt_type being set
