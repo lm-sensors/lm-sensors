@@ -402,7 +402,8 @@ int content_write(int file, int addr){
 	addr_cnt=HEAD_SIZE;
 	k=0;
 
-	for(j=0;j<=MAX_BLK_SIZE;j++)buf[j]=0;
+	for(j=0;j<MAX_BLK_SIZE;j++)
+		buf[j]=0;
 
 
 
@@ -429,7 +430,8 @@ int content_write(int file, int addr){
 	 		//printf("i:%d\n",i);
 			addr_cnt=addr_cnt + i + (delka==1?1:0); //+i
 			
-			for(j=0;j<=MAX_BLK_SIZE;j++)buf[j]=0;
+			for(j=0;j<MAX_BLK_SIZE;j++)
+				buf[j]=0;
 
 			i=0;
 			if(delka<1) {
@@ -508,7 +510,8 @@ void erase(int file, int addr,int eeprom_size){
 	delka=0;
 	k=0;
 
-	for(j=0;j<=MAX_BLK_SIZE;j++)buf[j]=0;
+	for(j=0;j<MAX_BLK_SIZE;j++)
+		buf[j]=0;
 
 
 
