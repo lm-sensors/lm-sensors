@@ -178,7 +178,7 @@ char *sensors_get_label(const sensors_chip_name *name,
 	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
 		for (i = 0; i < chip->labels_count; i++)
 			if (!strcmp(feature->name, chip->labels[i].name)) {
-				label = strdup(chip->labels[i].value);
+				label = chip->labels[i].value;
 				goto sensors_get_label_exit;
 			}
 
@@ -191,15 +191,16 @@ char *sensors_get_label(const sensors_chip_name *name,
 		if (i > 0) {
 			/* i - 1 to strip the '\n' at the end */
 			buf[i - 1] = 0;
-			label = strdup(buf);
+			label = buf;
 			goto sensors_get_label_exit;
 		}
 	}
 
 	/* No label, return the feature name instead */
-	label = strdup(feature->name);
+	label = feature->name;
 	
 sensors_get_label_exit:
+	label = strdup(label);
 	if (!label)
 		sensors_fatal_error(__func__, "Allocating label text");
 	return label;
