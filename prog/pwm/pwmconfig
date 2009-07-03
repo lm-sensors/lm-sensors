@@ -42,6 +42,12 @@ then
 	exit 1
 fi
 
+if [ "`id -u`" != "0" ]
+then
+	echo "You need to be root to run this script."
+	exit 1
+fi
+
 echo "# pwmconfig revision $REVISION ($REVDATE)"
 echo 'This program will search your sensors for pulse width modulation (pwm)'
 echo 'controls, and test each one to see if it controls a fan on'
@@ -258,7 +264,7 @@ do
 			GOODPWM="$GOODPWM $i"
 		fi
 	else
-		NOTROOT=1
+		echo "Can't write to $i, skipping."
 	fi
 done
 
@@ -299,13 +305,6 @@ then
 	echo 'Make sure you have a 3-wire fan connected.'
 	echo 'You may also need to increase the fan divisors.'
 	echo 'See doc/fan-divisors for more information.'
-	exit 1
-fi
-
-if [ "$NOTROOT" = "1" ]
-then
-	echo 'As you are not root, we cannot write the PWM settings.'
-	echo 'Please run as root to continue.'
 	exit 1
 fi
 
