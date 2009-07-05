@@ -5,7 +5,11 @@
 # differ from one mainboard to the next. Only label, compute and set
 # statements for internal voltage and temperature sensors are included.
 #
-# Better configuration files for specific mainboards can be found at
+# In general, local changes should not be added to this file, but rather
+# placed in custom configuration files located in /etc/sensors.d. This
+# approach makes further updates much easier.
+#
+# Such custom configuration files for specific mainboards can be found at
 # http://www.lm-sensors.org/wiki/Configurations
 
 chip "lm78-*" "lm79-*" "lm80-*"
