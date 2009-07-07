@@ -904,7 +904,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm90_detect(@_, 9); },
 	}, {
 		name => "Texas Instruments TMP411",
-		driver => "to-be-written",
+		driver => "tmp401",
 		i2c_addrs => [0x4c..0x4e],
 		i2c_detect => sub { lm90_detect(@_, 10); },
 	}, {
