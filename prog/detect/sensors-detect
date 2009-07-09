@@ -417,7 +417,7 @@ $revision =~ s/ \([^()]*\)//;
 
 # Look-up table to find out an I2C bus' driver based on the bus name.
 # The match field should contain a regular expression matching the I2C
-# bus name as it would appear in /sys/class/i2c-adapter.
+# bus name as it would appear in sysfs.
 # Note that new drivers probably don't need to be added to this table
 # if they bind to their device, as we will be able to get the driver name
 # from sysfs directly.
@@ -2109,25 +2109,17 @@ sub initialize_cpu_list
 }
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
-# adapter present on the system. Each entry has the following keys: name
-# (directly taken from /sys/class/i2c-adapter), driver and autoload.
+# adapter present on the system. Each entry has the following keys: path,
+# parent, name (directly taken from sysfs), driver and autoload.
 use vars qw(@i2c_adapters);
 
 # Find out whether the driver would be automatically loaded by the modalias
 # mechanism.
-sub classdev_driver_autoloads
+sub device_driver_autoloads
 {
-	my $classdev = shift;
+	my $device = shift;
 	
-	my $modalias = sysfs_device_attribute("$classdev/device", "modalias");
-	if (!defined($modalias)) {
-		my $dev_link = readlink("$classdev/device");
-		if ($dev_link) {
-			$dev_link =~ s/\/[^\/]*$//;
-			$modalias = sysfs_device_attribute("$classdev/$dev_link",
-							   "modalias");
-		}
-	}
+	my $modalias = sysfs_device_attribute($device, "modalias");
 	return 0 unless defined($modalias);
 
 	# At the moment we only handle PCI and USB drivers. Other driver
@@ -2151,22 +2143,31 @@ sub initialize_i2c_adapters_list
 
 	while (defined($_ = readdir(ADAPTERS))) {
 		next unless m/^i2c-(\d+)$/;
+		my $nr = $1;
 		$entry = {}; # New entry
-		$entry->{name} = sysfs_device_attribute("${class_dir}/i2c-$1",
-							"name")
-			      || sysfs_device_attribute("${class_dir}/i2c-$1/device",
-							"name");
+
+		# The layout in sysfs has changed over the years
+		my $link = readlink("${class_dir}/i2c-$nr/device");
+		if ($link =~ m/^(.*)\/i2c-$nr$/) {
+			$entry->{path} = "${class_dir}/i2c-$nr/device";
+			$entry->{parent} = "${class_dir}/i2c-$nr/$1";
+		} else {
+			$entry->{path} = "${class_dir}/i2c-$nr";
+			$entry->{parent} = "$entry->{path}/device";
+		}
+
+		$entry->{name} = sysfs_device_attribute($entry->{path}, "name");
 		next if $entry->{name} eq "ISA main adapter";
 
 		# First try to get the I2C adapter driver name from sysfs,
 		# and if it fails, fall back to searching our list of known
 		# I2C adapters.
-		$entry->{driver} = sysfs_device_driver("${class_dir}/i2c-$1/device")
+		$entry->{driver} = sysfs_device_driver($entry->{parent})
 				|| find_i2c_adapter_driver($entry->{name})
 				|| 'UNKNOWN';
 
-		$entry->{autoload} = classdev_driver_autoloads("${class_dir}/i2c-$1");
-		$i2c_adapters[$1] = $entry;
+		$entry->{autoload} = device_driver_autoloads($entry->{parent});
+		$i2c_adapters[$nr] = $entry;
 	}
 	closedir(ADAPTERS);
 }
@@ -2187,7 +2188,7 @@ sub initialize_hwmon_autoloaded
 		$driver = sysfs_device_driver("${class_dir}/$hwmon/device");
 		next unless defined($driver);
 
-		if (classdev_driver_autoloads("${class_dir}/$hwmon")) {
+		if (device_driver_autoloads("${class_dir}/$hwmon/device")) {
 			$driver =~ tr/-/_/;
 			$hwmon_autoloaded{$driver}++
 		}
@@ -2562,7 +2563,7 @@ sub adapter_pci_detection
 		unless $count;
 }
 
-# $_[0]: Adapter description as found in /sys/class/i2c-adapter
+# $_[0]: Adapter description as found in sysfs
 sub find_i2c_adapter_driver
 {
 	my $name = shift;
@@ -3065,18 +3066,17 @@ sub probe_free_i2c_address
 	}
 }
 
-# $_[0]: The number of the adapter to check
+# $_[0]: The device to check (PCI or not)
 # Returns: PCI class of the adapter if available, 0 if not
-sub get_i2c_adapter_class
+sub get_pci_class
 {
-	my ($adapter_nr) = @_;
-	my ($adapter, $subsystem, $class);
+	my ($device) = @_;
+	my ($subsystem, $class);
 
-	$adapter = "$sysfs_root/class/i2c-adapter/i2c-$adapter_nr";
-	$subsystem = sysfs_device_subsystem("$adapter/device");
+	$subsystem = sysfs_device_subsystem($device);
 	return 0 unless defined $subsystem && $subsystem eq "pci";
 
-	$class = sysfs_device_attribute("$adapter/device", "class");
+	$class = sysfs_device_attribute($device, "class");
 	return 0 unless defined $class;
 	$class = oct($class) if $class =~ /^0/;
 	return $class >> 8;
@@ -3088,7 +3088,7 @@ sub scan_i2c_adapter
 	my ($adapter_nr, $smbus_default) = @_;
 	my ($funcs, $chip, $addr, $class, $default, $input, @not_to_scan);
 
-	$class = get_i2c_adapter_class($adapter_nr);
+	$class = get_pci_class($i2c_adapters[$adapter_nr]->{parent});
 	if (($class & 0xff00) == 0x0400) {
 		# Do not probe adapters on PCI multimedia cards by default
 		$default = 0;
