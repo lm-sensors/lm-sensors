@@ -2519,7 +2519,8 @@ sub adapter_pci_detection
 		$device = $pci_list{$key};
 		$smbus{$key}++
 			if exists $device->{class} &&
-			   $device->{class} == 0x0c05; # SMBus
+			   ($device->{class} == 0x0c01 ||	# Access Bus
+			    $device->{class} == 0x0c05);	# SMBus
 	}
 
 	# Loop over the known I2C/SMBus adapters

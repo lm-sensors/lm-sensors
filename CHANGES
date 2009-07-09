@@ -6,6 +6,7 @@ SVN-HEAD
   sensors.conf.default: Encourage user to not modify this file
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
+                  Report unsupported Access Bus adapters
 
 3.1.1 (2009-06-21)
   isadump: Use geteuid instead of getuid so that setuid bit works
