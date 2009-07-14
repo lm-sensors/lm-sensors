@@ -908,6 +908,21 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c..0x4e],
 		i2c_detect => sub { lm90_detect(@_, 10); },
 	}, {
+		name => "Texas Instruments TMP421",
+		driver => "tmp421",
+		i2c_addrs => [0x2a, 0x4c..0x4f], # 0x1c-0x1f not probed.
+		i2c_detect => sub { tmp42x_detect(@_, 0); },
+	}, {
+		name => "Texas Instruments TMP422",
+		driver => "tmp421",
+		i2c_addrs => [0x4c..0x4f],
+		i2c_detect => sub { tmp42x_detect(@_, 1); },
+	}, {
+		name => "Texas Instruments TMP423",
+		driver => "tmp421",
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { tmp42x_detect(@_, 2); },
+	}, {
 		name => "National Semiconductor LM95231",
 		driver => "to-be-written",
 		i2c_addrs => [0x2b, 0x19, 0x2a],
@@ -3903,6 +3918,26 @@ sub lm90_detect
 		return 6 if ($addr == 0x4d && $cid == 0x13); # TMP411B
 		return 6 if ($addr == 0x4e && $cid == 0x10); # TMP411C
 	}
+	return;
+}
+
+# Chip to detect: 0 = TMP421, 1 = TMP422, 2 = TMP423
+# Registers used:
+#   0xfe: Manufactorer ID
+#   0xff: Device ID
+sub tmp42x_detect()
+{
+	my ($file, $addr, $chip) = @_;
+
+	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
+	my $cid = i2c_smbus_read_byte_data($file, 0xff);
+
+	return if ($mid != 0x55);
+
+	return 6 if ($chip == 0 && $cid == 0x21); # TMP421
+	return 6 if ($chip == 1 && $cid == 0x22); # TMP422
+	return 6 if ($chip == 2 && $cid == 0x23); # TMP423
+
 	return;
 }
 

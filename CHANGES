@@ -7,6 +7,7 @@ SVN-HEAD
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
                   Report unsupported Access Bus adapters
+                  Add detection for TI's TMP421, TMP422 and TMP423 chips
 
 3.1.1 (2009-06-21)
   isadump: Use geteuid instead of getuid so that setuid bit works
