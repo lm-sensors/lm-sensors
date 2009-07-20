@@ -1430,7 +1430,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M233 Super IO Sensors",
-		driver => "smsc47m1",
+		driver => "to-be-written",
 		devid => 0x6b80,
 		devid_mask => 0xff80,
 		logdev => 0x0a,
