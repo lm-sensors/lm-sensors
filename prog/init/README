@@ -23,7 +23,7 @@ automatically at boot time.
 ----------------
 
 The script sensord.init also loads the modules, and then
-starts the sensord daemon. See the directory ../sensord for
+starts the sensord daemon. See the manual page sensord(8) for
 more information on the daemon.
 
 The sensord.init file should be copied to /etc/rc.d/init.d/sensord.
