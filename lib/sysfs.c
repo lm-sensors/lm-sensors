@@ -730,6 +730,8 @@ int sensors_read_sysfs_bus(void)
 	int ret;
 
 	ret = sysfs_foreach_classdev("i2c-adapter", sensors_add_i2c_bus);
+	if (ret == ENOENT)
+		ret = sysfs_foreach_busdev("i2c", sensors_add_i2c_bus);
 	if (ret && ret != ENOENT)
 		return -SENSORS_ERR_KERNEL;
 
