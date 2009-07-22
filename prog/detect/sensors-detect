@@ -2150,11 +2150,17 @@ sub device_driver_autoloads
 
 sub initialize_i2c_adapters_list
 {
-	my $entry;
+	my ($entry, $base_dir, $have_i2c_adapter_class);
 	local $_;
 
-	my $class_dir = "${sysfs_root}/class/i2c-adapter";
-	opendir(local *ADAPTERS, $class_dir) or return;
+	if (-d "${sysfs_root}/class/i2c-adapter") {
+		$base_dir = "${sysfs_root}/class/i2c-adapter";
+		$have_i2c_adapter_class = 1;
+	} else {
+		$base_dir = "${sysfs_root}/bus/i2c/devices";
+		$have_i2c_adapter_class = 0;
+	}
+	opendir(local *ADAPTERS, $base_dir) or return;
 
 	while (defined($_ = readdir(ADAPTERS))) {
 		next unless m/^i2c-(\d+)$/;
@@ -2162,13 +2168,20 @@ sub initialize_i2c_adapters_list
 		$entry = {}; # New entry
 
 		# The layout in sysfs has changed over the years
-		my $link = readlink("${class_dir}/i2c-$nr/device");
-		if ($link =~ m/^(.*)\/i2c-$nr$/) {
-			$entry->{path} = "${class_dir}/i2c-$nr/device";
-			$entry->{parent} = "${class_dir}/i2c-$nr/$1";
+		if ($have_i2c_adapter_class) {
+			my $link = readlink("${base_dir}/i2c-$nr/device");
+			if ($link =~ m/^(.*)\/i2c-$nr$/) {
+				$entry->{path} = "${base_dir}/i2c-$nr/device";
+				$entry->{parent} = "${base_dir}/i2c-$nr/$1";
+			} else {
+				$entry->{path} = "${base_dir}/i2c-$nr";
+				$entry->{parent} = "$entry->{path}/device";
+			}
 		} else {
-			$entry->{path} = "${class_dir}/i2c-$nr";
-			$entry->{parent} = "$entry->{path}/device";
+			my $link = readlink("${base_dir}/i2c-$nr");
+			$link =~ s/\/i2c-$nr$//;
+			$entry->{path} = "${base_dir}/i2c-$nr";
+			$entry->{parent} = "${base_dir}/$link";
 		}
 
 		$entry->{name} = sysfs_device_attribute($entry->{path}, "name");
