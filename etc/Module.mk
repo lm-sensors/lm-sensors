@@ -31,6 +31,10 @@ install-etc:
 	if [ ! -e $(DESTDIR)$(ETCINSTALL) ] ; then \
 	  $(INSTALL) -m 644 $(ETCTARGET) $(DESTDIR)$(ETCINSTALL); \
 	fi
+	if [ -e $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors \
+	     -a ! -e $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors.conf ] ; then \
+	  $(MV) $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors.conf ; \
+	fi
 user_install :: install-etc
 
 # No clean rule
