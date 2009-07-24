@@ -5620,7 +5620,7 @@ sub print_chips_report
 # A second array, called
 sub generate_modprobes
 {
-  my ($chip, $detection, $nr, $i, @optionlist, @probelist, $driver, $isa, $adap);
+  my ($chip, $detection, $nr, $i, @optionlist, $driver, $isa, $adap);
   my $ipmi = 0;
   my $modprobes = "";
   my $configfile;
@@ -5723,19 +5723,13 @@ sub generate_modprobes
       }
     }
 
-    next if not (@probelist or @optionlist);
+    next if not @optionlist;
     $configfile = "# hwmon module options\n" unless defined $configfile;
     $configfile .= "options $chip->{driver}";
     $configfile .= sprintf " ignore=%d,0x%02x", shift @optionlist,
-                                               shift @optionlist
-                  if @optionlist;
+                                               shift @optionlist;
     $configfile .= sprintf ",%d,0x%02x", shift @optionlist, shift @optionlist
                   while @optionlist;
-    $configfile .= sprintf " probe=%d,0x%02x", shift @probelist,
-                                              shift @probelist
-                  if @probelist;
-    $configfile .= sprintf ",%d,0x%02x", shift @probelist, shift @probelist
-                  while @probelist;
     $configfile .= "\n";
   }
 
