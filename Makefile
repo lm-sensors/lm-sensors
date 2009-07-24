@@ -118,6 +118,7 @@ SRCDIRS += lib/test
 MKDIR := mkdir -p
 RMDIR := rmdir
 RM := rm -f
+MV := mv -f
 BISON := bison
 FLEX := flex
 AR := ar

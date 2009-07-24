@@ -28,6 +28,10 @@ install-etc:
 	fi
 	$(MKDIR) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 755 $(ETC_DIR)/sensors-conf-convert $(DESTDIR)$(BINDIR)
+	if [ -e $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors \
+	     -a ! -e $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors.conf ] ; then \
+	  $(MV) $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors $(DESTDIR)$(ETCDIR)/modprobe.d/lm_sensors.conf ; \
+	fi
 
 user_install :: install-etc
 
