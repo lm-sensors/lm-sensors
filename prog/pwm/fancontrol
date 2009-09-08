@@ -195,10 +195,9 @@ function CheckFiles {
 	if [ $outdated -eq 1 ]
 	then
 		echo
-		echo "At least one referenced file is missing. Either some"
-		echo "required kernel modules haven't been loaded, or your"
-		echo "configuration file is outdated. In the latter case,"
-		echo "you should run pwmconfig again."
+		echo "At least one referenced file is missing. Either some required kernel"
+		echo "modules haven't been loaded, or your configuration file is outdated."
+		echo "In the latter case, you should run pwmconfig again."
 	fi
 
 	return $outdated
