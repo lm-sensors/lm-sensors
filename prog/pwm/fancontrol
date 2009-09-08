@@ -152,6 +152,58 @@ function LoadConfig {
 	echo
 }
 
+# Check that all referenced sysfs files exist
+function CheckFiles {
+	local outdated=0
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
+	do
+		pwmo=${AFCPWM[$fcvcount]}
+		if [ ! -w $pwmo ]
+		then
+			echo "Error: file $pwmo doesn't exist"
+			outdated=1
+		fi
+		let fcvcount=$fcvcount+1
+	done
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCTEMP[@]} )) # go through all temp inputs
+	do
+		tsen=${AFCTEMP[$fcvcount]}
+		if [ ! -r $tsen ]
+		then
+			echo "Error: file $tsen doesn't exist"
+			outdated=1
+		fi
+		let fcvcount=$fcvcount+1
+	done
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCFAN[@]} )) # go through all fan inputs
+	do
+		fan=${AFCFAN[$fcvcount]}
+		if [ ! -r $fan ]
+		then
+			echo "Error: file $fan doesn't exist"
+			outdated=1
+		fi
+		let fcvcount=$fcvcount+1
+	done
+
+	if [ $outdated -eq 1 ]
+	then
+		echo
+		echo "At least one referenced file is missing. Either some"
+		echo "required kernel modules haven't been loaded, or your"
+		echo "configuration file is outdated. In the latter case,"
+		echo "you should run pwmconfig again."
+	fi
+
+	return $outdated
+}
+
 if [ -f "$1" ]
 then
 	LoadConfig $1
@@ -180,6 +232,8 @@ then
 	exit 1
 fi
 cd $DIR
+
+CheckFiles || exit 1
 
 if [ -f "$PIDFILE" ]
 then

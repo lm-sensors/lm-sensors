@@ -1,4 +1,4 @@
-.TH FANCONTROL 8 "January 2009" "lm-sensors 3"
+.TH FANCONTROL 8 "September 2009" "lm-sensors 3"
 .SH NAME
 fancontrol \- automated software based fan speed regulation
 
@@ -91,6 +91,10 @@ MINTEMP=hwmon0/device/pwm1=40 hwmon0/device/pwm2=54
 You have to play with the temperature values a bit to get happy. For initial
 setup I recommend using the \fBpwmconfig\fP script. Small changes can be made by
 editing the config file directly following the rules above.
+
+Upon starting, fancontrol will make sure that all referenced sysfs files
+do exist. If not, it will quit immediately, upon the assumption that the
+configuration file may be out-of-sync with the loaded kernel drivers.
 
 .SH THE ALGORITHM
 

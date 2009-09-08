@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN-HEAD
   libsensors: Support upcoming sysfs path to i2c adapters
+  fancontrol: Check that all referenced sysfs files exist
   pwmconfig: Exit immediately if not root
   sensors.conf.default: Encourage user to not modify this file
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
