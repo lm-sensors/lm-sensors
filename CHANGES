@@ -13,6 +13,8 @@ SVN-HEAD
                   The SMSC LPC47M233 isn't currently supported
                   Support upcoming sysfs path to i2c adapters
                   Rename the modprobe configuration file to lm_sensors.conf
+                  Drop AMD K10 detection (unreliable sensors)
+                  Add detection for AMD Family 11h thermal sensors
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)

@@ -1843,9 +1843,9 @@ use vars qw(@cpu_ids);
 		driver => "k8temp",
 		detect => \&k8temp_pci_detect,
 	}, {
-		name => "AMD K10 thermal sensors",
+		name => "AMD Family 11h thermal sensors",
 		driver => "to-be-written",
-		detect => \&k10temp_pci_detect,
+		detect => \&fam11h_pci_detect,
 	}, {
 		name => "Intel Core family thermal sensor",
 		driver => "coretemp",
@@ -5250,9 +5250,9 @@ sub k8temp_pci_detect
 	return 9;
 }
 
-sub k10temp_pci_detect
+sub fam11h_pci_detect
 {
-	return unless exists $pci_list{'1022:1203'};
+	return unless exists $pci_list{'1022:1303'};
 	return 9;
 }
 
