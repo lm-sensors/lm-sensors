@@ -38,13 +38,21 @@ variables available for changing \fBfancontrol\fP's behaviour:
 This variable defines at which interval in seconds the main loop of
 \fBfancontrol\fP will be executed
 .TP
+.B DEVPATH
+Maps hwmon class devices to physical devices. This lets \fBfancontrol\fP
+check that the configuration file is still up-to-date.
+.TP
+.B DEVNAME
+Records hwmon class device names. This lets \fBfancontrol\fP check that
+the configuration file is still up-to-date.
+.TP
 .B FCTEMPS
 Maps PWM outputs to temperature sensors so \fBfancontrol\fP knows which
 temperature sensors should be used for calculation of new values for
 the corresponding PWM outputs.
 .TP
 .B FCFANS
-FCFANS records the association between a PWM and a fan.
+Records the association between a PWM output and a fan input.
 Then \fBfancontrol\fP can check the fan speed and restart it if it
 stops unexpectedly.
 .TP
@@ -92,9 +100,11 @@ You have to play with the temperature values a bit to get happy. For initial
 setup I recommend using the \fBpwmconfig\fP script. Small changes can be made by
 editing the config file directly following the rules above.
 
-Upon starting, fancontrol will make sure that all referenced sysfs files
-do exist. If not, it will quit immediately, upon the assumption that the
-configuration file may be out-of-sync with the loaded kernel drivers.
+Upon starting, fancontrol will make sure that all referenced devices
+do exist and match what they were at configuration time, and that all
+referenced sysfs files do exist. If not, it will quit immediately, upon
+the assumption that the configuration file may be out-of-sync with the
+loaded kernel drivers.
 
 .SH THE ALGORITHM
 

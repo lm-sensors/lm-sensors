@@ -3,12 +3,12 @@
 # Simple script implementing a temperature dependent fan speed control
 # Supported Linux kernel versions: 2.6.5 and later
 #
-# Version 0.69
+# Version 0.70
 #
 # Usage: fancontrol [CONFIGFILE]
 #
 # Dependencies:
-#   bash, egrep, sed, cut, sleep, lm_sensors :)
+#   bash, egrep, sed, cut, sleep, readlink, lm_sensors :)
 #
 # Please send any questions, comments or success stories to
 # marius.reiner@hdev.de
@@ -55,6 +55,8 @@ function LoadConfig {
 
 	# grep configuration from file
 	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
+	DEVPATH=`egrep '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g'`
+	DEVNAME=`egrep '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g'`
 	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
 	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
 	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
@@ -152,6 +154,57 @@ function LoadConfig {
 	echo
 }
 
+function DevicePath()
+{
+	if [ -h "$1/device" ]
+	then
+		readlink -f "$1/device" | sed -e 's/^\/sys\///'
+	fi
+}
+
+function DeviceName()
+{
+	if [ -r "$1/name" ]
+	then
+		cat "$1/name" | sed -e 's/[[:space:]=]/_/g'
+	elif [ -r "$1/device/name" ]
+	then
+		cat "$1/device/name" | sed -e 's/[[:space:]=]/_/g'
+	fi
+}
+
+function ValidateDevices()
+{
+	local OLD_DEVPATH="$1" OLD_DEVNAME="$2" outdated=0
+	local entry device name path
+
+	for entry in $OLD_DEVPATH
+	do
+		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
+		path=`echo "$entry" | sed -e 's/^[^=]*=//'`
+
+		if [ "`DevicePath "$device"`" != "$path" ]
+		then
+			echo "Device path of $device has changed"
+			outdated=1
+		fi
+	done
+
+	for entry in $OLD_DEVNAME
+	do
+		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
+		name=`echo "$entry" | sed -e 's/^[^=]*=//'`
+
+		if [ "`DeviceName "$device"`" != "$name" ]
+		then
+			echo "Device name of $device has changed"
+			outdated=1
+		fi
+	done
+
+	return $outdated
+}
+
 # Check that all referenced sysfs files exist
 function CheckFiles {
 	local outdated=0
@@ -232,6 +285,17 @@ then
 fi
 cd $DIR
 
+# Check for configuration change
+if [ -z "$DEVPATH" -o -z "$DEVNAME" ]
+then
+	echo "Configuration is too old, please run pwmconfig again"
+	exit 1
+fi
+if ! ValidateDevices "$DEVPATH" "$DEVNAME"
+then
+	echo "Configuration appears to be outdated, please run pwmconfig again"
+	exit 1
+fi
 CheckFiles || exit 1
 
 if [ -f "$PIDFILE" ]
