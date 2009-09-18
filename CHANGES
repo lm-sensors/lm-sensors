@@ -58,6 +58,7 @@ SVN-HEAD
               Free bus statements from the configuration file sooner
               Read extra configuration files from /etc/sensors.d (#2174)
               Report the configuration file name on parse errors
+              Add support for ACPI devices
   libsensors.3: Reformat for clarity
                 Document function sensors_snprintf_chip_name
                 Document error-related functions
