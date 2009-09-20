@@ -5275,7 +5275,8 @@ sub coretemp_detect
 				 $probecpu->{model} == 15 ||
 				 $probecpu->{model} == 0x16 ||
 				 $probecpu->{model} == 0x17 ||
-				 $probecpu->{model} == 0x1a)) {
+				 $probecpu->{model} == 0x1a ||
+				 $probecpu->{model} == 0x1c)) {	# Atom
 			return 9;
 		}
 	}
