@@ -111,6 +111,7 @@ chip "it87-*" "it8712-*" "it8716-*" "it8718-*" "it8720-*"
 
 
 chip "fscpos-*" "fscher-*"
+#FSC "Hermes"
 
     label in0 "+12V"
     label in1 "+5V"
@@ -122,6 +123,7 @@ chip "fscpos-*" "fscher-*"
 
 
 chip "fscscy-*"
+#FSC "Scylla"
 
     label in0 "+12V"
     label in1 "+5V"
@@ -132,6 +134,53 @@ chip "fscscy-*"
     label temp3 "M/B Temp"
     label temp4 "Aux Temp"
 
+
+chip "fschds-*"
+# Fujitsu Technology Solutions, "Hades"-Chip
+
+# Temperatures
+    label temp1 "CPU Temp"
+    label temp2 "Super I/O Temp"
+    label temp3 "System Temp"
+    ignore temp4
+    ignore temp5
+
+# Fans
+    label fan1 "PSU Fan"
+    label fan2 "CPU Fan"
+    label fan3 "System FAN2"
+    label fan4 "System FAN3"
+    label fan5 "System FAN4"
+
+# Voltages
+    label in0 "+12V"
+    label in1 "+5V"
+    label in2 "Vbat"
+
+chip "fscsyl-*"
+# Fujitsu Technology Solutions, "Syleus"-Chip
+
+# Temperatures
+    label temp1 "CPU Temp"
+    ignore temp2
+    ignore temp3
+    label temp4 "Super I/O Temp"
+    label temp5 "Northbridge Temp"
+
+# Fans
+    label fan1 "CPU Fan"
+    label fan2 "System FAN2"
+    label fan3 "System FAN3"
+    label fan4 "System FAN4"
+    label fan7 "PSU Fan"
+
+# Voltages
+    label in0 "+12V"
+    label in1 "+5V"
+    label in2 "Vbat"
+    ignore in4
+    label in3 "+3.3V"
+    label in5 "+3.3V-Aux"
 
 chip "vt1211-*"
 
