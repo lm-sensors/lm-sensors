@@ -156,6 +156,7 @@ endif
 	$(INSTALL) -m 644 $(LIBHEADERFILES) $(DESTDIR)$(LIBINCLUDEDIR)
 	$(INSTALL) -m 644 $(LIBMAN3FILES) $(DESTDIR)$(LIBMAN3DIR)
 	$(INSTALL) -m 644 $(LIBMAN5FILES) $(DESTDIR)$(LIBMAN5DIR)
+	$(LN) sensors.conf.5 $(DESTDIR)$(LIBMAN5DIR)/sensors3.conf.5
 
 
 user_install :: install-lib
