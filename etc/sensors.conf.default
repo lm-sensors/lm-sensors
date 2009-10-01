@@ -142,8 +142,6 @@ chip "fschds-*"
     label temp1 "CPU Temp"
     label temp2 "Super I/O Temp"
     label temp3 "System Temp"
-    ignore temp4
-    ignore temp5
 
 # Fans
     label fan1 "PSU Fan"
@@ -162,8 +160,6 @@ chip "fscsyl-*"
 
 # Temperatures
     label temp1 "CPU Temp"
-    ignore temp2
-    ignore temp3
     label temp4 "Super I/O Temp"
     label temp5 "Northbridge Temp"
 
@@ -178,7 +174,6 @@ chip "fscsyl-*"
     label in0 "+12V"
     label in1 "+5V"
     label in2 "Vbat"
-    ignore in4
     label in3 "+3.3V"
     label in5 "+3.3V-Aux"
 
