@@ -5070,7 +5070,7 @@ sub max6650_detect
 	return if i2c_smbus_read_byte_data($file, 0x14) & 0xE0;
 	return if ($conf & 0xC0) or ($conf & 0x07) > 4;
 
-	return 3;
+	return 2;
 }
 
 sub max6655_detect
