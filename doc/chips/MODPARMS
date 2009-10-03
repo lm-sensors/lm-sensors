@@ -43,6 +43,10 @@ BUS NUMBERING
 I2C/SMBus adapters are numbered in the order they are inserted. If you want
 to know what number an adapter has, use the following command:
 
+  (for kernel 2.6.32 and newer)
+  grep . /sys/bus/i2c/devices/i2c-*/name
+
+  (for kernel 2.6.31 and older)
   grep . /sys/class/i2c-adapter/i2c-*/name
 
 Alternatively, if you have installed i2c-tools, you can do:
