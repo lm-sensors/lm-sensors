@@ -19,6 +19,7 @@ SVN-HEAD
                   Add detection for AMD Family 11h thermal sensors
                   Add detection for Intel Atom thermal sensors
                   Add detection for National Semiconductor LM73
+                  Add SMBus detection for AMD Hudson-2
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)

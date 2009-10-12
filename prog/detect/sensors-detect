@@ -390,7 +390,12 @@ $revision =~ s/ \([^()]*\)//;
 	}, {
 		vendid	=> 0x1002,
 		devid	=> 0x4385,
-		procid	=> "ATI Technologies Inc SB600 SMBus",
+		procid	=> "ATI Technologies Inc SB600/SB700/SB800 SMBus",
+		driver	=> "i2c-piix4",
+	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x780b,
+		procid	=> "AMD Hudson-2 SMBus",
 		driver	=> "i2c-piix4",
 	}, {
 		vendid	=> 0x100B,
