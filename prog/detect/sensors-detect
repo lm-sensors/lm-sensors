@@ -1664,6 +1664,20 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
+		name => "Nuvoton W83667HG-B Super IO Sensors",
+		driver => "to-be-written",	# Probably w83627ehf
+		devid => 0xB350,
+		devid_mask => 0xFFF0,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Nuvoton W83677HG-I Super IO Sensors",
+		driver => "to-be-written",	# Probably w83627ehf
+		devid => 0xB470,
+		devid_mask => 0xFFF0,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "Winbond W83L517D Super IO",
 		driver => "not-a-sensor",
 		devid => 0x61,
@@ -1805,7 +1819,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		ns_detect => \&smsc_ns_detect_superio,
 		ns_chips => \@superio_ids_smsc_ns,
 	}, {
-		family => "VIA/Winbond/Fintek",
+		family => "VIA/Winbond/Nuvoton/Fintek",
 		guess => 0x290,
 		enter =>
 		{
