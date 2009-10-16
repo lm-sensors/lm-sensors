@@ -668,7 +668,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x28..0x2f],
 		i2c_detect => sub { w83781d_detect(@_, 9); },
 	}, {
-		name => "Winbond W83627DHG",
+		name => "Winbond W83627DHG/W83667HG/W83677HG",
 		driver => "use-isa-instead",
 		i2c_addrs => [0x28..0x2f],
 		i2c_detect => sub { w83781d_detect(@_, 10); },
@@ -4411,7 +4411,8 @@ sub lm87_detect
 
 # Chip to detect: 0 = W83781D, 1 = W83782D, 2 = W83783S, 3 = W83627HF,
 #		  4 = AS99127F (rev.1), 5 = AS99127F (rev.2), 6 = ASB100,
-#		  7 = W83791D, 8 = W83792D, 9 = W83627EHF, 10 = W83627DHG
+#		  7 = W83791D, 8 = W83792D, 9 = W83627EHF,
+#		  10 = W83627DHG/W83667HG/W83677HG
 # Registers used:
 #   0x48: Full I2C Address
 #   0x4a: I2C addresses of emulated LM75 chips
