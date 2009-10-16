@@ -582,6 +582,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7467_detect(@_, 1); },
 	}, {
+		name => "Analog Devices ADT7490",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { adt7490_detect(@_); },
+	}, {
 		name => "Andigilog aSC7511",
 		driver => "to-be-written",
 		i2c_addrs => [0x4c],
@@ -4281,6 +4286,20 @@ sub adt7473_detect
 
 	return if $chip == 0 && $cid != 0x73;	# ADT7473
 	return if $chip == 1 && $cid != 0x75;	# ADT7475
+	return 5;
+}
+
+# Registers used:
+#   0x3e: Manufacturer ID
+#   0x3f: Chip ID
+sub adt7490_detect
+{
+	my ($file, $addr, $chip) = @_;
+	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
+	my $cid = i2c_smbus_read_byte_data($file, 0x3f);
+
+	return if $mid != 0x41;			# Analog Devices
+	return if ($cid & 0xfc) != 0x6c;	# ADT7490
 	return 5;
 }
 
