@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN-HEAD
   libsensors: Support upcoming sysfs path to i2c adapters
+              Add support for HID devices
   fancontrol: Check that all referenced sysfs files exist
               Check that all devices match the configuration file
   pwmconfig: Exit immediately if not root

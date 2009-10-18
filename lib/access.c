@@ -363,6 +363,10 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 		return "Virtual device";
 	case SENSORS_BUS_TYPE_ACPI:
 		return "ACPI interface";
+	/* HID should probably not be there either, but I don't know if
+	   HID buses have a name nor where to find it. */
+	case SENSORS_BUS_TYPE_HID:
+		return "HID adapter";
 	}
 
 	/* bus types with several instances */

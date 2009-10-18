@@ -6,6 +6,10 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x421	lm-sensors SVN
+* Added bus type "hid":
+  #define SENSORS_BUS_TYPE_HID
+
 0x420	lm-sensors 3.1.1
 * Added a method to free the memory allocated by sensors_parse_chip_name()
   void sensors_free_chip_name(sensors_chip_name *chip);

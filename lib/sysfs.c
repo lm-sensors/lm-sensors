@@ -518,7 +518,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 				       const char *dev_name,
 				       const char *hwmon_path)
 {
-	int domain, bus, slot, fn;
+	int domain, bus, slot, fn, vendor, product, id;
 	int err = -SENSORS_ERR_KERNEL;
 	char *bus_attr;
 	char bus_path[NAME_MAX];
@@ -612,6 +612,13 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		/* For now we assume that acpi devices are unique */
 		entry.chip.bus.nr = 0;
 		entry.chip.addr = 0;
+	} else
+	if (subsys && !strcmp(subsys, "hid") &&
+	    sscanf(dev_name, "%x:%x:%x.%x", &bus, &vendor, &product, &id) == 4) {
+		entry.chip.bus.type = SENSORS_BUS_TYPE_HID;
+		/* As of kernel 2.6.32, the hid device names don't look good */
+		entry.chip.bus.nr = bus;
+		entry.chip.addr = id;
 	} else {
 		/* Ignore unknown device */
 		err = 0;
