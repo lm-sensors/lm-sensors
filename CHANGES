@@ -23,6 +23,7 @@ SVN-HEAD
                   Add SMBus detection for AMD Hudson-2
                   Add detection for Nuvoton W83667HG-B and W83677HG-I
                   Add detection for Analog Devices ADT7490
+                  Refer to f71882fg driver if F71889FG is detected
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)
