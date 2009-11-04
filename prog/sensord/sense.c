@@ -47,7 +47,7 @@ static int idChip(const sensors_chip_name *chip)
 {
 	const char *adapter;
 
-	sensorLog(LOG_INFO, "Chip: %s", chipName (chip));
+	sensorLog(LOG_INFO, "Chip: %s", chipName(chip));
 	adapter = sensors_get_adapter_name(&chip->bus);
 	if (adapter)
 		sensorLog(LOG_INFO, "Adapter: %s", adapter);
@@ -55,92 +55,111 @@ static int idChip(const sensors_chip_name *chip)
 	return 0;
 }
 
+static int get_flag(const sensors_chip_name *chip, int num)
+{
+	double val;
+	int ret;
+
+	if (num == -1)
+		return 0;
+
+	ret = sensors_get_value(chip, num, &val);
+	if (ret) {
+		sensorLog(LOG_ERR, "Error getting sensor data: %s/#%d: %s",
+			  chip->prefix, num, sensors_strerror(ret));
+		return -1;
+	}
+
+	return (int) (val + 0.5);
+}
+
+static int get_features(const sensors_chip_name *chip,
+			const FeatureDescriptor *feature, int action,
+			char *label, int alarm, int beep)
+{
+	int i, ret;
+	double val[MAX_DATA];
+
+	for (i = 0; feature->dataNumbers[i] >= 0; i++) {
+		ret = sensors_get_value(chip, feature->dataNumbers[i],
+					val + i);
+		if (ret) {
+			sensorLog(LOG_ERR,
+				  "Error getting sensor data: %s/#%d: %s",
+				  chip->prefix, feature->dataNumbers[i],
+				  sensors_strerror(ret));
+			return -1;
+		}
+	}
+
+	if (action == DO_RRD) {
+		if (feature->rrd) {
+			const char *rrded = feature->rrd(val);
+
+			/* FIXME: Jean's review comment:
+			 * sprintf would me more efficient.
+			 */
+			strcat(strcat (rrdBuff, ":"), rrded ? rrded : "U");
+		}
+	} else {
+		const char *formatted = feature->format(val, alarm, beep);
+
+		if (!formatted) {
+			sensorLog(LOG_ERR, "Error formatting sensor data");
+			return -1;
+		}
+
+		if (action == DO_READ) {
+			sensorLog(LOG_INFO, "  %s: %s", label, formatted);
+		} else {
+			sensorLog(LOG_ALERT, "Sensor alarm: Chip %s: %s: %s",
+				  chipName(chip), label, formatted);
+		}
+	}
+	return 0;
+}
+
+static int do_features(const sensors_chip_name *chip,
+		       const FeatureDescriptor *feature, int action)
+{
+	char *label;
+	int alarm, beep;
+
+	label = sensors_get_label(chip, feature->feature);
+	if (!label) {
+		sensorLog(LOG_ERR, "Error getting sensor label: %s/%s",
+			  chip->prefix, feature->feature->name);
+		return -1;
+	}
+
+	alarm = get_flag(chip, feature->alarmNumber);
+	if (alarm == -1)
+		return -1;
+	else if (action == DO_SCAN && !alarm)
+		return 0;
+
+	beep = get_flag(chip, feature->beepNumber);
+	if (beep == -1)
+		return -1;
+
+	return get_features(chip, feature, action, label, alarm, beep);
+}
+
 static int doKnownChip(const sensors_chip_name *chip,
 		       const ChipDescriptor *descriptor, int action)
 {
 	const FeatureDescriptor *features = descriptor->features;
-	int index0, subindex;
-	int ret = 0;
-	double tmp;
+	int i, ret = 0;
 
 	if (action == DO_READ)
 		ret = idChip(chip);
-	for (index0 = 0; (ret == 0) && features[index0].format; ++ index0) {
-		const FeatureDescriptor *feature = features + index0;
-		int alarm, beep;
-		char *label = NULL;
 
-		if (!(label = sensors_get_label(chip, feature->feature))) {
-			sensorLog(LOG_ERR,
-				  "Error getting sensor label: %s/%s",
-				  chip->prefix, feature->feature->name);
-			ret = 22;
-		} else {
-			double values[MAX_DATA];
-
-			alarm = 0;
-			if (!ret && feature->alarmNumber != -1) {
-				if ((ret = sensors_get_value(chip,
-							     feature->alarmNumber,
-							     &tmp))) {
-					sensorLog(LOG_ERR,
-						  "Error getting sensor data: %s/#%d: %s",
-						  chip->prefix,
-						  feature->alarmNumber,
-						  sensors_strerror(ret));
-					ret = 20;
-				} else {
-					alarm = (int) (tmp + 0.5);
-				}
-			}
-			if ((action == DO_SCAN) && !alarm)
-				continue;
-
-			beep = 0;
-			if (!ret && feature->beepNumber != -1) {
-				if ((ret = sensors_get_value(chip,
-							     feature->beepNumber,
-							     &tmp))) {
-					sensorLog(LOG_ERR,
-						  "Error getting sensor data: %s/#%d: %s",
-						  chip->prefix,
-						  feature->beepNumber,
-						  sensors_strerror(ret));
-					ret = 21;
-				} else {
-					beep = (int) (tmp + 0.5);
-				}
-			}
-
-			for (subindex = 0; !ret &&
-				     (feature->dataNumbers[subindex] >= 0); ++ subindex) {
-				if ((ret = sensors_get_value(chip, feature->dataNumbers[subindex], values + subindex))) {
-					sensorLog(LOG_ERR, "Error getting sensor data: %s/#%d: %s", chip->prefix, feature->dataNumbers[subindex], sensors_strerror(ret));
-					ret = 23;
-				}
-			}
-			if (ret == 0) {
-				if (action == DO_RRD) { // arse = "N:"
-					if (feature->rrd) {
-						const char *rrded = feature->rrd (values);
-						strcat(strcat (rrdBuff, ":"),
-						       rrded ? rrded : "U");
-					}
-				} else {
-					const char *formatted = feature->format (values, alarm, beep);
-					if (formatted) {
-						if (action == DO_READ) {
-							sensorLog(LOG_INFO, "  %s: %s", label, formatted);
-						} else {
-							sensorLog(LOG_ALERT, "Sensor alarm: Chip %s: %s: %s", chipName(chip), label, formatted);
-						}
-					}
-				}
-			}
-		}
-		if (label)
-			free(label);
+	for (i = 0; features[i].format; i++) {
+		ret = do_features(chip, features + i, action);
+		if (ret == -1)
+			break;
 	}
+
 	return ret;
 }
 
@@ -167,7 +186,7 @@ static int doChip(const sensors_chip_name *chip, int action)
 		ret = setChip(chip);
 	} else {
 		int index0, chipindex = -1;
-		for (index0 = 0; knownChips[index0].features; ++ index0)
+		for (index0 = 0; knownChips[index0].features; ++index0) {
 			/*
 			 * Trick: we compare addresses here. We know it works
 			 * because both pointers were returned by
@@ -178,9 +197,12 @@ static int doChip(const sensors_chip_name *chip, int action)
 				chipindex = index0;
 				break;
 			}
-		if (chipindex >= 0)
+		}
+
+		if (chipindex >= 0) {
 			ret = doKnownChip(chip, &knownChips[chipindex],
 					  action);
+		}
 	}
 	return ret;
 }
