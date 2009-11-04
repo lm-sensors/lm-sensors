@@ -221,17 +221,18 @@ static int doChip(const sensors_chip_name *chip, int action)
 
 static int doChips(int action)
 {
-	const sensors_chip_name *chip;
+	const sensors_chip_name *chip, *chip_arg;
 	int i, j, ret = 0;
 
-	for (j = 0; (ret == 0) && (j < sensord_args.numChipNames); ++ j) {
+	for (j = 0; j < sensord_args.numChipNames; j++) {
+		chip_arg = &sensord_args.chipNames[j];
 		i = 0;
-		while ((ret == 0) &&
-		       ((chip = sensors_get_detected_chips(&sensord_args.chipNames[j], &i)) != NULL)) {
+		while ((chip = sensors_get_detected_chips(chip_arg, &i))) {
 			ret = doChip(chip, action);
+			if (ret)
+				return ret;
 		}
 	}
-
 	return ret;
 }
 
