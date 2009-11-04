@@ -45,11 +45,20 @@ static const char *chipName(const sensors_chip_name *chip)
 
 static int idChip(const sensors_chip_name *chip)
 {
-	const char *adapter;
+	const char *name, *adapter;
 
-	sensorLog(LOG_INFO, "Chip: %s", chipName(chip));
+	name = chipName(chip);
+	if (!name) {
+		sensorLog(LOG_ERR, "Error getting chip name");
+		return -1;
+	}
+
+	sensorLog(LOG_INFO, "Chip: %s", name);
+
 	adapter = sensors_get_adapter_name(&chip->bus);
-	if (adapter)
+	if (!adapter)
+		sensorLog(LOG_INFO, "Error getting adapter name");
+	else
 		sensorLog(LOG_INFO, "Adapter: %s", adapter);
 
 	return 0;
@@ -151,8 +160,11 @@ static int doKnownChip(const sensors_chip_name *chip,
 	const FeatureDescriptor *features = descriptor->features;
 	int i, ret = 0;
 
-	if (action == DO_READ)
+	if (action == DO_READ) {
 		ret = idChip(chip);
+		if (ret)
+			return ret;
+	}
 
 	for (i = 0; features[i].format; i++) {
 		ret = do_features(chip, features + i, action);
