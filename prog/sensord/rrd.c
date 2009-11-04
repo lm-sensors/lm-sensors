@@ -196,7 +196,7 @@ static int rrdGetSensors_DS(void *_data, const char *rawLabel,
 {
 	(void) label; /* no warning */
 	if (!feature || feature->rrd) {
-		struct ds *data = (struct ds *) _data;
+		struct ds *data = _data;
 		char *ptr = rrdBuff + data->num * RRD_BUFF;
 		const char *min, *max;
 		data->argv[data->num ++] = ptr;
@@ -306,7 +306,7 @@ struct gr {
 static int rrdCGI_DEF(void *_data, const char *rawLabel, const char *label,
 		      const FeatureDescriptor *feature)
 {
-	struct gr *data = (struct gr *) _data;
+	struct gr *data = _data;
 	(void) label; /* no warning */
 	if (!feature || (feature->rrd && (feature->type == data->type)))
 		printf("\n\tDEF:%s=%s:%s:AVERAGE", rawLabel,
@@ -342,7 +342,7 @@ static int rrdCGI_color(const char *label)
 static int rrdCGI_LINE(void *_data, const char *rawLabel, const char *label,
 		       const FeatureDescriptor *feature)
 {
-	struct gr *data = (struct gr *) _data;
+	struct gr *data = _data;
 	if (!feature || (feature->rrd && (feature->type == data->type)))
 		printf("\n\tLINE2:%s#%.6x:\"%s\"", rawLabel,
 		       rrdCGI_color(label), label);
