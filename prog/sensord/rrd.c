@@ -449,16 +449,16 @@ int rrdCGI(void)
 {
 	int ret = 0, i;
 
-	printf("#!" RRDCGI "\n\n<HTML>\n"
-	       "<HEAD>\n<TITLE>sensord</TITLE>\n</HEAD>\n"
-	       "<BODY>\n<H1>sensord</H1>\n");
+	printf("#!" RRDCGI "\n\n<html>\n"
+	       "<head>\n<title>sensord</title>\n</head>\n"
+	       "<body>\n<h1>sensord</h1>\n");
 
 	for (i = 0; i < ARRAY_SIZE(graphs); i++) {
 		struct gr *graph = &graphs[i];
 
-		printf("<H2>%s</H2>\n", graph->h2);
-		printf("<P>\n<RRD::GRAPH %s/%s.png\n\t--imginfo '"
-		       "<IMG SRC=" WWWDIR "/%%s WIDTH=%%lu HEIGHT=%%lu>'"
+		printf("<h2>%s</h2>\n", graph->h2);
+		printf("<p>\n<RRD::GRAPH %s/%s.png\n\t--imginfo '"
+		       "<img src=" WWWDIR "/%%s width=%%lu height=%%lu>'"
 		       "\n\t-a PNG\n\t-h 200 -w 800\n",
 		       sensord_args.cgiDir, graph->image);
 
@@ -473,7 +473,7 @@ int rrdCGI(void)
 			ret = applyToFeatures(rrdCGI_LINE, graph);
 		if (!ret && sensord_args.doLoad && graph->loadAvg)
 			ret = rrdCGI_LINE(graph, LOADAVG, LOAD_AVERAGE, NULL);
-		printf (">\n</P>\n");
+		printf (">\n</p>\n");
 	}
 	printf("<p>\n<small><b>sensord</b> by "
 	       "<a href=\"mailto:merlin@merlin.org\">Merlin Hughes</a>"
@@ -481,7 +481,7 @@ int rrdCGI(void)
 	       "<a href=\"http://www.lm-sensors.org/\">lm_sensors</a> "
 	       "crew.</small>\n</p>\n");
 
-	printf("</BODY>\n</HTML>\n");
+	printf("</body>\n</html>\n");
 
 	return ret;
 }
