@@ -137,52 +137,72 @@ static void rrdCheckLabel(const char *rawLabel, int index0)
 	}
 }
 
-static int applyToFeatures(FeatureFN fn, void *data)
+static int _applyToFeatures(FeatureFN fn, void *data,
+			    const sensors_chip_name *chip,
+			    const ChipDescriptor *desc)
 {
-	const sensors_chip_name *chip;
-	int i, j, ret = 0, num = 0;
+	int i, ret;
+	const FeatureDescriptor *features = desc->features;
+	const FeatureDescriptor *feature;
+	const char *rawLabel;
+	char *label;
 
-	for (j = 0; (ret == 0) && (j < sensord_args.numChipNames); ++ j) {
-		i = 0;
-		while ((ret == 0) && ((chip = sensors_get_detected_chips(&sensord_args.chipNames[j], &i)) != NULL)) {
-			int index0, chipindex = -1;
+	for (i = 0; i < MAX_RRD_SENSORS && features[i].format; ++i) {
+		feature = features + i;
+		rawLabel = feature->feature->name;
 
-			/* Trick: we compare addresses here. We know it works
-			 * because both pointers were returned by
-			 * sensors_get_detected_chips(), so they refer to
-			 * libsensors internal structures, which do not move.
-			 */
-			for (index0 = 0; knownChips[index0].features; ++index0)
-				if (knownChips[index0].name == chip) {
-					chipindex = index0;
-					break;
-				}
-			if (chipindex >= 0) {
-				const ChipDescriptor *descriptor = &knownChips[chipindex];
-				const FeatureDescriptor *features = descriptor->features;
+		label = sensors_get_label(chip, feature->feature);
+		if (!label) {
+			sensorLog(LOG_ERR, "Error getting sensor label: %s/%s",
+				  chip->prefix, rawLabel);
+			return -1;
+		}
 
-				for (index0 = 0; (ret == 0) && (num < MAX_RRD_SENSORS) && features[index0].format; ++index0) {
-					const FeatureDescriptor *feature = features + index0;
-					const char *rawLabel = feature->feature->name;
-					char *label = NULL;
+		rrdCheckLabel(rawLabel, i);
+		ret = fn(data, rrdLabels[i], label, feature);
+		free(label);
+	}
+	return 0;
+}
 
-					if (!(label = sensors_get_label(chip, feature->feature))) {
-						sensorLog(LOG_ERR, "Error getting sensor label: %s/%s", chip->prefix, rawLabel);
-						ret = -1;
-					} else  {
-						rrdCheckLabel(rawLabel, num);
-						ret = fn(data,
-							 rrdLabels[num],
-							 label, feature);
-						++ num;
-					}
-					if (label)
-						free(label);
-				}
-			}
+static ChipDescriptor *lookup_known_chips(const sensors_chip_name *chip)
+{
+	int i;
+
+	/* Trick: we compare addresses here. We know it works
+	 * because both pointers were returned by
+	 * sensors_get_detected_chips(), so they refer to
+	 * libsensors internal structures, which do not move.
+	 */
+	for (i = 0; knownChips[i].features; i++) {
+		if (knownChips[i].name == chip) {
+			return &knownChips[i];
 		}
 	}
-	return ret;
+	return NULL;
+}
+
+static int applyToFeatures(FeatureFN fn, void *data)
+{
+	int i, i_detected, ret;
+	const sensors_chip_name *chip, *chip_arg;
+	ChipDescriptor *desc;
+
+	for (i = 0; i < sensord_args.numChipNames; i++) {
+		chip_arg = &sensord_args.chipNames[i];
+		i_detected = 0;
+		while ((chip = sensors_get_detected_chips(chip_arg,
+							  &i_detected))) {
+			desc = lookup_known_chips(chip);
+			if (!desc)
+				continue;
+
+			ret = _applyToFeatures(fn, data, chip, desc);
+			if (ret)
+				return ret;
+		}
+	}
+	return 0;
 }
 
 struct ds {
