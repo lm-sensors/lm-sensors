@@ -9,6 +9,7 @@ SVN-HEAD
   pwmconfig: Exit immediately if not root
              Save device paths and names in configuration file
   sensors.conf.default: Encourage user to not modify this file
+  sensord: Don't name our variables "alarm"
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
                   Report unsupported Access Bus adapters

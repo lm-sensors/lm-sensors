@@ -33,78 +33,78 @@
 
 static char buff[4096];
 
-static const char *fmtExtra(int alarm, int beep)
+static const char *fmtExtra(int alrm, int beep)
 {
-	if (alarm)
+	if (alrm)
 		sprintf(buff + strlen(buff), " [ALARM]");
 	if (beep)
 		sprintf(buff + strlen(buff), " (beep)");
 	return buff;
 }
 
-static const char *fmtTemps_1(const double values[], int alarm, int beep)
+static const char *fmtTemps_1(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%.1f C (limit = %.1f C, hysteresis = %.1f C)",
 		values[0], values[1], values[2]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtTemps_minmax_1(const double values[], int alarm,
+static const char *fmtTemps_minmax_1(const double values[], int alrm,
 				     int beep) {
 	sprintf(buff, "%.1f C (min = %.1f C, max = %.1f C)", values[0],
 		values[1], values[2]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtTemp_only(const double values[], int alarm, int beep)
+static const char *fmtTemp_only(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%.1f C", values[0]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtVolt_2(const double values[], int alarm, int beep)
+static const char *fmtVolt_2(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%+.2f V", values[0]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtVolt_3(const double values[], int alarm, int beep)
+static const char *fmtVolt_3(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%+.3f V", values[0]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtVolts_2(const double values[], int alarm, int beep)
+static const char *fmtVolts_2(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%+.2f V (min = %+.2f V, max = %+.2f V)", values[0],
 		values[1], values[2]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtFans_0(const double values[], int alarm, int beep)
+static const char *fmtFans_0(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%.0f RPM (min = %.0f RPM, div = %.0f)", values[0],
 		values[1], values[2]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtFans_nodiv_0(const double values[], int alarm, int beep)
+static const char *fmtFans_nodiv_0(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%.0f RPM (min = %.0f RPM)", values[0], values[1]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtFan_only(const double values[], int alarm, int beep)
+static const char *fmtFan_only(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "%.0f RPM", values[0]);
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
-static const char *fmtSoundAlarm(const double values[], int alarm, int beep)
+static const char *fmtSoundAlarm(const double values[], int alrm, int beep)
 {
 	sprintf(buff, "Sound alarm %s",
 		(values[0] < 0.5) ? "disabled" : "enabled");
-	return fmtExtra(alarm, beep);
+	return fmtExtra(alrm, beep);
 }
 
 static const char *rrdF0(const double values[])

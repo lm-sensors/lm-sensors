@@ -84,7 +84,7 @@ static int get_flag(const sensors_chip_name *chip, int num)
 
 static int get_features(const sensors_chip_name *chip,
 			const FeatureDescriptor *feature, int action,
-			char *label, int alarm, int beep)
+			char *label, int alrm, int beep)
 {
 	int i, ret;
 	double val[MAX_DATA];
@@ -111,7 +111,7 @@ static int get_features(const sensors_chip_name *chip,
 			strcat(strcat (rrdBuff, ":"), rrded ? rrded : "U");
 		}
 	} else {
-		const char *formatted = feature->format(val, alarm, beep);
+		const char *formatted = feature->format(val, alrm, beep);
 
 		if (!formatted) {
 			sensorLog(LOG_ERR, "Error formatting sensor data");
@@ -132,7 +132,7 @@ static int do_features(const sensors_chip_name *chip,
 		       const FeatureDescriptor *feature, int action)
 {
 	char *label;
-	int alarm, beep;
+	int alrm, beep;
 
 	label = sensors_get_label(chip, feature->feature);
 	if (!label) {
@@ -141,17 +141,17 @@ static int do_features(const sensors_chip_name *chip,
 		return -1;
 	}
 
-	alarm = get_flag(chip, feature->alarmNumber);
-	if (alarm == -1)
+	alrm = get_flag(chip, feature->alarmNumber);
+	if (alrm == -1)
 		return -1;
-	else if (action == DO_SCAN && !alarm)
+	else if (action == DO_SCAN && !alrm)
 		return 0;
 
 	beep = get_flag(chip, feature->beepNumber);
 	if (beep == -1)
 		return -1;
 
-	return get_features(chip, feature, action, label, alarm, beep);
+	return get_features(chip, feature, action, label, alrm, beep);
 }
 
 static int doKnownChip(const sensors_chip_name *chip,
