@@ -10,6 +10,14 @@ SVN-HEAD
              Save device paths and names in configuration file
   sensors.conf.default: Encourage user to not modify this file
   sensord: Don't name our variables "alarm"
+  	   Major refactoring including
+	   - Cleanup of huge functions
+	   - Remove needless casts
+	   - Fix coding style
+	   - Break long lines
+	   - Make functions more robust
+	   - Remove unused return value
+	   - Make CGI script more XHML compatible
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
                   Report unsupported Access Bus adapters
