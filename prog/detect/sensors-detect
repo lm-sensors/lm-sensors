@@ -1878,6 +1878,10 @@ use vars qw(@cpu_ids);
 		driver => "k8temp",
 		detect => \&k8temp_pci_detect,
 	}, {
+		name => "AMD Family 10h thermal sensors",
+		driver => "to-be-written",
+		detect => \&fam10h_pci_detect,
+	}, {
 		name => "AMD Family 11h thermal sensors",
 		driver => "to-be-written",
 		detect => \&fam11h_pci_detect,
@@ -5332,6 +5336,25 @@ sub k8temp_pci_detect
 {
 	return unless exists $pci_list{'1022:1103'};
 	return 9;
+}
+
+sub fam10h_pci_detect
+{
+	return unless exists $pci_list{'1022:1203'};
+
+	# Errata 319 (Inaccurate Temperature Measurement) affects
+	# revisions DR-BA, DR-B2 and DR-B3, all have model number = 2.
+	# So we only pick CPU with model number > 2.
+	my $probecpu;
+	foreach $probecpu (@cpu) {
+		if ($probecpu->{vendor_id} eq 'AuthenticAMD' &&
+				$probecpu->{'cpu family'} == 0x10 &&
+				$probecpu->{model} > 2) {
+			return 9;
+		}
+	}
+	
+	return;
 }
 
 sub fam11h_pci_detect
