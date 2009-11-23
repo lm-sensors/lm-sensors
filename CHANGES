@@ -17,7 +17,7 @@ SVN-HEAD
 	   - Break long lines
 	   - Make functions more robust
 	   - Remove unused return value
-	   - Make CGI script more XHML compatible
+	   - Make CGI script more XHTML compatible
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
                   Report unsupported Access Bus adapters
@@ -34,6 +34,7 @@ SVN-HEAD
                   Add detection for Analog Devices ADT7490
                   Refer to f71882fg driver if F71889FG is detected
                   Add detecton for Fintek F71869FG
+                  Detect ADT7473 at 0x2c and 0x2d
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)
