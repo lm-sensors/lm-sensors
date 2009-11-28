@@ -18,6 +18,7 @@ SVN-HEAD
 	   - Make functions more robust
 	   - Remove unused return value
 	   - Make CGI script more XHTML compatible
+  sensors: Fix iconv-related build warning in set_degstr
   sensors-detect: Refer to tmp401 driver if TMP411 is detected
                   Clean up the discovery of i2c adapters
                   Report unsupported Access Bus adapters
