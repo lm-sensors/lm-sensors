@@ -134,14 +134,15 @@ static void set_degstr(void)
   /* Size hardcoded for better performance.
      Don't forget to count the trailing \0! */
   size_t deg_latin1_size = 3;
-  char *deg_latin1_text[2] = {"\260C", "\260F"};
+  char deg_latin1_text[2][3] = {"\260C", "\260F"};
+  char *deg_latin1_ptr = deg_latin1_text[fahrenheit];
   size_t nconv;
   size_t degstr_size = sizeof(degstr);
   char *degstr_ptr = degstr;
 
   iconv_t cd = iconv_open(nl_langinfo(CODESET), "ISO-8859-1");
   if (cd != (iconv_t) -1) {
-    nconv = iconv(cd, &(deg_latin1_text[fahrenheit]), &deg_latin1_size,
+    nconv = iconv(cd, &deg_latin1_ptr, &deg_latin1_size,
                   &degstr_ptr, &degstr_size);
     iconv_close(cd);
     
