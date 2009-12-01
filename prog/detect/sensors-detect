@@ -4254,7 +4254,7 @@ sub adt7467_detect
 	return if $mid != 0x41;			# Analog Devices
 
 	if ($chip == 0) {
-		return if $cid != 0x68;		# ADT7467
+		return if $cid != 0x68;		# ADT7467/ADT7468
 		return if ($drev & 0xf0) != 0x70;
 		return 7 if $drev == 0x71 || $drev == 0x72;
 		return 5;
@@ -4262,7 +4262,7 @@ sub adt7467_detect
 	if ($chip == 1) {
 		return if $cid != 0x76;		# ADT7476
 		return if ($drev & 0xf0) != 0x60;
-		return 7 if $drev == 0x69;
+		return 7 if $drev >= 0x69 && $drev <= 0x6b;
 		return 5;
 	}
 	if ($chip == 2) {

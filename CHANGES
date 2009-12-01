@@ -38,6 +38,7 @@ SVN-HEAD
                   Refer to f71882fg driver if F71889FG is detected
                   Add detecton for Fintek F71869FG
                   Detect ADT7473 at 0x2c and 0x2d
+                  More known revisions for the ADT7476
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)
