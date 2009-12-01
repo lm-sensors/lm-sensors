@@ -9,6 +9,8 @@ SVN-HEAD
   pwmconfig: Exit immediately if not root
              Save device paths and names in configuration file
   sensors.conf.default: Encourage user to not modify this file
+                        Add a section for adt7473 and adt7475
+                        Add a section for adt7476 and adt7490
   sensord: Don't name our variables "alarm"
   	   Major refactoring including
 	   - Cleanup of huge functions

@@ -403,3 +403,32 @@ chip "f8000-*"
     compute in0  @*2, @/2
     compute in1  @*2, @/2
     compute in2  @*2, @/2
+
+
+chip "adt7473-*" "adt7475-*"
+
+    label in2 "+3.3V"
+
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+
+    label temp2 "Board Temp"
+
+
+chip "adt7476-*" "adt7490-*"
+
+    label in1 "Vcore"
+    label in2 "+3.3V"
+    label in3 "+5V"
+    label in4 "+12V"
+
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in3_min  5.0 * 0.90
+    set in3_max  5.0 * 1.10
+# Depending on how your ADT7476 is hardwired, you may or may not have
+# +12V readings.
+#    set in4_min 12.0 * 0.90
+#    set in4_max 12.0 * 1.10
+
+    label temp2 "M/B Temp"
