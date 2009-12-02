@@ -39,6 +39,7 @@ SVN-HEAD
                   Add detecton for Fintek F71869FG
                   Detect ADT7473 at 0x2c and 0x2d
                   More known revisions for the ADT7476
+                  Add detection for Nuvoton W83L771AWG/ASG
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)

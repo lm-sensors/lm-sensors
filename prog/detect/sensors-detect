@@ -904,9 +904,14 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm90_detect(@_, 7); },
 	}, {
 		name => "Winbond W83L771W/G",
-		driver => "lm90",
+		driver => "to-be-written",
 		i2c_addrs => [0x4c],
 		i2c_detect => sub { lm90_detect(@_, 8); },
+	}, {
+		name => "Winbond W83L771AWG/ASG",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 11); },
 	}, {
 		name => "Texas Instruments TMP401",
 		driver => "tmp401",
@@ -3918,7 +3923,8 @@ sub lm83_detect
 # Chip to detect: 0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
 #		  4 = MAX6654/MAX6690, 5 = ADT7461,
 #		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
-#		  7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411
+#		  7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
+#		  11 = W83L771AWG/ASG
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -3988,7 +3994,7 @@ sub lm90_detect
 		return if ($conf & 0x2a) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x5c;		# Winbond
-		return 6 if $cid == 0x00;	# W83L771W/G
+		return 6 if ($cid & 0xfe) == 0x00; # W83L771W/G
 	}
 	if ($chip == 9) {
 		return if ($conf & 0x1B) != 0;
@@ -4003,6 +4009,12 @@ sub lm90_detect
 		return 6 if ($addr == 0x4c && $cid == 0x12); # TMP411A
 		return 6 if ($addr == 0x4d && $cid == 0x13); # TMP411B
 		return 6 if ($addr == 0x4e && $cid == 0x10); # TMP411C
+	}
+	if ($chip == 11) {
+		return if ($conf & 0x2a) != 0;
+		return if $rate > 0x08;
+		return if $mid != 0x5c;		# Winbond
+		return 6 if ($cid & 0xfe) == 0x10; # W83L771AWG/ASG
 	}
 	return;
 }
