@@ -568,7 +568,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { adt7467_detect(@_, 4); },
 	}, {
 		name => "Analog Devices ADT7473",
-		driver => "adt7473",
+		driver => sub { kernel_version_at_least(2, 6, 33) ? "adt7475" : "adt7473" },
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7473_detect(@_, 0); },
 	}, {
@@ -578,12 +578,12 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { adt7473_detect(@_, 1); },
 	}, {
 		name => "Analog Devices ADT7476",
-		driver => "to-be-written",
+		driver => "adt7475",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7467_detect(@_, 1); },
 	}, {
 		name => "Analog Devices ADT7490",
-		driver => "to-be-written",
+		driver => "adt7475",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7490_detect(@_); },
 	}, {
