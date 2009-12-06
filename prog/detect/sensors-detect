@@ -1884,11 +1884,11 @@ use vars qw(@cpu_ids);
 		detect => \&k8temp_pci_detect,
 	}, {
 		name => "AMD Family 10h thermal sensors",
-		driver => "to-be-written",
+		driver => "k10temp",
 		detect => \&fam10h_pci_detect,
 	}, {
 		name => "AMD Family 11h thermal sensors",
-		driver => "to-be-written",
+		driver => "k10temp",
 		detect => \&fam11h_pci_detect,
 	}, {
 		name => "Intel Core family thermal sensor",
