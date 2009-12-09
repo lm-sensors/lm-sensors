@@ -154,7 +154,7 @@ static void sis5595_write(u8 reg, u8 data)
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-int sis5595_setup(struct pci_dev *SIS5595_dev)
+static int __devinit sis5595_setup(struct pci_dev *SIS5595_dev)
 {
 	u16 a;
 	u8 val;

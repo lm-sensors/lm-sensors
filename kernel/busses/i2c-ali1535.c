@@ -145,7 +145,7 @@ static unsigned short ali1535_smba = 0;
    Note the differences between kernels with the old PCI BIOS interface and
    newer kernels with the real PCI interface. In compat.h some things are
    defined to make the transition easier. */
-int ali1535_setup(struct pci_dev *ALI1535_dev)
+static int __devinit ali1535_setup(struct pci_dev *ALI1535_dev)
 {
 	int error_return = 0;
 	unsigned char temp;
