@@ -1899,9 +1899,13 @@ use vars qw(@cpu_ids);
 		driver => "i5k_amb",
 		detect => \&intel_amb_detect,
 	}, {
-		name => "VIA C7 thermal and voltage sensors",
-		driver => "c7temp",
-		detect => \&c7temp_detect,
+		name => "VIA C7 thermal sensor",
+		driver => "via-cputemp",
+		detect => \&via_c7_detect,
+	}, {
+		name => "VIA Nano thermal sensor",
+		driver => "via-cputemp",
+		detect => \&via_nano_detect,
 	}
 );
 
@@ -5402,7 +5406,7 @@ sub coretemp_detect
 	return;
 }
 
-sub c7temp_detect
+sub via_c7_detect
 {
 	my $probecpu;
 	foreach $probecpu (@cpu) {
@@ -5410,6 +5414,19 @@ sub c7temp_detect
 				$probecpu->{'cpu family'} == 6 &&
 				($probecpu->{model} == 0xa ||
 				 $probecpu->{model} == 0xd)) {
+			return 9;
+		}
+	}
+	return;
+}
+
+sub via_nano_detect
+{
+	my $probecpu;
+	foreach $probecpu (@cpu) {
+		if ($probecpu->{vendor_id} eq 'CentaurHauls' &&
+				$probecpu->{'cpu family'} == 6 &&
+				$probecpu->{model} == 0xf) {
 			return 9;
 		}
 	}
