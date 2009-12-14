@@ -1893,7 +1893,11 @@ use vars qw(@cpu_ids);
 	}, {
 		name => "Intel Core family thermal sensor",
 		driver => "coretemp",
-		detect => \&coretemp_detect,
+		detect => sub { coretemp_detect(0); },
+	}, {
+		name => "Intel Atom thermal sensor",
+		driver => "coretemp",
+		detect => sub { coretemp_detect(1); },
 	}, {
 		name => "Intel AMB FB-DIMM thermal sensor",
 		driver => "i5k_amb",
@@ -5390,18 +5394,20 @@ sub intel_amb_detect
 
 sub coretemp_detect
 {
+	my $chip = shift;
 	my $probecpu;
+
 	foreach $probecpu (@cpu) {
-		if ($probecpu->{vendor_id} eq 'GenuineIntel' &&
-				$probecpu->{'cpu family'} == 6 &&
-				($probecpu->{model} == 14 ||	# Pentium M DC
-				 $probecpu->{model} == 15 ||	# Core 2 DC 65nm
-				 $probecpu->{model} == 0x16 ||	# Core 2 SC 65nm
-				 $probecpu->{model} == 0x17 ||	# Penryn 45nm
-				 $probecpu->{model} == 0x1a ||	# Nehalem
-				 $probecpu->{model} == 0x1c)) {	# Atom
-			return 9;
-		}
+		next unless $probecpu->{vendor_id} eq 'GenuineIntel' &&
+			    $probecpu->{'cpu family'} == 6;
+		return 9 if $chip == 0 &&
+			($probecpu->{model} == 14 ||	# Pentium M DC
+			 $probecpu->{model} == 15 ||	# Core 2 DC 65nm
+			 $probecpu->{model} == 0x16 ||	# Core 2 SC 65nm
+			 $probecpu->{model} == 0x17 ||	# Penryn 45nm
+			 $probecpu->{model} == 0x1a);	# Nehalem
+		return 9 if $chip == 1 &&
+			($probecpu->{model} == 0x1c);	# Atom
 	}
 	return;
 }
