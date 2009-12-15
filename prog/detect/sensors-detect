@@ -4063,7 +4063,12 @@ sub amc6821_detect()
 	my $comp_id = i2c_smbus_read_byte_data($file, 0x3e);
 
 	return if ($comp_id != 0x49);		# Texas Instruments
-	return 5 if ($dev_id == 0x21);		# AMC6821
+
+	# Bit 7 of register address is ignored
+	return if i2c_smbus_read_byte_data($file, 0x80 | 0x3d) != $dev_id;
+	return if i2c_smbus_read_byte_data($file, 0x80 | 0x3e) != $comp_id;
+
+	return 6 if ($dev_id == 0x21);		# AMC6821
 
 	return;
 }
