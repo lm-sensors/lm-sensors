@@ -41,6 +41,7 @@ SVN-HEAD
                   More known revisions for the ADT7476
                   Add detection for Nuvoton W83L771AWG/ASG
                   Add detection for VIA Nano
+                  Add detection for Texas Instruments AMC6821
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)

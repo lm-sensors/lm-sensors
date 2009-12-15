@@ -938,6 +938,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c, 0x4d],
 		i2c_detect => sub { tmp42x_detect(@_, 2); },
 	}, {
+		name => "Texas Instruments AMC6821",
+		driver => "amc6821",
+		i2c_addrs => [0x18..0x1a, 0x2c..0x2e, 0x4c..0x4e],
+		i2c_detect => sub { amc6821_detect(@_); },
+	}, {
 		name => "National Semiconductor LM95231",
 		driver => "to-be-written",
 		i2c_addrs => [0x2b, 0x19, 0x2a],
@@ -4043,6 +4048,22 @@ sub tmp42x_detect()
 	return 6 if ($chip == 0 && $cid == 0x21); # TMP421
 	return 6 if ($chip == 1 && $cid == 0x22); # TMP422
 	return 6 if ($chip == 2 && $cid == 0x23); # TMP423
+
+	return;
+}
+
+# Registers used:
+#   0x3d: Device ID
+#   0x3e: Company ID
+sub amc6821_detect()
+{
+	my ($file, $addr) = @_;
+
+	my $dev_id = i2c_smbus_read_byte_data($file, 0x3d);
+	my $comp_id = i2c_smbus_read_byte_data($file, 0x3e);
+
+	return if ($comp_id != 0x49);		# Texas Instruments
+	return 5 if ($dev_id == 0x21);		# AMC6821
 
 	return;
 }
