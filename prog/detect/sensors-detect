@@ -5390,14 +5390,18 @@ sub fam10h_pci_detect
 
 	# Errata 319 (Inaccurate Temperature Measurement) affects
 	# revisions DR-BA, DR-B2 and DR-B3, all have model number = 2.
-	# So we only pick CPU with model number > 2.
+	# Revisions RB-C2 and HY-D0 are also affected.
 	my $probecpu;
 	foreach $probecpu (@cpu) {
-		if ($probecpu->{vendor_id} eq 'AuthenticAMD' &&
-				$probecpu->{'cpu family'} == 0x10 &&
-				$probecpu->{model} > 2) {
-			return 9;
-		}
+		next unless $probecpu->{vendor_id} eq 'AuthenticAMD' &&
+			    $probecpu->{'cpu family'} == 0x10;
+
+		next if $probecpu->{model} == 2;	# DR-B*
+		next if $probecpu->{model} == 4 &&
+			$probecpu->{stepping} <= 2;	# RB-C2
+		next if $probecpu->{model} == 8;	# HY-D0
+
+		return 9;
 	}
 	
 	return;
