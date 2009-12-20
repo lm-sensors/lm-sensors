@@ -28,7 +28,7 @@ SVN-HEAD
                   The SMSC LPC47M233 isn't currently supported
                   Support upcoming sysfs path to i2c adapters
                   Rename the modprobe configuration file to lm_sensors.conf
-                  Only report AMD Family 10h CPU with model > 2
+                  Only report AMD Family 10h CPU with working sensors
                   Add detection for AMD Family 11h thermal sensors
                   Add detection for Intel Atom thermal sensors
                   Add detection for National Semiconductor LM73

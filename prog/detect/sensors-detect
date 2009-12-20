@@ -5396,10 +5396,13 @@ sub fam10h_pci_detect
 		next unless $probecpu->{vendor_id} eq 'AuthenticAMD' &&
 			    $probecpu->{'cpu family'} == 0x10;
 
-		next if $probecpu->{model} == 2;	# DR-B*
-		next if $probecpu->{model} == 4 &&
-			$probecpu->{stepping} <= 2;	# RB-C2
+		next if $probecpu->{model} < 4;		# DR-B*
 		next if $probecpu->{model} == 8;	# HY-D0
+		if ($probecpu->{model} == 4) {		# RB-C*
+			my @dram_cfg = split /\n/, `setpci -d 1022:1202 94.L 2>/dev/null`;
+			next unless @dram_cfg >= 1;
+			next unless hex($dram_cfg[0]) & 0x00000100;	# DDR3
+		}
 
 		return 9;
 	}
