@@ -909,7 +909,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm90_detect(@_, 8); },
 	}, {
 		name => "Winbond W83L771AWG/ASG",
-		driver => "to-be-written",
+		driver => "lm90",
 		i2c_addrs => [0x4c],
 		i2c_detect => sub { lm90_detect(@_, 11); },
 	}, {
