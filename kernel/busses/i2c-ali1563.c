@@ -92,9 +92,9 @@ static int ali1563_transaction(struct i2c_adapter * a)
 	outb_p(inb_p(SMB_HST_CNTL2) | HST_CNTL2_START, SMB_HST_CNTL2);
 
 	timeout = ALI1563_MAX_TIMEOUT;
-	do
+	do {
 		i2c_delay(1);
-	while (((data = inb_p(SMB_HST_STS)) & HST_STS_BUSY) && --timeout);
+	} while (((data = inb_p(SMB_HST_STS)) & HST_STS_BUSY) && --timeout);
 
 	printk(KERN_DEBUG "ali1563: Transaction (post): STS=%02x, CNTL1=%02x, "
 		"CNTL2=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, DAT1=%02x\n",
@@ -162,9 +162,9 @@ static int ali1563_block_start(struct i2c_adapter * a)
 	outb_p(inb_p(SMB_HST_CNTL2) | HST_CNTL2_START, SMB_HST_CNTL2);
 
 	timeout = ALI1563_MAX_TIMEOUT;
-	do
+	do {
 		i2c_delay(1);
-	while (!((data = inb_p(SMB_HST_STS)) & HST_STS_DONE) && --timeout);
+	} while (!((data = inb_p(SMB_HST_STS)) & HST_STS_DONE) && --timeout);
 
 	printk(KERN_DEBUG "ali1563: Block (post): STS=%02x, CNTL1=%02x, "
 		"CNTL2=%02x, CMD=%02x, ADD=%02x, DAT0=%02x, DAT1=%02x\n",
