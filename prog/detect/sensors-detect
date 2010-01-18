@@ -587,6 +587,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7490_detect(@_); },
 	}, {
+		name => "Analog Devices ADT7411",
+		driver => "to-be-written",
+		i2c_addrs => [0x48, 0x4a, 0x4b],
+		i2c_detect => sub { adt7411_detect(@_); },
+	}, {
 		name => "Andigilog aSC7511",
 		driver => "to-be-written",
 		i2c_addrs => [0x4c],
@@ -4359,6 +4364,25 @@ sub adt7490_detect
 
 	return if $mid != 0x41;			# Analog Devices
 	return if ($cid & 0xfc) != 0x6c;	# ADT7490
+	return 5;
+}
+
+# Registers used:
+#   0x4d: Device ID
+#   0x4e: Manufacturer ID
+#   0x4e: Silicon revision
+sub adt7411_detect
+{
+	my ($file, $addr) = @_;
+	my $dev_id = i2c_smbus_read_byte_data($file, 0x4d);
+	my $man_id = i2c_smbus_read_byte_data($file, 0x4e);
+	my $revision = i2c_smbus_read_byte_data($file, 0x4f);
+
+	return if $man_id != 0x41;		# Analog Devices
+	return if $dev_id != 0x02;		# ADT7411
+	# The datasheet suggests that the version is in the high nibble, but
+	# a dump from a real ADT7411 chip shows that it is in the low nibble.
+	return if ($revision & 0x0f) != 0x04;	# ADT7411
 	return 5;
 }
 

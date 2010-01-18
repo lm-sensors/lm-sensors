@@ -42,6 +42,7 @@ SVN-HEAD
                   Add detection for Nuvoton W83L771AWG/ASG
                   Add detection for VIA Nano
                   Add detection for Texas Instruments AMC6821
+                  Add detection for Analog Devices ADT7411
   sysconfig-lm_sensors-convert: Fix exit code
 
 3.1.1 (2009-06-21)
