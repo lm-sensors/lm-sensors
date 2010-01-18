@@ -4358,7 +4358,7 @@ sub adt7473_detect
 #   0x3f: Chip ID
 sub adt7490_detect
 {
-	my ($file, $addr, $chip) = @_;
+	my ($file, $addr) = @_;
 	my $mid = i2c_smbus_read_byte_data($file, 0x3e);
 	my $cid = i2c_smbus_read_byte_data($file, 0x3f);
 
