@@ -1,1 +1,1 @@
-#define LM_VERSION "3.1.1+SVN"
+#define LM_VERSION "3.1.2"
