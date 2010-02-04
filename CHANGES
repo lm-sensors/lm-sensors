@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Give udev time to settle before accessing i2c nodes
+
 3.1.2 (2010-02-02)
   libsensors: Support upcoming sysfs path to i2c adapters
               Add support for HID devices
