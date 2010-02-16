@@ -1602,6 +1602,10 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		name => "SMSC LPC47N227 Super IO",
 		driver => "not-a-sensor",
 		devid => 0x5a,
+	}, {
+		name => "SMSC LPC47N237 Super IO",
+		driver => "not-a-sensor",
+		devid => 0x13,
 	}
 );
 
