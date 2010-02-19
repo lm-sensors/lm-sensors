@@ -5476,7 +5476,8 @@ sub coretemp_detect
 			 $probecpu->{model} == 15 ||	# Core 2 DC 65nm
 			 $probecpu->{model} == 0x16 ||	# Core 2 SC 65nm
 			 $probecpu->{model} == 0x17 ||	# Penryn 45nm
-			 $probecpu->{model} == 0x1a);	# Nehalem
+			 $probecpu->{model} == 0x1a ||	# Nehalem
+			 $probecpu->{model} == 0x1e);	# Lynnfield
 		return 9 if $chip == 1 &&
 			($probecpu->{model} == 0x1c);	# Atom
 	}
