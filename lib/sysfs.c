@@ -136,7 +136,7 @@ static int sysfs_foreach_busdev(const char *bus_type,
 
 char sensors_sysfs_mount[NAME_MAX];
 
-#define MAX_SENSORS_PER_TYPE	20
+#define MAX_SENSORS_PER_TYPE	24
 #define MAX_SUBFEATURES		8
 #define MAX_SENSOR_TYPES	6
 /* Room for all 5 types (in, fan, temp, power, energy) with all their
