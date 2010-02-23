@@ -139,8 +139,8 @@ char sensors_sysfs_mount[NAME_MAX];
 #define MAX_SENSORS_PER_TYPE	24
 #define MAX_SUBFEATURES		8
 #define MAX_SENSOR_TYPES	6
-/* Room for all 5 types (in, fan, temp, power, energy) with all their
-   subfeatures + VID + misc features */
+/* Room for all 6 types (in, fan, temp, power, energy, current) with all
+   their subfeatures + VID + misc features */
 #define ALL_POSSIBLE_SUBFEATURES \
 				(MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES * \
 				 MAX_SENSOR_TYPES * 2 + \
