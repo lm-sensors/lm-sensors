@@ -1165,6 +1165,16 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2f],
 		i2c_detect => sub { fintek_detect(@_, 7); },
 	}, {
+		name => "SMSC EMC1403",
+		driver => "emc1403",
+		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
+		i2c_detect => sub { emc1403_detect(@_, 0); },
+	}, {
+		name => "SMSC EMC1404",
+		driver => "to-be-written", # emc1403
+		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
+		i2c_detect => sub { emc1403_detect(@_, 1); },
+	}, {
 		name => "Smart Battery",
 		driver => "sbs", # ACPI driver, not sure if it always works
 		i2c_addrs => [0x0b],
@@ -5131,6 +5141,31 @@ sub fintek_detect
 	}
 
 	return 7;
+}
+
+# Chip to detect: 0 = EMC1403, 1 = EMC1404
+# Registers used:
+#   0xfd: Device ID register
+#   0xfe: Vendor ID register
+#   0xff: Revision register
+sub emc1403_detect
+{
+	my ($file, $addr, $chip) = @_;
+	my $dev_id = i2c_smbus_read_byte_data($file, 0xfd);
+	my $man_id = i2c_smbus_read_byte_data($file, 0xfe);
+	my $rev = i2c_smbus_read_byte_data($file, 0xff);
+
+	return unless $man_id == 0x5d;	# SMSC
+
+	if ($chip == 0) {
+		return unless $dev_id == 0x21;
+		return unless $rev == 0x01;
+	} elsif ($chip == 1) {
+		return unless $dev_id == 0x25;
+		return unless $rev == 0x01;
+	}
+
+	return 6;
 }
 
 # This checks for non-FFFF values for temperature, voltage, and current.

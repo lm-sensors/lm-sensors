@@ -5,6 +5,7 @@ SVN HEAD
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
   sensors-detect: Give udev time to settle before accessing i2c nodes
                   Add support for Intel PCH (SMBus)
+                  Add support for SMSC EMC1403 and EMC1404
 
 3.1.2 (2010-02-02)
   libsensors: Support upcoming sysfs path to i2c adapters
