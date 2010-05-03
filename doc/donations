@@ -109,3 +109,6 @@ Observit	Intel D865GSA, Celeron D-352, 128 MB RAM	2007-06
 
 Observit	Intel D865GBF, Celeron 2.4 GHz, 512 MB RAM	2007-06
 		Resulted in: improvements to the lm85 driver.	Jean Delvare
+
+ASUSTeK		ASUS Z8NA-D6, 2 x Xeon E5520, 2 x 1 GB RAM	2010-04
+		Drivers developed: nothing yet			Jean Delvare
