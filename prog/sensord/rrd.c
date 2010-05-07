@@ -137,9 +137,11 @@ static void rrdCheckLabel(const char *rawLabel, int index0)
 	}
 }
 
+/* Returns the number of features processed, or -1 on error */
 static int _applyToFeatures(FeatureFN fn, void *data,
 			    const sensors_chip_name *chip,
-			    const ChipDescriptor *desc)
+			    const ChipDescriptor *desc,
+			    int labelOffset)
 {
 	int i;
 	const FeatureDescriptor *features = desc->features;
@@ -147,7 +149,7 @@ static int _applyToFeatures(FeatureFN fn, void *data,
 	const char *rawLabel;
 	char *label;
 
-	for (i = 0; i < MAX_RRD_SENSORS && features[i].format; ++i) {
+	for (i = 0; labelOffset + i < MAX_RRD_SENSORS && features[i].format; ++i) {
 		feature = features + i;
 		rawLabel = feature->feature->name;
 
@@ -158,11 +160,11 @@ static int _applyToFeatures(FeatureFN fn, void *data,
 			return -1;
 		}
 
-		rrdCheckLabel(rawLabel, i);
-		fn(data, rrdLabels[i], label, feature);
+		rrdCheckLabel(rawLabel, labelOffset + i);
+		fn(data, rrdLabels[labelOffset + i], label, feature);
 		free(label);
 	}
-	return 0;
+	return i;
 }
 
 static ChipDescriptor *lookup_known_chips(const sensors_chip_name *chip)
@@ -184,7 +186,7 @@ static ChipDescriptor *lookup_known_chips(const sensors_chip_name *chip)
 
 static int applyToFeatures(FeatureFN fn, void *data)
 {
-	int i, i_detected, ret;
+	int i, i_detected, ret, labelOffset = 0;
 	const sensors_chip_name *chip, *chip_arg;
 	ChipDescriptor *desc;
 
@@ -197,9 +199,10 @@ static int applyToFeatures(FeatureFN fn, void *data)
 			if (!desc)
 				continue;
 
-			ret = _applyToFeatures(fn, data, chip, desc);
-			if (ret)
+			ret = _applyToFeatures(fn, data, chip, desc, labelOffset);
+			if (ret < 0)
 				return ret;
+			labelOffset += ret;
 		}
 	}
 	return 0;
