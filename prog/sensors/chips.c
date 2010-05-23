@@ -91,6 +91,21 @@ static double get_value(const sensors_chip_name *name,
 	return val;
 }
 
+/* A variant for input values, where we want to handle errors gracefully */
+static int get_input_value(const sensors_chip_name *name,
+			   const sensors_subfeature *sub,
+			   double *val)
+{
+	int err;
+
+	err = sensors_get_value(name, sub->number, val);
+	if (err && err != -SENSORS_ERR_ACCESS_R) {
+		fprintf(stderr, "ERROR: Can't get value of subfeature %s: %s\n",
+			sub->name, sensors_strerror(err));
+	}
+	return err;
+}
+
 static int get_label_size(const sensors_chip_name *name)
 {
 	int i;
@@ -230,8 +245,8 @@ static void print_chip_temp(const sensors_chip_name *name,
 	} else {
 		sf = sensors_get_subfeature(name, feature,
 					    SENSORS_SUBFEATURE_TEMP_INPUT);
-		if (sf) {
-			val = get_value(name, sf);
+		if (sf && get_input_value(name, sf, &val) == 0) {
+			get_input_value(name, sf, &val);
 			if (fahrenheit)
 				val = deg_ctof(val);
 			printf("%+6.1f%s  ", val, degstr);
@@ -289,7 +304,7 @@ static void print_chip_in(const sensors_chip_name *name,
 			  int label_size)
 {
 	const sensors_subfeature *sf, *sfmin, *sfmax;
-	double alarm_max, alarm_min;
+	double val, alarm_max, alarm_min;
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
@@ -302,8 +317,8 @@ static void print_chip_in(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_IN_INPUT);
-	if (sf)
-		printf("%+6.2f V", get_value(name, sf));
+	if (sf && get_input_value(name, sf, &val) == 0)
+		printf("%+6.2f V", val);
 	else
 		printf("     N/A");
 
@@ -355,6 +370,7 @@ static void print_chip_fan(const sensors_chip_name *name,
 			   int label_size)
 {
 	const sensors_subfeature *sf, *sfmin, *sfdiv;
+	double val;
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
@@ -372,8 +388,8 @@ static void print_chip_fan(const sensors_chip_name *name,
 	else {
 		sf = sensors_get_subfeature(name, feature,
 					    SENSORS_SUBFEATURE_FAN_INPUT);
-		if (sf)
-			printf("%4.0f RPM", get_value(name, sf));
+		if (sf && get_input_value(name, sf, &val) == 0)
+			printf("%4.0f RPM", val);
 		else
 			printf("     N/A");
 	}
@@ -471,8 +487,7 @@ static void print_chip_power(const sensors_chip_name *name,
 					       SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL);
 	}
 
-	if (sf) {
-		val = get_value(name, sf);
+	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sW", val, unit);
 	} else
@@ -526,8 +541,7 @@ static void print_chip_energy(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_ENERGY_INPUT);
-	if (sf) {
-		val = get_value(name, sf);
+	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sJ", val, unit);
 	} else
@@ -583,7 +597,7 @@ static void print_chip_curr(const sensors_chip_name *name,
 			    int label_size)
 {
 	const sensors_subfeature *sf, *sfmin, *sfmax;
-	double alarm_max, alarm_min;
+	double alarm_max, alarm_min, val;
 	char *label;
 
 	if (!(label = sensors_get_label(name, feature))) {
@@ -596,8 +610,8 @@ static void print_chip_curr(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_CURR_INPUT);
-	if (sf)
-		printf("%+6.2f A", get_value(name, sf));
+	if (sf && get_input_value(name, sf, &val) == 0)
+		printf("%+6.2f A", val);
 	else
 		printf("     N/A");
 

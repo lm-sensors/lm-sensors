@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
   sensord: Fix support of multiple chips (#2377)
+  sensors: Properly handle sensor input read errors
   sensors-detect: Give udev time to settle before accessing i2c nodes
                   Add support for Intel PCH (SMBus)
                   Add support for SMSC EMC1403 and EMC1404
