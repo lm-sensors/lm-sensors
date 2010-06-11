@@ -10,6 +10,7 @@ SVN HEAD
                   Add support for SMSC EMC1403 and EMC1404
                   Fix detection of RB-C3 AMD Family 10h CPU
                   Add support for SMSC EMC2103
+                  Add support for Fintek F71889ED
 
 3.1.2 (2010-02-02)
   libsensors: Support upcoming sysfs path to i2c adapters
