@@ -618,7 +618,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { andigilog_detect(@_, 1); },
 	}, {
 		name => "Andigilog aSC7621",
-		driver => "to-be-written",
+		driver => "asc7621",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { andigilog_detect(@_, 2); },
 	}, {
