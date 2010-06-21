@@ -228,6 +228,7 @@ static const struct subfeature_type_match temp_matches[] = {
 	{ "fault", SENSORS_SUBFEATURE_TEMP_FAULT },
 	{ "type", SENSORS_SUBFEATURE_TEMP_TYPE },
 	{ "offset", SENSORS_SUBFEATURE_TEMP_OFFSET },
+	{ "beep", SENSORS_SUBFEATURE_TEMP_BEEP },
 	{ NULL, 0 }
 };
 
@@ -238,6 +239,7 @@ static const struct subfeature_type_match in_matches[] = {
 	{ "alarm", SENSORS_SUBFEATURE_IN_ALARM },
 	{ "min_alarm", SENSORS_SUBFEATURE_IN_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_IN_MAX_ALARM },
+	{ "beep", SENSORS_SUBFEATURE_IN_BEEP },
 	{ NULL, 0 }
 };
 
@@ -247,6 +249,7 @@ static const struct subfeature_type_match fan_matches[] = {
 	{ "div", SENSORS_SUBFEATURE_FAN_DIV },
 	{ "alarm", SENSORS_SUBFEATURE_FAN_ALARM },
 	{ "fault", SENSORS_SUBFEATURE_FAN_FAULT },
+	{ "beep", SENSORS_SUBFEATURE_FAN_BEEP },
 	{ NULL, 0 }
 };
 
@@ -273,6 +276,7 @@ static const struct subfeature_type_match curr_matches[] = {
 	{ "alarm", SENSORS_SUBFEATURE_CURR_ALARM },
 	{ "min_alarm", SENSORS_SUBFEATURE_CURR_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_CURR_MAX_ALARM },
+	{ "beep", SENSORS_SUBFEATURE_CURR_BEEP },
 	{ NULL, 0 }
 };
 
