@@ -883,10 +883,15 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c..0x4d],
 		i2c_detect => sub { lm90_detect(@_, 3); },
 	}, {
-		name => "Maxim MAX6654/MAX6690",
+		name => "Maxim MAX6654",
 		driver => "to-be-written", # probably lm90
 		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
 		i2c_detect => sub { lm90_detect(@_, 4); },
+	}, {
+		name => "Maxim MAX6690",
+		driver => "to-be-written", # probably lm90
+		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
+		i2c_detect => sub { lm90_detect(@_, 12); },
 	}, {
 		name => "Maxim MAX6657/MAX6658/MAX6659",
 		driver => "lm90",
@@ -3986,10 +3991,10 @@ sub lm83_detect
 }
 
 # Chip to detect: 0 = LM90, 1 = LM89/LM99, 2 = LM86, 3 = ADM1032,
-#		  4 = MAX6654/MAX6690, 5 = ADT7461,
+#		  4 = MAX6654, 5 = ADT7461,
 #		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
 #		  7 = MAX6680/MAX6681, 8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
-#		  11 = W83L771AWG/ASG
+#		  11 = W83L771AWG/ASG, 12 = MAX6690
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4035,7 +4040,7 @@ sub lm90_detect
 		return if ($conf & 0x07) != 0;
 		return if $rate > 0x07;
 		return if $mid != 0x4d;		# Maxim
-		return 8 if $cid == 0x08;	# MAX6654/MAX6690
+		return 8 if $cid == 0x08;	# MAX6654
 	}
 	if ($chip == 5) {
 		return if ($conf & 0x1b) != 0;
@@ -4080,6 +4085,12 @@ sub lm90_detect
 		return if $rate > 0x08;
 		return if $mid != 0x5c;		# Winbond
 		return 6 if ($cid & 0xfe) == 0x10; # W83L771AWG/ASG
+	}
+	if ($chip == 12) {
+		return if ($conf & 0x07) != 0;
+		return if $rate > 0x07;
+		return if $mid != 0x4d;		# Maxim
+		return 8 if $cid == 0x09;	# MAX6690
 	}
 	return;
 }
