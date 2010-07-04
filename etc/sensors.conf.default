@@ -266,11 +266,11 @@ chip "adm1030-*" "adm1031-*"
     label temp1 "M/B Temp"
 
 
-chip "w83627ehf-*" "w83627dhg-*"
+chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*"
 
     label in0 "Vcore"
     label in2 "AVCC"
-    label in3 "VCC"
+    label in3 "+3.3V"
     label in7 "3VSB"
     label in8 "Vbat"
 

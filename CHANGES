@@ -5,6 +5,7 @@ SVN HEAD
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
               Map individual beep features
               Change license to LGPL
+  sensors.conf.default: W83667HG config is similar to W83627EHF/DHG
   sensord: Fix support of multiple chips (#2377)
   sensors: Properly handle sensor input read errors
   sensors-detect: Give udev time to settle before accessing i2c nodes
