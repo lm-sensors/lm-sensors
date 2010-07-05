@@ -2951,13 +2951,8 @@ use vars qw(%chips_detected);
 sub add_i2c_to_chips_detected
 {
 	my ($chipdriver, $datahash) = @_;
-	my ($i, $new_detected_ref, $detected_ref, $detected_entry,
+	my ($i, $detected_ref, $detected_entry,
 	    $put_in_detected, @hash_addrs, @entry_addrs);
-
-	# First determine where the hash has to be added.
-	$chips_detected{$chipdriver} = []
-		unless exists $chips_detected{$chipdriver};
-	$new_detected_ref = $chips_detected{$chipdriver};
 
 	# Find out whether our new entry should go into the detected list
 	# or not. We compare all i2c addresses; if at least one matches,
@@ -3003,7 +2998,9 @@ sub add_i2c_to_chips_detected
 	}
 
 	# Now add the new entry to detected
-	push @$new_detected_ref, $datahash;
+	$chips_detected{$chipdriver} = []
+		unless exists $chips_detected{$chipdriver};
+	push @{$chips_detected{$chipdriver}}, $datahash;
 }
 
 # This adds a detection to the above structure.
