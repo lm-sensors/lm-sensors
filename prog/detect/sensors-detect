@@ -2951,7 +2951,7 @@ use vars qw(%chips_detected);
 sub add_i2c_to_chips_detected
 {
 	my ($chipdriver, $datahash) = @_;
-	my ($i, $detected_ref, $detected_entry,
+	my ($i, $detected_ref, $detected_entry, $driver,
 	    $put_in_detected, @hash_addrs, @entry_addrs);
 
 	# Find out whether our new entry should go into the detected list
@@ -2984,7 +2984,8 @@ sub add_i2c_to_chips_detected
 	# Here, we discard all entries which match at least in one main or
 	# sub address. This may not be the best idea to do, as it may remove
 	# detections without replacing them with second-best ones. Too bad.
-	foreach $detected_ref (values %chips_detected) {
+	foreach $driver (keys %chips_detected) {
+		$detected_ref = $chips_detected{$driver};
 		for ($i = @$detected_ref-1; $i >=0; $i--) {
 			next unless defined $detected_ref->[$i]->{i2c_addr};
 			@entry_addrs = ($detected_ref->[$i]->{i2c_addr});
@@ -2993,6 +2994,8 @@ sub add_i2c_to_chips_detected
 			if ($detected_ref->[$i]->{i2c_devnr} == $datahash->{i2c_devnr} &&
 			    any_list_match(\@entry_addrs, \@hash_addrs)) {
 				splice @$detected_ref, $i, 1;
+				delete $chips_detected{$driver}
+					if (!@$detected_ref);
 			}
 		}
 	}
