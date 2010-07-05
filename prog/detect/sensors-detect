@@ -3003,6 +3003,15 @@ sub add_i2c_to_chips_detected
 	push @{$chips_detected{$chipdriver}}, $datahash;
 }
 
+# Fake i2c drivers such as "not-a-sensor" or "use-isa-instead" have to be
+# inserted so that confidence comparison can be performed. But then we have
+# to filter them out so that the user doesn't get confused.
+sub filter_out_fake_i2c_drivers
+{
+	delete $chips_detected{"not-a-sensor"};
+	delete $chips_detected{"use-isa-instead"};
+}
+
 # This adds a detection to the above structure.
 # $_[0]: chip driver
 # $_[1]: reference to data hash
@@ -3189,9 +3198,6 @@ sub probe_free_i2c_address
 			}
 		}
 		print ")\n";
-
-		return if ($chip->{driver} eq "not-a-sensor"
-			|| $chip->{driver} eq "use-isa-instead");
 
 		$new_hash = {
 			conf => $conf,
@@ -5986,6 +5992,7 @@ sub main
 			next unless exists $i2c_adapters[$dev_nr];
 			scan_i2c_adapter($dev_nr, $by_default);
 		}
+		filter_out_fake_i2c_drivers();
 	}
 
 	if (!keys %chips_detected) {
