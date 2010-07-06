@@ -1185,6 +1185,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
 		i2c_detect => sub { emc1403_detect(@_, 1); },
 	}, {
+		name => "ST STTS424",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 0); },
+	}, {
 		name => "Smart Battery",
 		driver => "sbs", # ACPI driver, not sure if it always works
 		i2c_addrs => [0x0b],
@@ -5302,6 +5307,52 @@ sub max6655_detect
 	return unless i2c_smbus_read_byte_data($file, 0x12) & 0x1f;
 
 	return 6;
+}
+
+# Chip to detect: 0 = STTS424
+# Registers used:
+#   0x00: Capabilities
+#   0x01: Configuration
+#   0x06: Manufacturer ID
+#   0x07: Device ID
+sub jedec_JC42_4_detect
+{
+	my ($file, $addr, $chip) = @_;
+	my ($reg, $manid, $devid);
+
+	# We test the MSB only at first, because not all chips enjoy
+	# word access.
+
+	# Check for unused bits
+	$reg = i2c_smbus_read_byte_data($file, 0x00);
+	return if $reg & 0xff;
+	$reg = i2c_smbus_read_byte_data($file, 0x01);
+	return if $reg & 0xf8;
+
+	# Check for manufacturer and device ID
+	$manid = i2c_smbus_read_byte_data($file, 0x06);
+	$devid = i2c_smbus_read_byte_data($file, 0x07);
+	if ($chip == 0) {
+		return unless $manid == 0x10;		# STMicrolectronics
+		return unless $devid == 0x00;		# STTS424
+	}
+
+	# Now, do it all again with words. Note that we get
+	# the MSB first, so all value checks are byte-swapped.
+
+	# Check for unused bits
+	$reg = i2c_smbus_read_word_data($file, 0x00);
+	return if $reg < 0 || $reg & 0xc0ff;
+
+	$manid = i2c_smbus_read_word_data($file, 0x06);
+	$devid = i2c_smbus_read_word_data($file, 0x07);
+	return if $manid < 0 || $devid < 0;
+	if ($chip == 0) {
+		return unless $manid == 0x4a10;		# STMicrolectronics
+		return unless ($devid & 0xfeff) == 0x0000; # STTS424
+	}
+
+	return 5;
 }
 
 # This isn't very good detection.

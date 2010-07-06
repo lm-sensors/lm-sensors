@@ -17,6 +17,7 @@ SVN HEAD
                   Add support for ITE IT8721F
                   Fix Maxim MAX6690 support
                   Fix handling of duplicate detections
+                  Add support for STMicroelectronics STTS424
 
 3.1.2 (2010-02-02)
   libsensors: Support upcoming sysfs path to i2c adapters
