@@ -1190,10 +1190,55 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 0); },
 	}, {
+		name => "ST STTS424E",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 10); },
+	}, {
 		name => "NXP SE97/SE97B",
 		driver => "to-be-written",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 1); },
+	}, {
+		name => "NXP SE98",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 2); },
+	}, {
+		name => "Analog Devices ADT7408",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 3); },
+	}, {
+		name => "IDT TS3000/TSE2002",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 4); },
+	}, {
+		name => "Maxim MAX6604",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 5); },
+	}, {
+		name => "Microchip MCP98242",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 6); },
+	}, {
+		name => "Microchip MCP98243",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 7); },
+	}, {
+		name => "Microchip MCP9843",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 8); },
+	}, {
+		name => "ON CAT6095/CAT34TS02",
+		driver => "to-be-written",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 9); },
 	}, {
 		name => "Smart Battery",
 		driver => "sbs", # ACPI driver, not sure if it always works
@@ -5314,7 +5359,10 @@ sub max6655_detect
 	return 6;
 }
 
-# Chip to detect: 0 = STTS424, 1 = SE97/SE97B
+# Chip to detect: 0 = STTS424, 1 = SE97/SE97B, 2 = SE98, 3 = ADT7408,
+#                 4 = TS3000/TSE2002, 5 = MAX6604, 6 = MCP98242,
+#                 7 = MCP98243, 8 = MCP9843, 9 = CAT6095 / CAT34TS02,
+#                 10 = STTS424E
 # Registers used:
 #   0x00: Capabilities
 #   0x01: Configuration
@@ -5340,10 +5388,37 @@ sub jedec_JC42_4_detect
 
 	if ($chip == 0) {
 		return unless $manid == 0x10;		# STMicrolectronics
-		return unless $devid == 0x00;		# STTS424
+		return unless $devid == 0x01;		# STTS424
 	} elsif ($chip == 1) {
 		return unless $manid == 0x11;		# NXP
 		return unless $devid == 0xa2;		# SE97
+	} elsif ($chip == 2) {
+		return unless $manid == 0x11;		# NXP
+		return unless $devid == 0xa1;		# SE98
+	} elsif ($chip == 3) {
+		return unless $manid == 0x11;		# ADT
+		return unless $devid == 0x08;		# ADT7408
+	} elsif ($chip == 4) {
+		return unless $manid == 0x00;		# IDT
+		return unless $devid == 0x29;		# TS3000/TSE2002
+	} elsif ($chip == 5) {
+		return unless $manid == 0x00;		# MAXIM
+		return unless $devid == 0x3e;		# MAX6604
+	} elsif ($chip == 6) {
+		return unless $manid == 0x00;		# MCP
+		return unless $devid == 0x20;		# MCP98242
+	} elsif ($chip == 7) {
+		return unless $manid == 0x00;		# MCP
+		return unless $devid == 0x21;		# MCP98243
+	} elsif ($chip == 8) {
+		return unless $manid == 0x00;		# MCP
+		return unless $devid == 0x00;		# MCP9843
+	} elsif ($chip == 9) {
+		return unless $manid == 0x1b;		# ONS
+		return unless $devid == 0x08;		# CAT6095 / CAT34TS02
+	} elsif ($chip == 10) {
+		return unless $manid == 0x10;		# STMicrolectronics
+		return unless $devid == 0x00;		# STTS424E02
 	}
 
 	# Now, do it all again with words. Note that we get
@@ -5358,10 +5433,37 @@ sub jedec_JC42_4_detect
 	return if $manid < 0 || $devid < 0;
 	if ($chip == 0) {
 		return unless $manid == 0x4a10;		# STMicrolectronics
-		return unless ($devid & 0xfeff) == 0x0000; # STTS424
+		return unless ($devid & 0xfeff) == 0x0001; # STTS424
 	} elsif ($chip == 1) {
 		return unless $manid == 0x3111;		# NXP
 		return unless ($devid & 0xfcff) == 0x00a2; # SE97
+	} elsif ($chip == 2) {
+		return unless $manid == 0x3111;		# NXP
+		return unless ($devid & 0xfcff) == 0x00a1; # SE98
+	} elsif ($chip == 3) {
+		return unless $manid == 0xd411;		# ADT
+		return unless $devid == 0x0108;		# ADT7408
+	} elsif ($chip == 4) {
+		return unless $manid == 0xb300;		# IDT
+		return unless $devid == 0x0329;		# TS3000/TSE2002
+	} elsif ($chip == 5) {
+		return unless $manid == 0x4d00;		# MAXIM
+		return unless $devid == 0x003e;		# MAX6604
+	} elsif ($chip == 6) {
+		return unless $manid == 0x5400;		# MCP
+		return unless ($devid & 0xfcff) == 0x0020; # MCP98242
+	} elsif ($chip == 7) {
+		return unless $manid == 0x5400;		# MCP
+		return unless ($devid & 0xfcff) == 0x0021; # MCP98243
+	} elsif ($chip == 8) {
+		return unless $manid == 0x5400;		# MCP
+		return unless ($devid & 0xfcff) == 0x0000; # MCP9843
+	} elsif ($chip == 9) {
+		return unless $manid == 0x091b;		# ONS
+		return unless ($devid & 0xe0ff) == 0x0008; # CAT6095 / CAT34TS02
+	} elsif ($chip == 10) {
+		return unless $manid == 0x4a10;		# STMicrolectronics
+		return unless ($devid & 0xfeff) == 0x0000; # STTS424E02
 	}
 
 	return 5;

@@ -20,6 +20,7 @@ SVN HEAD
                   Add support for STMicroelectronics STTS424
                   Add support for NXP SE97 / SE97B
                   Add reference to NCT6771F/NCT6772F/NCT6775F
+                  Add support for several JC42.4 compliant temperature sensors
 
 3.1.2 (2010-02-02)
   libsensors: Support upcoming sysfs path to i2c adapters
