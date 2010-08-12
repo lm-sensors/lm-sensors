@@ -1186,57 +1186,57 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { emc1403_detect(@_, 1); },
 	}, {
 		name => "ST STTS424",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 0); },
 	}, {
 		name => "ST STTS424E",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 10); },
 	}, {
 		name => "NXP SE97/SE97B",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 1); },
 	}, {
 		name => "NXP SE98",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 2); },
 	}, {
 		name => "Analog Devices ADT7408",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 3); },
 	}, {
 		name => "IDT TS3000/TSE2002",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 4); },
 	}, {
 		name => "Maxim MAX6604",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 5); },
 	}, {
 		name => "Microchip MCP98242",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 6); },
 	}, {
 		name => "Microchip MCP98243",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 7); },
 	}, {
 		name => "Microchip MCP9843",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 8); },
 	}, {
 		name => "ON CAT6095/CAT34TS02",
-		driver => "to-be-written",
+		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 9); },
 	}, {
@@ -1798,7 +1798,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71808E Super IO Sensors",
-		driver => "to-be-written",
+		driver => "f71882fg",
 		devid => 0x0901,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
