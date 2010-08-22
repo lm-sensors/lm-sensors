@@ -5,6 +5,7 @@ SVN HEAD
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
               Map individual beep features
               Change license to LGPL
+  pwmconfig: Sample all fan speeds before returning to full speed (#2380)
   sensors.conf.default: W83667HG config is similar to W83627EHF/DHG
   sensord: Fix support of multiple chips (#2377)
   sensors: Properly handle sensor input read errors

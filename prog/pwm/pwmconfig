@@ -437,15 +437,19 @@ do
 		echo '^C received, restoring PWM and aborting...'
 		exit 1
 	fi
+
+	# Sample all current fan speeds at once, so that we can quickly
+	# disable PWM and return all fans to full speed
+	CURRENT_SPEEDS="`cat $GOODFAN`"
+	pwmdisable $i
+
 	let pwmactivecount=0
 	let count=1
 	for j in $GOODFAN
 	do
 		OS=`echo $SPEEDS | cut -d' ' -f$count`
-		# this will return the first field if there's only one (sysfs)
-		S=`cat $j | cut -d' ' -f2`
+		S=`echo $CURRENT_SPEEDS | cut -d' ' -f$count`
 		echo "  $j ... speed was $OS now $S"
-		pwmdisable $i
 		let threshold=2*$OS/3
 		if [ $S -lt $threshold ]
 		then
