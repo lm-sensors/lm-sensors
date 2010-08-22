@@ -7,6 +7,7 @@ SVN HEAD
               Change license to LGPL
   pwmconfig: Sample all fan speeds before returning to full speed (#2380)
              Wait for fans to return to full speed only once per PWM
+             Drop legacy invocations of cut
   sensors.conf.default: W83667HG config is similar to W83627EHF/DHG
   sensord: Fix support of multiple chips (#2377)
   sensors: Properly handle sensor input read errors

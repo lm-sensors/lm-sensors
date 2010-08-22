@@ -280,8 +280,7 @@ sleep $DELAY
 echo 'Found the following fan sensors:'
 for i in $FAN
 do
-	# this will return the first field if there's only one (sysfs)
-	S=`cat $i | cut -d' ' -f2`
+	S=`cat $i`
 	if [ "$S" = "0" -o "$S" = "-1" ]
 	then
 		echo "   $i     current speed: 0 ... skipping!"
@@ -373,8 +372,7 @@ function pwmdetail()
 			rm -f $TMP1 $TMP2
 			exit 1
 		fi
-		# this will return the first field if there's only one (sysfs)
-		S=`cat $F | cut -d' ' -f2`
+		S=`cat $F`
 		# Fan speed should never increase significantly
 		if [ $S -gt $threshold ]
 		then
@@ -476,8 +474,7 @@ do
 				fanactive="$j+${fanactive}" #not supported yet by fancontrol
 				fanactive_min="$S+${fanactive_min}"
 			fi
-			# this will return the first field if there's only one (sysfs)
-			S=`cat $j | cut -d' ' -f2`
+			S=`cat $j`
 			if [ $S -lt $threshold ]
 			then
 				echo "    Fan $j has not returned to speed, please investigate!"
@@ -701,7 +698,7 @@ function TestMinStop()
 	do
 		pwmset $pwms $fanval
 		sleep $PDELAY
-		fanspeed=`cat $faninput | cut -d' ' -f2`
+		fanspeed=`cat $faninput`
 		if [ $fanspeed -gt $threshold ]
 		then
 			echo "    PWM $fanval -> $fanspeed RPM (probably incorrect)"
