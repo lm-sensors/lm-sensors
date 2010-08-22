@@ -464,15 +464,17 @@ do
 				pwmactive="$i ${pwmactive}"
 				fanactive="$j ${fanactive}"
 				fanactive_min="$S ${fanactive_min}"
+
+				# Give all correlated fans time to return to full speed
+				sleep $DELAY
+				if [ $? -ne 0 ]
+				then
+					echo '^C received, aborting...'
+					exit 1
+				fi
 			else
 				fanactive="$j+${fanactive}" #not supported yet by fancontrol
 				fanactive_min="$S+${fanactive_min}"
-			fi
-			sleep $DELAY
-			if [ $? -ne 0 ]
-			then
-				echo '^C received, aborting...'
-				exit 1
 			fi
 			# this will return the first field if there's only one (sysfs)
 			S=`cat $j | cut -d' ' -f2`
