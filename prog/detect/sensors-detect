@@ -1590,6 +1590,12 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0a,
 		features => FEAT_FAN,
 	}, {
+		name => "SMSC LPC47U32x Super IO Fan Sensors",
+		driver => "to-be-written",
+		devid => 0x58,
+		logdev => 0x0a,
+		features => FEAT_FAN,
+	}, {
 		name => "SMSC LPC47U33x Super IO Fan Sensors",
 		driver => "to-be-written",
 		devid => 0x54,
@@ -1711,6 +1717,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		devid => 0x3f,
 	}, {
 		name => "Winbond W83627HF/F/HG/G Super IO Sensors",
+		# Also SMSC LPC61W492
 		driver => "w83627hf",
 		devid => 0x52,
 		logdev => 0x0b,
