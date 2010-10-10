@@ -6,6 +6,9 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x430	lm-sensors 3.2.0
+* License changed from GPL to LGPL
+
 0x421	lm-sensors 3.1.2
 * Added bus type "hid":
   #define SENSORS_BUS_TYPE_HID

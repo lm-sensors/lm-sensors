@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
               Map individual beep features
               Change license to LGPL
