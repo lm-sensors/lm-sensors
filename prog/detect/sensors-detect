@@ -4113,6 +4113,7 @@ sub max6680_95_detect
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
+#   0xbf: Configuration 2 (National Semiconductor and Winbond only)
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 sub lm90_detect
@@ -4122,9 +4123,11 @@ sub lm90_detect
 	my $cid = i2c_smbus_read_byte_data($file, 0xff);
 	my $conf = i2c_smbus_read_byte_data($file, 0x03);
 	my $rate = i2c_smbus_read_byte_data($file, 0x04);
+	my $conf2 = i2c_smbus_read_byte_data($file, 0xbf);
 
 	if ($chip == 0) {
 		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xf8) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x01;		# National Semiconductor
 		return 8 if $cid == 0x21;	# LM90
@@ -4132,6 +4135,7 @@ sub lm90_detect
 	}
 	if ($chip == 1) {
 		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xf8) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x01;		# National Semiconductor
 		return 8 if $addr == 0x4c and $cid == 0x31; # LM89/LM99
@@ -4140,6 +4144,7 @@ sub lm90_detect
 	}
 	if ($chip == 2) {
 		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xf8) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x01;		# National Semiconductor
 		return 8 if $cid == 0x11;	# LM86
@@ -4171,6 +4176,7 @@ sub lm90_detect
 	}
 	if ($chip == 8) {
 		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xf8) != 0;
 		return if $rate > 0x09;
 		return if $mid != 0x5c;		# Winbond
 		return 6 if ($cid & 0xfe) == 0x00; # W83L771W/G
@@ -4191,6 +4197,7 @@ sub lm90_detect
 	}
 	if ($chip == 11) {
 		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xf8) != 0;
 		return if $rate > 0x08;
 		return if $mid != 0x5c;		# Winbond
 		return 6 if ($cid & 0xfe) == 0x10; # W83L771AWG/ASG
