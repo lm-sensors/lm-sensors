@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  Makefile: Check for bison and flex
   sensors-detect: Improve LM90 and W83L771 detection
 
 3.2.0 (2010-10-10)
