@@ -382,15 +382,18 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		sftype = sensors_subfeature_get_type(name, &nr);
 		if (sftype == SENSORS_SUBFEATURE_UNKNOWN)
 			continue;
+		ftype = sftype >> 8;
 
 		/* Adjust the channel number */
-		switch (sftype & 0xFF00) {
-		case SENSORS_SUBFEATURE_FAN_INPUT:
-		case SENSORS_SUBFEATURE_TEMP_INPUT:
-		case SENSORS_SUBFEATURE_POWER_AVERAGE:
-		case SENSORS_SUBFEATURE_ENERGY_INPUT:
-		case SENSORS_SUBFEATURE_CURR_INPUT:
+		switch (ftype) {
+		case SENSORS_FEATURE_FAN:
+		case SENSORS_FEATURE_TEMP:
+		case SENSORS_FEATURE_POWER:
+		case SENSORS_FEATURE_ENERGY:
+		case SENSORS_FEATURE_CURR:
 			nr--;
+			break;
+		default:
 			break;
 		}
 
@@ -406,19 +409,18 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 		/* "calculate" a place to store the subfeature in our sparse,
 		   sorted table */
-		switch (sftype) {
-		case SENSORS_SUBFEATURE_VID:
+		switch (ftype) {
+		case SENSORS_FEATURE_VID:
 			i = SUB_OFFSET_OTHER +
-			    ((sftype >> 8) - SENSORS_FEATURE_VID) *
-			    FEATURE_TYPE_SIZE +
+			    (ftype - SENSORS_FEATURE_VID) * FEATURE_TYPE_SIZE +
 			    nr * FEATURE_SIZE + (sftype & 0xFF);
 			break;
-		case SENSORS_SUBFEATURE_BEEP_ENABLE:
+		case SENSORS_FEATURE_BEEP_ENABLE:
 			i = SUB_OFFSET_MISC +
-			    ((sftype >> 8) - SENSORS_FEATURE_BEEP_ENABLE);
+			    (ftype - SENSORS_FEATURE_BEEP_ENABLE);
 			break;
 		default:
-			i = (sftype >> 8) * FEATURE_TYPE_SIZE +
+			i = ftype * FEATURE_TYPE_SIZE +
 			    nr * FEATURE_SIZE +
 			    ((sftype & 0x80) >> 7) * MAX_SUBFEATURES +
 			    (sftype & 0x7F);
