@@ -439,7 +439,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		if (!all_subfeatures[i].name)
 			sensors_fatal_error(__func__, "Out of memory");
 
-		if (!(sftype & 0x80))
+		/* Other and misc subfeatures are never scaled */
+		if (sftype < SENSORS_SUBFEATURE_VID && !(sftype & 0x80))
 			all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
 		all_subfeatures[i].flags |= sensors_get_attr_mode(dev_path, name);
 
