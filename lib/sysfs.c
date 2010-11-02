@@ -136,15 +136,19 @@ static int sysfs_foreach_busdev(const char *bus_type,
 
 char sensors_sysfs_mount[NAME_MAX];
 
+#define MAX_MAIN_SENSOR_TYPES	6
+#define MAX_OTHER_SENSOR_TYPES	1
 #define MAX_SENSORS_PER_TYPE	24
 #define MAX_SUBFEATURES		8
-#define MAX_SENSOR_TYPES	6
-/* Room for all 6 types (in, fan, temp, power, energy, current) with all
-   their subfeatures + VID + misc features */
-#define ALL_POSSIBLE_SUBFEATURES \
-				(MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES * \
-				 MAX_SENSOR_TYPES * 2 + \
-				 MAX_SENSORS_PER_TYPE + 1)
+#define FEATURE_SIZE		(MAX_SUBFEATURES * 2)
+#define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)
+
+/* Room for all 6 main types (in, fan, temp, power, energy, current) and 1
+   other type (VID) with all their subfeatures + misc features */
+#define SUB_OFFSET_OTHER	(MAX_MAIN_SENSOR_TYPES * FEATURE_TYPE_SIZE)
+#define SUB_OFFSET_MISC		(SUB_OFFSET_OTHER + \
+				 MAX_OTHER_SENSOR_TYPES * FEATURE_TYPE_SIZE)
+#define ALL_POSSIBLE_SUBFEATURES	(SUB_OFFSET_MISC + 1)
 
 static
 int get_type_scaling(sensors_subfeature_type type)
@@ -404,16 +408,18 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		   sorted table */
 		switch (sftype) {
 		case SENSORS_SUBFEATURE_VID:
-			i = nr + MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES *
-			    MAX_SENSOR_TYPES * 2;
+			i = SUB_OFFSET_OTHER +
+			    ((sftype >> 8) - SENSORS_FEATURE_VID) *
+			    FEATURE_TYPE_SIZE +
+			    nr * FEATURE_SIZE + (sftype & 0xFF);
 			break;
 		case SENSORS_SUBFEATURE_BEEP_ENABLE:
-			i = MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES *
-			    MAX_SENSOR_TYPES * 2 + MAX_SENSORS_PER_TYPE;
+			i = SUB_OFFSET_MISC +
+			    ((sftype >> 8) - SENSORS_FEATURE_BEEP_ENABLE);
 			break;
 		default:
-			i = (sftype >> 8) * MAX_SENSORS_PER_TYPE *
-			    MAX_SUBFEATURES * 2 + nr * MAX_SUBFEATURES * 2 +
+			i = (sftype >> 8) * FEATURE_TYPE_SIZE +
+			    nr * FEATURE_SIZE +
 			    ((sftype & 0x80) >> 7) * MAX_SUBFEATURES +
 			    (sftype & 0x7F);
 		}
@@ -450,11 +456,9 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		if (!all_subfeatures[i].name)
 			continue;
 
-		if (i >= MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES *
-		    MAX_SENSOR_TYPES * 2 ||
-		    i / (MAX_SUBFEATURES * 2) != prev_slot) {
+		if (i >= SUB_OFFSET_MISC || i / FEATURE_SIZE != prev_slot) {
 			fnum++;
-			prev_slot = i / (MAX_SUBFEATURES * 2);
+			prev_slot = i / FEATURE_SIZE;
 		}
 	}
 
@@ -472,12 +476,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			continue;
 
 		/* New main feature? */
-		if (i >= MAX_SENSORS_PER_TYPE * MAX_SUBFEATURES *
-		    MAX_SENSOR_TYPES * 2 ||
-		    i / (MAX_SUBFEATURES * 2) != prev_slot) {
+		if (i >= SUB_OFFSET_MISC || i / FEATURE_SIZE != prev_slot) {
 			ftype = all_subfeatures[i].type >> 8;
 			fnum++;
-			prev_slot = i / (MAX_SUBFEATURES * 2);
+			prev_slot = i / FEATURE_SIZE;
 
 			dyn_features[fnum].name = get_feature_name(ftype,
 						all_subfeatures[i].name);
