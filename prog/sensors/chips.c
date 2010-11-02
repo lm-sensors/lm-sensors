@@ -120,7 +120,10 @@ static int get_label_size(const sensors_chip_name *name)
 			max_size = strlen(label);
 		free(label);
 	}
-	return max_size + 1;
+
+	/* One more for the colon, and one more to guarantee at least one
+	   space between that colon and the value */
+	return max_size + 2;
 }
 
 static void print_temp_limits(double limit1, double limit2,
