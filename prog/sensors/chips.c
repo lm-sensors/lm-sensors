@@ -58,7 +58,7 @@ void print_chip_raw(const sensors_chip_name *name)
 						sub->name,
 						sensors_strerror(err));
 				else
-					printf("  %s: %.2f\n", sub->name, val);
+					printf("  %s: %.3f\n", sub->name, val);
 			} else
 				printf("(%s)\n", label);
 		}
