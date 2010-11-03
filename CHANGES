@@ -4,6 +4,7 @@ lm_sensors CHANGES file
 SVN-HEAD
   File lm_sensors.lsm: Delete, don't advertise a legacy branch
   File doc/developers/release_checklist: Skip mail to lsm
+  Library: Handle new chassis intrusion interface (w93792d and w83793)
   Module i2c-ali1563: Remove sparse warnings (2.6 backport)
   Module i2c-amd8111: Fix timeout handling (2.6 backport)
   Module i2c-piix4: ATI SB800 is not actually supported

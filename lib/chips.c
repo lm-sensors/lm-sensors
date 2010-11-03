@@ -1827,7 +1827,8 @@ static sensors_chip_feature w83792d_features[] =
     { { SENSORS_W83792D_VRM, "vrm", NOMAP, NOMAP, RW }, 
                              W83792D_SYSCTL_VRM, VALUE(1), 1 }, */
     { { SENSORS_W83792D_CHASSIS, "chassis", SENSORS_W83792D_CHASSIS, NOMAP, RW }, 
-                                 W83792D_SYSCTL_CHASSIS, VALUE(1), 0 },
+                                 W83792D_SYSCTL_CHASSIS, VALUE(1), 0,
+                                 "intrusion0_alarm", 0, "chassis" },
     { { SENSORS_W83792D_FAN1_DIV, "fan1_div", SENSORS_W83792D_FAN1, NOMAP, RW }, 
                                   W83792D_SYSCTL_FAN_DIV, VALUE(1), 0 },
     { { SENSORS_W83792D_FAN2_DIV, "fan2_div", SENSORS_W83792D_FAN2, NOMAP, RW }, 
@@ -1924,7 +1925,8 @@ static sensors_chip_feature w83793_features[] =
     { { SENSORS_W83793_VRM, "vrm", NOMAP, NOMAP, RW }, 
                          NOSYSCTL, VALUE(1), 1 },
     { { SENSORS_W83793_CHASSIS, "chassis", NOMAP, NOMAP, RW }, 
-                             NOSYSCTL, VALUE(1), 0 },
+                             NOSYSCTL, VALUE(1), 0,
+                             "intrusion0_alarm", 0, "chassis" },
     { { 0 }, 0 }
 };
 
