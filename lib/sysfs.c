@@ -1,7 +1,7 @@
 /*
     sysfs.c - Part of libsensors, a library for reading Linux sensor data
     Copyright (c) 2005 Mark M. Hoffman <mhoffman@lightlink.com>
-    Copyright (C) 2007-2008 Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2010 Jean Delvare <khali@linux-fr.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -137,14 +137,14 @@ static int sysfs_foreach_busdev(const char *bus_type,
 char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_MAIN_SENSOR_TYPES	6
-#define MAX_OTHER_SENSOR_TYPES	1
+#define MAX_OTHER_SENSOR_TYPES	2
 #define MAX_SENSORS_PER_TYPE	24
 #define MAX_SUBFEATURES		8
 #define FEATURE_SIZE		(MAX_SUBFEATURES * 2)
 #define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)
 
-/* Room for all 6 main types (in, fan, temp, power, energy, current) and 1
-   other type (VID) with all their subfeatures + misc features */
+/* Room for all 6 main types (in, fan, temp, power, energy, current) and 2
+   other types (VID, intrusion) with all their subfeatures + misc features */
 #define SUB_OFFSET_OTHER	(MAX_MAIN_SENSOR_TYPES * FEATURE_TYPE_SIZE)
 #define SUB_OFFSET_MISC		(SUB_OFFSET_OTHER + \
 				 MAX_OTHER_SENSOR_TYPES * FEATURE_TYPE_SIZE)
@@ -190,6 +190,7 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_POWER:
 	case SENSORS_FEATURE_ENERGY:
 	case SENSORS_FEATURE_CURR:
+	case SENSORS_FEATURE_INTRUSION:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
 		if (!name)
@@ -289,6 +290,11 @@ static const struct subfeature_type_match cpu_matches[] = {
 	{ NULL, 0 }
 };
 
+static const struct subfeature_type_match intrusion_matches[] = {
+	{ "alarm", SENSORS_SUBFEATURE_INTRUSION_ALARM },
+	{ "beep", SENSORS_SUBFEATURE_INTRUSION_BEEP },
+	{ NULL, 0 }
+};
 static struct feature_type_match matches[] = {
 	{ "temp%d%c", temp_matches },
 	{ "in%d%c", in_matches },
@@ -297,6 +303,7 @@ static struct feature_type_match matches[] = {
 	{ "power%d%c", power_matches },
 	{ "curr%d%c", curr_matches },
 	{ "energy%d%c", energy_matches },
+	{ "intrusion%d%c", intrusion_matches },
 };
 
 /* Return the subfeature type and channel number based on the subfeature
@@ -411,6 +418,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		   sorted table */
 		switch (ftype) {
 		case SENSORS_FEATURE_VID:
+		case SENSORS_FEATURE_INTRUSION:
 			i = SUB_OFFSET_OTHER +
 			    (ftype - SENSORS_FEATURE_VID) * FEATURE_TYPE_SIZE +
 			    nr * FEATURE_SIZE + (sftype & 0xFF);

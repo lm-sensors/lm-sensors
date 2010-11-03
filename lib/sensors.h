@@ -1,7 +1,7 @@
 /*
     sensors.h - Part of libsensors, a Linux library for reading sensor data.
     Copyright (c) 1998, 1999  Frodo Looijaard <frodol@dds.nl>
-    Copyright (C) 2007        Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007, 2010  Jean Delvare <khali@linux-fr.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -141,6 +141,7 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_ENERGY		= 0x04,
 	SENSORS_FEATURE_CURR		= 0x05,
 	SENSORS_FEATURE_VID		= 0x10,
+	SENSORS_FEATURE_INTRUSION	= 0x11,
 	SENSORS_FEATURE_BEEP_ENABLE	= 0x18,
 	SENSORS_FEATURE_UNKNOWN		= INT_MAX,
 } sensors_feature_type;
@@ -197,6 +198,9 @@ typedef enum sensors_subfeature_type {
 	SENSORS_SUBFEATURE_CURR_BEEP,
 
 	SENSORS_SUBFEATURE_VID = SENSORS_FEATURE_VID << 8,
+
+	SENSORS_SUBFEATURE_INTRUSION_ALARM = SENSORS_FEATURE_INTRUSION << 8,
+	SENSORS_SUBFEATURE_INTRUSION_BEEP,
 
 	SENSORS_SUBFEATURE_BEEP_ENABLE = SENSORS_FEATURE_BEEP_ENABLE << 8,
 

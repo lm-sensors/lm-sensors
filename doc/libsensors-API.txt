@@ -6,6 +6,12 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x431	lm-sensors SVN
+* Added support for intrusion detection
+  enum sensors_feature_type SENSORS_FEATURE_INTRUSION
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_INTRUSION_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_INTRUSION_BEEP
+
 0x430	lm-sensors 3.2.0
 * License changed from GPL to LGPL
 
