@@ -5,6 +5,7 @@ SVN HEAD
   Makefile: Check for bison and flex
   libsensors: Add support for intrusion detection
   sensors: Display 3 decimal places in raw output
+           Add support for intrusion detection
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
 

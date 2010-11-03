@@ -2,7 +2,7 @@
     chips.c - Part of sensors, a user-space program for hardware monitoring
     Copyright (C) 1998-2003  Frodo Looijaard <frodol@dds.nl> and
                              Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2007       Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2010  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -661,6 +661,27 @@ static void print_chip_curr(const sensors_chip_name *name,
 	printf("\n");
 }
 
+static void print_chip_intrusion(const sensors_chip_name *name,
+				 const sensors_feature *feature,
+				 int label_size)
+{
+	char *label;
+	const sensors_subfeature *subfeature;
+	double alarm;
+
+	subfeature = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_INTRUSION_ALARM);
+	if (!subfeature)
+		return;
+
+	if ((label = sensors_get_label(name, feature))
+	 && !sensors_get_value(name, subfeature->number, &alarm)) {
+		print_label(label, label_size);
+		printf("%s\n", alarm ? "ALARM" : "OK");
+	}
+	free(label);
+}
+
 void print_chip(const sensors_chip_name *name)
 {
 	const sensors_feature *feature;
@@ -694,6 +715,9 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_CURR:
 			print_chip_curr(name, feature, label_size);
+			break;
+		case SENSORS_FEATURE_INTRUSION:
+			print_chip_intrusion(name, feature, label_size);
 			break;
 		default:
 			continue;
