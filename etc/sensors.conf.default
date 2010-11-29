@@ -266,6 +266,25 @@ chip "adm1030-*" "adm1031-*"
     label temp1 "M/B Temp"
 
 
+chip "w83627thf-*"
+
+    label in3 "+5V"
+    label in7 "5VSB"
+    label in8 "Vbat"
+
+    # Internal resistors
+    compute in3  @ * (1 + 34/51), @ / (1 + 34/51)
+    compute in7  @ * (1 + 34/51), @ / (1 + 34/51)
+
+    set in3_min  5.0 * 0.90
+    set in3_max  5.0 * 1.10
+    set in7_min  5.0 * 0.90
+    set in7_max  5.0 * 1.10
+# The battery voltage may or may not be monitored.
+#    set in8_min  3.0 * 0.90
+#    set in8_max  3.0 * 1.10
+
+
 chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*"
 
     label in0 "Vcore"
