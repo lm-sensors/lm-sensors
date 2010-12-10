@@ -402,6 +402,20 @@ chip "sch5027-*"
     set in6_max  3.0 * 1.10
 
 
+chip "sch5127-*"
+
+    label in2 "+3.3V"
+    label in5 "3VSB"
+    label in6 "Vbat"
+
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in5_min  3.3 * 0.90
+    set in5_max  3.3 * 1.10
+    set in6_min  3.0 * 0.90
+    set in6_max  3.0 * 1.10
+
+
 chip "f71882fg-*"
 
     label in0 "+3.3V"

@@ -5,6 +5,7 @@ SVN HEAD
   Makefile: Check for bison and flex
   libsensors: Add support for intrusion detection (#2370)
   sensors.conf.defauit: Add a section for the W83627THF
+                        Add a section for the SCH5127
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
   sensors-detect: Improve LM90 and W83L771 detection
