@@ -597,6 +597,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { adt7490_detect(@_); },
 	}, {
+		name => "Analog Devices ADT7410",
+		driver => "to-be-written",
+		i2c_addrs => [0x48..0x4b],
+		i2c_detect => sub { adt7410_detect(@_); },
+	}, {
 		name => "Analog Devices ADT7411",
 		driver => "to-be-written",
 		i2c_addrs => [0x48, 0x4a, 0x4b],
@@ -4544,6 +4549,41 @@ sub adt7490_detect
 	return if $mid != 0x41;			# Analog Devices
 	return if ($cid & 0xfc) != 0x6c;	# ADT7490
 	return 5;
+}
+
+# Registers used:
+#   0x02: Status
+#   0x0a: Thyst
+#   0x0b: ID
+# We also rely on the fact that only the 5 LSB of the address pointer
+# are considered, so registers cycle over 32 byte boundaries.
+sub adt7410_detect
+{
+	my ($file, $addr) = @_;
+	my $status = i2c_smbus_read_byte_data($file, 0x02);
+	my $thyst = i2c_smbus_read_byte_data($file, 0x0a);
+	my $id = i2c_smbus_read_byte_data($file, 0x0b);
+
+	# Unused bits
+	return if ($status & 0x0f);
+	return if ($thyst & 0xf0);
+
+	# ID register
+	return if $id != 0xcb;
+
+	# Cycling registers
+	for (my $i = 2; $i < 16; $i *= 2) {
+		return if i2c_smbus_read_byte_data($file, 0x0a + $i * 16) != $thyst;
+		return if i2c_smbus_read_byte_data($file, 0x0b + $i * 16) != $id;
+	}
+
+	# Non-existent registers (other devices tend to have ID registers there)
+	return if i2c_smbus_read_byte_data($file, 0x03e) != 0;
+	return if i2c_smbus_read_byte_data($file, 0x03f) != 0;
+	return if i2c_smbus_read_byte_data($file, 0x0fe) != 0;
+	return if i2c_smbus_read_byte_data($file, 0x0ff) != 0;
+
+	return 3;
 }
 
 # Registers used:

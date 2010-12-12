@@ -11,6 +11,7 @@ SVN HEAD
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
                   Add detection of SMSC EMC1423
+                  Add detection of the Analog Devices ADT7410
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
