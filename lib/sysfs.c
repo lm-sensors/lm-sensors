@@ -139,8 +139,8 @@ char sensors_sysfs_mount[NAME_MAX];
 #define MAX_MAIN_SENSOR_TYPES	6
 #define MAX_OTHER_SENSOR_TYPES	2
 #define MAX_SENSORS_PER_TYPE	24
-#define MAX_SUBFEATURES		8
-#define FEATURE_SIZE		(MAX_SUBFEATURES * 2)
+/* max_subfeatures is now computed dynamically */
+#define FEATURE_SIZE		(max_subfeatures * 2)
 #define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)
 
 /* Room for all 6 main types (in, fan, temp, power, energy, current) and 2
@@ -337,6 +337,33 @@ sensors_subfeature_type sensors_subfeature_get_type(const char *name, int *nr)
 	return SENSORS_SUBFEATURE_UNKNOWN;
 }
 
+static int sensors_compute_max(void)
+{
+	int i, j, max, offset;
+	const struct subfeature_type_match *submatches;
+	sensors_feature_type ftype;
+
+	max = 0;
+	for (i = 0; i < ARRAY_SIZE(matches); i++) {
+		submatches = matches[i].submatches;
+		for (j = 0; submatches[j].name != NULL; j++) {
+			ftype = submatches[j].type >> 8;
+
+			if (ftype < SENSORS_FEATURE_VID) {
+				offset = submatches[j].type & 0x7F;
+				if (offset >= max)
+					max = offset + 1;
+			} else {
+				offset = submatches[j].type & 0xFF;
+				if (offset >= max * 2)
+					max = ((offset + 1) + 1) / 2;
+			}
+		}
+	}
+
+	return max;
+}
+
 static int sensors_get_attr_mode(const char *device, const char *attr)
 {
 	char path[NAME_MAX];
@@ -357,6 +384,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 				     const char *dev_path)
 {
 	int i, fnum = 0, sfnum = 0, prev_slot;
+	static int max_subfeatures;
 	DIR *dir;
 	struct dirent *ent;
 	sensors_subfeature *all_subfeatures;
@@ -367,6 +395,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 	if (!(dir = opendir(dev_path)))
 		return -errno;
+
+	/* Dynamically figure out the max number of subfeatures */
+	if (!max_subfeatures)
+		max_subfeatures = sensors_compute_max();
 
 	/* We use a large sparse table at first to store all found
 	   subfeatures, so that we can store them sorted at type and index
@@ -430,7 +462,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		default:
 			i = ftype * FEATURE_TYPE_SIZE +
 			    nr * FEATURE_SIZE +
-			    ((sftype & 0x80) >> 7) * MAX_SUBFEATURES +
+			    ((sftype & 0x80) >> 7) * max_subfeatures +
 			    (sftype & 0x7F);
 		}
 
