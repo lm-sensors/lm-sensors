@@ -136,8 +136,8 @@ static int sysfs_foreach_busdev(const char *bus_type,
 
 char sensors_sysfs_mount[NAME_MAX];
 
-#define MAX_MAIN_SENSOR_TYPES	6
-#define MAX_OTHER_SENSOR_TYPES	2
+#define MAX_MAIN_SENSOR_TYPES	(SENSORS_FEATURE_MAX_MAIN - SENSORS_FEATURE_IN)
+#define MAX_OTHER_SENSOR_TYPES	(SENSORS_FEATURE_MAX_OTHER - SENSORS_FEATURE_VID)
 #define MAX_SENSORS_PER_TYPE	24
 /* max_subfeatures is now computed dynamically */
 #define FEATURE_SIZE		(max_subfeatures * 2)
