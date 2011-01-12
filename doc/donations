@@ -101,11 +101,11 @@ Winbond		Asus P4P800-X, Pentium 4 2.8 GHz, 512 MB RAM	2006-08
 		(ICH5) SMBus with SPD EEPROMs connected, and
 		a Winbond W83627THF hardware monitoring chip.
 
-Observit	Intel D865GSA, Celeron D-352, 128 MB RAM	2007-06
-		Resulted in: backport of the w83627ehf driver	Jean Delvare
+Observit	Intel D865GSA (dead), Celeron D-352,		2007-06
+		128 MB RAM					Jean Delvare
+		Resulted in: backport of the w83627ehf driver
 		to Linux 2.4, improvements to the Linux 2.6
 		w83627ehf driver.
-		(dead)
 
 Observit	Intel D865GBF, Celeron 2.4 GHz, 512 MB RAM	2007-06
 		Resulted in: improvements to the lm85 driver.	Jean Delvare
