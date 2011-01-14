@@ -640,7 +640,12 @@ use vars qw(@i2c_adapter_names);
 		name => "National Semiconductor LM93",
 		driver => "lm93",
 		i2c_addrs => [0x2c..0x2e],
-		i2c_detect => sub { lm93_detect(@_); },
+		i2c_detect => sub { lm93_detect(@_, 0); },
+	}, {
+		name => "National Semiconductor LM94",
+		driver => "to-be-written",	# Most likely lm93
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm93_detect(@_, 1); },
 	}, {
 		name => "Winbond W83781D",
 		driver => "w83781d",
@@ -5226,14 +5231,27 @@ sub fsc_detect
 	return 8;
 }
 
+# Chip to detect: 0 = LM93, 1 = LM94
 # Registers used:
 #   0x3E: Manufacturer ID
 #   0x3F: Version/Stepping
 sub lm93_detect
 {
-	my ($file, $addr) = @_;
-	return unless i2c_smbus_read_byte_data($file, 0x3E) == 0x01
-		  and i2c_smbus_read_byte_data($file, 0x3F) == 0x73;
+	my ($file, $addr, $chip) = @_;
+	my ($man_id, $dev_id);
+
+	$man_id = i2c_smbus_read_byte_data($file, 0x3E);
+	$dev_id = i2c_smbus_read_byte_data($file, 0x3F);
+	
+	if ($chip == 0) {
+		return unless $man_id == 0x01	# National Semiconductor
+			  and $dev_id == 0x73;	# LM93
+	}
+	if ($chip == 1) {
+		return unless $man_id == 0x01	# National Semiconductor
+			  and $dev_id >= 0x79
+			  and $dev_id <= 0x7A;	# LM94
+	}
 	return 5;
 }
 
