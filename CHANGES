@@ -9,6 +9,7 @@ SVN HEAD
 	      Add support for new sysfs attributes
   sensors.conf.default: Add a section for the W83627THF
                         Add a section for the SCH5127
+                        Add a section for the W83627UHG
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
   sensors-detect: Improve LM90 and W83L771 detection

@@ -303,6 +303,23 @@ chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*"
     set in8_max  3.0 * 1.10
 
 
+chip "w83627uhg-*"
+
+    label in2 "AVCC"
+    label in3 "+5V"
+    label in7 "5VSB"
+    label in8 "Vbat"
+
+    set in2_min  5.0 * 0.90
+    set in2_max  5.0 * 1.10
+    set in3_min  5.0 * 0.90
+    set in3_max  5.0 * 1.10
+    set in7_min  5.0 * 0.90
+    set in7_max  5.0 * 1.10
+    set in8_min  3.0 * 0.90
+    set in8_max  3.0 * 1.10
+
+
 chip "f71805f-*"
 
     label in0 "+3.3V"
