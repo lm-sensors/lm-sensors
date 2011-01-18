@@ -110,5 +110,12 @@ Observit	Intel D865GSA (dead), Celeron D-352,		2007-06
 Observit	Intel D865GBF, Celeron 2.4 GHz, 512 MB RAM	2007-06
 		Resulted in: improvements to the lm85 driver.	Jean Delvare
 
+Nuvoton		2 x Asus P5QL Pro, 1 GB RAM,			2009-07
+		Pentium D-945, video card (dead)		Jean Delvare
+		This board has an ATK0110 ACPI device backed
+		by a Winbond W83667HG.
+
 ASUSTeK		ASUS Z8NA-D6, 2 x Xeon E5520, 2 x 1 GB RAM	2010-04
-		Drivers developed: nothing yet			Jean Delvare
+		This board has a Winbond W83795ADG, SMBus is	Jean Delvare
+		multiplexed with GPIOs.
+		Drivers developed: w83795
