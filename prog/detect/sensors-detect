@@ -23,7 +23,7 @@
 require 5.004;
 
 use strict;
-use Fcntl;
+use Fcntl qw(:DEFAULT :seek);
 use File::Basename;
 
 # We will call modprobe, which typically lives in either /sbin,
@@ -2046,13 +2046,9 @@ use vars qw(@cpu_ids);
 		driver => "k10temp",
 		detect => \&fam11h_pci_detect,
 	}, {
-		name => "Intel Core family thermal sensor",
+		name => "Intel digital thermal sensor",
 		driver => "coretemp",
-		detect => sub { coretemp_detect(0); },
-	}, {
-		name => "Intel Atom thermal sensor",
-		driver => "coretemp",
-		detect => sub { coretemp_detect(1); },
+		detect => \&coretemp_detect,
 	}, {
 		name => "Intel AMB FB-DIMM thermal sensor",
 		driver => "i5k_amb",
@@ -2314,10 +2310,10 @@ sub initialize_cpu_list
 	while (<INPUTFILE>) {
 		if (m/^processor\s*:\s*(\d+)/) {
 			push @cpu, $entry if scalar keys(%{$entry}); # Previous entry
-			$entry = {}; # New entry
+			$entry = { nr => $1 }; # New entry
 			next;
 		}
-		if (m/^(vendor_id|cpu family|model|model name|stepping)\s*:\s*(.+)$/) {
+		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level)\s*:\s*(.+)$/) {
 			my $k = $1;
 			my $v = $2;
 			$v =~ s/\s+/ /g;	# Merge multiple spaces
@@ -2484,6 +2480,15 @@ sub load_module
 	my $normalized = $module;
 	$normalized =~ tr/-/_/;
 	$modules_list{$normalized} = 1;
+}
+
+# udev may take some time to create device nodes when loading modules
+sub udev_settle
+{
+	if (!(-x "/sbin/udevadm" && system("/sbin/udevadm settle") == 0)
+	 && !(-x "/sbin/udevsettle" && system("/sbin/udevsettle") == 0)) {
+		sleep(1);
+	}
 }
 
 sub initialize_modules_supported
@@ -5833,23 +5838,33 @@ sub intel_amb_detect
 	return;
 }
 
+sub cpuid
+{
+	my ($cpu_nr, $eax) = @_;
+
+	sysopen(CPUID, "/dev/cpu/$cpu_nr/cpuid", O_RDONLY) or return;
+	binmode CPUID;
+	sysseek(CPUID, $eax, SEEK_SET)
+		or die "Cannot seek /dev/cpu/$cpu_nr/cpuid";
+	sysread(CPUID, my $data, 16)
+		or die "Cannot read /dev/cpu/$cpu_nr/cpuid";
+	close CPUID;
+
+	return unpack("L4", $data);
+}
+
 sub coretemp_detect
 {
-	my $chip = shift;
 	my $probecpu;
 
 	foreach $probecpu (@cpu) {
 		next unless $probecpu->{vendor_id} eq 'GenuineIntel' &&
-			    $probecpu->{'cpu family'} == 6;
-		return 9 if $chip == 0 &&
-			($probecpu->{model} == 14 ||	# Pentium M DC
-			 $probecpu->{model} == 15 ||	# Core 2 DC 65nm
-			 $probecpu->{model} == 0x16 ||	# Core 2 SC 65nm
-			 $probecpu->{model} == 0x17 ||	# Penryn 45nm
-			 $probecpu->{model} == 0x1a ||	# Nehalem
-			 $probecpu->{model} == 0x1e);	# Lynnfield
-		return 9 if $chip == 1 &&
-			($probecpu->{model} == 0x1c);	# Atom
+			    $probecpu->{'cpuid level'} >= 6;
+
+		# Now we check for the DTS flag
+		my @regs = cpuid($probecpu->{nr}, 6);
+		return unless @regs == 4;
+		return 9 if ($regs[0] & (1 << 0));	# eax, bit 0
 	}
 	return;
 }
@@ -6203,6 +6218,12 @@ sub main
 	print "Some south bridges, CPUs or memory controllers contain embedded sensors.\n".
 	      "Do you want to scan for them? This is totally safe. (YES/no): ";
 	unless (<STDIN> =~ /^\s*n/i) {
+		# Load the cpuid driver if needed
+		unless (-e "/dev/cpu/$cpu[0]->{nr}/cpuid") {
+			load_module("cpuid");
+			udev_settle();
+		}
+
 		$| = 1;
 		foreach my $entry (@cpu_ids) {
 			scan_cpu($entry);
@@ -6278,12 +6299,7 @@ sub main
 		$by_default = 1 if dmi_match('board_vendor', 'asustek', 'tyan',
 					     'supermicro');
 
-		# udev may take some time to create the device node
-		if (!(-x "/sbin/udevadm" && system("/sbin/udevadm settle") == 0)
-		 && !(-x "/sbin/udevsettle" && system("/sbin/udevsettle") == 0)) {
-			sleep(1);
-		}
-
+		udev_settle();
 		for (my $dev_nr = 0; $dev_nr < @i2c_adapters; $dev_nr++) {
 			next unless exists $i2c_adapters[$dev_nr];
 			scan_i2c_adapter($dev_nr, $by_default);
