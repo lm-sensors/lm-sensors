@@ -828,6 +828,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
 		i2c_detect => sub { max1668_detect(@_, 2); },
 	}, {
+		name => "Maxim MAX6639",
+		driver => "max6639",
+		i2c_addrs => [0x2c, 0x2e, 0x2f],
+		i2c_detect => sub { max6639_detect(@_); },
+	}, {
 		name => "Maxim MAX6650/MAX6651",
 		driver => "max6650",
 		i2c_addrs => [0x1b, 0x1f, 0x48, 0x4b],
@@ -5444,6 +5449,27 @@ sub w83l784r_detect
 	push @res, ($reg & 0x07) + 0x48 unless $reg & 0x08;
 	push @res, (($reg & 0x70) >> 4) + 0x48 unless $reg & 0x80;
 	return @res;
+}
+
+# Chip to detect: MAX6639
+# Registers used:
+#   0x3d: Device ID
+#   0x3e: Manufacturer ID
+#   0x3f: Chip revision
+sub max6639_detect
+{
+	my ($file, $addr) = @_;
+	my ($man_id, $dev_id, $rev);
+
+	$dev_id = i2c_smbus_read_byte_data($file, 0x3d);
+	$man_id = i2c_smbus_read_byte_data($file, 0x3e);
+	$rev = i2c_smbus_read_byte_data($file, 0x3f);
+	
+	return unless $man_id == 0x4d;	# Maxim
+	return unless $dev_id == 0x58;	# MAX6639
+	return unless $rev == 0x00;
+
+	return 6;
 }
 
 # The max6650 has no device ID register. However, a few registers have

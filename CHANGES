@@ -19,6 +19,7 @@ SVN HEAD
                   Add detection of the National Semiconductor LM94
                   Add detection of the ITE IT8728F
                   Implement universal detection for coretemp (#2381)
+                  Add detection of Maxim MAX6639
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
