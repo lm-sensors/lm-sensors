@@ -21,6 +21,7 @@ SVN HEAD
                   Implement universal detection for coretemp (#2381)
                   Add detection of Maxim MAX6639
                   Add detection of EMC1023, EMC1043, EMC1053, and EMC1063
+                  Add detection of Nuvoton NCT5571D, NCT5577D and NCT6776F
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24

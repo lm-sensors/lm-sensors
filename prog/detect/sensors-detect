@@ -1830,7 +1830,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Nuvoton W83667HG-B Super IO Sensors",
+		name => "Nuvoton W83667HG-B (NCT5571D) Super IO Sensors",
 		driver => "w83627ehf",
 		devid => 0xB350,
 		devid_mask => 0xFFF0,
@@ -1847,6 +1847,18 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		name => "Winbond W83L517D Super IO",
 		driver => "not-a-sensor",
 		devid => 0x61,
+	}, {
+		name => "Nuvoton NCT5577D Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0xC331,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Nuvoton NCT6776F Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0xC333,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71805F/FG Super IO Sensors",
 		driver => "f71805f",
