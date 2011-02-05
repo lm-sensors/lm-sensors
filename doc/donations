@@ -119,3 +119,8 @@ ASUSTeK		ASUS Z8NA-D6, 2 x Xeon E5520, 2 x 1 GB RAM	2010-04
 		This board has a Winbond W83795ADG, SMBus is	Jean Delvare
 		multiplexed with GPIOs.
 		Drivers developed: w83795
+
+lleo19		Intel DH57JG with i3-540 CPU, 4GB RAM, chassis,	2011-01
+		and power supply.				Guenter Roeck
+		Used to add support for NCT6775F (W83677HG-I)
+		to w83627ehf driver.
