@@ -14,13 +14,25 @@ given new feature.
 * Added support for various new sysfs attributes
   enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_LCRIT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_CRIT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_LCRIT_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_CRIT_ALARM
   enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_LCRIT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_EMERGENCY
   enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_EMERGENCY_HYST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_LCRIT_ALARM
   enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_EMERGENCY_ALARM
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_CAP
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_CAP_HYST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MAX
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_CRIT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_CAP_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MAX_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_CRIT_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_LCRIT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_CRIT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_LCRIT_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_CRIT_ALARM
 
 0x430	lm-sensors 3.2.0
 * License changed from GPL to LGPL

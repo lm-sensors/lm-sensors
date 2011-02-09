@@ -234,6 +234,7 @@ static const struct subfeature_type_match temp_matches[] = {
 	{ "max_alarm", SENSORS_SUBFEATURE_TEMP_MAX_ALARM },
 	{ "crit_alarm", SENSORS_SUBFEATURE_TEMP_CRIT_ALARM },
 	{ "emergency_alarm", SENSORS_SUBFEATURE_TEMP_EMERGENCY_ALARM },
+	{ "lcrit_alarm", SENSORS_SUBFEATURE_TEMP_LCRIT_ALARM },
 	{ "fault", SENSORS_SUBFEATURE_TEMP_FAULT },
 	{ "type", SENSORS_SUBFEATURE_TEMP_TYPE },
 	{ "offset", SENSORS_SUBFEATURE_TEMP_OFFSET },
@@ -250,6 +251,8 @@ static const struct subfeature_type_match in_matches[] = {
 	{ "alarm", SENSORS_SUBFEATURE_IN_ALARM },
 	{ "min_alarm", SENSORS_SUBFEATURE_IN_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_IN_MAX_ALARM },
+	{ "lcrit_alarm", SENSORS_SUBFEATURE_IN_LCRIT_ALARM },
+	{ "crit_alarm", SENSORS_SUBFEATURE_IN_CRIT_ALARM },
 	{ "beep", SENSORS_SUBFEATURE_IN_BEEP },
 	{ NULL, 0 }
 };
@@ -273,7 +276,12 @@ static const struct subfeature_type_match power_matches[] = {
 	{ "input_lowest", SENSORS_SUBFEATURE_POWER_INPUT_LOWEST },
 	{ "cap", SENSORS_SUBFEATURE_POWER_CAP },
 	{ "cap_hyst", SENSORS_SUBFEATURE_POWER_CAP_HYST },
+	{ "cap_alarm", SENSORS_SUBFEATURE_POWER_CAP_ALARM },
 	{ "alarm", SENSORS_SUBFEATURE_POWER_ALARM },
+	{ "max", SENSORS_SUBFEATURE_POWER_MAX },
+	{ "max_alarm", SENSORS_SUBFEATURE_POWER_MAX_ALARM },
+	{ "crit", SENSORS_SUBFEATURE_POWER_CRIT },
+	{ "crit_alarm", SENSORS_SUBFEATURE_POWER_CRIT_ALARM },
 	{ "average_interval", SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL },
 	{ NULL, 0 }
 };
@@ -287,9 +295,13 @@ static const struct subfeature_type_match curr_matches[] = {
 	{ "input", SENSORS_SUBFEATURE_CURR_INPUT },
 	{ "min", SENSORS_SUBFEATURE_CURR_MIN },
 	{ "max", SENSORS_SUBFEATURE_CURR_MAX },
+	{ "lcrit", SENSORS_SUBFEATURE_CURR_LCRIT },
+	{ "crit", SENSORS_SUBFEATURE_CURR_CRIT },
 	{ "alarm", SENSORS_SUBFEATURE_CURR_ALARM },
 	{ "min_alarm", SENSORS_SUBFEATURE_CURR_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_CURR_MAX_ALARM },
+	{ "lcrit_alarm", SENSORS_SUBFEATURE_CURR_LCRIT_ALARM },
+	{ "crit_alarm", SENSORS_SUBFEATURE_CURR_CRIT_ALARM },
 	{ "beep", SENSORS_SUBFEATURE_CURR_BEEP },
 	{ NULL, 0 }
 };
