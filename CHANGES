@@ -24,6 +24,7 @@ SVN HEAD
                   Add detection of Nuvoton NCT5571D, NCT5577D and NCT6776F
                   Add detection of SMSC EMC1002, EMC1033, EMC1046, EMC1047,
                         EMC1072, EMC1073, EMC1074, EMC1402, and EMC1424
+                  Fixed address ranges checked for SMSC EMC1403 and EMC1404.
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24

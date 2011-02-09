@@ -1257,17 +1257,17 @@ use vars qw(@i2c_adapter_names);
 	}, {
 		name => "SMSC EMC1403",
 		driver => "emc1403",
-		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
+		i2c_addrs => [0x18, 0x29, 0x4c, 0x4d],
 		i2c_detect => sub { emc1403_detect(@_, 0); },
 	}, {
 		name => "SMSC EMC1404",
 		driver => "to-be-written", # emc1403
-		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
+		i2c_addrs => [0x18, 0x29, 0x4c, 0x4d],
 		i2c_detect => sub { emc1403_detect(@_, 1); },
 	}, {
 		name => "SMSC EMC1423",
 		driver => "emc1403",
-		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
+		i2c_addrs => [0x4c],
 		i2c_detect => sub { emc1403_detect(@_, 3); },
 	}, {
 		name => "SMSC EMC1424",
