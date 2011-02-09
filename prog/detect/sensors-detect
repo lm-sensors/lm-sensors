@@ -965,7 +965,7 @@ use vars qw(@i2c_adapter_names);
 	}, {
 		name => "Texas Instruments TMP421",
 		driver => "tmp421",
-		i2c_addrs => [0x2a, 0x4c..0x4f], # 0x1c-0x1f not probed.
+		i2c_addrs => [0x1c..0x1f, 0x2a, 0x4c..0x4f],
 		i2c_detect => sub { tmp42x_detect(@_, 0); },
 	}, {
 		name => "Texas Instruments TMP422",
