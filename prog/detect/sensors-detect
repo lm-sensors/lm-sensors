@@ -1195,15 +1195,35 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2f],
 		i2c_detect => sub { fintek_detect(@_, 7); },
 	}, {
+		name => "SMSC EMC1002",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c, 0x4d], # 0x3c, 0x3d not probed
+		i2c_detect => sub { emc1403_detect(@_, 4); },
+	}, {
 		name => "SMSC EMC1023",
 		driver => "to-be-written",	# emc1023
 		i2c_addrs => [0x48, 0x49, 0x4c, 0x4d],
 		i2c_detect => sub { emc1023_detect(@_, 0); },
 	}, {
+		name => "SMSC EMC1033",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c, 0x4d], # 0x3c, 0x3d not probed
+		i2c_detect => sub { emc1403_detect(@_, 5); },
+	}, {
 		name => "SMSC EMC1043",
 		driver => "to-be-written",	# emc1023
 		i2c_addrs => [0x48, 0x49, 0x4c, 0x4d],
 		i2c_detect => sub { emc1023_detect(@_, 1); },
+	}, {
+		name => "SMSC EMC1046",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { emc1403_detect(@_, 6); },
+	}, {
+		name => "SMSC EMC1047",
+		driver => "to-be-written",
+		i2c_addrs => [0x18], # 0x10 not probed
+		i2c_detect => sub { emc1403_detect(@_, 7); },
 	}, {
 		name => "SMSC EMC1053",
 		driver => "to-be-written",	# emc1023
@@ -1214,6 +1234,26 @@ use vars qw(@i2c_adapter_names);
 		driver => "to-be-written",	# emc1023
 		i2c_addrs => [0x48, 0x49, 0x4c, 0x4d],
 		i2c_detect => sub { emc1023_detect(@_, 3); },
+	}, {
+		name => "SMSC EMC1072",
+		driver => "to-be-written",
+		i2c_addrs => [0x1c, 0x4c, 0x5c], # 0x2c, 0x3c, 0x6c, 0x7c not probed
+		i2c_detect => sub { emc1403_detect(@_, 8); },
+	}, {
+		name => "SMSC EMC1073",
+		driver => "to-be-written",
+		i2c_addrs => [0x1c, 0x4c, 0x5c], # 0x2c, 0x3c, 0x6c, 0x7c not probed
+		i2c_detect => sub { emc1403_detect(@_, 9); },
+	}, {
+		name => "SMSC EMC1074",
+		driver => "to-be-written",
+		i2c_addrs => [0x1c, 0x4c, 0x5c], # 0x2c, 0x3c, 0x6c, 0x7c not probed
+		i2c_detect => sub { emc1403_detect(@_, 10); },
+	}, {
+		name => "SMSC EMC1402",
+		driver => "to-be-written",
+		i2c_addrs => [0x18, 0x29, 0x4c, 0x4d],
+		i2c_detect => sub { emc1403_detect(@_, 11); },
 	}, {
 		name => "SMSC EMC1403",
 		driver => "emc1403",
@@ -1229,6 +1269,11 @@ use vars qw(@i2c_adapter_names);
 		driver => "emc1403",
 		i2c_addrs => [0x18, 0x2a, 0x4c, 0x4d],
 		i2c_detect => sub { emc1403_detect(@_, 3); },
+	}, {
+		name => "SMSC EMC1424",
+		driver => "to-be-written",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { emc1403_detect(@_, 12); },
 	}, {
 		name => "ST STTS424",
 		driver => "jc42",
@@ -5446,7 +5491,9 @@ sub emc1023_detect
 	return 7;
 }
 
-# Chip to detect: 0 = EMC1403, 1 = EMC1404, 2 = EMC2103, 3 = EMC1423
+# Chip to detect: 0 = EMC1403, 1 = EMC1404, 2 = EMC2103, 3 = EMC1423,
+#	4 = EMC1002, 5 = EMC1033, 6 = EMC1046, 7 = EMC1047, 8 = EMC1072,
+#	9 = EMC1073, 10 = EMC1074, 11 = EMC1402, 12 = EMC1424
 # Registers used:
 #   0xfd: Device ID register
 #   0xfe: Vendor ID register
@@ -5460,17 +5507,44 @@ sub emc1403_detect
 
 	return unless $man_id == 0x5d;	# SMSC
 
-	if ($chip == 0) {
+	if ($chip == 0) {		# EMC1403
 		return unless $dev_id == 0x21;
 		return unless $rev == 0x01;
-	} elsif ($chip == 1) {
+	} elsif ($chip == 1) {		# EMC1404
 		return unless $dev_id == 0x25;
 		return unless $rev == 0x01;
-	} elsif ($chip == 2) {
+	} elsif ($chip == 2) {		# EMC2103
 		return unless ($dev_id == 0x24) || ($dev_id == 0x26);
 		return unless $rev == 0x01;
-	} elsif ($chip == 3) {
+	} elsif ($chip == 3) {		# EMC1423
 		return unless $dev_id == 0x23;
+		return unless $rev == 0x01;
+	} elsif ($chip == 4) {		# EMC1002
+		return unless ($dev_id == 0x02) || ($dev_id == 0x03);
+		return unless $rev == 0x01;
+	} elsif ($chip == 5) {		# EMC1033
+		return unless ($dev_id == 0x0a) || ($dev_id == 0x0b);
+		return unless $rev == 0x01;
+	} elsif ($chip == 6) {		# EMC1046
+		return unless $dev_id == 0x1a;
+		return unless $rev == 0x01;
+	} elsif ($chip == 7) {		# EMC1047
+		return unless $dev_id == 0x1c;
+		return unless $rev == 0x01;
+	} elsif ($chip == 8) {		# EMC1072
+		return unless $dev_id == 0x20;
+		return unless $rev == 0x03;
+	} elsif ($chip == 9) {		# EMC1073
+		return unless $dev_id == 0x21;
+		return unless $rev == 0x03;
+	} elsif ($chip == 10) {		# EMC1074
+		return unless $dev_id == 0x25;
+		return unless $rev == 0x03;
+	} elsif ($chip == 11) {		# EMC1402
+		return unless $dev_id == 0x20;
+		return unless $rev == 0x01;
+	} elsif ($chip == 12) {		# EMC1424
+		return unless $dev_id == 0x27;
 		return unless $rev == 0x01;
 	}
 
