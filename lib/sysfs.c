@@ -143,8 +143,10 @@ char sensors_sysfs_mount[NAME_MAX];
 #define FEATURE_SIZE		(max_subfeatures * 2)
 #define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)
 
-/* Room for all 6 main types (in, fan, temp, power, energy, current) and 2
-   other types (VID, intrusion) with all their subfeatures + misc features */
+/*
+ * Room for all 7 main types (in, fan, temp, power, energy, current, humidity)
+ * and 2 other types (VID, intrusion) with all their subfeatures + misc features
+ */
 #define SUB_OFFSET_OTHER	(MAX_MAIN_SENSOR_TYPES * FEATURE_TYPE_SIZE)
 #define SUB_OFFSET_MISC		(SUB_OFFSET_OTHER + \
 				 MAX_OTHER_SENSOR_TYPES * FEATURE_TYPE_SIZE)
@@ -158,6 +160,7 @@ int get_type_scaling(sensors_subfeature_type type)
 	case SENSORS_SUBFEATURE_IN_INPUT:
 	case SENSORS_SUBFEATURE_TEMP_INPUT:
 	case SENSORS_SUBFEATURE_CURR_INPUT:
+	case SENSORS_SUBFEATURE_HUMIDITY_INPUT:
 		return 1000;
 	case SENSORS_SUBFEATURE_FAN_INPUT:
 		return 1;
@@ -190,6 +193,7 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_POWER:
 	case SENSORS_FEATURE_ENERGY:
 	case SENSORS_FEATURE_CURR:
+	case SENSORS_FEATURE_HUMIDITY:
 	case SENSORS_FEATURE_INTRUSION:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
@@ -306,6 +310,11 @@ static const struct subfeature_type_match curr_matches[] = {
 	{ NULL, 0 }
 };
 
+static const struct subfeature_type_match humidity_matches[] = {
+	{ "input", SENSORS_SUBFEATURE_HUMIDITY_INPUT },
+	{ NULL, 0 }
+};
+
 static const struct subfeature_type_match cpu_matches[] = {
 	{ "vid", SENSORS_SUBFEATURE_VID },
 	{ NULL, 0 }
@@ -325,6 +334,7 @@ static struct feature_type_match matches[] = {
 	{ "curr%d%c", curr_matches },
 	{ "energy%d%c", energy_matches },
 	{ "intrusion%d%c", intrusion_matches },
+	{ "humidity%d%c", humidity_matches },
 };
 
 /* Return the subfeature type and channel number based on the subfeature
@@ -451,6 +461,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		case SENSORS_FEATURE_POWER:
 		case SENSORS_FEATURE_ENERGY:
 		case SENSORS_FEATURE_CURR:
+		case SENSORS_FEATURE_HUMIDITY:
 			nr--;
 			break;
 		default:
