@@ -27,6 +27,7 @@ SVN HEAD
                         EMC1072, EMC1073, EMC1074, EMC1402, and EMC1424
                   Fixed address ranges checked for SMSC EMC1403 and EMC1404.
                   Fix detection of SPD EEPROM on DDR3 memory modules
+                  Add detection of AMD family 12h and 14h thermal sensors
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
