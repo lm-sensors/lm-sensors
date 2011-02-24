@@ -502,6 +502,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x48..0x4f],
 		i2c_detect => sub { lm75_detect(@_, 0); },
 	}, {
+		name => "National Semiconductor LM75A",
+		driver => "lm75",
+		i2c_addrs => [0x48..0x4f],
+		i2c_detect => sub { lm75_detect(@_, 2); },
+	}, {
 		name => "Dallas Semiconductor DS75",
 		driver => "lm75",
 		i2c_addrs => [0x48..0x4f],
@@ -3839,13 +3844,14 @@ sub lm78_detect
 	return 6;
 }
 
-# Chip to detect: 0 = LM75, 1 = DS75
+# Chip to detect: 0 = LM75, 1 = DS75, 2 = LM75A
 # Registers used:
 #   0x00: Temperature
 #   0x01: Configuration
 #   0x02: Hysteresis
 #   0x03: Overtemperature Shutdown
 #   0x04-0x07: No registers
+#   0x07: Device ID (LM75A only)
 # The first detection step is based on the fact that the LM75 has only
 # four registers, and cycles addresses over 8-byte boundaries. We use the
 # 0x04-0x07 addresses (unused) to improve the reliability. These are not
@@ -3855,6 +3861,9 @@ sub lm78_detect
 # The DS75 is a bit different, it doesn't cycle over 8-byte boundaries, and
 # all register addresses from 0x04 to 0x0f behave like 0x04-0x07 do for
 # the LM75.
+# And the LM75A is again different, it cycles over 8-byte boundaries, but
+# registers 0x04-0x06 return 0xff. Thankfully it has a device ID register
+# at 0x07.
 # Not all devices enjoy SMBus read word transactions, so we use read byte
 # transactions even for the 16-bit registers. The low bits aren't very
 # useful for detection anyway.
@@ -3864,23 +3873,38 @@ sub lm75_detect
 	my $i;
 	my $cur = i2c_smbus_read_byte_data($file, 0x00);
 	my $conf = i2c_smbus_read_byte_data($file, 0x01);
+	my ($maxreg, $hyst, $os, $dev_id);
 
-	my $hyst = i2c_smbus_read_byte_data($file, 0x02, NO_CACHE);
-	my $maxreg = $chip == 1 ? 0x0f : 0x07;
-	for $i (0x04 .. $maxreg) {
-		return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $hyst;
+	if ($chip == 2) {	# LM75A
+		$dev_id = i2c_smbus_read_byte_data($file, 0x07);
+		return if $dev_id != 0xA1;
+
+		$hyst = i2c_smbus_read_byte_data($file, 0x02);
+		$os = i2c_smbus_read_byte_data($file, 0x03);
+
+		for $i (0x04 .. 0x06) {
+			return if i2c_smbus_read_byte_data($file, $i) != 0xff;
+		}
+	} else {		# LM75 or DS75
+		$maxreg = $chip == 1 ? 0x0f : 0x07;
+		$hyst = i2c_smbus_read_byte_data($file, 0x02, NO_CACHE);
+		for $i (0x04 .. $maxreg) {
+			return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $hyst;
+		}
+
+		$os = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
+		for $i (0x04 .. $maxreg) {
+			return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $os;
+		}
 	}
 
-	my $os = i2c_smbus_read_byte_data($file, 0x03, NO_CACHE);
-	for $i (0x04 .. $maxreg) {
-		return if i2c_smbus_read_byte_data($file, $i, NO_CACHE) != $os;
-	}
-
-	if ($chip == 0) {
+	if ($chip != 1) {	# LM75 or LM75A
 		for ($i = 8; $i <= 248; $i += 40) {
 			return if i2c_smbus_read_byte_data($file, $i + 0x01) != $conf
 			       or i2c_smbus_read_byte_data($file, $i + 0x02) != $hyst
 			       or i2c_smbus_read_byte_data($file, $i + 0x03) != $os;
+			return if $chip == 2
+			      and i2c_smbus_read_byte_data($file, $i + 0x07) != $dev_id;
 		}
 	}
 
@@ -3888,7 +3912,7 @@ sub lm75_detect
 	return if $conf == $cur and $cur == $hyst and $cur == $os;
 
 	# Unused bits
-	return if $chip == 0 and ($conf & 0xe0);
+	return if $chip != 1 and ($conf & 0xe0);
 	return if $chip == 1 and ($conf & 0x80);
 
 	# Most probable value ranges

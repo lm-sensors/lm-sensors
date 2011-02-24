@@ -29,6 +29,7 @@ SVN HEAD
                   Fix detection of SPD EEPROM on DDR3 memory modules
                   Add detection of AMD family 12h and 14h thermal sensors
                   Add detection of EMC6D103S
+                  Add detection of National Semiconductor LM75A
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
