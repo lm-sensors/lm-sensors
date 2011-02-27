@@ -2730,8 +2730,8 @@ sub dmi_match
 sub is_laptop
 {
 	return 0 unless $dmi{chassis_type};
-	return 1 if $dmi{chassis_type} =~ m/(Laptop|Notebook|Hand Held)/i;
-	return 1 if $dmi{chassis_type} =~ m/^(9|10|11|14)$/;
+	return 1 if $dmi{chassis_type} =~ m/(Portable|Laptop|Notebook|Hand Held)/i;
+	return 1 if $dmi{chassis_type} =~ m/^(8|9|10|11|14)$/;
 	return 0;
 }
 
