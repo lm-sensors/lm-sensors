@@ -33,6 +33,7 @@ given new feature.
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_CRIT
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_LCRIT_ALARM
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_CRIT_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_PULSES
 * Added support for humidity sensors
   enum sensors_feature_type SENSORS_FEATURE_HUMIDITY
   enum sensors_subfeature_type SENSORS_SUBFEATURE_HUMIDITY_INPUT

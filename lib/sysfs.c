@@ -265,6 +265,7 @@ static const struct subfeature_type_match fan_matches[] = {
 	{ "input", SENSORS_SUBFEATURE_FAN_INPUT },
 	{ "min", SENSORS_SUBFEATURE_FAN_MIN },
 	{ "div", SENSORS_SUBFEATURE_FAN_DIV },
+	{ "pulses", SENSORS_SUBFEATURE_FAN_PULSES },
 	{ "alarm", SENSORS_SUBFEATURE_FAN_ALARM },
 	{ "fault", SENSORS_SUBFEATURE_FAN_FAULT },
 	{ "beep", SENSORS_SUBFEATURE_FAN_BEEP },
