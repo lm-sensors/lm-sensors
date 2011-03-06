@@ -1,0 +1,23 @@
+{
+global:
+  libsensors_version;
+  sensors_cleanup;
+  sensors_do_chip_sets;
+  sensors_free_chip_name;
+  sensors_get_adapter_name;
+  sensors_get_all_subfeatures;
+  sensors_get_detected_chips;
+  sensors_get_features;
+  sensors_get_label;
+  sensors_get_subfeature;
+  sensors_get_value;
+  sensors_init;
+  sensors_parse_chip_name;
+  sensors_set_value;
+  sensors_snprintf_chip_name;
+  sensors_strerror;
+  sensors_parse_error;
+  sensors_parse_error_wfn;
+  sensors_fatal_error;
+local: *;
+ };

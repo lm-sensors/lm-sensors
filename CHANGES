@@ -8,6 +8,7 @@ SVN HEAD
               Compute MAX_*_SENSOR_TYPES at build time (#2378)
 	      Add support for new sysfs attributes
               Add support for humidity sensors
+              Limit symbol visibility
   sensors.conf.default: Add a section for the W83627THF
                         Add a section for the SCH5127
                         Add a section for the W83627UHG
