@@ -3645,14 +3645,14 @@ sub probe_superio
 	outb($addrreg, $superio{actreg});
 	$val = inb($datareg);
 	if (!($val & $superio{actmask})) {
-		if ($addr) {
+		if ($addr && $addr != 0xffff) {
 			printf "\n    (address 0x\%x, but not activated)\n", $addr;
 		} else {
 			print "\n    (but not activated)\n";
 		}
 		return 0;
 	}
-	if ($addr == 0) {
+	if ($addr == 0 || $addr == 0xffff) {
 		print "\n    (but no address specified)\n";
 		return 0;
 	}
