@@ -32,6 +32,7 @@ SVN HEAD
                   Add detection of EMC6D103S
                   Add detection of National Semiconductor LM75A
                   Count DMI chassis type 8 as a laptop
+                  Add detection of SMSC SCH5627
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
