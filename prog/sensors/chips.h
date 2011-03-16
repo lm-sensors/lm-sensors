@@ -24,6 +24,29 @@
 
 #include "lib/sensors.h"
 
+/*
+ * Retrieved subfeatures
+ */
+struct sensor_subfeature_data {
+	double value;		/* Subfeature value. Not used for alarms. */
+	const char *name;	/* Subfeature name */
+	const char *unit;	/* Unit to be displayed for this subfeature.
+				   This field is optional. */
+};
+
+/*
+ * Subfeature data structure. Used to create a table of implemented subfeatures
+ * for a given feature.
+ */
+struct sensor_subfeature_list {
+	int subfeature;
+	const struct sensor_subfeature_list *exists;
+				/* Complementary subfeatures to be displayed
+				   if subfeature exists */
+	int alarm;		/* true if this is an alarm */
+	const char *name;	/* subfeature name to be printed */
+};
+
 void print_chip_raw(const sensors_chip_name *name);
 void print_chip(const sensors_chip_name *name);
 

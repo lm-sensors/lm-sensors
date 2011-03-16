@@ -16,6 +16,7 @@ SVN HEAD
            Add support for intrusion detection (#2370)
            If an attribute value is 0, display the value with its base unit,
            not with the minumum supported unit
+           Added support for additional sensor attributes
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
                   Add detection of SMSC EMC1423
