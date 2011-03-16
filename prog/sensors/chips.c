@@ -441,6 +441,11 @@ static void scale_value(double *value, const char **prefixstr)
 	};
 	struct scale_table *scale = prefix_scales;
 
+	if (abs_value == 0) {
+		*prefixstr = "";
+		return;
+	}
+
 	while (scale->upper_bound && abs_value > scale->upper_bound) {
 		divisor = scale->upper_bound;
 		scale++;

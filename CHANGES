@@ -14,6 +14,8 @@ SVN HEAD
                         Add a section for the W83627UHG
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
+           If an attribute value is 0, display the value with its base unit,
+           not with the minumum supported unit
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
                   Add detection of SMSC EMC1423
