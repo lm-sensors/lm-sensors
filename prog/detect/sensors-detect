@@ -2,7 +2,7 @@
 #
 #    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2009  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2004 - 2011  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -1933,8 +1933,14 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Fintek F71808E Super IO Sensors",
-		driver => "to-be-written",	# f71882fg
+		driver => "f71882fg",
 		devid => 0x0901,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Fintek F71808A Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1001,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
@@ -1944,9 +1950,15 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Fintek F71869FG Super IO Sensors",
-		driver => "to-be-written",
+		name => "Fintek F71869F/E Super IO Sensors",
+		driver => "f71882fg",
 		devid => 0x0814,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Fintek F71869A Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1007,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
@@ -1974,9 +1986,15 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Fintek F71889E Super IO Sensors",
-		driver => "to-be-written",
+		name => "Fintek F71889ED Super IO Sensors",
+		driver => "f71882fg",
 		devid => 0x0909,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Fintek F71889A Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1005,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
@@ -1987,6 +2005,18 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		name => "Fintek F81218D Super IO",
 		driver => "not-a-sensor",
 		devid => 0x0206,
+	}, {
+		name => "Fintek F81865F Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x0704,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Fintek F81866D Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1010,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Asus F8000 Super IO",
 		driver => "f71882fg",

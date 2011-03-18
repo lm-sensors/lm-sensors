@@ -14,8 +14,7 @@ SVN HEAD
                         Add a section for the W83627UHG
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
-           If an attribute value is 0, display the value with its base unit,
-           not with the minumum supported unit
+           Fix automatic unit selection of 0 value
            Added support for additional sensor attributes
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
@@ -36,6 +35,7 @@ SVN HEAD
                   Add detection of National Semiconductor LM75A
                   Count DMI chassis type 8 as a laptop
                   Add detection of SMSC SCH5627
+                  Add detection of many Fintek Super-I/O devices
 
 3.2.0 (2010-10-10)
   libsensors: Increase MAX_SENSORS_PER_TYPE to 24
