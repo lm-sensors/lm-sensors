@@ -6,16 +6,17 @@ SVN HEAD
   libsensors: Add support for intrusion detection (#2370)
               Compute MAX_SUBFEATURES at run-time (#2378)
               Compute MAX_*_SENSOR_TYPES at build time (#2378)
-	      Add support for new sysfs attributes
+	      Add support for new sysfs attributes (#2379)
               Add support for humidity sensors
               Limit symbol visibility
   sensors.conf.default: Add a section for the W83627THF
                         Add a section for the SCH5127
                         Add a section for the W83627UHG
+                        Add a section for the W83795G/ADG
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
            Fix automatic unit selection of 0 value
-           Added support for additional sensor attributes
+           Added support for additional sensor attributes (#2379)
   sensors-detect: Improve LM90 and W83L771 detection
                   Fix error seen if I2C bus numbers are not sequential
                   Add detection of SMSC EMC1423

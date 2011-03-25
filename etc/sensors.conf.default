@@ -49,6 +49,20 @@ chip "w83793-*"
     set in9_max  3.0 * 1.10
 
 
+chip "w83795g-*" "w83795adg-*"
+
+    label in12 "+3.3V"
+    label in13 "3VSB"
+    label in14 "Vbat"
+
+    set in12_min  3.3 * 0.90
+    set in12_max  3.3 * 1.10
+    set in13_min  3.3 * 0.90
+    set in13_max  3.3 * 1.10
+    set in14_min  3.0 * 0.90
+    set in14_max  3.3 * 1.10
+
+
 chip "via686a-*"
 
     label in0 "Vcore"
