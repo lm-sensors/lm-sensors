@@ -13,6 +13,7 @@ SVN HEAD
                         Add a section for the SCH5127
                         Add a section for the W83627UHG
                         Add a section for the W83795G/ADG
+                        Add a section for the F81865F
   sensors: Display 3 decimal places in raw output
            Add support for intrusion detection (#2370)
            Fix automatic unit selection of 0 value

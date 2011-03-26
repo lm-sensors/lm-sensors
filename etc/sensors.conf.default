@@ -447,7 +447,8 @@ chip "sch5127-*"
     set in6_max  3.0 * 1.10
 
 
-chip "f71882fg-*"
+chip "f71808e-*" "f71862fg-*" "f71869-*" "f71882fg-*" \
+     "f71889fg-*" "f71889ed-*" "f71889a-*"
 
     label in0 "+3.3V"
     label in7 "3VSB"
@@ -458,7 +459,7 @@ chip "f71882fg-*"
     compute in8  @*2, @/2
 
 
-chip "f8000-*"
+chip "f71858fg-*" "f8000-*"
 
     label in0 "+3.3V"
     label in1 "3VSB"
@@ -467,6 +468,17 @@ chip "f8000-*"
     compute in0  @*2, @/2
     compute in1  @*2, @/2
     compute in2  @*2, @/2
+
+
+chip "f81865f-*"
+
+    label in0 "+3.3V"
+    label in5 "3VSB"
+    label in6 "Vbat"
+
+    compute in0  @*2, @/2
+    compute in5  @*2, @/2
+    compute in6  @*2, @/2
 
 
 chip "adt7473-*" "adt7475-*"
