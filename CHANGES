@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
   libsensors: Add support for intrusion detection (#2370)
               Compute MAX_SUBFEATURES at run-time (#2378)
