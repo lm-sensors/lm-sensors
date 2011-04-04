@@ -1546,7 +1546,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_TEMP,
 	}, {
 		# Shouldn't be in this family, but there it is
-		name => "ITE IT8512E/F Super IO",
+		name => "ITE IT8512E/F/G Super IO",
 		driver => "not-a-sensor",
 		devid => 0x8512,
 	}
