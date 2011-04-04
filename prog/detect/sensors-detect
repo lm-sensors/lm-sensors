@@ -1665,7 +1665,10 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_FAN,
 	}, {
 		name => "SMSC LPC47M584-NC Super IO",
-		# No datasheet
+		# No datasheet (Dell-specific part). Not compatible with
+		# smsc47m1 nor dme1737 nor LPC47M233. No evidence that this
+		# chip can do any hardware monitoring at all.
+		driver => "not-a-sensor",
 		devid => 0x76,
 	}, {
 		name => "SMSC LPC47N252 Super IO Fan Sensors",
