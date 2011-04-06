@@ -1045,6 +1045,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c..0x4d],
 		i2c_detect => sub { lm90_detect(@_, 5); },
 	}, {
+		name => "Analog Devices ADT7461A, ON Semiconductor NCT1008",
+		driver => "to-be-written",	# lm90
+		i2c_addrs => [0x4c..0x4d],
+		i2c_detect => sub { lm90_detect(@_, 13); },
+	}, {
 		name => "Analog Devices ADT7481",
 		driver => "to-be-written",
 		i2c_addrs => [0x4c, 0x4b],
@@ -4321,7 +4326,8 @@ sub max6680_95_detect
 #		  4 = MAX6654, 5 = ADT7461,
 #		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
 #		  8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
-#		  11 = W83L771AWG/ASG, 12 = MAX6690
+#		  11 = W83L771AWG/ASG, 12 = MAX6690,
+#		  13 = ADT7461A/NCT1008
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4419,6 +4425,12 @@ sub lm90_detect
 		return if $rate > 0x07;
 		return if $mid != 0x4d;		# Maxim
 		return 8 if $cid == 0x09;	# MAX6690
+	}
+	if ($chip == 13) {
+		return if ($conf & 0x1b) != 0;
+		return if $rate > 0x0a;
+		return if $mid != 0x41;		# Analog Devices
+		return 8 if $cid == 0x57;	# ADT7461A, NCT1008
 	}
 	return;
 }
