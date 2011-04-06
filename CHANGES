@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Add AMD family 15h CPU detection
+
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
   libsensors: Add support for intrusion detection (#2370)

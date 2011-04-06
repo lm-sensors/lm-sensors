@@ -2186,6 +2186,10 @@ use vars qw(@cpu_ids);
 		driver => "k10temp",
 		detect => \&fam12h_14h_pci_detect,
 	}, {
+		name => "AMD Family 15h thermal sensors",
+		driver => "k10temp",
+		detect => \&fam15h_pci_detect,
+	}, {
 		name => "Intel digital thermal sensor",
 		driver => "coretemp",
 		detect => \&coretemp_detect,
@@ -6135,6 +6139,12 @@ sub fam11h_pci_detect
 sub fam12h_14h_pci_detect
 {
 	return unless exists $pci_list{'1022:1703'};
+	return 9;
+}
+
+sub fam15h_pci_detect
+{
+	return unless exists $pci_list{'1022:1603'};
 	return 9;
 }
 
