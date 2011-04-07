@@ -3,7 +3,8 @@ lm-sensors CHANGES file
 
 SVN HEAD
   sensors-detect: Add AMD family 15h CPU detection
-  sensors-detect: Add detection of ADT7461A / NCT1008
+                  Add detection of ADT7461A / NCT1008
+                  Add detection of ITE IT8516E/F/G
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex

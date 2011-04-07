@@ -1550,10 +1550,15 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x14,
 		features => FEAT_IN | FEAT_TEMP,
 	}, {
-		# Shouldn't be in this family, but there it is
 		name => "ITE IT8512E/F/G Super IO",
-		driver => "not-a-sensor",
+		driver => "to-be-written",
 		devid => 0x8512,
+		features => FEAT_IN | FEAT_FAN,
+	}, {
+		name => "ITE IT8516E/F/G Super IO",
+		driver => "to-be-written",
+		devid => 0x8516,
+		features => FEAT_IN | FEAT_FAN,
 	}
 );
 
@@ -2113,7 +2118,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 # first.
 @superio_ids = (
 	{
-		family => "National Semiconductor",
+		family => "National Semiconductor/ITE",
 		enter =>
 		{
 			0x2e => [],
