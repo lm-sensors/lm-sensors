@@ -558,7 +558,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm85_detect(@_, 6); },
 	}, {
 		name => "SMSC EMC6D103S",
-		driver => "to-be-written",	# lm85
+		driver => "lm85",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm85_detect(@_, 8); },
 	}, {
