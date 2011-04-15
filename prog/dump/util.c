@@ -11,6 +11,13 @@
 #include <stdio.h>
 #include "util.h"
 
+/* To keep glibc2 happy */
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
+#include <sys/io.h>
+#else
+#include <asm/io.h>
+#endif
+
 /* Return 1 if we should continue, 0 if we should abort */
 int user_ack(int def)
 {
@@ -46,3 +53,17 @@ int user_ack(int def)
 	return ret;
 }
 
+/* I/O read of specified size */
+unsigned long inx(int addr, int width)
+{
+	switch (width) {
+	case 2:
+		return inw(addr);
+		break;
+	case 4:
+		return inl(addr);
+		break;
+	default:
+		return inb(addr);
+	}
+}

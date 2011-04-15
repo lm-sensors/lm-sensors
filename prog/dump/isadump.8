@@ -1,10 +1,11 @@
-.TH ISADUMP 8 "August 2004"
+.TH ISADUMP 8 "April 2011"
 .SH NAME
 isadump \- examine ISA registers
 
 .SH SYNOPSIS
 .B isadump
 .RB [ -y ]
+.RB [ -W | -L ]
 .RB [ "-k V1,V2..." ]
 .I addrreg
 .I datareg
@@ -12,8 +13,10 @@ isadump \- examine ISA registers
 #for I2C-like access
 .br
 .B isadump
+.B -f
 .RB [ -y ]
-.BI "-f " address
+.RB [ -W | -L ]
+.I address
 .RI [ "range " [ "bank " [ bankreg ]]]
 #for flat address space
 
@@ -39,6 +42,12 @@ Specify a comma-separated list of bytes to send as the key sequence to enter
 the chip configuration mode. Most Super-I/O chips need this.
 Known key sequences are: 0x87,0x01,0x55,0x55 for ITE, 0x55 for SMSC, 0x87,0x87
 for Winbond and VIA, none needed for National Semiconductor.
+.TP
+.B -W
+Perform 16-bit reads.
+.TP
+.B -L
+Perform 32-bit reads.
 
 .SH OPTIONS (I2C-like access mode)
 At least two options must be provided to isadump. \fIaddrreg\fR contains the

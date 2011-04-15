@@ -2,7 +2,7 @@
     isadump.c - isadump, a user-space program to dump ISA registers
     Copyright (C) 2000  Frodo Looijaard <frodol@dds.nl>, and
                         Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2004,2007  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2004-2011  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,9 +52,15 @@ static void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isadump [-y] [-k V1,V2...] ADDRREG DATAREG [BANK [BANKREG]]\n"
+	        "  isadump [OPTIONS] [-k V1,V2...] ADDRREG DATAREG [BANK [BANKREG]]\n"
 	        "Syntax for flat address space:\n"
-	        "  isadump [-y] -f ADDRESS [RANGE [BANK [BANKREG]]]\n");
+	        "  isadump -f [OPTIONS] ADDRESS [RANGE [BANK [BANKREG]]]\n"
+		"Options:\n"
+		"  -k	Super-I/O configuration access key\n"
+		"  -f	Enable flat address space mode\n"
+		"  -y	Assume affirmative answer to all questions\n"
+		"  -W	Read and display word (16-bit) values\n"
+		"  -L	Read and display long (32-bit) values\n");
 }
 
 static int default_bankreg(int flat, int addrreg, int datareg)
@@ -96,9 +102,10 @@ int main(int argc, char *argv[])
 	int bank = -1;      /* -1 means no bank operation */
 	int bankreg;
 	int oldbank = 0;
-	int i, j, res;
+	int i, j;
+	unsigned long res;
 	int flags = 0;
-	int flat = 0, yes = 0;
+	int flat = 0, yes = 0, width = 1;
 	char *end;
 	unsigned char enter_key[SUPERIO_MAX_KEY+1];
 
@@ -118,6 +125,8 @@ int main(int argc, char *argv[])
 			}
 			flags++;
 			break;
+		case 'W': width = 2; break;
+		case 'L': width = 4; break;
 		default:
 			fprintf(stderr, "Warning: Unsupported flag "
 				"\"-%c\"!\n", argv[1+flags][1]);
@@ -270,9 +279,12 @@ int main(int argc, char *argv[])
 	if (bank >= 0)
 		oldbank = set_bank(flat, addrreg, datareg, bank, bankreg);
 
-	if (flat)
-		printf("  ");
-	printf("     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f\n");
+	/* print column headers */
+	printf("%*s", flat ? 5 : 3, "");
+	for (j = 0; j < 16; j += width)
+		printf(" %*x", width * 2, j);
+	printf("\n");
+
 	for (i = 0; i < range; i += 16) {
 		if (flat)
 			printf("%04x: ", addrreg + i);
@@ -288,19 +300,19 @@ int main(int argc, char *argv[])
 		if (enter_key[0])
 			superio_write_key(addrreg, enter_key);
 
-		for (j = 0; j < 16; j++) {
+		for (j = 0; j < 16; j += width) {
 			fflush(stdout);
 			if (flat) {
-				res = inb(addrreg + i + j);
+				res = inx(addrreg + i + j, width);
 			} else {	
 				outb(i+j, addrreg);
 				if (i+j == 0 && inb(addrreg) == 0x80) {
 					/* Bit 7 appears to be a busy flag */
 					range = 128;
 				}
-				res = inb(datareg);
+				res = inx(datareg, width);
 			}
-			printf("%02x ", res);
+			printf("%0*lx ", width * 2, res);
 		}
 		printf("\n");
 	}

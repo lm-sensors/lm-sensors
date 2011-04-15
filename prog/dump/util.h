@@ -12,5 +12,6 @@
 #define _UTIL_H
 
 extern int user_ack(int def);
+extern unsigned long inx(int addr, int width);
 
 #endif /* _UTIL_H */

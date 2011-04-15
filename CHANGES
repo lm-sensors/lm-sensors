@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  isadump: Add support for word (16-bit) and long (32-bit) reads
   sensors-detect: Add AMD family 15h CPU detection
                   Add detection of ADT7461A / NCT1008
                   Add detection of ITE IT8516E/F/G
