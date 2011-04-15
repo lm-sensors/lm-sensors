@@ -67,3 +67,18 @@ unsigned long inx(int addr, int width)
 		return inb(addr);
 	}
 }
+
+/* I/O write of specified size */
+void outx(unsigned long value, int addr, int width)
+{
+	switch (width) {
+	case 2:
+		outw(value, addr);
+		break;
+	case 4:
+		outl(value, addr);
+		break;
+	default:
+		outb(value, addr);
+	}
+}

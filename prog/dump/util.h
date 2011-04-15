@@ -13,5 +13,6 @@
 
 extern int user_ack(int def);
 extern unsigned long inx(int addr, int width);
+extern void outx(unsigned long value, int addr, int width);
 
 #endif /* _UTIL_H */

@@ -1,10 +1,11 @@
-.TH ISASET 8 "May 2005"
+.TH ISASET 8 "April 2011"
 .SH "NAME"
 isaset \- set ISA registers
 
 .SH SYNOPSIS
 .B isaset
 .RB [ -y ]
+.RB [ -W | -L ]
 .I addrreg
 .I datareg
 .I address
@@ -13,8 +14,10 @@ isaset \- set ISA registers
 #for I2C-like access
 .br
 .B isaset
+.B -f
 .RB [ -y ]
-.BI "-f " address
+.RB [ -W | -L ]
+.I address
 .I value
 .RI [ mask ]
 #for flat address space
@@ -33,6 +36,12 @@ Disable interactive mode. By default, isaset will wait for a confirmation
 from the user before messing with the ISA bus. When this flag is used, it
 will perform the operation directly. This is mainly meant to be used in
 scripts.
+.TP
+.B -W
+Perform a 16-bit write.
+.TP
+.B -L
+Perform a 32-bit write.
 
 .SH OPTIONS (I2C-like access mode)
 Four options must be provided to isaset. \fIaddrreg\fR contains the

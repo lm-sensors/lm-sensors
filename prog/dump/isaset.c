@@ -2,7 +2,7 @@
     isaset.c - isaset, a user-space program to write ISA registers
     Copyright (C) 2000  Frodo Looijaard <frodol@dds.nl>, and
                         Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2004,2007  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2004-2011  Jean Delvare <khali@linux-fr.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,17 +48,22 @@ static void help(void)
 {
 	fprintf(stderr,
 	        "Syntax for I2C-like access:\n"
-	        "  isaset [-y] ADDRREG DATAREG ADDRESS VALUE [MASK]\n"
+	        "  isaset [OPTIONS] ADDRREG DATAREG ADDRESS VALUE [MASK]\n"
 	        "Syntax for flat address space:\n"
-	        "  isaset [-y] -f ADDRESS VALUE [MASK]\n");
+	        "  isaset -f [OPTIONS] ADDRESS VALUE [MASK]\n"
+		"Options:\n"
+		"  -f	Enable flat address space mode\n"
+		"  -y	Assume affirmative answer to all questions\n"
+		"  -W	Write a word (16-bit) value\n"
+		"  -L	Write a long (32-bit) value\n");
 }
 
 int main(int argc, char *argv[])
 {
-	int addrreg, datareg = 0, value, addr = 0, vmask = 0;
-	unsigned char res;
+	int addrreg, datareg = 0, addr = 0;
+	unsigned long value, vmask = 0, maxval = 0xff, res;
 	int flags = 0;
-	int flat = 0, yes = 0;
+	int flat = 0, yes = 0, width = 1;
 	char *end;
 
 	/* handle (optional) flags first */
@@ -66,6 +71,8 @@ int main(int argc, char *argv[])
 		switch (argv[1+flags][1]) {
 		case 'f': flat = 1; break;
 		case 'y': yes = 1; break;
+		case 'W': width = 2; maxval = 0xffff; break;
+		case 'L': width = 4; maxval = 0xffffffff; break;
 		default:
 			fprintf(stderr, "Warning: Unsupported flag "
 				"\"-%c\"!\n", argv[1+flags][1]);
@@ -128,29 +135,30 @@ int main(int argc, char *argv[])
 	if (!flat)
 		flags += 2;
 
-	value = strtol(argv[flags+2], &end, 0);
+	value = strtoul(argv[flags+2], &end, 0);
 	if (*end) {
 		fprintf(stderr, "Error: Invalid value!\n");
 		help();
 		exit(1);
 	}
-	if (value < 0 || value > 0xff) {
+	if (value > maxval) {
 		fprintf(stderr, "Error: Value out of range "
-			"(0x00-0xff)!\n");
+			"(0x%0*u-%0*lu)!\n", width * 2, 0, width * 2, maxval);
 		help();
 		exit(1);
 	}
 
 	if (flags+3 < argc) {
-		vmask = strtol(argv[flags+3], &end, 0);
+		vmask = strtoul(argv[flags+3], &end, 0);
 		if (*end) {
 			fprintf(stderr, "Error: Invalid mask!\n");
 			help();
 			exit(1);
 		}
-		if (vmask < 0 || vmask > 0xff) {
+		if (vmask > maxval) {
 			fprintf(stderr, "Error: Mask out of range "
-				"(0x00-0xff)!\n");
+				"(0x%0*u-%0*lu)!\n", width * 2, 0,
+				width * 2, maxval);
 			help();
 			exit(1);
 		}
@@ -167,13 +175,15 @@ int main(int argc, char *argv[])
 		        "system crashes, data loss and worse!\n");
 
 		if (flat)
-			fprintf(stderr, "I will write value 0x%02x%s to address "
-		                "0x%x.\n", value, vmask ? " (masked)" : "",
-			        addrreg);
+			fprintf(stderr,
+				"I will write value 0x%0*lx%s to address "
+		                "0x%x.\n", width * 2, value,
+				vmask ? " (masked)" : "", addrreg);
 		else
-			fprintf(stderr, "I will write value 0x%02x%s to address "
+			fprintf(stderr,
+				"I will write value 0x%0*lx%s to address "
 		                "0x%02x of chip with address register 0x%x\n"
-		                "and data register 0x%x.\n",
+		                "and data register 0x%x.\n", width * 2,
 		                value, vmask ? " (masked)" : "", addr,
 			        addrreg, datareg);
 
@@ -206,26 +216,22 @@ int main(int argc, char *argv[])
 #endif
 
 	if (vmask) {
-		int oldvalue;
+		unsigned long oldvalue;
 
 		if (flat) {
-			oldvalue = inb(addrreg);
+			oldvalue = inx(addrreg, width);
 		} else {	
 			outb(addr, addrreg);
-			oldvalue = inb(datareg);
-		}
-
-		if (oldvalue < 0) {
-			fprintf(stderr, "Error: Failed to read old value\n");
-			exit(1);
+			oldvalue = inx(datareg, width);
 		}
 
 		value = (value & vmask) | (oldvalue & ~vmask);
 
 		if (!yes) {
-			fprintf(stderr, "Old value 0x%02x, write mask "
-				"0x%02x: Will write 0x%02x to %s "
-				"0x%02x\n", oldvalue, vmask, value,
+			fprintf(stderr, "Old value 0x%0*lx, write mask "
+				"0x%0*lx: Will write 0x%0*lx to %s "
+				"0x%02x\n", width * 2, oldvalue,
+				width * 2, vmask, width * 2, value,
 				flat ? "address" : "register",
 				flat ? addrreg : addr);
 
@@ -241,20 +247,21 @@ int main(int argc, char *argv[])
 	/* do the real thing */
 	if (flat) {
 		/* write */
-		outb(value, addrreg);
+		outx(value, addrreg, width);
 		/* readback */
-		res = inb(addrreg);
+		res = inx(addrreg, width);
 	} else {	
 		/* write */
 		outb(addr, addrreg);
-		outb(value, datareg);
+		outx(value, datareg, width);
 		/* readback */
-		res = inb(datareg);
+		res = inx(datareg, width);
 	}
 
 	if (res != value) {
-		fprintf(stderr, "Data mismatch, wrote 0x%02x, "
-		        "read 0x%02x back.\n", value, res);
+		fprintf(stderr, "Data mismatch, wrote 0x%0*lx, "
+		        "read 0x%0*lx back.\n", width * 2, value,
+			width * 2, res);
 	}
 
 	exit(0);
