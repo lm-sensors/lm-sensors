@@ -2415,7 +2415,7 @@ sub initialize_conf
 	if (!$use_udev) {
 		# Try some known default udev db locations, just in case
 		if (-e '/dev/.udev.tdb' || -e '/dev/.udev'
-		 || -e '/dev/.udevdb') {
+		 || -e '/dev/.udevdb' || -e '/run/udev') {
 			$use_udev = 1;
 			$dev_i2c = '/dev/i2c-';
 		}
@@ -6459,6 +6459,22 @@ EOT
 		}
 		close(SYSCONFIG);
 
+		if (-x "/bin/systemctl" && -d "/lib/systemd/system" &&
+		    ! -f "/lib/systemd/system/lm_sensors.service") {
+			print "Copy prog/init/lm_sensors.service to /lib/systemd/system\n".
+			      "and run 'systemctl enable lm_sensors.service'\n".
+			      "for initialization at boot time.\n";
+			return;
+		}
+
+		if (-x "/bin/systemctl" &&
+		    -f "/lib/systemd/system/lm_sensors.service") {
+			system("/bin/systemctl", "enable", "lm_sensors.service");
+			system("/bin/systemctl", "start", "lm_sensors.service");
+			# All done, don't check for /etc/init.d/lm_sensors
+			return;
+		}
+
 		print "Copy prog/init/lm_sensors.init to /etc/init.d/lm_sensors\n".
 		      "for initialization at boot time.\n"
 			unless -f "/etc/init.d/lm_sensors";
@@ -6514,8 +6530,10 @@ sub main
 		exit -1;
 	}
 
-	if (-x "/sbin/service" && -f "/etc/init.d/lm_sensors" &&
-	    -f "/var/lock/subsys/lm_sensors") {
+	if (-x "/bin/systemctl" && -f "/lib/systemd/system/lm_sensors.service") {
+		system("/bin/systemctl", "stop", "lm_sensors.service");
+	} elsif (-x "/sbin/service" && -f "/etc/init.d/lm_sensors" &&
+		 -f "/var/lock/subsys/lm_sensors") {
 		system("/sbin/service", "lm_sensors", "stop");
 	}
 
