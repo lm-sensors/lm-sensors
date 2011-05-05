@@ -1917,7 +1917,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Nuvoton W83677HG-I (NCT6771F/NCT6772F/NCT6775F) Super IO Sensors",
-		driver => "to-be-written",	# Probably w83627ehf
+		driver => "w83627ehf",
 		devid => 0xB470,
 		devid_mask => 0xFFF0,
 		logdev => 0x0b,
@@ -1934,7 +1934,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Nuvoton NCT6776F Super IO Sensors",
-		driver => "to-be-written",
+		driver => "w83627ehf",
 		devid => 0xC333,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
