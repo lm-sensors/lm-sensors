@@ -1344,11 +1344,6 @@ use vars qw(@i2c_adapter_names);
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 9); },
-	}, {
-		name => "Smart Battery",
-		driver => "sbs", # ACPI driver, not sure if it always works
-		i2c_addrs => [0x0b],
-		i2c_detect => sub { smartbatt_detect(@_); },
 	}
 );
 
@@ -5703,19 +5698,6 @@ sub emc1403_detect
 	}
 
 	return 6;
-}
-
-# This checks for non-FFFF values for temperature, voltage, and current.
-# The address (0x0b) is specified by the SMBus standard so it's likely
-# that this really is a smart battery.
-sub smartbatt_detect
-{
-	my ($file, $addr) = @_;
-
-	return if i2c_smbus_read_word_data($file, 0x08) == 0xffff
-	       || i2c_smbus_read_word_data($file, 0x09) == 0xffff
-	       || i2c_smbus_read_word_data($file, 0x0a) == 0xffff;
-	return 5;
 }
 
 # Chip to detect: 0 = W83L784R/AR/G, 1 = W83L785R/G, 2 = W83L786NR/NG/R/G,

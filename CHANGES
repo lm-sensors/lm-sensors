@@ -7,6 +7,8 @@ SVN HEAD
   sensors-detect: Add AMD family 15h CPU detection
                   Add detection of ADT7461A / NCT1008
                   Add detection of ITE IT8516E/F/G
+                  Integrate with systemd
+                  Drop unreliable smart battery detection
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
