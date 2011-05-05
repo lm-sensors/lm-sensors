@@ -9,6 +9,7 @@ SVN HEAD
                   Add detection of ITE IT8516E/F/G
                   Integrate with systemd
                   Drop unreliable smart battery detection
+                  Add detection of SMSC EMC6W201
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex

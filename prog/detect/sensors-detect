@@ -562,6 +562,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm85_detect(@_, 8); },
 	}, {
+		name => "SMSC EMC6W201",
+		driver => "to-be-written",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { emc6w201_detect(@_); },
+	}, {
 		name => "Winbond WPCD377I",
 		driver => "not-a-sensor",
 		i2c_addrs => [0x2c..0x2e],
@@ -4924,6 +4929,21 @@ sub lm85_detect
 	}
 
 	return 7;
+}
+
+# Registers used:
+#   0x3e: Vendor register
+#   0x3f: Version/Stepping register
+sub emc6w201_detect
+{
+	my ($file, $addr) = @_;
+	my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
+	my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
+
+	return if $vendor != 0x5c;			# SMSC
+	return if $verstep < 0xb0 || $verstep < 0xb1;	# EMC6W201
+
+	return 6;
 }
 
 # Chip to detect: 0 = LM87, 1 = ADM1024
