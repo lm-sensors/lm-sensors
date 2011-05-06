@@ -13,6 +13,7 @@ SVN-HEAD
   Program sensord: Fix a memory leak when a chip name is provided
   Program sensors: Fix a memory leak when a chip name is provided
                    Fix iconv-related build warning in set_degstr
+                   Properly support Maxim MAX6650 and MAX6651
   Program sensors-detect: Fix detection of older DS1621
                           Rename the modprobe config file to lm_sensors.conf
                           Drop AMD K10 detection (unreliable sensors)

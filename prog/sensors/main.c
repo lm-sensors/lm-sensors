@@ -436,6 +436,7 @@ static struct match matches[] = {
 	{ "lm63", print_lm63 },
 	{ "xeontemp", print_xeontemp },
 	{ "max6650", print_max6650 },
+	{ "max6651", print_max6650 },
 	{ "asb100", print_asb100 },
 	{ "adm1029", print_adm1029 },
 	{ "adm1030", print_adm1031 },

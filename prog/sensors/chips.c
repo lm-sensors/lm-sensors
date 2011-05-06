@@ -5443,8 +5443,8 @@ void print_max6650(const sensors_chip_name *name)
         print_label(label,10);
         printf("%4.0f RPM\n", tach);
       }
-    } else
-      printf("ERROR: Can't get %s data!\n", tach_list[i].name);
+    }
+    /* Keep silent on error, MAX6650 has no fan2-fan4 */
  
     free(label);
   }
