@@ -4929,14 +4929,17 @@ sub lm85_detect
 # Registers used:
 #   0x3e: Vendor register
 #   0x3f: Version/Stepping register
+#   0x40: Configuration register (reserved bits + ready)
 sub emc6w201_detect
 {
 	my ($file, $addr) = @_;
 	my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
 	my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
+	my $conf = i2c_smbus_read_byte_data($file, 0x40);
 
 	return if $vendor != 0x5c;			# SMSC
 	return if $verstep < 0xb0 || $verstep < 0xb1;	# EMC6W201
+	return if ($conf & 0xf4) != 0x04;
 
 	return 6;
 }
