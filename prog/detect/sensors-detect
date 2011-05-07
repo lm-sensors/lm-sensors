@@ -848,11 +848,6 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c, 0x2e, 0x2f],
 		i2c_detect => sub { max6639_detect(@_); },
 	}, {
-		name => "Maxim MAX6650/MAX6651",
-		driver => "max6650",
-		i2c_addrs => [0x1b, 0x1f, 0x48, 0x4b],
-		i2c_detect => sub { max6650_detect(@_); },
-	}, {
 		name => "Maxim MAX6655/MAX6656",
 		driver => "max6655",
 		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
@@ -5774,34 +5769,6 @@ sub max6639_detect
 	return unless $rev == 0x00;
 
 	return 6;
-}
-
-# The max6650 has no device ID register. However, a few registers have
-# spare bits, which are documented as being always zero on read. We read
-# all of these registers check the spare bits. Any non-zero means this
-# is not a max6650/1.
-#
-# The always zero bits are:
-#   configuration byte register (0x02) - top 2 bits
-#   gpio status register (0x14) - top 3 bits
-#   alarm enable register (0x08) - top 3 bits
-#   alarm status register (0x0A) - top 3 bits
-#   tachometer count time register (0x16) - top 6 bits
-# Additionally, not all values are possible for lower 3 bits of
-# the configuration register.
-sub max6650_detect
-{
-	my ($file, $addr) = @_;
-
-	my $conf = i2c_smbus_read_byte_data($file, 0x02);
-
-	return if i2c_smbus_read_byte_data($file, 0x16) & 0xFC;
-	return if i2c_smbus_read_byte_data($file, 0x0A) & 0xE0;
-	return if i2c_smbus_read_byte_data($file, 0x08) & 0xE0;
-	return if i2c_smbus_read_byte_data($file, 0x14) & 0xE0;
-	return if ($conf & 0xC0) or ($conf & 0x07) > 4;
-
-	return 2;
 }
 
 sub max6655_detect

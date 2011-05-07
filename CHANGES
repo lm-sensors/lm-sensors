@@ -10,6 +10,7 @@ SVN HEAD
                   Integrate with systemd
                   Drop unreliable smart battery detection
                   Add detection of SMSC EMC6W201
+                  Drop unreliable detection of Maxim MAX6650
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
