@@ -563,7 +563,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm85_detect(@_, 8); },
 	}, {
 		name => "SMSC EMC6W201",
-		driver => "to-be-written",
+		driver => "emc6w201",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { emc6w201_detect(@_); },
 	}, {
@@ -4936,12 +4936,17 @@ sub emc6w201_detect
 	my $vendor = i2c_smbus_read_byte_data($file, 0x3e);
 	my $verstep = i2c_smbus_read_byte_data($file, 0x3f);
 	my $conf = i2c_smbus_read_byte_data($file, 0x40);
+	my $stepping;
 
-	return if $vendor != 0x5c;			# SMSC
-	return if $verstep < 0xb0 || $verstep < 0xb1;	# EMC6W201
+	return if $vendor != 0x5c;		# SMSC
+	return if ($verstep & 0xf0) != 0xb0;	# EMC6W201
 	return if ($conf & 0xf4) != 0x04;
 
-	return 6;
+	$stepping = $verstep & 0x0f;
+	return if $stepping > 3;
+
+	# So far we've only seen stepping 1 chips
+	return $stepping <= 1 ? 6 : 3;
 }
 
 # Chip to detect: 0 = LM87, 1 = ADM1024
