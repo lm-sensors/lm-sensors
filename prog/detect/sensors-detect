@@ -557,7 +557,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm85_detect(@_, 6); },
 	}, {
-		name => "SMSC EMC6D103S",
+		name => "SMSC EMC6D103S or EMC2300",
 		driver => "lm85",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm85_detect(@_, 8); },
@@ -4857,7 +4857,7 @@ sub andigilog_aSC7511_detect
 
 # Chip to detect: 0 = LM85, 1 = LM96000, 2 = ADM1027, 3 = ADT7463,
 #		  4 = EMC6D100/101, 5 = EMC6D102, 6 = EMC6D103,
-#		  7 = WPCD377I (no sensors), 8 = EMC6D103S
+#		  7 = WPCD377I (no sensors), 8 = EMC6D103S/EMC2300
 # Registers used:
 #   0x3e: Vendor register
 #   0x3d: Device ID register (Analog Devices only)
@@ -4896,7 +4896,7 @@ sub lm85_detect
 		       && $verstep != 0x69;	# EMC6D103 A1
 	} elsif ($chip == 8) {
 		return if $vendor != 0x5c;	# SMSC
-		return if $verstep != 0x6a;	# EMC6D103S
+		return if $verstep != 0x6a;	# EMC6D103S/EMC2300
 	}
 
 	if ($vendor == 0x41) {			# Analog Devices
