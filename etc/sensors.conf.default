@@ -242,6 +242,14 @@ chip "lm85-*" "lm85b-*" "lm85c-*" "adm1027-*" "adt7463-*" "adt7468-*" "emc6d100-
     label temp2 "M/B Temp"
 
 
+chip "emc6w201-*"
+
+    label in2 "+3.3V"
+    label in3 "+5V"
+
+    label temp6 "M/B Temp"
+
+
 chip "pc87365-*" "pc87366-*"
 
 # Voltage inputs
