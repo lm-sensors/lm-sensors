@@ -223,7 +223,8 @@ chip "smsc47m192-*"
     label temp1 "SIO Temp"
 
 
-chip "lm85-*" "lm85b-*" "lm85c-*" "adm1027-*" "adt7463-*" "adt7468-*" "emc6d100-*" "emc6d102-*"
+chip "lm85-*" "lm85b-*" "lm85c-*" "adm1027-*" "adt7463-*" "adt7468-*" \
+     "emc6d100-*" "emc6d102-*" "emc6d103-*" "emc6d103s-*" 
 
     label in1 "Vcore"
     label in2 "+3.3V"
