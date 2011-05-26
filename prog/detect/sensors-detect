@@ -1780,6 +1780,16 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		},
 		logdev => 0x0c,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "SMSC SCH5636 Super IO",
+		driver => "sch5636",
+		devid => 0xc7,
+		regs => {
+			basereg_lsb => 0x66,
+			basereg_msb => 0x67,
+		},
+		logdev => 0x0c,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}
 );
 
