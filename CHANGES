@@ -14,6 +14,7 @@ SVN HEAD
                   Drop unreliable detection of Maxim MAX6650
                   Add detection of SMSC EMC2300
                   Add detection of MAX6642
+                  Add detection of ITE IT8772E
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
