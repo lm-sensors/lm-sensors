@@ -618,7 +618,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { adt7410_detect(@_); },
 	}, {
 		name => "Analog Devices ADT7411",
-		driver => "to-be-written",
+		driver => "adt7411",
 		i2c_addrs => [0x48, 0x4a, 0x4b],
 		i2c_detect => sub { adt7411_detect(@_); },
 	}, {
@@ -658,7 +658,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm93_detect(@_, 0); },
 	}, {
 		name => "National Semiconductor LM94",
-		driver => "to-be-written",	# Most likely lm93
+		driver => "lm93",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm93_detect(@_, 1); },
 	}, {
@@ -959,7 +959,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { max6680_95_detect(@_, 1); },
 	}, {
 		name => "Winbond W83L771W/G",
-		driver => "to-be-written",
+		driver => "lm90",
 		i2c_addrs => [0x4c],
 		i2c_detect => sub { lm90_detect(@_, 8); },
 	}, {
@@ -1051,7 +1051,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { lm90_detect(@_, 5); },
 	}, {
 		name => "Analog Devices ADT7461A, ON Semiconductor NCT1008",
-		driver => "to-be-written",	# lm90
+		driver => "lm90",
 		i2c_addrs => [0x4c..0x4d],
 		i2c_detect => sub { lm90_detect(@_, 13); },
 	}, {
