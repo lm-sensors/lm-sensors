@@ -1356,12 +1356,12 @@ use vars qw(@i2c_adapter_names);
 @ipmi_ifs = (
 	{
 		name => "IPMI BMC KCS",
-		driver => "ipmisensors",
+		driver => "to-be-written",	# ipmisensors
 		isa_addrs => [0x0ca0],
 		isa_detect => sub { ipmi_detect(@_); },
 	}, {
 		name => "IPMI BMC SMIC",
-		driver => "ipmisensors",
+		driver => "to-be-written",	# ipmisensors
 		isa_addrs => [0x0ca8],
 		isa_detect => sub { ipmi_detect(@_); },
 	}
@@ -6045,6 +6045,7 @@ sub w83781d_isa_detect
 sub ipmi_from_smbios
 {
 	my ($version, $if, @ipmi_if);
+	my $ipmi_driver = "to-be-written";	# ipmisensors
 
 	return 0 unless check_dmidecode_version();
 
@@ -6080,13 +6081,13 @@ sub ipmi_from_smbios
 						 $if->{type}));
 		}
 		print "Success!\n".
-		      "    (confidence 8, driver `ipmisensors')\n";
+		      "    (confidence 8, driver `$ipmi_driver')\n";
 		my $new_hash = {
 			conf => 8,
 			isa_addr => $if->{addr} || 0,
 			chipname => $if->{type},
 		};
-		add_isa_to_chips_detected("ipmisensors", $new_hash);
+		add_isa_to_chips_detected($ipmi_driver, $new_hash);
 	}
 
 	return scalar @ipmi_if;
