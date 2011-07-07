@@ -999,7 +999,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { amc6821_detect(@_); },
 	}, {
 		name => "National Semiconductor LM95231",
-		driver => "to-be-written",
+		driver => "lm95241",
 		i2c_addrs => [0x2b, 0x19, 0x2a],
 		i2c_detect => sub { lm95231_detect(@_, 0); },
 	}, {
@@ -4544,7 +4544,7 @@ sub lm95231_detect
 
 	return if $mid != 0x01;				# National Semiconductor
 	return if $chip == 0 && $cid != 0xa1;		# LM95231
-	return if $chip == 1 && $cid != 0xa4;		# LM95231
+	return if $chip == 1 && $cid != 0xa4;		# LM95241
 
 	return if i2c_smbus_read_byte_data($file, 0x02) & 0x70;
 	return if i2c_smbus_read_byte_data($file, 0x03) & 0x89;
