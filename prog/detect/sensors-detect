@@ -1055,6 +1055,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c..0x4d],
 		i2c_detect => sub { lm90_detect(@_, 13); },
 	}, {
+		name => "NXP/Philips SA56004",
+		driver => "lm90",
+		i2c_addrs => [0x48..0x4f],
+		i2c_detect => sub { lm90_detect(@_, 14); },
+	}, {
 		name => "Analog Devices ADT7481",
 		driver => "to-be-written",
 		i2c_addrs => [0x4c, 0x4b],
@@ -4352,11 +4357,11 @@ sub max6680_95_detect
 #		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
 #		  8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
 #		  11 = W83L771AWG/ASG, 12 = MAX6690,
-#		  13 = ADT7461A/NCT1008
+#		  13 = ADT7461A/NCT1008, 14 = SA56004
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
-#   0xbf: Configuration 2 (National Semiconductor and Winbond only)
+#   0xbf: Configuration 2 (National Semiconductor, Winbond, and Philips only)
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
 sub lm90_detect
@@ -4456,6 +4461,13 @@ sub lm90_detect
 		return if $rate > 0x0a;
 		return if $mid != 0x41;		# Analog Devices
 		return 8 if $cid == 0x57;	# ADT7461A, NCT1008
+	}
+	if ($chip == 14) {
+		return if ($conf & 0x2a) != 0;
+		return if ($conf2 & 0xfe) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0xa1;		# NXP Semiconductor/Philips
+		return 6 if $cid == 0x00;	# SA56004
 	}
 	return;
 }

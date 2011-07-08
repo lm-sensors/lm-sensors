@@ -16,6 +16,7 @@ SVN HEAD
                   Add detection of MAX6642
                   Add detection of ITE IT8772E
                   Don't advertise the ipmisensors driver
+                  Add detection of SA56004
 
 3.3.0 (2011-03-28)
   Makefile: Check for bison and flex
