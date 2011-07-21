@@ -43,7 +43,7 @@ fi
 modprobe fakephp &> /dev/null
 
 if [ ! -d "$pcibus" ] ; then
-	echo "You need the fake PCI hotplug driver! (fakephp.ko and 2.6 kernel)"
+	echo "You need the fake PCI hotplug driver! (fakephp.ko, kernel 2.6.5 or later)"
 	exit 255;
 fi
 

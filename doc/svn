@@ -4,9 +4,9 @@ Anonymous access to our Subversion repository (SVN) is available. This means
 that users can have direct access to up-to-the-minute code.
 (http://subversion.tigris.org/)
 
-Driver development for 2.6 kernels is taking place directly in the kernel
-using GIT. Do not use the drivers from our SVN repository for 2.6 kernels, it
-will not work. The user-space tools will work though.
+Driver development for kernel version 3 is taking place directly in the kernel
+using GIT. Do not use the drivers from our SVN repository for kernel version
+2.6 or 3, it will not work. The user-space tools will work though.
 
 We presume that you have Subversion installed on your machine. To check out a
 working copy of the code for this project use the following commands:

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w -pi.old
 
 # Convert a sensors.conf file from the old (Linux 2.4, lm-sensors 2)
-# symbol names to the new (Linux 2.6, lm-sensors 3) symbol names.
+# symbol names to the new (Linux 2.6 or 3, lm-sensors 3) symbol names.
 #
 # Copyright (C) 2007  Jean Delvare <khali@linux-fr.org>
 #

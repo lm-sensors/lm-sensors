@@ -25,7 +25,7 @@ see http://www.lm-sensors.org/wiki/UsefulLinks.
      isadump -k 0x55 0x2e 0x2f
 
 * prog/hotplug/unhide_ICH_SMBus (shell script, not installed)
-  It unhides the ICH Intel SMBus for 2.6 kernels
+  It unhides the ICH Intel SMBus for kernel 2.6.5 and later.
 
 * prog/init/lm_sensors.init (shell script, not installed)
   A SysV init script to be installed in /etc/rc.d/init.d/

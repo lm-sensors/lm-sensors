@@ -3,7 +3,7 @@ What is it?
 
 It unhides the SMBus of Intel ICH southbridges hidden on Asus P4B series
 and some other Asus and non-Asus systems. It is implemented as a shell
-script for the 2.6 kernel: unhide_ICH_SMBus.
+script for kernel 2.6.5 and later: unhide_ICH_SMBus.
 
 It works with the following chips:
  * ICH2   (82801BA)
@@ -19,9 +19,8 @@ with the German support and learned that: "We do not want the users to be
 irritated by just another PCI Device in the Win98 device manager."
 Really funny :-).
 
-For 2.6 kernels, activation is normally handled by the code in
-drivers/pci/quirks.c in the kernel source. If you have the 2.6 kernel and
-the quirks code does not activate your SMBus, you may:
+Activation is normally handled by the code in drivers/pci/quirks.c in the
+kernel source. If the quirks code does not activate your SMBus, you may:
 
  * first of all, read the paragraph "Hidden ICH SMBus" in
    Documentation/i2c/busses/i2c-i801 in the kernel source.
