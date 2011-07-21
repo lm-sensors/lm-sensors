@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads
   isaset: Add support for word (16-bit) and long (32-bit) writes
   sensors.conf.default: Add a section for the EMC6W201

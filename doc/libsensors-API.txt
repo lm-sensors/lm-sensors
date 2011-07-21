@@ -6,7 +6,7 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
-0x431	lm-sensors 3.3.0
+0x431	lm-sensors 3.3.0 to 3.3.1
 * Added support for intrusion detection
   enum sensors_feature_type SENSORS_FEATURE_INTRUSION
   enum sensors_subfeature_type SENSORS_SUBFEATURE_INTRUSION_ALARM
