@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Stop calling for PIIX5 SMBus testers
+
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads
   isaset: Add support for word (16-bit) and long (32-bit) writes

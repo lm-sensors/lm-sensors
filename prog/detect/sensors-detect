@@ -60,7 +60,7 @@ $revision =~ s/ \([^()]*\)//;
 		vendid	=> 0x8086,
 		devid	=> 0x7603,
 		procid	=> "Intel 82372FB PIIX5 ACPI",
-		driver	=> "to-be-tested",
+		driver	=> "to-be-written",
 	}, {
 		vendid	=> 0x8086,
 		devid	=> 0x719b,
@@ -2970,16 +2970,8 @@ sub adapter_pci_detection
 		next unless exists $pci_list{$key};
 
 		$device = $pci_list{$key};
-		if ($try->{driver} eq "to-be-tested") {
-			print "\nWe are currently looking for testers for this adapter!\n".
-			      "Please check http://www.lm-sensors.org/wiki/Devices\n".
-			      "and/or contact us if you want to help.\n\n".
-			      "Continue... ";
-			<STDIN>;
-			print "\n";
-		}
 
-		if ($try->{driver} =~ m/^to-be-/) {
+		if ($try->{driver} eq "to-be-written") {
 			printf "No known driver for device \%s: \%s\n",
 			       pci_busid($device), $try->{procid};
 		} else {
