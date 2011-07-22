@@ -2767,6 +2767,7 @@ sub initialize_dmi_data
 		'system manufacturer' => 1,
 		'system product name' => 1,
 		'system name' => 1,
+		'system version' => 1,
 	);
 	my $dmi_id_dir;
 
@@ -2811,6 +2812,7 @@ sub print_dmi_summary
 	
 	if (defined $system) {
 		print "# System: $system";
+		print " [$dmi{product_version}]" if defined $dmi{product_version};
 		print " (laptop)" if (is_laptop());
 		print "\n";
 	}

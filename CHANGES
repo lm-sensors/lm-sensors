@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   sensors-detect: Stop calling for PIIX5 SMBus testers
                   Improve filtering of fake DMI data
+                  Print DMI system/product version if available
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads
