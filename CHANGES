@@ -18,6 +18,7 @@ SVN-HEAD
                           Rename the modprobe config file to lm_sensors.conf
                           Drop AMD K10 detection (unreliable sensors)
                           Add detection for AMD Family 11h thermal sensors
+                          Stop calling for PIIX5 SMBus testers
 
 2.10.8 (20081216)
   File doc/chips/lm90: Update datasheet links (2.6 backport)
