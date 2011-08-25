@@ -6615,7 +6615,7 @@ sub main
 	      "Do you want to scan for them? This is totally safe. (YES/no): ";
 	unless (<STDIN> =~ /^\s*n/i) {
 		# Load the cpuid driver if needed
-		unless (-e "/dev/cpu/$cpu[0]->{nr}/cpuid") {
+		unless (-e "$sysfs_root/class/cpuid") {
 			load_module("cpuid");
 			udev_settle();
 		}
