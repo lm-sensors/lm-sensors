@@ -4044,7 +4044,9 @@ sub lm73_detect
 	# Bits that always return 0
 	return if ($conf & 0x0c) or ($status & 0x10);
 
-	return if i2c_smbus_read_word_data($file, 0x07) != 0x9001;
+	# Test with byte read first to avoid confusing other chips
+	return if i2c_smbus_read_byte_data($file, 0x07) != 0x01
+	       or i2c_smbus_read_word_data($file, 0x07) != 0x9001;
 
 	# Make sure the chip supports SMBus read word transactions
 	my $cur = i2c_smbus_read_word_data($file, 0x00);

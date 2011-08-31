@@ -6,6 +6,7 @@ SVN HEAD
                   Improve filtering of fake DMI data
                   Print DMI system/product version if available
                   Fix loading of the cpuid module
+                  Make LM73 detection less problematic
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads
