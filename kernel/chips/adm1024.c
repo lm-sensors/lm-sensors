@@ -182,8 +182,8 @@ static int adm1024_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int adm1024_detach_client(struct i2c_client *client);
 
-static int adm1024_read_value(struct i2c_client *client, u8 register);
-static int adm1024_write_value(struct i2c_client *client, u8 register,
+static int adm1024_read_value(struct i2c_client *client, u8 reg);
+static int adm1024_write_value(struct i2c_client *client, u8 reg,
 			       u8 value);
 static void adm1024_update_client(struct i2c_client *client);
 static void adm1024_init_client(struct i2c_client *client);

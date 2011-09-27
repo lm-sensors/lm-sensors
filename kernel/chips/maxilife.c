@@ -268,10 +268,10 @@ static int maxi_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int maxi_detach_client(struct i2c_client *client);
 
-static int maxi_read_value(struct i2c_client *client, u8 register);
+static int maxi_read_value(struct i2c_client *client, u8 reg);
 static int maxi_read_token(struct i2c_client *client, u16 token);
 #ifndef NOWRITE
-static int maxi_write_value(struct i2c_client *client, u8 register,
+static int maxi_write_value(struct i2c_client *client, u8 reg,
 			    u8 value);
 #endif
 static int maxi_write_token_loop(struct i2c_client *client, u16 token,

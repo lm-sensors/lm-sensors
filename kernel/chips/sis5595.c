@@ -193,8 +193,8 @@ static int sis5595_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int sis5595_detach_client(struct i2c_client *client);
 
-static int sis5595_read_value(struct i2c_client *client, u8 register);
-static int sis5595_write_value(struct i2c_client *client, u8 register,
+static int sis5595_read_value(struct i2c_client *client, u8 reg);
+static int sis5595_write_value(struct i2c_client *client, u8 reg,
 			       u8 value);
 static void sis5595_update_client(struct i2c_client *client);
 static void sis5595_init_client(struct i2c_client *client);

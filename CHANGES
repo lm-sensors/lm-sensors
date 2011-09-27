@@ -9,6 +9,7 @@ SVN-HEAD
   Module i2c-amd8111: Fix timeout handling (2.6 backport)
   Module i2c-piix4: ATI SB800 is not actually supported
   Module it87: Properly decode -128 degrees C (2.6 backport)
+  Modules: Don't name function parameters "register"
   Program eepromer: Fix array initialization overrun
   Program sensord: Fix a memory leak when a chip name is provided
   Program sensors: Fix a memory leak when a chip name is provided

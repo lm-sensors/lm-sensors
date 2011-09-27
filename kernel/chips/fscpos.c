@@ -137,8 +137,8 @@ static int fscpos_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int fscpos_detach_client(struct i2c_client *client);
 
-static int fscpos_read_value(struct i2c_client *client, u8 register);
-static int fscpos_write_value(struct i2c_client *client, u8 register,
+static int fscpos_read_value(struct i2c_client *client, u8 reg);
+static int fscpos_write_value(struct i2c_client *client, u8 reg,
 			    u8 value);
 static void fscpos_update_client(struct i2c_client *client);
 static void fscpos_init_client(struct i2c_client *client);

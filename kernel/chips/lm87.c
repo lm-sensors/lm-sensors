@@ -221,8 +221,8 @@ static int lm87_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int lm87_detach_client(struct i2c_client *client);
 
-static int lm87_read_value(struct i2c_client *client, u8 register);
-static int lm87_write_value(struct i2c_client *client, u8 register,
+static int lm87_read_value(struct i2c_client *client, u8 reg);
+static int lm87_write_value(struct i2c_client *client, u8 reg,
 			       u8 value);
 static void lm87_update_client(struct i2c_client *client);
 static void lm87_init_client(struct i2c_client *client);

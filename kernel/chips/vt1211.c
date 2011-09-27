@@ -222,8 +222,8 @@ static int vt1211_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int vt1211_detach_client(struct i2c_client *client);
 
-static inline int vt_rdval(struct i2c_client *client, u8 register);
-static inline void vt1211_write_value(struct i2c_client *client, u8 register,
+static inline int vt_rdval(struct i2c_client *client, u8 reg);
+static inline void vt1211_write_value(struct i2c_client *client, u8 reg,
 			       u8 value);
 static void vt1211_update_client(struct i2c_client *client);
 static void vt1211_init_client(struct i2c_client *client);

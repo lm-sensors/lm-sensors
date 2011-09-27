@@ -191,8 +191,8 @@ static int fscscy_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int fscscy_detach_client(struct i2c_client *client);
 
-static int fscscy_read_value(struct i2c_client *client, u8 register);
-static int fscscy_write_value(struct i2c_client *client, u8 register,
+static int fscscy_read_value(struct i2c_client *client, u8 reg);
+static int fscscy_write_value(struct i2c_client *client, u8 reg,
 			    u8 value);
 static void fscscy_update_client(struct i2c_client *client);
 static void fscscy_init_client(struct i2c_client *client);

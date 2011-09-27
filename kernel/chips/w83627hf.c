@@ -325,8 +325,8 @@ static int w83627hf_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83627hf_detach_client(struct i2c_client *client);
 
-static int w83627hf_read_value(struct i2c_client *client, u16 register);
-static int w83627hf_write_value(struct i2c_client *client, u16 register,
+static int w83627hf_read_value(struct i2c_client *client, u16 reg);
+static int w83627hf_write_value(struct i2c_client *client, u16 reg,
 			       u16 value);
 static void w83627hf_update_client(struct i2c_client *client);
 static void w83627hf_init_client(struct i2c_client *client);

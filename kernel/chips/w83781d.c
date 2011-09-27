@@ -297,8 +297,8 @@ static int w83781d_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int w83781d_detach_client(struct i2c_client *client);
 
-static int w83781d_read_value(struct i2c_client *client, u16 register);
-static int w83781d_write_value(struct i2c_client *client, u16 register,
+static int w83781d_read_value(struct i2c_client *client, u16 reg);
+static int w83781d_write_value(struct i2c_client *client, u16 reg,
 			       u16 value);
 static void w83781d_update_client(struct i2c_client *client);
 static void w83781d_init_client(struct i2c_client *client);

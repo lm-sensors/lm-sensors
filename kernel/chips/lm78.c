@@ -143,8 +143,8 @@ static int lm78_detect(struct i2c_adapter *adapter, int address,
 		       unsigned short flags, int kind);
 static int lm78_detach_client(struct i2c_client *client);
 
-static int lm78_read_value(struct i2c_client *client, u8 register);
-static int lm78_write_value(struct i2c_client *client, u8 register,
+static int lm78_read_value(struct i2c_client *client, u8 reg);
+static int lm78_write_value(struct i2c_client *client, u8 reg,
 			    u8 value);
 static void lm78_update_client(struct i2c_client *client);
 static void lm78_init_client(struct i2c_client *client);

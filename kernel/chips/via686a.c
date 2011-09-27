@@ -338,8 +338,8 @@ static int via686a_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int via686a_detach_client(struct i2c_client *client);
 
-static int via686a_read_value(struct i2c_client *client, u8 register);
-static void via686a_write_value(struct i2c_client *client, u8 register,
+static int via686a_read_value(struct i2c_client *client, u8 reg);
+static void via686a_write_value(struct i2c_client *client, u8 reg,
 				u8 value);
 static void via686a_update_client(struct i2c_client *client);
 static void via686a_init_client(struct i2c_client *client);

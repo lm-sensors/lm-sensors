@@ -79,8 +79,8 @@ static int mic74_detect(struct i2c_adapter *adapter, int address,
 			  unsigned short flags, int kind);
 static int mic74_detach_client(struct i2c_client *client);
 
-static int mic74_read_value(struct i2c_client *client, u8 register);
-static int mic74_write_value(struct i2c_client *client, u8 register,
+static int mic74_read_value(struct i2c_client *client, u8 reg);
+static int mic74_write_value(struct i2c_client *client, u8 reg,
 			       u8 value);
 static void mic74_update_client(struct i2c_client *client);
 static void mic74_init_client(struct i2c_client *client);
