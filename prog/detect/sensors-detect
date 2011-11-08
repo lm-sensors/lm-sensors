@@ -1023,6 +1023,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18, 0x4e],
 		i2c_detect => sub { lm63_detect(@_, 3); },
 	}, {
+		name => "National Semiconductor LM96163",
+		driver => "lm63",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm63_detect(@_, 4); },
+	}, {
 		name => "Fintek F75363SG",
 		driver => "lm63", # Not yet
 		i2c_addrs => [0x4c],
@@ -4599,7 +4604,7 @@ sub adt7481_detect
 	return 6;
 }
 
-# Chip to detect: 1 = LM63, 2 = F75363SG, 3 = LM64
+# Chip to detect: 1 = LM63, 2 = F75363SG, 3 = LM64, 4 = LM96163
 # Registers used:
 #   0xfe: Manufacturer ID
 #   0xff: Chip ID / die revision
@@ -4627,6 +4632,11 @@ sub lm63_detect
 	} elsif ($chip == 3) {
 		return if $mid != 0x01		# National Semiconductor
 		       || $cid != 0x51;		# LM64
+		return if ($conf & 0x18) != 0x00
+		       || ($mask & 0xa4) != 0xa4;
+	} elsif ($chip == 4) {
+		return if $mid != 0x01		# National Semiconductor
+		       || $cid != 0x49;		# LM96163
 		return if ($conf & 0x18) != 0x00
 		       || ($mask & 0xa4) != 0xa4;
 	}
