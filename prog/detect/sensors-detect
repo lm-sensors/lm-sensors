@@ -657,7 +657,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm93_detect(@_, 0); },
 	}, {
-		name => "National Semiconductor LM94",
+		name => "National Semiconductor LM94 or LM96194",
 		driver => "lm93",
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { lm93_detect(@_, 1); },
