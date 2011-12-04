@@ -49,7 +49,7 @@ function LoadConfig {
 	echo "Loading configuration from $1 ..."
 	if [ ! -r "$1" ]
 	then
-		echo "Error: Can't read configuration file"
+		echo "Error: Can't read configuration file" >&2
 		exit 1
 	fi
 
@@ -70,13 +70,13 @@ function LoadConfig {
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
 	then
-		echo "Some mandatory settings missing, please check your config file!"
+		echo "Some mandatory settings missing, please check your config file!" >&2
 		exit 1
 	fi
 	if [ "$INTERVAL" -le 0 ]
 	then
-		echo "Error in configuration file:"
-		echo "INTERVAL must be at least 1"
+		echo "Error in configuration file:" >&2
+		echo "INTERVAL must be at least 1" >&2
 		exit 1
 	fi
 
@@ -90,8 +90,8 @@ function LoadConfig {
 	do
 		if ! echo $fcv | egrep -q '='
 		then
-			echo "Error in configuration file:"
-			echo "FCTEMPS value is improperly formatted"
+			echo "Error in configuration file:" >&2
+			echo "FCTEMPS value is improperly formatted" >&2
 			exit 1
 		fi
 
@@ -110,32 +110,32 @@ function LoadConfig {
 		# verify the validity of the settings
 		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
 		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
-			echo "MINTEMP must be less than MAXTEMP"
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "MINTEMP must be less than MAXTEMP" >&2
 			exit 1
 		fi
 		if [ "${AFCMAXPWM[$fcvcount]}" -gt 255 ]
 		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
-			echo "MAXPWM must be at most 255"
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "MAXPWM must be at most 255" >&2
 			exit 1
 		fi
 		if [ "${AFCMINSTOP[$fcvcount]}" -ge "${AFCMAXPWM[$fcvcount]}" ]
 		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
-			echo "MINSTOP must be less than MAXPWM"
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "MINSTOP must be less than MAXPWM" >&2
 			exit 1
 		fi
 		if [ "${AFCMINSTOP[$fcvcount]}" -lt "${AFCMINPWM[$fcvcount]}" ]
 		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
-			echo "MINSTOP must be greater than or equal to MINPWM"
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "MINSTOP must be greater than or equal to MINPWM" >&2
 			exit 1
 		fi
 		if [ "${AFCMINPWM[$fcvcount]}" -lt 0 ]
 		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):"
-			echo "MINPWM must be at least 0"
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "MINPWM must be at least 0" >&2
 			exit 1
 		fi
 
@@ -185,7 +185,7 @@ function ValidateDevices()
 
 		if [ "`DevicePath "$device"`" != "$path" ]
 		then
-			echo "Device path of $device has changed"
+			echo "Device path of $device has changed" >&2
 			outdated=1
 		fi
 	done
@@ -197,7 +197,7 @@ function ValidateDevices()
 
 		if [ "`DeviceName "$device"`" != "$name" ]
 		then
-			echo "Device name of $device has changed"
+			echo "Device name of $device has changed" >&2
 			outdated=1
 		fi
 	done
@@ -215,7 +215,7 @@ function CheckFiles {
 		pwmo=${AFCPWM[$fcvcount]}
 		if [ ! -w $pwmo ]
 		then
-			echo "Error: file $pwmo doesn't exist"
+			echo "Error: file $pwmo doesn't exist" >&2
 			outdated=1
 		fi
 		let fcvcount=$fcvcount+1
@@ -227,7 +227,7 @@ function CheckFiles {
 		tsen=${AFCTEMP[$fcvcount]}
 		if [ ! -r $tsen ]
 		then
-			echo "Error: file $tsen doesn't exist"
+			echo "Error: file $tsen doesn't exist" >&2
 			outdated=1
 		fi
 		let fcvcount=$fcvcount+1
@@ -241,7 +241,7 @@ function CheckFiles {
 		do
 			if [ ! -r $fan ]
 			then
-				echo "Error: file $fan doesn't exist"
+				echo "Error: file $fan doesn't exist" >&2
 				outdated=1
 			fi
 		done
@@ -250,10 +250,10 @@ function CheckFiles {
 
 	if [ $outdated -eq 1 ]
 	then
-		echo
-		echo "At least one referenced file is missing. Either some required kernel"
-		echo "modules haven't been loaded, or your configuration file is outdated."
-		echo "In the latter case, you should run pwmconfig again."
+		echo >&2
+		echo "At least one referenced file is missing. Either some required kernel" >&2
+		echo "modules haven't been loaded, or your configuration file is outdated." >&2
+		echo "In the latter case, you should run pwmconfig again." >&2
 	fi
 
 	return $outdated
@@ -277,13 +277,13 @@ elif echo "${AFCPWM[0]}" | egrep -q '^[1-9]*[0-9]-[0-9abcdef]{4}'
 then
 	DIR=/sys/bus/i2c/devices
 else
-	echo "$0: Invalid path to sensors"
+	echo "$0: Invalid path to sensors" >&2
 	exit 1
 fi
 
 if [ ! -d $DIR ]
 then
-	echo $0: 'No sensors found! (did you load the necessary modules?)'
+	echo $0: 'No sensors found! (did you load the necessary modules?)' >&2
 	exit 1
 fi
 cd $DIR
@@ -291,19 +291,19 @@ cd $DIR
 # Check for configuration change
 if [ -z "$DEVPATH" -o -z "$DEVNAME" ]
 then
-	echo "Configuration is too old, please run pwmconfig again"
+	echo "Configuration is too old, please run pwmconfig again" >&2
 	exit 1
 fi
 if ! ValidateDevices "$DEVPATH" "$DEVNAME"
 then
-	echo "Configuration appears to be outdated, please run pwmconfig again"
+	echo "Configuration appears to be outdated, please run pwmconfig again" >&2
 	exit 1
 fi
 CheckFiles || exit 1
 
 if [ -f "$PIDFILE" ]
 then
-	echo "File $PIDFILE exists, is fancontrol already running?"
+	echo "File $PIDFILE exists, is fancontrol already running?" >&2
 	exit 1
 fi
 echo $$ > "$PIDFILE"
@@ -416,7 +416,7 @@ function UpdateFanSpeeds {
 				read one_fanval < ${one_fan}
 				if [ $? -ne 0 ]
 				then
-					echo "Error reading Fan value from $DIR/$one_fan"
+					echo "Error reading Fan value from $DIR/$one_fan" >&2
 					restorefans 1
 				fi
 
@@ -473,7 +473,7 @@ function UpdateFanSpeeds {
 		echo $pwmval > $pwmo # write new value to pwm output
 		if [ $? -ne 0 ]
 		then
-			echo "Error writing PWM value to $DIR/$pwmo"
+			echo "Error writing PWM value to $DIR/$pwmo" >&2
 			restorefans 1
 		fi
 		if [ "$DEBUG" != "" ]
@@ -492,7 +492,7 @@ do
 	pwmenable $pwmo
 	if [ $? -ne 0 ]
 	then
-		echo "Error enabling PWM on $DIR/$pwmo"
+		echo "Error enabling PWM on $DIR/$pwmo" >&2
 		restorefans 1
 	fi
 	let fcvcount=$fcvcount+1
