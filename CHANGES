@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  fancontrol: Support setup where one PWM output controls several fans
   sensors-detect: Stop calling for PIIX5 SMBus testers
                   Improve filtering of fake DMI data
                   Print DMI system/product version if available

@@ -236,12 +236,15 @@ function CheckFiles {
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCFAN[@]} )) # go through all fan inputs
 	do
-		fan=${AFCFAN[$fcvcount]}
-		if [ ! -r $fan ]
-		then
-			echo "Error: file $fan doesn't exist"
-			outdated=1
-		fi
+		# A given PWM output can control several fans
+		for fan in $(echo ${AFCFAN[$fcvcount]} | sed -e 's/+/ /')
+		do
+			if [ ! -r $fan ]
+			then
+				echo "Error: file $fan doesn't exist"
+				outdated=1
+			fi
+		done
 		let fcvcount=$fcvcount+1
 	done
 
@@ -405,12 +408,31 @@ function UpdateFanSpeeds {
 		# If fanspeed-sensor output shall be used, do it
 		if [[ -n ${fan} ]]
 		then
-			read fanval < ${fan}
-			if [ $? -ne 0 ]
-			then
-				echo "Error reading Fan value from $DIR/$fan"
-				restorefans 1
-			fi
+			min_fanval=100000
+			fanval=
+			# A given PWM output can control several fans
+			for one_fan in $(echo $fan | sed -e 's/+/ /')
+			do
+				read one_fanval < ${one_fan}
+				if [ $? -ne 0 ]
+				then
+					echo "Error reading Fan value from $DIR/$one_fan"
+					restorefans 1
+				fi
+
+				# Remember the minimum, it only matters if it is 0
+				if [ $one_fanval -lt $min_fanval ]
+				then
+					min_fanval=$one_fanval
+				fi
+
+				if [ -z "$fanval" ]
+				then
+					fanval=$one_fanval
+				else
+					fanval="$fanval/$one_fanval"
+				fi
+			done
 		else
 			fanval=1  # set it to a non zero value, so the rest of the script still works
 		fi
@@ -430,6 +452,7 @@ function UpdateFanSpeeds {
 			echo "tval=$tval"
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"
+			echo "min_fanval=$min_fanval"
 		fi
 
 		if (( $tval <= $mint ))
@@ -439,7 +462,7 @@ function UpdateFanSpeeds {
 		else
 		  # calculate the new value from temperature and settings
 		  pwmval="(${tval}-${mint})*(${maxpwm}-${minso})/(${maxt}-${mint})+${minso}"
-		  if [ $pwmpval -eq 0 -o $fanval -eq 0 ]
+		  if [ $pwmpval -eq 0 -o $min_fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
 			# Sleep while still handling signals
