@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   libsensors: Added support for new sysfs attributes
   sensors: Added support for new sysfs attributes
+           Display both instantaneous and average power if available.
   fancontrol: Support setup where one PWM output controls several fans
               Output error messages to stderr
   sensors-detect: Stop calling for PIIX5 SMBus testers
