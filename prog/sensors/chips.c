@@ -570,7 +570,7 @@ static void print_chip_power(const sensors_chip_name *name,
 
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
-		printf("%6.2f %sW  ", val, unit);
+		printf("%6.2f %sW%*s", val, unit, 2 - (int)strlen(unit), "");
 	} else
 		printf("     N/A  ");
 
