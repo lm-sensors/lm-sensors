@@ -124,3 +124,6 @@ lleo19		Intel DH57JG with i3-540 CPU, 4GB RAM, chassis,	2011-01
 		and power supply.				Guenter Roeck
 		Used to add support for NCT6775F (W83677HG-I)
 		to w83627ehf driver.
+
+AMD		Asus EAH6450 Silent video card			2011-12
+								Jean Delvare
