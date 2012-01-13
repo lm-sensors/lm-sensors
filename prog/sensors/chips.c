@@ -339,7 +339,7 @@ static void print_chip_temp(const sensors_chip_name *name,
 			sens = 4;
 
 		printf("  sensor = %s", sens == 0 ? "disabled" :
-		       sens == 1 ? "diode" :
+		       sens == 1 ? "CPU diode" :
 		       sens == 2 ? "transistor" :
 		       sens == 3 ? "thermal diode" :
 		       sens == 4 ? "thermistor" :
