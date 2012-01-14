@@ -323,7 +323,7 @@ chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*" "nct6775-*" "nct6776-*"
     set in7_min  3.3 * 0.90
     set in7_max  3.3 * 1.10
     set in8_min  3.0 * 0.90
-    set in8_max  3.0 * 1.10
+    set in8_max  3.3 * 1.10
 
 
 chip "w83627uhg-*"
@@ -340,7 +340,7 @@ chip "w83627uhg-*"
     set in7_min  5.0 * 0.90
     set in7_max  5.0 * 1.10
     set in8_min  3.0 * 0.90
-    set in8_max  3.0 * 1.10
+    set in8_max  3.3 * 1.10
 
 
 chip "f71805f-*"
