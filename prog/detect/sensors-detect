@@ -818,6 +818,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
 		i2c_detect => sub { adm1021_detect(@_, 1); },
 	}, {
+		name => "Global Mixed-mode Technology G781",
+		driver => "lm90",
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { lm90_detect(@_, 15); },
+	}, {
 		name => "Maxim MAX1617",
 		driver => "adm1021",
 		i2c_addrs => [0x18..0x1a, 0x29..0x2b, 0x4c..0x4e],
@@ -4364,7 +4369,8 @@ sub max6680_95_detect
 #		  6 = MAX6646/MAX6647/MAX6648/MAX6649/MAX6692,
 #		  8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
 #		  11 = W83L771AWG/ASG, 12 = MAX6690,
-#		  13 = ADT7461A/NCT1008, 14 = SA56004
+#		  13 = ADT7461A/NCT1008, 14 = SA56004,
+#		  15 = G781
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4475,6 +4481,12 @@ sub lm90_detect
 		return if $rate > 0x09;
 		return if $mid != 0xa1;		# NXP Semiconductor/Philips
 		return 6 if $cid == 0x00;	# SA56004
+	}
+	if ($chip == 15) {
+		return if ($conf & 0x3f) != 0;
+		return if $rate > 0x08;
+		return if $mid != 0x47;		# GMT
+		return 8 if $cid == 0x01;	# G781
 	}
 	return;
 }
