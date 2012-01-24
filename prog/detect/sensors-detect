@@ -153,6 +153,26 @@ $revision =~ s/ \([^()]*\)//;
 		driver	=> "i2c-i801",
 	}, {
 		vendid	=> 0x8086,
+		devid	=> 0x1D22,
+		procid	=> "Intel Patsburg (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x2330,
+		procid	=> "Intel DH89xxCC (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x1E22,
+		procid	=> "Intel Panther Point (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8C22,
+		procid	=> "Intel Lynx Point (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
 		devid	=> 0x8119,
 		procid	=> "Intel SCH",
 		driver	=> "i2c-isch",
