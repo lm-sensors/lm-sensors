@@ -4271,7 +4271,7 @@ sub ds1621_detect
 #   0x07: Converstion rate register (LM96080 only)
 #   0x2a-0x3d: Limits registers (LM80 only)
 #   0x3e: Manufacturer's ID register (LM96080 only)
-#   0x3f: Steppind/die revision ID register (LM96080 only)
+#   0x3f: Stepping/die revision ID register (LM96080 only)
 # The LM80 is easily misdetected since it doesn't provide identification
 # registers. So we have to use some tricks:
 #   - 6-bit addressing, so limits readings modulo 0x40 should be unchanged
