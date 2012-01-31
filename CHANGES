@@ -16,6 +16,7 @@ SVN HEAD
                   Make LM73 detection less problematic
                   Add detection of National Semiconductor LM96163
                   Add detection of GMT G781
+                  Properly handle Super-I/O chips without logical device
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads

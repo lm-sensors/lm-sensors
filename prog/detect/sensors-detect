@@ -3766,6 +3766,10 @@ sub probe_superio
 		print "\n    (hardware monitoring capabilities accessible via SMBus only)\n";
 		return FEAT_SMBUS;
 	}
+	if (!exists $chip->{logdev}) {
+		print "\n    (no support yet)\n";
+		return 0;
+	}
 
 	# Switch to the sensor logical device
 	outb($addrreg, $superio{logdevreg});
