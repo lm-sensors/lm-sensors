@@ -12,7 +12,7 @@
 # Such custom configuration files for specific mainboards can be found at
 # http://www.lm-sensors.org/wiki/Configurations
 
-chip "lm78-*" "lm79-*" "lm80-*"
+chip "lm78-*" "lm79-*" "lm80-*" "lm96080-*"
 
     label temp1 "M/B Temp"
 
