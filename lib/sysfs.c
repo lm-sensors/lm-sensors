@@ -24,6 +24,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/vfs.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -40,6 +41,7 @@
 /****************************************************************************/
 
 #define ATTR_MAX	128
+#define SYSFS_MAGIC	0x62656572
 
 /*
  * Read an attribute from sysfs
@@ -593,11 +595,11 @@ exit_free:
 /* returns !0 if sysfs filesystem was found, 0 otherwise */
 int sensors_init_sysfs(void)
 {
-	struct stat statbuf;
+	struct statfs statfsbuf;
 
 	snprintf(sensors_sysfs_mount, NAME_MAX, "%s", "/sys");
-	if (stat(sensors_sysfs_mount, &statbuf) < 0
-	 || statbuf.st_nlink <= 2)	/* Empty directory */
+	if (statfs(sensors_sysfs_mount, &statfsbuf) < 0
+	 || statfsbuf.f_type != SYSFS_MAGIC)
 		return 0;
 
 	return 1;

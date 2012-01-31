@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   libsensors: Added support for new sysfs attributes
+              Change sysfs detection to survive upcoming kernel changes
   sensors: Added support for new sysfs attributes
            Display both instantaneous and average power if available.
            Report thermal sensor type 1 as CPU diode
