@@ -19,6 +19,7 @@ SVN HEAD
                   Add detection of GMT G781
                   Properly handle Super-I/O chips without logical device
                   Add detection of National Semiconductor LM96080
+                  Add detection of ITE IT8771E
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads
