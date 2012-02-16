@@ -2809,6 +2809,7 @@ sub initialize_dmi_data
 		'system product name' => 1,
 		'system name' => 1,
 		'system version' => 1,
+		'to be filled by o.e.m.' => 1,
 	);
 	my $dmi_id_dir;
 
