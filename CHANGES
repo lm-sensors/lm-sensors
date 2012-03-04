@@ -21,6 +21,7 @@ SVN HEAD
                   Add detection of National Semiconductor LM96080
                   Add detection of ITE IT8771E
                   Add detection of ITE IT8781F, IT8782F and IT8783F
+                  Add detection of ITE IT8510E/TE/G, IT8511E/TE/G, IT8513E/F/G, and IT8518E
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads

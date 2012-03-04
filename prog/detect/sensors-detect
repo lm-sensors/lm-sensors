@@ -1595,14 +1595,34 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x14,
 		features => FEAT_IN | FEAT_TEMP,
 	}, {
+		name => "ITE IT8510E/TE/G Super IO",
+		driver => "to-be-written",
+		devid => 0x8510,
+		features => FEAT_IN | FEAT_FAN,
+	}, {
+		name => "ITE IT8511E/TE/G Super IO",
+		driver => "to-be-written",
+		devid => 0x8511,
+		features => FEAT_IN | FEAT_FAN,
+	}, {
 		name => "ITE IT8512E/F/G Super IO",
 		driver => "to-be-written",
 		devid => 0x8512,
 		features => FEAT_IN | FEAT_FAN,
 	}, {
+		name => "ITE IT8513E/F/G Super IO",
+		driver => "to-be-written",
+		devid => 0x8513,
+		features => FEAT_IN | FEAT_FAN,
+	}, {
 		name => "ITE IT8516E/F/G Super IO",
 		driver => "to-be-written",
 		devid => 0x8516,
+		features => FEAT_IN | FEAT_FAN,
+	}, {
+		name => "ITE IT8518E Super IO",
+		driver => "to-be-written",
+		devid => 0x8518,
 		features => FEAT_IN | FEAT_FAN,
 	}
 );
