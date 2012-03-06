@@ -204,7 +204,11 @@ static void daemonize(void)
 	} else if (pid != 0) {
 		fprintf(file, "%d\n", pid);
 		fclose(file);
-		unloadLib();
+
+		freeChips();
+		if (unloadLib())
+			exit(EXIT_FAILURE);
+
 		exit(EXIT_SUCCESS);
 	}
 

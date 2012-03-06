@@ -132,14 +132,7 @@ static int do_features(const sensors_chip_name *chip,
 		       const FeatureDescriptor *feature, int action)
 {
 	char *label;
-	int alrm, beep;
-
-	label = sensors_get_label(chip, feature->feature);
-	if (!label) {
-		sensorLog(LOG_ERR, "Error getting sensor label: %s/%s",
-			  chip->prefix, feature->feature->name);
-		return -1;
-	}
+	int alrm, beep, ret;
 
 	alrm = get_flag(chip, feature->alarmNumber);
 	if (alrm == -1)
@@ -151,7 +144,18 @@ static int do_features(const sensors_chip_name *chip,
 	if (beep == -1)
 		return -1;
 
-	return get_features(chip, feature, action, label, alrm, beep);
+	label = sensors_get_label(chip, feature->feature);
+	if (!label) {
+		sensorLog(LOG_ERR, "Error getting sensor label: %s/%s",
+			  chip->prefix, feature->feature->name);
+		return -1;
+	}
+
+	ret = get_features(chip, feature, action, label, alrm, beep);
+
+	free(label);
+
+	return ret;
 }
 
 static int doKnownChip(const sensors_chip_name *chip,
