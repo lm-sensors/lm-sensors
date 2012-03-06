@@ -114,10 +114,8 @@ static int do_features(const sensors_chip_name *chip,
 		if (feature->rrd) {
 			const char *rrded = feature->rrd(val);
 
-			/* FIXME: Jean's review comment:
-			 * sprintf would me more efficient.
-			 */
-			strcat(strcat (rrdBuff, ":"), rrded ? rrded : "U");
+			sprintf(rrdBuff + strlen(rrdBuff), ":%s",
+				rrded ? rrded : "U");
 		}
 
 		return 0;
