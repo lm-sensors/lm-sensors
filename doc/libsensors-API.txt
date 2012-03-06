@@ -16,6 +16,9 @@ SVN HEAD
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_AVERAGE
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_LOWEST
   enum sensors_subfeature_type SENSORS_SUBFEATURE_CURR_HIGHEST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MAX
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MIN_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MAX_ALARM
 0x431	lm-sensors 3.3.0 to 3.3.1
 * Added support for intrusion detection
   enum sensors_feature_type SENSORS_FEATURE_INTRUSION

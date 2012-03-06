@@ -408,7 +408,7 @@ static void print_chip_fan(const sensors_chip_name *name,
 			   const sensors_feature *feature,
 			   int label_size)
 {
-	const sensors_subfeature *sf, *sfmin, *sfdiv;
+	const sensors_subfeature *sf, *sfmin, *sfmax, *sfdiv;
 	double val;
 	char *label;
 
@@ -435,24 +435,36 @@ static void print_chip_fan(const sensors_chip_name *name,
 
 	sfmin = sensors_get_subfeature(name, feature,
 				       SENSORS_SUBFEATURE_FAN_MIN);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_FAN_MAX);
 	sfdiv = sensors_get_subfeature(name, feature,
 				       SENSORS_SUBFEATURE_FAN_DIV);
-	if (sfmin && sfdiv)
-		printf("  (min = %4.0f RPM, div = %1.0f)",
-		       get_value(name, sfmin),
-		       get_value(name, sfdiv));
-	else if (sfmin)
-		printf("  (min = %4.0f RPM)",
-		       get_value(name, sfmin));
-	else if (sfdiv)
-		printf("  (div = %1.0f)",
-		       get_value(name, sfdiv));
+	if (sfmin || sfmax || sfdiv) {
+		printf("  (");
+		if (sfmin)
+			printf("min = %4.0f RPM",
+			       get_value(name, sfmin));
+		if (sfmax)
+			printf("%smax = %4.0f RPM",
+			       sfmin ? ", " : "",
+			       get_value(name, sfmax));
+		if (sfdiv)
+			printf("%sdiv = %1.0f",
+			       (sfmin || sfmax) ? ", " : "",
+			       get_value(name, sfdiv));
+		printf(")");
+	}
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_FAN_ALARM);
-	if (sf && get_value(name, sf)) {
+	sfmin = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_FAN_MIN_ALARM);
+	sfmax = sensors_get_subfeature(name, feature,
+				       SENSORS_SUBFEATURE_FAN_MAX_ALARM);
+	if ((sf && get_value(name, sf)) ||
+	    (sfmin && get_value(name, sfmin)) ||
+	    (sfmax && get_value(name, sfmax)))
 		printf("  ALARM");
-	}
 
 	printf("\n");
 }
