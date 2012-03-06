@@ -1350,6 +1350,16 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 10); },
 	}, {
+		name => "ST STTS2002",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 11); },
+	}, {
+		name => "ST STTS3000",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 12); },
+	}, {
 		name => "NXP SE97/SE97B",
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
@@ -5985,7 +5995,7 @@ sub max6655_detect
 # Chip to detect: 0 = STTS424, 1 = SE97/SE97B, 2 = SE98, 3 = ADT7408,
 #                 4 = TS3000/TSE2002, 5 = MAX6604, 6 = MCP98242,
 #                 7 = MCP98243, 8 = MCP9843, 9 = CAT6095 / CAT34TS02,
-#                 10 = STTS424E
+#                 10 = STTS424E, 11 = STTS2002, 12 = STTS3000
 # Registers used:
 #   0x00: Capabilities
 #   0x01: Configuration
@@ -6042,6 +6052,12 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 10) {
 		return unless $manid == 0x10;		# STMicrolectronics
 		return unless $devid == 0x00;		# STTS424E02
+	} elsif ($chip == 11) {
+		return unless $manid == 0x10;		# STMicrolectronics
+		return unless $devid == 0x03;		# STTS2002
+	} elsif ($chip == 12) {
+		return unless $manid == 0x10;		# STMicrolectronics
+		return unless $devid == 0x02;		# STTS3000
 	}
 
 	# Now, do it all again with words. Note that we get
@@ -6087,6 +6103,12 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 10) {
 		return unless $manid == 0x4a10;		# STMicrolectronics
 		return unless ($devid & 0xfeff) == 0x0000; # STTS424E02
+	} elsif ($chip == 11) {
+		return unless $manid == 0x4a10;		# STMicrolectronics
+		return unless ($devid & 0xfeff) == 0x0003; # STTS2002
+	} elsif ($chip == 12) {
+		return unless $manid == 0x4a10;		# STMicrolectronics
+		return unless ($devid & 0xfeff) == 0x0002; # STTS3000
 	}
 
 	return 5;
