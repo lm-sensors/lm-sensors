@@ -82,12 +82,20 @@ static int get_flag(const sensors_chip_name *chip, int num)
 	return (int) (val + 0.5);
 }
 
-static int get_features(const sensors_chip_name *chip,
-			const FeatureDescriptor *feature, int action,
-			char *label, int alrm, int beep)
+static int do_features(const sensors_chip_name *chip,
+		       const FeatureDescriptor *feature, int action)
 {
-	int i, ret;
+	char *label;
+	const char *formatted;
+	int i, alrm, beep, ret;
 	double val[MAX_DATA];
+
+	/* If only scanning, take a quick exit if alarm is off */
+	alrm = get_flag(chip, feature->alarmNumber);
+	if (alrm == -1)
+		return -1;
+	if (action == DO_SCAN && !alrm)
+		return 0;
 
 	for (i = 0; feature->dataNumbers[i] >= 0; i++) {
 		ret = sensors_get_value(chip, feature->dataNumbers[i],
@@ -101,6 +109,7 @@ static int get_features(const sensors_chip_name *chip,
 		}
 	}
 
+	/* For RRD, we don't need anything else */
 	if (action == DO_RRD) {
 		if (feature->rrd) {
 			const char *rrded = feature->rrd(val);
@@ -110,40 +119,24 @@ static int get_features(const sensors_chip_name *chip,
 			 */
 			strcat(strcat (rrdBuff, ":"), rrded ? rrded : "U");
 		}
-	} else {
-		const char *formatted = feature->format(val, alrm, beep);
 
-		if (!formatted) {
-			sensorLog(LOG_ERR, "Error formatting sensor data");
-			return -1;
-		}
-
-		if (action == DO_READ) {
-			sensorLog(LOG_INFO, "  %s: %s", label, formatted);
-		} else {
-			sensorLog(LOG_ALERT, "Sensor alarm: Chip %s: %s: %s",
-				  chipName(chip), label, formatted);
-		}
-	}
-	return 0;
-}
-
-static int do_features(const sensors_chip_name *chip,
-		       const FeatureDescriptor *feature, int action)
-{
-	char *label;
-	int alrm, beep, ret;
-
-	alrm = get_flag(chip, feature->alarmNumber);
-	if (alrm == -1)
-		return -1;
-	else if (action == DO_SCAN && !alrm)
 		return 0;
+	}
 
+	/* For scanning and logging, we need extra information */
 	beep = get_flag(chip, feature->beepNumber);
 	if (beep == -1)
 		return -1;
 
+	formatted = feature->format(val, alrm, beep);
+	if (!formatted) {
+		sensorLog(LOG_ERR, "Error formatting sensor data");
+		return -1;
+	}
+
+	/* FIXME: It would be more efficient to store the label at
+	 * initialization time.
+	 */
 	label = sensors_get_label(chip, feature->feature);
 	if (!label) {
 		sensorLog(LOG_ERR, "Error getting sensor label: %s/%s",
@@ -151,11 +144,15 @@ static int do_features(const sensors_chip_name *chip,
 		return -1;
 	}
 
-	ret = get_features(chip, feature, action, label, alrm, beep);
+	if (action == DO_READ)
+		sensorLog(LOG_INFO, "  %s: %s", label, formatted);
+	else
+		sensorLog(LOG_ALERT, "Sensor alarm: Chip %s: %s: %s",
+			  chipName(chip), label, formatted);
 
 	free(label);
 
-	return ret;
+	return 0;
 }
 
 static int doKnownChip(const sensors_chip_name *chip,
