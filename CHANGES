@@ -10,6 +10,7 @@ SVN HEAD
            Display both instantaneous and average power if available.
            Report thermal sensor type 1 as CPU diode
            Align power values better
+           Fix power interval output
   fancontrol: Support setup where one PWM output controls several fans
               Output error messages to stderr
   sensors-detect: Stop calling for PIIX5 SMBus testers

@@ -586,11 +586,25 @@ static void print_chip_power(const sensors_chip_name *name,
 	} else
 		printf("     N/A  ");
 
-	for (i = 0; i < sensor_count; i++)
-		scale_value(&sensors[i].value, &sensors[i].unit);
+	for (i = 0; i < sensor_count; i++) {
+		/*
+		 * Unit is W and needs to be scaled for all attributes except
+		 * interval, which does not need to be scaled and is reported in
+		 * seconds.
+		 */
+		if (strcmp(sensors[i].name, "interval")) {
+			char *tmpstr;
 
+			tmpstr = alloca(4);
+			scale_value(&sensors[i].value, &unit);
+			snprintf(tmpstr, 4, "%sW", unit);
+			sensors[i].unit = tmpstr;
+		} else {
+			sensors[i].unit = "s";
+		}
+	}
 	print_limits(sensors, sensor_count, alarms, alarm_count,
-		     label_size, "%s = %6.2f %sW");
+		     label_size, "%s = %6.2f %s");
 
 	printf("\n");
 }
