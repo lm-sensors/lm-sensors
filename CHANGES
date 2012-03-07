@@ -27,6 +27,8 @@ SVN HEAD
                   Add detection of ITE IT8510E/TE/G, IT8511E/TE/G,
                          IT8513E/F/G, and IT8518E
                   Add detection of ST Microelectronics STTS2002 and STTS3000
+                  Add detection of IDT TSE2002GB2, TS3000GB2, Microchip MCP9804,
+                         and Atmel AT30TS00
 
 3.3.1 (2011-07-21)
   isadump: Add support for word (16-bit) and long (32-bit) reads

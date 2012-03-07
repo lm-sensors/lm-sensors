@@ -1385,6 +1385,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 5); },
 	}, {
+		name => "Microchip MCP9804",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 13); },
+	}, {
 		name => "Microchip MCP98242",
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
@@ -1404,6 +1409,11 @@ use vars qw(@i2c_adapter_names);
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 9); },
+	}, {
+		name => "Atmel AT30TS00",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 14); },
 	}
 );
 
@@ -5996,6 +6006,7 @@ sub max6655_detect
 #                 4 = TS3000/TSE2002, 5 = MAX6604, 6 = MCP98242,
 #                 7 = MCP98243, 8 = MCP9843, 9 = CAT6095 / CAT34TS02,
 #                 10 = STTS424E, 11 = STTS2002, 12 = STTS3000
+#                 13 = MCP9804, 14 = AT30TS00
 # Registers used:
 #   0x00: Capabilities
 #   0x01: Configuration
@@ -6058,6 +6069,12 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 12) {
 		return unless $manid == 0x10;		# STMicrolectronics
 		return unless $devid == 0x02;		# STTS3000
+	} elsif ($chip == 13) {
+		return unless $manid == 0x00;		# MCP
+		return unless $devid == 02;		# MCP9804
+	} elsif ($chip == 14) {
+		return unless $manid == 0x00;		# Atmel
+		return unless $devid == 0x82;		# AT30TS00
 	}
 
 	# Now, do it all again with words. Note that we get
@@ -6084,7 +6101,7 @@ sub jedec_JC42_4_detect
 		return unless $devid == 0x0108;		# ADT7408
 	} elsif ($chip == 4) {
 		return unless $manid == 0xb300;		# IDT
-		return unless $devid == 0x0329;		# TS3000/TSE2002
+		return unless $devid == 0x0329 || $devid == 0x1229; # TS3000/TSE2002
 	} elsif ($chip == 5) {
 		return unless $manid == 0x4d00;		# MAXIM
 		return unless $devid == 0x003e;		# MAX6604
@@ -6109,6 +6126,12 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 12) {
 		return unless $manid == 0x4a10;		# STMicrolectronics
 		return unless ($devid & 0xfeff) == 0x0002; # STTS3000
+	} elsif ($chip == 13) {
+		return unless $manid == 0x5400;		# MCP
+		return unless ($devid & 0xfcff) == 0x0002; # MCP9804
+	} elsif ($chip == 14) {
+		return unless $manid == 0x1f00;		# Atmel
+		return unless ($devid & 0xfeff) == 0x0082; # AT30TS00
 	}
 
 	return 5;
