@@ -96,6 +96,10 @@ Winbond		Celeron CPU, 512MB RAM				2006-03
 ASUSTeK		ASUS P5MT-S					2006-03
 		Platform for W83792D related development	Rudolf Marek
 
+Winbond		Asus P4P800-VM					2006-08
+		This board has a Winbond W83627THF hardware	Jean Delvare
+		monitoring chip.
+
 Winbond		Asus P4P800-X, Pentium 4 2.8 GHz, 512 MB RAM	2006-08
 		This board has an (hidden) Intel 82801EB	Jean Delvare
 		(ICH5) SMBus with SPD EEPROMs connected, and
