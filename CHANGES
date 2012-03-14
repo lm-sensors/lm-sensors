@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes
               Change sysfs detection to survive upcoming kernel changes
   sensord: Fix memory leaks revealed by valgrind
