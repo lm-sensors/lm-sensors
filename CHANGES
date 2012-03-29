@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Don't choke on systems without PCI
+
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes
               Change sysfs detection to survive upcoming kernel changes

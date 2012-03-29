@@ -2996,7 +2996,7 @@ sub read_sys_dev_pci
 	my ($dev, @pci_list);
 
 	opendir(local *DEVICES, "$devices")
-		or die "$devices: $!";
+		or return \@pci_list;
 
 	while (defined($dev = readdir(DEVICES))) {
 		my %record;
