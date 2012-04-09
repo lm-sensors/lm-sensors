@@ -3660,6 +3660,9 @@ sub scan_i2c_adapter
 		$input = <STDIN>;
 		chomp($input);
 		@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
+	} elsif (($class & 0xff00) == 0x0300) {
+		# Skip EDID addresses by default on graphics adapters
+		@not_to_scan = parse_not_to_scan(0x03, 0x77, "0x50-0x57");
 	}
 
 	open(local *FILE, "$dev_i2c$adapter_nr") or

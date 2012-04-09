@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   sensors-detect: Don't choke on systems without PCI
+                  Avoid probing EDID addresses on graphics cards (#2386)
 
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes
