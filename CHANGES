@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  sensors: Fix libiconv linkage need detection in rare corner case
   sensors-detect: Don't choke on systems without PCI
                   Avoid probing EDID addresses on graphics cards (#2386)
 
