@@ -144,10 +144,10 @@ endif
 	     echo '         Run the following command: rm /usr/lib/$(LIBSHBASENAME)*' ; \
 	     echo '******************************************************************************' ; \
 	   fi ; \
-	   grep -q '^$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '^$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(LIBDIR)$$' /etc/ld.so.conf || \
-	   grep -q '[[:space:]:,]$(LIBDIR)[[:space:]:,=]' /etc/ld.so.conf || \
+	   cat /etc/ld.so.conf /etc/ld.so.conf.d/*.conf 2>/dev/null | grep -q '^$(LIBDIR)$$' || \
+	   cat /etc/ld.so.conf /etc/ld.so.conf.d/*.conf 2>/dev/null | grep -q '^$(LIBDIR)[[:space:]:,=]' || \
+	   cat /etc/ld.so.conf /etc/ld.so.conf.d/*.conf 2>/dev/null | grep -q '[[:space:]:,]$(LIBDIR)$$' || \
+	   cat /etc/ld.so.conf /etc/ld.so.conf.d/*.conf 2>/dev/null | grep -q '[[:space:]:,]$(LIBDIR)[[:space:]:,=]' || \
 		( echo '******************************************************************************' ; \
 		  echo 'Warning: Library directory $(LIBDIR) is not in /etc/ld.so.conf!' ; \
 		  echo '         Add it and run /sbin/ldconfig for the userspace tools to work.' ; \
