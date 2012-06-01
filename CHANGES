@@ -6,6 +6,7 @@ SVN HEAD
   sensors: Fix libiconv linkage need detection in rare corner case
   sensors-detect: Don't choke on systems without PCI
                   Avoid probing EDID addresses on graphics cards (#2386)
+		  Add detection of NCT6779D and NCT6102D/NCT6106D
 
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes

@@ -2034,6 +2034,18 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
+		name => "Nuvoton NCT6779D Super IO Sensors",
+		driver => "to-be-written",	# nct6775, new driver
+		devid => 0xC562,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "Nuvoton NCT6102D/NCT6106D Super IO Sensors",
+		driver => "to-be-written",	# nct6775, new driver
+		devid => 0x1061,
+		logdev => 0x0b,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "Fintek F71805F/FG Super IO Sensors",
 		driver => "f71805f",
 		devid => 0x0406,
