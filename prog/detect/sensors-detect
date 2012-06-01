@@ -1904,6 +1904,10 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		driver => "not-a-sensor",
 		devid => 0x28,
 	}, {
+		name => "SMSC LPC47N217 Super IO",
+		driver => "not-a-sensor",
+		devid => 0x7a,
+	}, {
 		name => "SMSC LPC47N227 Super IO",
 		driver => "not-a-sensor",
 		devid => 0x5a,
@@ -1911,6 +1915,10 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		name => "SMSC LPC47N237 Super IO",
 		driver => "not-a-sensor",
 		devid => 0x13,
+	}, {
+		name => "SMSC SIO10N268 Notebook IO",
+		driver => "not-a-sensor",
+		devid => 0x5b,
 	}
 );
 
