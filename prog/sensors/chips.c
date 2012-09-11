@@ -658,6 +658,27 @@ static void print_chip_vid(const sensors_chip_name *name,
 	free(label);
 }
 
+static void print_chip_humidity(const sensors_chip_name *name,
+				const sensors_feature *feature,
+				int label_size)
+{
+	char *label;
+	const sensors_subfeature *subfeature;
+	double humidity;
+
+	subfeature = sensors_get_subfeature(name, feature,
+					    SENSORS_SUBFEATURE_HUMIDITY_INPUT);
+	if (!subfeature)
+		return;
+
+	if ((label = sensors_get_label(name, feature))
+	 && !sensors_get_value(name, subfeature->number, &humidity)) {
+		print_label(label, label_size);
+		printf("%6.1f \%RH\n", humidity);
+	}
+	free(label);
+}
+
 static void print_chip_beep_enable(const sensors_chip_name *name,
 				   const sensors_feature *feature,
 				   int label_size)
@@ -791,6 +812,9 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_INTRUSION:
 			print_chip_intrusion(name, feature, label_size);
+			break;
+		case SENSORS_FEATURE_HUMIDITY:
+			print_chip_humidity(name, feature, label_size);
 			break;
 		default:
 			continue;
