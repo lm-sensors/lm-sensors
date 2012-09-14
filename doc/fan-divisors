@@ -9,7 +9,39 @@ try the following:
   Look and see. Fans with tachometer outputs have at least 3 wires.
   Fans with only 2 wires cannot, in general, report their speed.
 
-- Try experimenting with the fan divisor settings:
+- If your monitoring chip supports fan divisors, try experimenting
+  with the fan divisor settings.
+
+
+Does my monitoring chip use fan divisors?
+-----------------------------------------
+
+  Recent monitoring chips tend to store fan speed values on 12 or even
+  16 bits, so divisors are no longer required. In that case, you won't
+  see "div" values in the output of sensors, and nothing needs to be
+  configured:
+  
+  CPU1 Fan:    2160 RPM  (min =  800 RPM)
+  CPU2 Fan:       0 RPM  (min =  799 RPM)  ALARM
+  Front3 Fan:     0 RPM  (min =    0 RPM)
+  Front4 Fan:   779 RPM  (min =  600 RPM)
+
+  If your "sensors" output looks like the above, stop reading here,
+  the explanations below do not apply to your case.
+
+  Older chips stored the fan speed values on 8 bits, which wasn't
+  sufficient to cover the full range from very slow fans to very
+  fast fans with good accuracy. This is where fan divisors came
+  into play:
+
+  Case Fan:       0 RPM  (min =  998 RPM, div = 8)  ALARM
+  CPU Fan:     2500 RPM  (min = 1500 RPM, div = 4)
+
+  If your "sensors" output looks like the above, read below.
+
+  As a notable exception, the w83627ehf driver exposes fan divisor
+  values, but they are adjusted automatically by the driver, so you
+  shouldn't have to care.
 
 
 Fan Divisor Settings
@@ -97,3 +129,4 @@ section of /etc/sensors3.conf:
 
 ------------------
 Copyright (c) 2000-2004 Mark D. Studebaker
+Copyright (c) 2006-2012 Jean Delvare

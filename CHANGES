@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  documentation: Update fan-divisors, fan divisors are optional
   libsensors: Fix warning about library path not in /etc/ld.so.conf
   sensors: Fix libiconv linkage need detection in rare corner case
            Add support for humidity output
