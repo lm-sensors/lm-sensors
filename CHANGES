@@ -6,6 +6,7 @@ SVN HEAD
   libsensors: Fix warning about library path not in /etc/ld.so.conf
   sensors: Fix libiconv linkage need detection in rare corner case
            Add support for humidity output
+           Add long switches to manual page
   sensors-detect: Don't choke on systems without PCI
                   Avoid probing EDID addresses on graphics cards (#2386)
 		  Add detection of NCT6779D and NCT6102D/NCT6106D

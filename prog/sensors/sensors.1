@@ -49,23 +49,23 @@ is used to set all limits as specified in the configuration file.
 is used to generate bus statements suitable for the configuration file.
 
 .SH OPTIONS
-.IP "-c config-file"
+.IP "-c, --config-file config-file"
 Specify a configuration file. If no file is specified, the libsensors
 default configuration file is used. Use `-c /dev/null' to temporarily
 disable this default configuration file.
-.IP -h
+.IP "-h, --help"
 Print a help text and exit.
-.IP -s
+.IP "-s, --set"
 Evaluate all `set' statements in the configuration file and exit. You must
 be `root' to do this. If this parameter is not specified, no `set' statement
 is evaluated.
-.IP -A
+.IP "-A, --no-adapter"
 Do not show the adapter for each chip.
 .IP -u
 Raw output. This mode is only meant for debugging.
-.IP -v
+.IP "-v, --version"
 Print the program version and exit.
-.IP -f
+.IP "-f, --fahrenheit"
 Print the temperatures in degrees Fahrenheit instead of Celsius.
 .IP --bus-list
 Generate bus statements suitable for using in sensors.conf. Such bus statements
