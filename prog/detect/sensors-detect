@@ -2,7 +2,7 @@
 #
 #    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2011  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2004 - 2012  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -2696,14 +2696,15 @@ sub initialize_i2c_adapters_list
 			} elsif ($link =~ m/^(.*)\/i2c-$nr$/) {
 				$entry->{path} = "${base_dir}/i2c-$nr/device";
 				$entry->{parent} = "${base_dir}/i2c-$nr/$1";
-			} else {
-				$entry->{path} = "${base_dir}/i2c-$nr";
-				$entry->{parent} = "$entry->{path}/device";
 			}
-		} else {
+		}
+
+		# This works for all recent kernels (with or without
+		# CONFIG_I2C_COMPAT)
+		if (!defined $entry->{path}) {
 			my $link = readlink("${base_dir}/i2c-$nr");
-			$link =~ s/\/i2c-$nr$//;
 			$entry->{path} = "${base_dir}/i2c-$nr";
+			$link =~ s/(\/i2c-[0-9]+)+$//;	# Handle multiplexers too
 			$entry->{parent} = "${base_dir}/$link";
 		}
 
