@@ -11,6 +11,7 @@ SVN HEAD
                   Avoid probing EDID addresses on graphics cards (#2386)
 		  Add detection of NCT6779D and NCT6102D/NCT6106D
 		  Add detection of SMSC LPC47N217 and SIO10N268
+                  Do not scan I2C adapters on graphics cards by default
 
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes

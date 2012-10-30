@@ -3652,8 +3652,8 @@ sub scan_i2c_adapter
 	my ($funcs, $chip, $addr, $class, $default, $input, @not_to_scan);
 
 	$class = get_pci_class($i2c_adapters[$adapter_nr]->{parent});
-	if (($class & 0xff00) == 0x0400) {
-		# Do not probe adapters on PCI multimedia cards by default
+	# Do not probe adapters on multimedia and graphics cards by default
+	if (($class & 0xff00) == 0x0400 || ($class & 0xff00) == 0x0300) {
 		$default = 0;
 	} elsif ($class == 0x0c01 || $class == 0x0c05
 	      || find_i2c_adapter_driver($i2c_adapters[$adapter_nr]->{name})) {
