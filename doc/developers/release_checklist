@@ -7,10 +7,9 @@ Release steps:
   (edit lib/Module.mk and change LIBMAINVER and/or LIBMINORVER)
   Remember: update main number when interface changes, minor if new
   functionality is added, and patch if only bugs are fixed.
-  `svn diff -r Vx-y-z lib' is your friend.
 - Update the CHANGES file (set version and release date)
-- Update lm_sensors.lsm (Version, Entered-date and Primary-site)
-- Update libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
+- Update doc/developers/lm_sensors.lsm (Version, Entered-date and Primary-site)
+- Update doc/libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
 - Update version.h
 - Commit
 - Tag the release using SVN:

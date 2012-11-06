@@ -1,7 +1,7 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional
   libsensors: Fix warning about library path not in /etc/ld.so.conf
   sensors: Fix libiconv linkage need detection in rare corner case
