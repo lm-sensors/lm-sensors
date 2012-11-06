@@ -674,7 +674,7 @@ static void print_chip_humidity(const sensors_chip_name *name,
 	if ((label = sensors_get_label(name, feature))
 	 && !sensors_get_value(name, subfeature->number, &humidity)) {
 		print_label(label, label_size);
-		printf("%6.1f \%RH\n", humidity);
+		printf("%6.1f %%RH\n", humidity);
 	}
 	free(label);
 }
