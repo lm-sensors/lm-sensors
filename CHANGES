@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  sensors.conf.5: Mention "sensors -u" to get the raw feature names
   sensors: Clarify what option -u is good for
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)

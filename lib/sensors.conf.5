@@ -1,6 +1,6 @@
 .\" Copyright (C) 1998, 1999 Adrian Baugh <adrian.baugh@keble.ox.ac.uk> and
 .\"                          Frodo Looijaard <frodol@dds.nl>
-.\" Copyright (C) 2008, 2009 Jean Delvare <khali@linux-fr.org>
+.\" Copyright (C) 2008--2012 Jean Delvare <khali@linux-fr.org>
 .\"
 .\" Permission is granted to make and distribute verbatim copies of this
 .\" manual provided the copyright notice and this permission notice are
@@ -21,7 +21,7 @@
 .\"
 .\" References consulted:
 .\"     sensors.conf.eg by Frodo Looijaard
-.TH sensors.conf 5  "February 2009" "lm-sensors 3" "Linux User's Manual"
+.TH sensors.conf 5  "November 2012" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors.conf \- libsensors configuration file
 
@@ -133,6 +133,10 @@ label in3 "+5V"
 
 The first argument is the feature name. The second argument is the feature
 description.
+
+Note that you must use the raw feature name, which is not necessarily the
+one displayed by "sensors" by default. Use "sensors \-u" to see the raw
+feature names. Same applies to all other statement types below.
 
 .SS IGNORE STATEMENT
 
