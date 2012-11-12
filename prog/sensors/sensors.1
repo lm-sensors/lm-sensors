@@ -22,7 +22,7 @@
 .\" Formatted or processed versions of this manual, if unaccompanied by
 .\" the source, must acknowledge the copyright and authors of this work.
 .\"
-.TH sensors 1  "October 2007" "lm-sensors 3" "Linux User's Manual"
+.TH sensors 1  "November 2012" "lm-sensors 3" "Linux User's Manual"
 .SH NAME
 sensors \- print sensors information
 .SH SYNOPSIS
@@ -62,7 +62,10 @@ is evaluated.
 .IP "-A, --no-adapter"
 Do not show the adapter for each chip.
 .IP -u
-Raw output. This mode is only meant for debugging.
+Raw output. This mode is suitable for debugging and for post-processing
+of the output by scripts. It is also useful when writing a configuration
+file because it shows the raw input names which must be referenced in the
+configuration file.
 .IP "-v, --version"
 Print the program version and exit.
 .IP "-f, --fahrenheit"

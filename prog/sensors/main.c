@@ -60,7 +60,7 @@ static void print_long_help(void)
 	     "  -f, --fahrenheit      Show temperatures in degrees fahrenheit\n"
 	     "  -A, --no-adapter      Do not show adapter for each chip\n"
 	     "      --bus-list        Generate bus statements for sensors.conf\n"
-	     "  -u                    Raw output (debugging only)\n"
+	     "  -u                    Raw output\n"
 	     "  -v, --version         Display the program version\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
