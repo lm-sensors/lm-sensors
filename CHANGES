@@ -17,6 +17,7 @@ SVN HEAD
                   Add detection of SMSC LPC47N217 and SIO10N268
                   Do not scan I2C adapters on graphics cards by default
                   Fix parent class discovery when multiplexer is present
+                  Add detection of AMD family 16h power sensors
 
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes
