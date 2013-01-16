@@ -6,6 +6,7 @@ SVN HEAD
   sensors: Clarify what option -u is good for
   sensors-detect: Add detection of AMD family 16h power sensors
                   Map IT8771E, IT8772E, IT8782F and IT8783F to it87
+                  Use /sys/module instead of /proc/modules where available
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional

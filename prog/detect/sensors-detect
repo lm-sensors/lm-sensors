@@ -2773,9 +2773,19 @@ sub initialize_modules_list
 {
 	local $_;
 
+	# /sys/module contains built-in drivers too, but doesn't exist on
+	# older kernels (added in kernel 2.6.7)
+	if (opendir(local *MODULES, "$sysfs_root/module")) {
+		while (defined($_ = readdir(MODULES))) {
+			next if m/^\./;
+			$modules_list{$1} = 1 if m/^(\S*)/;
+		}
+		return;
+	}
+
+	# Fall back to /proc/modules as it is always available
 	open(local *INPUTFILE, "/proc/modules") or return;
 	while (<INPUTFILE>) {
-		tr/-/_/; # Probably not needed
 		$modules_list{$1} = 1 if m/^(\S*)/;
 	}
 }
