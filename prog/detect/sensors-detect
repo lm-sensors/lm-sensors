@@ -2225,13 +2225,13 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8771E Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8771,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8772E Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8772,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
@@ -2243,13 +2243,13 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8782F Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8782,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8783F Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8783,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,

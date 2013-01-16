@@ -4,6 +4,8 @@ lm-sensors CHANGES file
 SVN HEAD
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
   sensors: Clarify what option -u is good for
+  sensors-detect: Add detection of AMD family 16h power sensors
+                  Map IT8771E, IT8772E, IT8782F and IT8783F to it87
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional
@@ -17,7 +19,6 @@ SVN HEAD
                   Add detection of SMSC LPC47N217 and SIO10N268
                   Do not scan I2C adapters on graphics cards by default
                   Fix parent class discovery when multiplexer is present
-                  Add detection of AMD family 16h power sensors
 
 3.3.2 (2012-03-14)
   libsensors: Added support for new sysfs attributes
