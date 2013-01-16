@@ -6695,19 +6695,6 @@ EOT
 		print SYSCONFIG "BUS_MODULES=\"", join(" ", @{$bus_modules}), "\"\n"
 			if @{$bus_modules};
 		print SYSCONFIG "HWMON_MODULES=\"", join(" ", @{$hwmon_modules}), "\"\n";
-
-		print SYSCONFIG <<'EOT';
-
-# For compatibility reasons, modules are also listed individually as variables
-#    MODULE_0, MODULE_1, MODULE_2, etc.
-# You should use BUS_MODULES and HWMON_MODULES instead if possible.
-
-EOT
-		my $i = 0;
-		foreach (@{$bus_modules}, @{$hwmon_modules}) {
-			print SYSCONFIG "MODULE_$i=$_\n";
-			$i++;
-		}
 		close(SYSCONFIG);
 
 		if (-x "/bin/systemctl" && -d "/lib/systemd/system" &&
