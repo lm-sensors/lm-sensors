@@ -2471,9 +2471,12 @@ sub overlay_hash
 
 sub initialize_ioports
 {
-	sysopen(IOPORTS, "/dev/port", O_RDWR)
-		or die "/dev/port: $!\n";
-	binmode(IOPORTS);
+	if (sysopen(IOPORTS, "/dev/port", O_RDWR)) {
+		binmode(IOPORTS);
+		return 1;
+	}
+	print STDERR "/dev/port: $!\n";
+	return 0;
 }
 
 sub close_ioports
@@ -3511,13 +3514,14 @@ sub find_aliases
 				print("Can't set I2C address for $dev\n"),
 				next;
 
-			initialize_ioports();
-			$alias_detect = $detected->[$isa]->{alias_detect};
-			$is_alias = &$alias_detect($detected->[$isa]->{isa_addr},
-						   \*FILE,
-						   $detected->[$i2c]->{i2c_addr});
+			if (initialize_ioports()) {
+				$alias_detect = $detected->[$isa]->{alias_detect};
+				$is_alias = &$alias_detect($detected->[$isa]->{isa_addr},
+							   \*FILE,
+							   $detected->[$i2c]->{i2c_addr});
+				close_ioports();
+			}
 			close(FILE);
-			close_ioports();
 
 			next unless $is_alias;
 			# This is an alias: copy the I2C data into the ISA
@@ -6819,10 +6823,11 @@ sub main
 		      "standard I/O ports to probe them. This is usually safe.\n";
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
 		unless (<STDIN> =~ /^\s*n/i) {
-			initialize_ioports();
-			$superio_features |= scan_superio(0x2e, 0x2f);
-			$superio_features |= scan_superio(0x4e, 0x4f);
-			close_ioports();
+			if (initialize_ioports()) {
+				$superio_features |= scan_superio(0x2e, 0x2f);
+				$superio_features |= scan_superio(0x4e, 0x4f);
+				close_ioports();
+			}
 		}
 		print "\n";
 
@@ -6835,9 +6840,10 @@ sub main
 			      "interfaces? (YES/no): ";
 			unless (<STDIN> =~ /^\s*n/i) {
 				if (!ipmi_from_smbios()) {
-					initialize_ioports();
-					scan_isa_bus(\@ipmi_ifs);
-					close_ioports();
+					if (initialize_ioports()) {
+						scan_isa_bus(\@ipmi_ifs);
+						close_ioports();
+					}
 				}
 			}
 			print "\n";
@@ -6851,9 +6857,10 @@ sub main
 		$input = <STDIN>;
 		unless ($input =~ /^\s*n/i
 		     || ($superio_features && $input !~ /^\s*y/i)) {
-			initialize_ioports();
-			scan_isa_bus(\@chip_ids);
-			close_ioports();
+			if (initialize_ioports()) {
+				scan_isa_bus(\@chip_ids);
+				close_ioports();
+			}
 		}
 		print "\n";
 	}
