@@ -9,6 +9,7 @@ SVN HEAD
                   Use /sys/module instead of /proc/modules where available
                   Drop legacy sysconfig configuration file syntax
                   Stay alive when /dev/port is missing
+                  Add detection of IT8752F
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional
