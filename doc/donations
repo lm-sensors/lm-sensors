@@ -36,9 +36,8 @@ Cendio Systems 	Asus P3B-F w/ AS99127F				2000-05
 		Drivers developed: as99127f improvements	MDS
 
 Atipa		SuperMicro 370DLE w/ Serverworks, LM87		2000-09
-		Drivers developed: serverworks support added	Jean Delvare
+		Drivers developed: serverworks support added	trash
 		to i2c-piix4; lm87 testing and improvements
-		(on-board NIC broken)
 
 Fujitsu		Complete system for general project support	2001-11
 Siemens		(broken)					Phil
@@ -82,7 +81,7 @@ Analog Devices	ADM1031 evaluation board			2004-04
 		(broken)
 
 Wincor Nixdorf	Seagate Barracuda 7200.7 160GB harddisk drive	2004-10
-		(dead)						Jean Delvare
+								trash
 
 Aweta		Intel Server system				2005-09
 		Drivers developed: PC87431 (IPMI SMB)		MDS
@@ -105,8 +104,8 @@ Winbond		Asus P4P800-X, Pentium 4 2.8 GHz, 512 MB RAM	2006-08
 		(ICH5) SMBus with SPD EEPROMs connected, and
 		a Winbond W83627THF hardware monitoring chip.
 
-Observit	Intel D865GSA (dead), Celeron D-352,		2007-06
-		128 MB RAM					Jean Delvare
+Observit	Intel D865GSA, Celeron D-352,			2007-06
+		128 MB RAM					trash
 		Resulted in: backport of the w83627ehf driver
 		to Linux 2.4, improvements to the Linux 2.6
 		w83627ehf driver.
