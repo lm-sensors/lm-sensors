@@ -12,6 +12,7 @@ SVN HEAD
                   Add detection of IT8752F
                   Add detection of MCP98244
                   Add detection of LM95234
+                  Add detection of TMP431/TMP432
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional

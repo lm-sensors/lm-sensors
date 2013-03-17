@@ -1023,6 +1023,16 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c, 0x4d],
 		i2c_detect => sub { tmp42x_detect(@_, 2); },
 	}, {
+		name => "Texas Instruments TMP431",
+		driver => "to-be-written",		# tmp401
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { lm90_detect(@_, 16); },
+	}, {
+		name => "Texas Instruments TMP432",
+		driver => "to-be-written",		# tmp401
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { lm90_detect(@_, 17); },
+	}, {
 		name => "Texas Instruments AMC6821",
 		driver => "amc6821",
 		i2c_addrs => [0x18..0x1a, 0x2c..0x2e, 0x4c..0x4e],
@@ -4537,7 +4547,7 @@ sub max6680_95_detect
 #		  8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
 #		  11 = W83L771AWG/ASG, 12 = MAX6690,
 #		  13 = ADT7461A/NCT1008, 14 = SA56004,
-#		  15 = G781
+#		  15 = G781, 16 = TMP431, 17 = TMP432
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4654,6 +4664,18 @@ sub lm90_detect
 		return if $rate > 0x08;
 		return if $mid != 0x47;		# GMT
 		return 8 if $cid == 0x01;	# G781
+	}
+	if ($chip == 16) {
+		return if ($conf & 0x1B) != 0;
+		return if $rate > 0x0F;
+		return if $mid != 0x55;		# Texas Instruments
+		return 6 if ($cid == 0x31);	# TMP431A/B/C/D
+	}
+	if ($chip == 17) {
+		return if ($conf & 0x1B) != 0;
+		return if $rate > 0x0F;
+		return if $mid != 0x55;		# Texas Instruments
+		return 6 if ($cid == 0x32);	# TMP432A/B
 	}
 	return;
 }
