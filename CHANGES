@@ -11,6 +11,7 @@ SVN HEAD
                   Stay alive when /dev/port is missing
                   Add detection of IT8752F
                   Add detection of MCP98244
+                  Add detection of LM95234
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional
