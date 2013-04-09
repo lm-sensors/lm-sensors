@@ -2043,7 +2043,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Nuvoton W83677HG-I (NCT6771F/NCT6772F/NCT6775F) Super IO Sensors",
+		name => "Nuvoton W83677HG-I (NCT5572D/NCT6771F/NCT6772F/NCT6775F) Super IO Sensors",
 		driver => "w83627ehf",
 		devid => 0xB470,
 		devid_mask => 0xFFF0,
@@ -2054,27 +2054,24 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		driver => "not-a-sensor",
 		devid => 0x61,
 	}, {
-		name => "Nuvoton NCT5577D Super IO Sensors",
-		driver => "to-be-written",
-		devid => 0xC331,
+		name => "Nuvoton NCT5577D/NCT6776F Super IO Sensors",
+		driver => "nct6775",
+		devid => 0xC330,
+		devid_mask => 0xFFF0,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Nuvoton NCT6776F Super IO Sensors",
-		driver => "w83627ehf",
-		devid => 0xC333,
+		name => "Nuvoton NCT5532D/NCT6779D Super IO Sensors",
+		driver => "nct6775",
+		devid => 0xC560,
+		devid_mask => 0xFFF0,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
-		name => "Nuvoton NCT6779D Super IO Sensors",
-		driver => "to-be-written",	# nct6775, new driver
-		devid => 0xC562,
-		logdev => 0x0b,
-		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
-	}, {
-		name => "Nuvoton NCT6102D/NCT6106D Super IO Sensors",
-		driver => "to-be-written",	# nct6775, new driver
-		devid => 0x1061,
+		name => "Nuvoton NCT6102D/NCT6104D/NCT6106D Super IO Sensors",
+		driver => "to-be-written",	# nct6775
+		devid => 0xC450,
+		devid_mask => 0xFFF0,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
