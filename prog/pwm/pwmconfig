@@ -449,7 +449,7 @@ do
 		OS=`echo $SPEEDS | cut -d' ' -f$count`
 		S=`echo $CURRENT_SPEEDS | cut -d' ' -f$count`
 		echo "  $j ... speed was $OS now $S"
-		let threshold=2*$OS/3
+		let threshold=3*$OS/4
 		if [ $S -lt $threshold ]
 		then
 			echo "    It appears that fan $j"
