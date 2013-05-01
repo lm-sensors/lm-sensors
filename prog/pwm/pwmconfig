@@ -472,7 +472,7 @@ do
 					exit 1
 				fi
 			else
-				fanactive="$j+${fanactive}" #not supported yet by fancontrol
+				fanactive="$j+${fanactive}"
 				fanactive_min="$S+${fanactive_min}"
 			fi
 			S=`cat $j`
