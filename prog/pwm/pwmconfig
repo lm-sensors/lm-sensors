@@ -444,6 +444,7 @@ do
 
 	let pwmactivecount=0
 	let count=1
+	S_MIN=
 	for j in $GOODFAN
 	do
 		OS=`echo $SPEEDS | cut -d' ' -f$count`
@@ -462,7 +463,6 @@ do
 				let pwmactivecount=1
 				pwmactive="$i ${pwmactive}"
 				fanactive="$j ${fanactive}"
-				fanactive_min="$S ${fanactive_min}"
 
 				# Give all correlated fans time to return to full speed
 				sleep $DELAY
@@ -473,8 +473,14 @@ do
 				fi
 			else
 				fanactive="$j+${fanactive}"
-				fanactive_min="$S+${fanactive_min}"
 			fi
+
+			# Keep track of the slowest fan controlled by one PWM
+			if [ -z "$S_MIN" ] || [ $S -lt $S_MIN ]
+			then
+				S_MIN=$S
+			fi
+
 			S=`cat $j`
 			if [ $S -lt $threshold ]
 			then
@@ -507,8 +513,11 @@ do
 		if [ "$X" = "y" -o "$X" = "Y" ]
 		then
 			pwmactive="$i ${pwmactive}"
+			fanactive_min="0 $fanactive_min"
 		fi
 		echo
+	else
+		fanactive_min="$S_MIN $fanactive_min"
 	fi
 done
 
