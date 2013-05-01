@@ -43,9 +43,10 @@ PIDFILE="/var/run/fancontrol.pid"
 #DEBUG=1
 MAX=255
 
-declare -i pwmval
+function LoadConfig
+{
+	local fcvcount fcv
 
-function LoadConfig {
 	echo "Loading configuration from $1 ..."
 	if [ ! -r "$1" ]
 	then
@@ -206,8 +207,9 @@ function ValidateDevices()
 }
 
 # Check that all referenced sysfs files exist
-function CheckFiles {
-	local outdated=0
+function CheckFiles
+{
+	local outdated=0 fcvcount pwmo tsen fan
 
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
@@ -311,7 +313,8 @@ echo $$ > "$PIDFILE"
 # $1 = pwm file name
 function pwmdisable()
 {
-	ENABLE=${1}_enable
+	local ENABLE=${1}_enable
+
 	# No enable file? Just set to max
 	if [ ! -f $ENABLE ]
 	then
@@ -344,7 +347,8 @@ function pwmdisable()
 # $1 = pwm file name
 function pwmenable()
 {
-	ENABLE=${1}_enable
+	local ENABLE=${1}_enable
+
 	if [ -f $ENABLE ]
 	then
 		echo 1 > $ENABLE 2> /dev/null
@@ -358,7 +362,8 @@ function pwmenable()
 
 function restorefans()
 {
-	local status=$1
+	local status=$1 fcvcount pwmo
+
 	echo 'Aborting, restoring fans...'
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
@@ -376,7 +381,13 @@ trap 'restorefans 0' SIGQUIT SIGTERM
 trap 'restorefans 1' SIGHUP SIGINT
 
 # main function
-function UpdateFanSpeeds {
+function UpdateFanSpeeds
+{
+	local fcvcount
+	local pwmo tsens fan mint maxt minsa minso minpwm maxpwm
+	local tval pwmpval fanval min_fanval one_fan one_fanval
+	local -i pwmval
+
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do

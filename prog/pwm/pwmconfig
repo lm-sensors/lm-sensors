@@ -144,7 +144,7 @@ fi
 # $1 = padding
 function print_devices()
 {
-	local name
+	local name device
 
 	for device in $DEVICES
 	do
@@ -157,7 +157,8 @@ function print_devices()
 # $1 = pwm file name
 function is_pwm_auto()
 {
-	ENABLE=${1}_enable
+	local ENABLE=${1}_enable
+
 	if [ -f $ENABLE ]
 	then
 		if [ "`cat $ENABLE`" -gt 1 ]
@@ -172,7 +173,8 @@ function is_pwm_auto()
 # $1 = pwm file name
 function pwmdisable()
 {
-	ENABLE=${1}_enable
+	local ENABLE=${1}_enable
+
 	# No enable file? Just set to max
 	if [ ! -f $ENABLE ]
 	then
@@ -211,7 +213,8 @@ function pwmdisable()
 # $1 = pwm file name
 function pwmenable()
 {
-	ENABLE=${1}_enable
+	local ENABLE=${1}_enable
+
 	if [ -w $ENABLE ]
 	then
 		echo 1 2>/dev/null > $ENABLE
@@ -326,9 +329,9 @@ STEP2_BELOW=31
 
 function pwmdetail()
 {
-	P=$1
-	F=$2
-	PLOT=
+	local P=$1 F=$2
+	local X PLOT= TMP1 TMP2
+	local threshold=100000 pwm S
 
 	type $PLOTTER > /dev/null 2>&1
 	if [ $? -eq 0 ]
@@ -359,7 +362,6 @@ function pwmdetail()
 		> $TMP2
 	fi
 
-	local threshold=100000
 	let pwm=$MAX
 	pwmenable $P
 	while [ $pwm -ge 0 ]
@@ -666,6 +668,8 @@ LoadConfig $FCCONFIG
 # $1 = pwm value below which the fan is stopped
 function TestMinStart()
 {
+	local fanok FANTEST
+
 	echo
 	echo 'Now we increase the PWM value in 10-unit-steps.'
 	echo 'Let the fan stop completely, then press return until the'
@@ -791,6 +795,8 @@ function RememberDevices()
 
 function SaveConfig()
 {
+	local tmpfile
+
 	RememberDevices "$FCTEMPS" "$FCFANS"
 
 	echo
