@@ -236,7 +236,8 @@ echo
 echo 'Found the following PWM controls:'
 for i in $PWM
 do
-	echo "   $i"
+	P=`cat $i`
+	echo "   $i           current value: $P"
 	if [ -w $i ]
 	then
 		# First check if PWM output is in automatic mode

@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
   sensors: Clarify what option -u is good for
+  pwmconfig: Print the initial PWM values
   sensors-detect: Add detection of AMD family 16h power sensors
                   Map IT8771E, IT8772E, IT8782F and IT8783F to it87
                   Use /sys/module instead of /proc/modules where available
