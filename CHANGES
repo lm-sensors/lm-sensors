@@ -17,6 +17,7 @@ SVN HEAD
                   Add detection of LM95234
                   Add detection of TMP431/TMP432
                   Update Nuvoton chip information and NCT6106D chip detection
+                  Drop unreliable DS1621/DS1631 detection
 
 3.3.3 "Happy Birthday Sophie" (2012-11-06)
   documentation: Update fan-divisors, fan divisors are optional
