@@ -4,6 +4,7 @@ lm-sensors CHANGES file
 SVN HEAD
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
   sensors: Clarify what option -u is good for
+  fancontrol: Fix handling of absolute paths in config
   pwmconfig: Print the initial PWM values
              Raise the detection threshold to 3/4
              Properly deal with multiple fan control
