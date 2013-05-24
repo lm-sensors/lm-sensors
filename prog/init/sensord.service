@@ -1,5 +1,6 @@
 [Unit]
 Description=Log hardware monitoring data
+After=lm_sensors.service
 After=syslog.target
 
 [Service]
