@@ -6,7 +6,7 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
-0x432	lm-sensors 3.3.2 to 3.3.3
+0x432	lm-sensors 3.3.2 to 3.3.4
 * Added support for new sysfs attributes
   enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_AVERAGE
   enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_LOWEST
