@@ -2743,7 +2743,7 @@ sub initialize_i2c_adapters_list
 		# First try to get the I2C adapter driver name from sysfs,
 		# and if it fails, fall back to searching our list of known
 		# I2C adapters.
-		$entry->{driver} = sysfs_device_driver($entry->{parent})
+		$entry->{driver} = sysfs_device_module($entry->{parent})
 				|| find_i2c_adapter_driver($entry->{name})
 				|| 'UNKNOWN';
 
@@ -2766,7 +2766,7 @@ sub initialize_hwmon_autoloaded
 	while (defined($hwmon = readdir(HWMON))) {
 		next unless $hwmon =~ m/^hwmon\d+$/;
 
-		$driver = sysfs_device_driver("${class_dir}/$hwmon/device");
+		$driver = sysfs_device_module("${class_dir}/$hwmon/device");
 		next unless defined($driver);
 
 		if (device_driver_autoloads("${class_dir}/$hwmon/device")) {
@@ -3004,12 +3004,22 @@ sub is_laptop
 # SYSFS HELPERS #
 #################
 
-# From a sysfs device path, return the driver (module) name, or undef
-sub sysfs_device_driver
+# From a sysfs device path, return the module name, or undef
+sub sysfs_device_module
 {
 	my $device = shift;
 
 	my $link = readlink("$device/driver/module");
+	return unless defined $link;
+	return basename($link);
+}
+
+# From a sysfs device path, return the driver name, or undef
+sub sysfs_device_driver
+{
+	my $device = shift;
+
+	my $link = readlink("$device/driver");
 	return unless defined $link;
 	return basename($link);
 }
@@ -3594,11 +3604,12 @@ sub add_busy_i2c_address
 	# If the address is busy, we can normally find out which driver
 	# requested it (if the kernel is recent enough, at least 2.6.16 and
 	# later are known to work), and we assume it is the right one.
-	my ($device, $driver, $new_hash);
+	my ($device, $driver, $module, $new_hash);
 
 	$device = sprintf("$sysfs_root/bus/i2c/devices/\%d-\%04x",
 			  $adapter_nr, $addr);
 	$driver = sysfs_device_driver($device);
+	$module = sysfs_device_module($device);
 
 	if (!defined($driver)) {
 		printf("Client at address 0x%02x can not be probed - ".
@@ -3615,14 +3626,21 @@ sub add_busy_i2c_address
 	};
 
 	printf "Client found at address 0x\%02x\n", $addr;
-	printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
-	       $driver, $new_hash->{chipname};
+	if (defined($module)) {
+		printf "Handled by driver `\%s' (already loaded), chip type `\%s'\n",
+		       $module, $new_hash->{chipname};
+	} else {
+		printf "Handled by driver `\%s' (built-in), chip type `\%s'\n",
+		       $driver, $new_hash->{chipname};
+		# Let's hope that the driver name matches the module name
+		$module = $driver;
+	}
 
 	# Only add it to the list if this is something we would have detected,
 	# else we end up with random i2c chip drivers listed (for example
 	# media/video drivers.)
-	if (exists $modules_supported{$driver}) {
-		add_i2c_to_chips_detected($driver, $new_hash);
+	if (exists $modules_supported{$module}) {
+		add_i2c_to_chips_detected($module, $new_hash);
 	} else {
 		print "    (note: this is probably NOT a sensor chip!)\n";
 	}
