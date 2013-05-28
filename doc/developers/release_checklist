@@ -27,10 +27,8 @@ Release steps:
   ssh devel.atrpms.net chmod 664 '/srv/lm-sensors.org/dl/lm-sensors/releases/lm_sensors-3.x.x.tar.bz2{,.sig}'
 
 After release, remember to:
-- Copy to mirrors
 - Update the Download page on lm-sensors.org, then add a news item
 - Announce on the lm-sensors mailing list
-- Announce on Freecode
 - Add "+SVN" to version.h and commit
 - Mark the corresponding release milestone as complete using trac-admin
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone completed 3.x.x now'
@@ -40,3 +38,5 @@ After release, remember to:
   e.g. 'trac-admin /srv/lm-sensors.org/trac milestone add 3.x.x+1 2012-05-10'
 - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
   subject `add' (no quotes)
+- Copy to mirrors
+- Announce on Freecode
