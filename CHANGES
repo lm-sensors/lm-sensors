@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  init: Fix EnvironmentFile in service files
   sensors-detect: Report built-in drivers as such
 
 3.3.4 (2013-05-27)
