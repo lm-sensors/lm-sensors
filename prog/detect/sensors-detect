@@ -5534,8 +5534,7 @@ sub adm1021_detect
 
 	# Extra checks for MAX1617 and LM84, since those are often misdetected.
 	# We verify several assertions (6 for the MAX1617, 4 for the LM84) and
-	# discard the chip if any fail. Note that these checks are not done
-	# by the adm1021 driver.
+	# discard the chip if any fail.
 	if ($chip == 2 || $chip == 5) {
 		my $lte = i2c_smbus_read_byte_data($file, 0x00);
 		my $rte = i2c_smbus_read_byte_data($file, 0x01);
