@@ -26,3 +26,16 @@ This may help identify a chip after doing a 'i2cdump [bus] [address]'.
 0xDA	Dallas
 
 [A-Z]{3} at 0x00-0x02: Fujitsu-Siemens
+
+
+Jedec JC 42.4 compliant temperature sensors provide the manufacturer ID
+in 16-bit register 0x06. Known manufacturer IDs are as follows.
+
+0x001F	Atmel
+0x004D	Maxim
+0x0054	Microchip
+0x00B3	IDT
+0x104A	ST Microelectronics
+0x1131	NXP (Philips)
+0x11D4	Analog Devices
+0x1B09	ON Semiconductor
