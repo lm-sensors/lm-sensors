@@ -5,6 +5,7 @@ SVN HEAD
   init: Fix EnvironmentFile in service files
   sensors-detect: Report built-in drivers as such
                   Use modules.builtin instead of /sys/module
+                  Handle built-in modules properly
 
 3.3.4 (2013-05-27)
   sensors.conf.5: Mention "sensors -u" to get the raw feature names

@@ -2789,7 +2789,7 @@ sub hwmon_is_autoloaded
 # MODULES #
 ###########
 
-use vars qw(%modules_list %modules_supported @modules_we_loaded);
+use vars qw(%modules_builtin %modules_list %modules_supported @modules_we_loaded);
 
 sub initialize_modules_list
 {
@@ -2799,7 +2799,7 @@ sub initialize_modules_list
 	if (open(*INPUTFILE, "/lib/modules/$kernel_version/modules.builtin")) {
 		while (<INPUTFILE>) {
 			tr/-/_/;
-			$modules_list{$1} = 1 if m/\/([^\/]+)\.ko$/;
+			$modules_builtin{$1} = 1 if m/\/([^\/]+)\.ko$/;
 		}
 		close(INPUTFILE);
 	}
@@ -2815,7 +2815,14 @@ sub is_module_loaded
 {
 	my $module = shift;
 	$module =~ tr/-/_/;
-	return exists $modules_list{$module}
+	return exists $modules_list{$module} || exists $modules_builtin{$module};
+}
+
+sub is_module_builtin
+{
+	my $module = shift;
+	$module =~ tr/-/_/;
+	return exists $modules_builtin{$module};
 }
 
 sub load_module
@@ -6637,7 +6644,7 @@ sub generate_modprobes
 		if ($driver eq "to-be-written") {
 			print "Note: there is no driver for ${$chips_detected{$driver}}[0]{chipname} yet.\n".
 			      "Check http://www.lm-sensors.org/wiki/Devices for updates.\n\n";
-		} else {
+		} elsif (!is_module_builtin($driver)) {
 			open(local *INPUTFILE, "modprobe -l $driver 2>/dev/null |");
 			local $_;
 			my $modulefound = 0;
@@ -6652,8 +6659,7 @@ sub generate_modprobes
 			# isn't supported
 			if ((($? >> 8) == 0) && ! $modulefound) {
 				print "Warning: the required module $driver is not currently installed\n".
-				      "on your system. If it is built into the kernel then it's OK.\n".
-				      "Otherwise, check http://www.lm-sensors.org/wiki/Devices for\n".
+				      "on your system. Check http://www.lm-sensors.org/wiki/Devices for\n".
 				      "driver availability.\n\n";
 			} else {
 				$hwmon_modules{$driver}++
@@ -6769,13 +6775,10 @@ EOT
 		       "/usr/local/bin/sensors -s\n").
 		      "#----cut here----\n\n");
 
-		print "If you have some drivers built into your kernel, the list above will\n".
-		      "contain too many modules. Skip the appropriate ones! You really\n".
-		      "should try these commands right now to make sure everything is\n".
-		      "working properly. Monitoring programs won't work until the needed\n".
+		print "You really should try these commands right now to make sure everything\n".
+		      "is working properly. Monitoring programs won't work until the needed\n".
 		      "modules are loaded.\n\n";
 	}
-
 }
 
 sub main
@@ -6939,6 +6942,7 @@ sub main
 		find_aliases($chips_detected{$driver});
 		print "\nDriver `$driver'";
 		print " (autoloaded)" if hwmon_is_autoloaded($driver);
+		print " (built-in)" if is_module_builtin($driver);
 		print ":\n";
 		print_chips_report($chips_detected{$driver});
 	}
