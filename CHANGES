@@ -7,6 +7,7 @@ SVN HEAD
                   Use modules.builtin instead of /sys/module
                   Handle built-in modules properly
                   Add detection of NCT6791D
+                  Add detection of NCT6681D, NCT6682D, and NCT6683D
 
 3.3.4 (2013-05-27)
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
