@@ -2115,6 +2115,12 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
+		name => "Fintek F71868A Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1106,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "Fintek F71869F/E Super IO Sensors",
 		driver => "f71882fg",
 		devid => 0x0814,
