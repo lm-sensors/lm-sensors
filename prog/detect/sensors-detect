@@ -2392,7 +2392,7 @@ use vars qw(@cpu_ids);
 	}, {
 		name => "AMD Family 15h thermal sensors",
 		driver => "k10temp",
-		detect => sub { amd_pci_detect('1603') },
+		detect => sub { amd_pci_detect('1603', '1403') },
 	}, {
 		name => "AMD Family 15h power sensors",
 		driver => "fam15h_power",
@@ -6432,9 +6432,11 @@ sub via8231_pci_detect
 
 sub amd_pci_detect
 {
-	my $f3_id = shift;
-	return unless exists $pci_list{"1022:$f3_id"};
-	return 9;
+	my $dev_id;
+	while (defined($dev_id = shift)) {
+		return 9 if exists $pci_list{"1022:$dev_id"};
+	}
+	return undef;
 }
 
 sub fam10h_pci_detect

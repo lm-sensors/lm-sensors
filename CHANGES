@@ -9,6 +9,7 @@ SVN HEAD
                   Add detection of NCT6791D
                   Add detection of NCT6681D, NCT6682D, and NCT6683D
                   Add detection of F71868A
+                  Add a PCI ID for new family 15h AMD processors
 
 3.3.4 (2013-05-27)
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
