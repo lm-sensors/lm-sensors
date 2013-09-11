@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  libsensors: Improve documentation of two functions
   init: Fix EnvironmentFile in service files
   sensors-detect: Report built-in drivers as such
                   Use modules.builtin instead of /sys/module

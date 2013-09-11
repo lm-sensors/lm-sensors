@@ -175,6 +175,8 @@ static int add_config_from_dir(const char *dir)
 	return res;
 }
 
+/* Ideally, initialization and configuraton file loading should be exposed
+   separately, to make it possible to load several configuration files. */
 int sensors_init(FILE *input)
 {
 	int res;

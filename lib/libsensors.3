@@ -1,5 +1,5 @@
 .\" Copyright (C) 1998, 1999  Adrian Baugh <adrian.baugh@keble.ox.ac.uk>
-.\" Copyright (C) 2007, 2009  Jean Delvare <khali@linux-fr.org>
+.\" Copyright (C) 2007, 2009, 2013  Jean Delvare <khali@linux-fr.org>
 .\" based on sensors.h, part of libsensors by Frodo Looijaard
 .\" libsensors is distributed under the LGPL
 .\"
@@ -25,7 +25,7 @@
 .\"
 .\" References consulted:
 .\"     libsensors source code
-.TH libsensors 3  "February 2009" "lm-sensors 3" "Linux Programmer's Manual"
+.TH libsensors 3  "September 2013" "lm-sensors 3" "Linux Programmer's Manual"
 
 .SH NAME
 libsensors \- publicly accessible functions provided by the sensors library
@@ -88,8 +88,12 @@ libsensors \- publicly accessible functions provided by the sensors library
 .B sensors_init()
 loads the configuration file and the detected chips list. If this returns a
 value unequal to zero, you are in trouble; you can not assume anything will
-be initialized properly. If you want to reload the configuration file, call
-sensors_cleanup() below before calling sensors_init() again.
+be initialized properly. If you want to reload the configuration file, or
+load a different configuration file, call sensors_cleanup() below before
+calling sensors_init() again. This means you can't load multiple configuration
+files at once by calling sensors_init() multiple times.
+
+The configuration file format is described in sensors.conf(5).
 
 If FILE is NULL, the default configuration files are used (see the FILES
 section below). Most applications will want to do that.
@@ -117,8 +121,19 @@ not contain wildcard values! Return the number of characters printed on
 success (same as snprintf), <0 on error.
 
 .B sensors_get_adapter_name()
-returns the adapter name of a bus number, as used within the
+returns the adapter name of a bus type, number pair, as used within the
 sensors_chip_name structure. If it could not be found, it returns NULL.
+
+Adapters describe how a monitoring chip is hooked up to the system.
+This is particularly relevant for I2C/SMBus sensor chips (bus type "i2c"),
+which must be accessed over an I2C/SMBus controller. Each such controller
+has a different number, assigned by the system at initialization time,
+so that they can be referenced individually.
+
+Super\-I/O or CPU\-embedded sensors, on the other hand, can be accessed
+directly and technically don't use any adapter. They have only a bus type
+but no bus number, and sensors_get_adapter_name() will return a generic
+adapter name for them.
 
 .B sensors_get_detected_chips()
 returns all detected chips that match a given chip name,
@@ -258,6 +273,6 @@ ignored.
 sensors.conf(5)
 
 .SH AUTHOR
-Frodo Looijaard and the lm_sensors group
+Frodo Looijaard, Jean Delvare and others
 http://www.lm-sensors.org/
 
