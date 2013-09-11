@@ -2694,7 +2694,10 @@ sub initialize_cpu_list
 	while (<INPUTFILE>) {
 		if (m/^processor\s*:\s*(\d+)/) {
 			push @cpu, $entry if scalar keys(%{$entry}); # Previous entry
-			$entry = { nr => $1 }; # New entry
+			$entry = { # New entry
+				nr => $1,
+				vendor_id => "undefined",
+			};
 			next;
 		}
 		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level)\s*:\s*(.+)$/) {
