@@ -2517,7 +2517,7 @@ sub read_answer
 		print "\n";
 		return "";
 	}
-	return <STDIN>;
+	return <STDIN> || "";
 }
 
 ###################
@@ -7012,6 +7012,15 @@ sub main
 	}
 
 	unload_modules();
+
+	# Check if running non-interactively without --auto
+	if (!$opt{auto} && ! -t STDIN) {
+		print "***************************************************************\n".
+		      "Warning: the preferred way to run this script non-interactively\n".
+		      "is with option --auto. Other methods are discouraged and may\n".
+		      "stop working at some point in the future.\n".
+		      "***************************************************************\n\n";
+	}
 }
 
 sub cleanup_on_int
