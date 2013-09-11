@@ -12,6 +12,7 @@ SVN HEAD
                   Add a PCI ID for new family 15h AMD processors
                   Introduce automatic mode (--auto)
                   Detect incorrect non-interactive runs
+                  Rework option handling
 
 3.3.4 (2013-05-27)
   sensors.conf.5: Mention "sensors -u" to get the raw feature names

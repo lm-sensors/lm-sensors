@@ -6824,14 +6824,22 @@ sub main
 {
 	my ($input, $superio_features);
 
-	# Handle special command line cases first
-	if (defined $ARGV[0] && $ARGV[0] eq "--stat") {
-		show_i2c_stats();
-		exit 0;
+	# Parse command line options
+	while (defined $ARGV[0]) {
+		if ($ARGV[0] eq "--stat") {
+			$opt{stat} = 1;
+		} elsif ($ARGV[0] eq "--auto") {
+			$opt{auto} = 1;
+		} else {
+			print STDERR "Error: unknown option $ARGV[0]\n";
+			exit 1;
+		}
+		shift @ARGV;
 	}
 
-	if (defined $ARGV[0] && $ARGV[0] eq "--auto") {
-		$opt{auto} = 1;
+	if ($opt{stat}) {
+		show_i2c_stats();
+		exit 0;
 	}
 
 	# We won't go very far if not root
