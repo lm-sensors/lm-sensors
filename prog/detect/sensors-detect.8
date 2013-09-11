@@ -1,9 +1,11 @@
-.TH SENSORS-DETECT 8 "December 2008" "lm-sensors 3"
+.TH SENSORS-DETECT 8 "September 2013" "lm-sensors 3"
 .SH NAME
 sensors-detect \- detect hardware monitoring chips
 
 .SH SYNOPSIS
-.B sensors-detect
+.B sensors-detect [
+.I --auto
+.B ]
 
 .SH DESCRIPTION
 sensors-detect is an interactive program that will walk you through the
@@ -29,6 +31,13 @@ However, the user is always free to ask for all detection steps if so is
 his/her wish. This can be useful if a given system has more than one
 hardware monitoring chip. Some vendors are known to do this, most notably
 Asus and Tyan.
+
+.SH OPTIONS
+.IP "--auto"
+Run in automatic, non-interactive mode. Assume default answers to all
+questions. Note that this isn't necessarily safe as the internal logic may
+lead to potentially dangerous probes being attempted. See the WARNING section
+below.
 
 .SH WARNING
 sensors-detect needs to access the hardware for most of the chip detections.

@@ -39,7 +39,7 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 
 use constant NO_CACHE => 1;
 use vars qw(@pci_adapters @chip_ids @ipmi_ifs @non_hwmon_chip_ids
-	    $i2c_addresses_to_scan $revision @i2c_byte_cache);
+	    $i2c_addresses_to_scan $revision @i2c_byte_cache %opt);
 
 $revision = '$Revision$ ($Date$)';
 $revision =~ s/\$\w+: (.*?) \$/$1/g;
@@ -2510,6 +2510,16 @@ sub overlay_hash
 	return %result;
 }
 
+# Read answer from stdin or accept default answer automatically
+sub read_answer
+{
+	if ($opt{auto}) {
+		print "\n";
+		return "";
+	}
+	return <STDIN>;
+}
+
 ###################
 # I/O PORT ACCESS #
 ###################
@@ -3759,7 +3769,7 @@ sub scan_i2c_adapter
 	       "Do you want to scan it? (\%s/selectively): ",
 	       $default ? "YES/no" : "yes/NO";
 
-	$input = <STDIN>;
+	$input = read_answer();
 	if ($input =~ /^\s*n/i
 	 || (!$default && $input !~ /^\s*[ys]/i)) {
 		print "\n";
@@ -3770,7 +3780,7 @@ sub scan_i2c_adapter
 		print "Please enter one or more addresses not to scan. Separate them with commas.\n",
 		      "You can specify a range by using dashes. Example: 0x58-0x5f,0x69.\n",
 		      "Addresses: ";
-		$input = <STDIN>;
+		$input = read_answer();
 		chomp($input);
 		@not_to_scan = parse_not_to_scan(0x03, 0x77, $input);
 	} elsif (($class & 0xff00) == 0x0300) {
@@ -6711,7 +6721,7 @@ sub write_config
 		printf "Do you want to \%s /etc/modprobe.d/lm_sensors.conf? (\%s): ",
 		       (-e '/etc/modprobe.d/lm_sensors.conf' ? 'overwrite' : 'generate'),
 		       ($have_modprobe_d ? 'YES/no' : 'yes/NO');
-		$_ = <STDIN>;
+		$_ = read_answer();
 		if (($have_modprobe_d and not m/^\s*n/i) or m/^\s*y/i) {
 			unless ($have_modprobe_d) {
 				mkdir('/etc/modprobe.d', 0777)
@@ -6735,7 +6745,7 @@ sub write_config
 	printf "Do you want to \%s /etc/sysconfig/lm_sensors? (\%s): ",
 	       (-e '/etc/sysconfig/lm_sensors' ? 'overwrite' : 'generate'),
 	       ($have_sysconfig ? 'YES/no' : 'yes/NO');
-	$_ = <STDIN>;
+	$_ = read_answer();
 	if (($have_sysconfig and not m/^\s*n/i) or m/^\s*y/i) {
 		unless ($have_sysconfig) {
 			mkdir('/etc/sysconfig', 0777)
@@ -6820,6 +6830,10 @@ sub main
 		exit 0;
 	}
 
+	if (defined $ARGV[0] && $ARGV[0] eq "--auto") {
+		$opt{auto} = 1;
+	}
+
 	# We won't go very far if not root
 	unless ($> == 0) {
 		print "You need to be root to run this script.\n";
@@ -6847,14 +6861,21 @@ sub main
 	initialize_dmi_data();
 	print_dmi_summary();
 	print "\n";
-	print "This program will help you determine which kernel modules you need\n",
-	      "to load to use lm_sensors most effectively. It is generally safe\n",
-	      "and recommended to accept the default answers to all questions,\n",
-	      "unless you know what you're doing.\n\n";
+
+	if ($opt{auto}) {
+		print "Running in automatic mode, default answers to all questions\n",
+		      "are assumed.\n\n";
+	} else {
+		print "This program will help you determine which kernel modules you need\n",
+		      "to load to use lm_sensors most effectively. It is generally safe\n",
+		      "and recommended to accept the default answers to all questions,\n",
+		      "unless you know what you're doing.\n\n";
+	}
 
 	print "Some south bridges, CPUs or memory controllers contain embedded sensors.\n".
 	      "Do you want to scan for them? This is totally safe. (YES/no): ";
-	unless (<STDIN> =~ /^\s*n/i) {
+	$input = read_answer();
+	unless ($input =~ /^\s*n/i) {
 		# Load the cpuid driver if needed
 		unless (-e "$sysfs_root/class/cpuid") {
 			load_module("cpuid");
@@ -6876,7 +6897,8 @@ sub main
 		print "Some Super I/O chips contain embedded sensors. We have to write to\n".
 		      "standard I/O ports to probe them. This is usually safe.\n";
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
-		unless (<STDIN> =~ /^\s*n/i) {
+		$input = read_answer();
+		unless ($input =~ /^\s*n/i) {
 			if (initialize_ioports()) {
 				$superio_features |= scan_superio(0x2e, 0x2f);
 				$superio_features |= scan_superio(0x4e, 0x4f);
@@ -6892,7 +6914,8 @@ sub main
 			      "there, we have to read from arbitrary I/O ports to probe for such\n".
 			      "interfaces. This is normally safe. Do you want to scan for IPMI\n".
 			      "interfaces? (YES/no): ";
-			unless (<STDIN> =~ /^\s*n/i) {
+			$input = read_answer();
+			unless ($input =~ /^\s*n/i) {
 				if (!ipmi_from_smbios()) {
 					if (initialize_ioports()) {
 						scan_isa_bus(\@ipmi_ifs);
@@ -6908,7 +6931,7 @@ sub main
 		       "safe though. Yes, you do have ISA I/O ports even if you do not have any\n".
 		       "ISA slots! Do you want to scan the ISA I/O ports? (\%s): ",
 		       $superio_features ? "yes/NO" : "YES/no";
-		$input = <STDIN>;
+		$input = read_answer();
 		unless ($input =~ /^\s*n/i
 		     || ($superio_features && $input !~ /^\s*y/i)) {
 			if (initialize_ioports()) {
@@ -6925,7 +6948,8 @@ sub main
 	      "on some systems.\n".
 	      "Do you want to probe the I2C/SMBus adapters now? (YES/no): ";
 
-	unless (<STDIN> =~ /^\s*n/i) {
+	$input = read_answer();
+	unless ($input =~ /^\s*n/i) {
 		adapter_pci_detection();
 		load_module("i2c-dev") unless -e "$sysfs_root/class/i2c-dev";
 		initialize_i2c_adapters_list();
@@ -6961,9 +6985,11 @@ sub main
 		exit;
 	}
 
-	print "Now follows a summary of the probes I have just done.\n".
-	      "Just press ENTER to continue: ";
-	<STDIN>;
+	print "\nNow follows a summary of the probes I have just done.\n";
+	unless ($opt{auto}) {
+		print "Just press ENTER to continue: ";
+		<STDIN>;
+	}
 
 	initialize_hwmon_autoloaded();
 	foreach my $driver (keys %chips_detected) {
