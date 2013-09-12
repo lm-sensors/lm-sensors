@@ -397,6 +397,7 @@
 #define SENSORS_ADT7463_PREFIX "adt7463"
 #define SENSORS_EMC6D100_PREFIX "emc6d100"
 #define SENSORS_EMC6D102_PREFIX "emc6d102"
+#define SENSORS_EMC6D103_PREFIX "emc6d103"
 
 #define SENSORS_ADM1027_ALARM_MASK           1  /* RW -- alarm_mask  */
 #define SENSORS_ADM1027_FAN1_PPR             2  /* RW -- fan1_ppr  */

@@ -5,6 +5,7 @@ SVN-HEAD
   File lm_sensors.lsm: Delete, don't advertise a legacy branch
   File doc/developers/release_checklist: Skip mail to lsm
   Library: Handle new chassis intrusion interface (w93792d and w83793)
+           Add support for the SMSC EMC6D103
   Module i2c-ali1563: Remove sparse warnings (2.6 backport)
   Module i2c-amd8111: Fix timeout handling (2.6 backport)
   Module i2c-piix4: ATI SB800 is not actually supported
@@ -15,6 +16,7 @@ SVN-HEAD
   Program sensors: Fix a memory leak when a chip name is provided
                    Fix iconv-related build warning in set_degstr
                    Properly support Maxim MAX6650 and MAX6651
+                   Add support for the SMSC EMC6D103
   Program sensors-detect: Fix detection of older DS1621
                           Rename the modprobe config file to lm_sensors.conf
                           Drop AMD K10 detection (unreliable sensors)
