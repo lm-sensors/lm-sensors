@@ -681,7 +681,7 @@ use vars qw(@pci_adapters_sis5595 @pci_adapters_sis645 @pci_adapters_sis96x);
        i2c_detect => sub { lm85_detect(0x41, @_); },
      },
      {
-       name => "SMSC EMC6D100, EMC6D101 or EMC6D102",
+       name => "SMSC EMC6D100, EMC6D101, EMC6D102 or EMC6D103",
        driver => "lm85",
        i2c_addrs => [0x2c..0x2e],
        i2c_detect => sub { lm85_detect(0x5c, @_); },
