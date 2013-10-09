@@ -2,7 +2,7 @@
 #
 #    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2012  Jean Delvare <khali@linux-fr.org>
+#    Copyright (C) 2004 - 2013  Jean Delvare <khali@linux-fr.org>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -1027,6 +1027,11 @@ use vars qw(@i2c_adapter_names);
 		driver => "to-be-written",		# tmp401
 		i2c_addrs => [0x4c, 0x4d],
 		i2c_detect => sub { lm90_detect(@_, 17); },
+	}, {
+		name => "Texas Instruments TMP451",
+		driver => "lm90",
+		i2c_addrs => [0x4c],
+		i2c_detect => sub { lm90_detect(@_, 18); },
 	}, {
 		name => "Texas Instruments AMC6821",
 		driver => "amc6821",
@@ -4563,7 +4568,7 @@ sub max6680_95_detect
 #		  8 = W83L771W/G, 9 = TMP401, 10 = TMP411,
 #		  11 = W83L771AWG/ASG, 12 = MAX6690,
 #		  13 = ADT7461A/NCT1008, 14 = SA56004,
-#		  15 = G781, 16 = TMP431, 17 = TMP432
+#		  15 = G781, 16 = TMP431, 17 = TMP432, 18 = TMP451
 # Registers used:
 #   0x03: Configuration
 #   0x04: Conversion rate
@@ -4692,6 +4697,12 @@ sub lm90_detect
 		return if $rate > 0x0F;
 		return if $mid != 0x55;		# Texas Instruments
 		return 6 if ($cid == 0x32);	# TMP432A/B
+	}
+	if ($chip == 18) {
+		return if ($conf & 0x1B) != 0;
+		return if $rate > 0x09;
+		return if $mid != 0x55;		# Texas Instruments
+		return 4 if ($cid == 0x00);	# TMP451
 	}
 	return;
 }
