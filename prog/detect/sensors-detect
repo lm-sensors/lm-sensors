@@ -1240,6 +1240,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2e],
 		i2c_detect => sub { emc1403_detect(@_, 2); },
 	}, {
+		name => "SMSC EMC2104",
+		driver => "to-be-written",
+		i2c_addrs => [0x2f],
+		i2c_detect => sub { emc1403_detect(@_, 13); },
+	}, {
 		name => "Fintek F75121R/F75122R/RG (VID+GPIO)",
 		driver => "to-be-written",
 		i2c_addrs => [0x4e], # 0x37 not probed
@@ -5963,7 +5968,8 @@ sub emc1023_detect
 
 # Chip to detect: 0 = EMC1403, 1 = EMC1404, 2 = EMC2103, 3 = EMC1423,
 #	4 = EMC1002, 5 = EMC1033, 6 = EMC1046, 7 = EMC1047, 8 = EMC1072,
-#	9 = EMC1073, 10 = EMC1074, 11 = EMC1402, 12 = EMC1424
+#	9 = EMC1073, 10 = EMC1074, 11 = EMC1402, 12 = EMC1424,
+#	13 = EMC2104
 # Registers used:
 #   0xfd: Device ID register
 #   0xfe: Vendor ID register
@@ -6016,6 +6022,9 @@ sub emc1403_detect
 	} elsif ($chip == 12) {		# EMC1424
 		return unless $dev_id == 0x27;
 		return unless $rev == 0x01;
+	} elsif ($chip == 13) {		# EMC2104
+		return unless $dev_id == 0x1d;
+		return unless $rev == 0x02;
 	}
 
 	return 6;

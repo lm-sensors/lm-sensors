@@ -18,6 +18,7 @@ SVN HEAD
                   Rework option handling
                   Fix use of uninitialized value 'vendor_id' on ppc64
                   Add detection of TMP451
+                  Add detection of SMSC EMC2104
 
 3.3.4 (2013-05-27)
   sensors.conf.5: Mention "sensors -u" to get the raw feature names
