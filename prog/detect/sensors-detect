@@ -2220,7 +2220,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 @superio_ids_ite = (
 	{
 		name => "ITE IT8603E Super IO Sensors",
-		driver => "to-be-written",
+		driver => "it87",
 		devid => 0x8603,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
