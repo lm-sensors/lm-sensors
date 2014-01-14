@@ -13,7 +13,7 @@ SVN HEAD
                   Add detection of NCT6681D, NCT6682D, and NCT6683D
                   Add detection of F71868A
                   Add detection of IT8603E
-                  Add a PCI ID for new family 15h AMD processors
+                  Add two PCI IDs for new family 15h AMD processors
                   Introduce automatic mode (--auto)
                   Detect incorrect non-interactive runs
                   Rework option handling
