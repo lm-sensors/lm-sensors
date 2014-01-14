@@ -140,7 +140,7 @@ char sensors_sysfs_mount[NAME_MAX];
 
 #define MAX_MAIN_SENSOR_TYPES	(SENSORS_FEATURE_MAX_MAIN - SENSORS_FEATURE_IN)
 #define MAX_OTHER_SENSOR_TYPES	(SENSORS_FEATURE_MAX_OTHER - SENSORS_FEATURE_VID)
-#define MAX_SENSORS_PER_TYPE	24
+#define MAX_SENSORS_PER_TYPE	33
 /* max_subfeatures is now computed dynamically */
 #define FEATURE_SIZE		(max_subfeatures * 2)
 #define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)

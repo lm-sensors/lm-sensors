@@ -3,6 +3,7 @@ lm-sensors CHANGES file
 
 SVN HEAD
   libsensors: Improve documentation of two functions
+              Increase MAX_SENSORS_PER_TYPE to 33
   init: Fix EnvironmentFile in service files
   sensors-conf-convert: Add a manual page
   sensors-detect: Report built-in drivers as such
