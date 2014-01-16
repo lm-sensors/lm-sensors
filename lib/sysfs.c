@@ -138,21 +138,8 @@ static int sysfs_foreach_busdev(const char *bus_type,
 
 char sensors_sysfs_mount[NAME_MAX];
 
-#define MAX_MAIN_SENSOR_TYPES	(SENSORS_FEATURE_MAX_MAIN - SENSORS_FEATURE_IN)
-#define MAX_OTHER_SENSOR_TYPES	(SENSORS_FEATURE_MAX_OTHER - SENSORS_FEATURE_VID)
-#define MAX_SENSORS_PER_TYPE	33
 /* max_subfeatures is now computed dynamically */
 #define FEATURE_SIZE		(max_subfeatures * 2)
-#define FEATURE_TYPE_SIZE	(MAX_SENSORS_PER_TYPE * FEATURE_SIZE)
-
-/*
- * Room for all 7 main types (in, fan, temp, power, energy, current, humidity)
- * and 2 other types (VID, intrusion) with all their subfeatures + misc features
- */
-#define SUB_OFFSET_OTHER	(MAX_MAIN_SENSOR_TYPES * FEATURE_TYPE_SIZE)
-#define SUB_OFFSET_MISC		(SUB_OFFSET_OTHER + \
-				 MAX_OTHER_SENSOR_TYPES * FEATURE_TYPE_SIZE)
-#define ALL_POSSIBLE_SUBFEATURES	(SUB_OFFSET_MISC + 1)
 
 static
 int get_type_scaling(sensors_subfeature_type type)
@@ -432,7 +419,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	static int max_subfeatures;
 	DIR *dir;
 	struct dirent *ent;
-	sensors_subfeature *all_subfeatures;
+	struct {
+		int count;
+		sensors_subfeature *sf;
+	} all_types[SENSORS_FEATURE_MAX];
 	sensors_subfeature *dyn_subfeatures;
 	sensors_feature *dyn_features;
 	sensors_feature_type ftype;
@@ -445,13 +435,10 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	if (!max_subfeatures)
 		max_subfeatures = sensors_compute_max();
 
-	/* We use a large sparse table at first to store all found
-	   subfeatures, so that we can store them sorted at type and index
-	   and then later create a dense sorted table. */
-	all_subfeatures = calloc(ALL_POSSIBLE_SUBFEATURES,
-				 sizeof(sensors_subfeature));
-	if (!all_subfeatures)
-		sensors_fatal_error(__func__, "Out of memory");
+	/* We use a set of large sparse tables at first (one per main
+	   feature type present) to store all found subfeatures, so that we
+	   can store them sorted and then later create a dense sorted table. */
+	memset(&all_types, 0, sizeof(all_types));
 
 	while ((ent = readdir(dir))) {
 		char *name;
@@ -482,37 +469,43 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			break;
 		}
 
-		if (nr < 0 || nr >= MAX_SENSORS_PER_TYPE) {
-			/* More sensors of one type than MAX_SENSORS_PER_TYPE,
-			   we have to ignore it */
+		/* Skip invalid entries */
+		if (nr < 0) {
 #ifdef DEBUG
 			sensors_fatal_error(__func__,
-					    "Increase MAX_SENSORS_PER_TYPE!");
+					    "Invalid channel number!");
 #endif
 			continue;
 		}
 
-		/* "calculate" a place to store the subfeature in our sparse,
-		   sorted table */
-		switch (ftype) {
-		case SENSORS_FEATURE_VID:
-		case SENSORS_FEATURE_INTRUSION:
-			i = SUB_OFFSET_OTHER +
-			    (ftype - SENSORS_FEATURE_VID) * FEATURE_TYPE_SIZE +
-			    nr * FEATURE_SIZE + (sftype & 0xFF);
-			break;
-		case SENSORS_FEATURE_BEEP_ENABLE:
-			i = SUB_OFFSET_MISC +
-			    (ftype - SENSORS_FEATURE_BEEP_ENABLE);
-			break;
-		default:
-			i = ftype * FEATURE_TYPE_SIZE +
-			    nr * FEATURE_SIZE +
-			    ((sftype & 0x80) >> 7) * max_subfeatures +
-			    (sftype & 0x7F);
+		/* (Re-)allocate memory if needed */
+		if (all_types[ftype].count < nr + 1) {
+			int old_count = all_types[ftype].count;
+
+			while (all_types[ftype].count < nr + 1)
+				all_types[ftype].count += 8;
+
+			all_types[ftype].sf = realloc(all_types[ftype].sf,
+						all_types[ftype].count *
+						FEATURE_SIZE *
+						sizeof(sensors_subfeature));
+			if (!all_types[ftype].sf)
+				sensors_fatal_error(__func__, "Out of memory");
+			memset(all_types[ftype].sf + old_count * FEATURE_SIZE,
+			       0, (all_types[ftype].count - old_count) *
+				  FEATURE_SIZE * sizeof(sensors_subfeature));
 		}
 
-		if (all_subfeatures[i].name) {
+		/* "calculate" a place to store the subfeature in our sparse,
+		   sorted table */
+		if (ftype < SENSORS_FEATURE_VID)
+			i = nr * FEATURE_SIZE +
+			    ((sftype & 0x80) >> 7) * max_subfeatures +
+			    (sftype & 0x7F);
+		else
+			i = nr * FEATURE_SIZE + (sftype & 0xFF);
+
+		if (all_types[ftype].sf[i].name) {
 #ifdef DEBUG
 			sensors_fatal_error(__func__, "Duplicate subfeature");
 #endif
@@ -520,15 +513,16 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		}
 
 		/* fill in the subfeature members */
-		all_subfeatures[i].type = sftype;
-		all_subfeatures[i].name = strdup(name);
-		if (!all_subfeatures[i].name)
+		all_types[ftype].sf[i].type = sftype;
+		all_types[ftype].sf[i].name = strdup(name);
+		if (!all_types[ftype].sf[i].name)
 			sensors_fatal_error(__func__, "Out of memory");
 
 		/* Other and misc subfeatures are never scaled */
 		if (sftype < SENSORS_SUBFEATURE_VID && !(sftype & 0x80))
-			all_subfeatures[i].flags |= SENSORS_COMPUTE_MAPPING;
-		all_subfeatures[i].flags |= sensors_get_attr_mode(dev_path, name);
+			all_types[ftype].sf[i].flags |= SENSORS_COMPUTE_MAPPING;
+		all_types[ftype].sf[i].flags |=
+					sensors_get_attr_mode(dev_path, name);
 
 		sfnum++;
 	}
@@ -540,14 +534,16 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	}
 
 	/* How many main features? */
-	prev_slot = -1;
-	for (i = 0; i < ALL_POSSIBLE_SUBFEATURES; i++) {
-		if (!all_subfeatures[i].name)
-			continue;
+	for (ftype = 0; ftype < SENSORS_FEATURE_MAX; ftype++) {
+		prev_slot = -1;
+		for (i = 0; i < all_types[ftype].count * FEATURE_SIZE; i++) {
+			if (!all_types[ftype].sf[i].name)
+				continue;
 
-		if (i >= SUB_OFFSET_MISC || i / FEATURE_SIZE != prev_slot) {
-			fnum++;
-			prev_slot = i / FEATURE_SIZE;
+			if (i / FEATURE_SIZE != prev_slot) {
+				fnum++;
+				prev_slot = i / FEATURE_SIZE;
+			}
 		}
 	}
 
@@ -559,30 +555,32 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	/* Copy from the sparse array to the compact array */
 	sfnum = 0;
 	fnum = -1;
-	prev_slot = -1;
-	for (i = 0; i < ALL_POSSIBLE_SUBFEATURES; i++) {
-		if (!all_subfeatures[i].name)
-			continue;
+	for (ftype = 0; ftype < SENSORS_FEATURE_MAX; ftype++) {
+		prev_slot = -1;
+		for (i = 0; i < all_types[ftype].count * FEATURE_SIZE; i++) {
+			if (!all_types[ftype].sf[i].name)
+				continue;
 
-		/* New main feature? */
-		if (i >= SUB_OFFSET_MISC || i / FEATURE_SIZE != prev_slot) {
-			ftype = all_subfeatures[i].type >> 8;
-			fnum++;
-			prev_slot = i / FEATURE_SIZE;
+			/* New main feature? */
+			if (i / FEATURE_SIZE != prev_slot) {
+				fnum++;
+				prev_slot = i / FEATURE_SIZE;
 
-			dyn_features[fnum].name = get_feature_name(ftype,
-						all_subfeatures[i].name);
-			dyn_features[fnum].number = fnum;
-			dyn_features[fnum].first_subfeature = sfnum;
-			dyn_features[fnum].type = ftype;
+				dyn_features[fnum].name =
+					get_feature_name(ftype,
+						all_types[ftype].sf[i].name);
+				dyn_features[fnum].number = fnum;
+				dyn_features[fnum].first_subfeature = sfnum;
+				dyn_features[fnum].type = ftype;
+			}
+
+			dyn_subfeatures[sfnum] = all_types[ftype].sf[i];
+			dyn_subfeatures[sfnum].number = sfnum;
+			/* Back to the feature */
+			dyn_subfeatures[sfnum].mapping = fnum;
+
+			sfnum++;
 		}
-
-		dyn_subfeatures[sfnum] = all_subfeatures[i];
-		dyn_subfeatures[sfnum].number = sfnum;
-		/* Back to the feature */
-		dyn_subfeatures[sfnum].mapping = fnum;
-
-		sfnum++;
 	}
 
 	chip->subfeature = dyn_subfeatures;
@@ -591,7 +589,8 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 	chip->feature_count = ++fnum;
 
 exit_free:
-	free(all_subfeatures);
+	for (ftype = 0; ftype < SENSORS_FEATURE_MAX; ftype++)
+		free(all_types[ftype].sf);
 	return 0;
 }
 
