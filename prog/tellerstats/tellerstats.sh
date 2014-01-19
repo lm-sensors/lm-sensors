@@ -23,7 +23,7 @@
 
 # generic tellerstats init BEGIN
 
-# get config information from /etc/tellerstats.conf or whereever we are pointed
+# get config information from /etc/tellerstats.conf or wherever we are pointed
 
 if [ -z "$TELLERSTATS_CONF" ]
 then

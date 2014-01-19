@@ -1980,9 +1980,9 @@ chip "f71805f-*" "f71872f-*"
 
 
 # Abit Uguru sensor part configuration.
-# The Abit Uguru is relativly straight forward to configure.
+# The Abit Uguru is relatively straight forward to configure.
 # label statements:
-# The voltage (in) temp and fan sensors are usualy in the same order as listed
+# The voltage (in) temp and fan sensors are usually in the same order as listed
 # in the BIOS, but not always!
 # compute statements:
 # The temp and fan sensors don't need any compute statements. Most voltage
@@ -1994,7 +1994,7 @@ chip "f71805f-*" "f71872f-*"
 # mutiplier, 5 volt the 1.788 and 12 volt the 4.153.
 # set statements:
 # The Abit BIOS sets reasonable treshholds and allows changing them, thus
-# set statements may be ommited. The abituguru kernel driver does support
+# set statements may be omitted. The abituguru kernel driver does support
 # them if you want to add them.
 #
 # The configuration below is for the Kv8Pro and AV8 this is the default as this

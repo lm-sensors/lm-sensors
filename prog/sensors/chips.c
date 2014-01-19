@@ -115,7 +115,7 @@ static int get_label_size(const sensors_chip_name *name)
 	int i;
 	const sensors_feature *iter;
 	char *label;
-	unsigned int max_size = 11;	/* 11 as minumum label width */
+	unsigned int max_size = 11;	/* 11 as minimum label width */
 
 	i = 0;
 	while ((iter = sensors_get_features(name, &i))) {
