@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Add detection of ADC128D818
+
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
               Increase MAX_SENSORS_PER_TYPE to 33
