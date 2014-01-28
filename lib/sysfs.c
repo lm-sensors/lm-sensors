@@ -382,7 +382,7 @@ sensors_subfeature_type sensors_subfeature_get_type(const char *name, int *nr)
 	return SENSORS_SUBFEATURE_UNKNOWN;
 }
 
-static int sensors_compute_max(void)
+static int sensors_compute_max_sf(void)
 {
 	int i, j, max, offset;
 	const struct subfeature_type_match *submatches;
@@ -443,7 +443,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 
 	/* Dynamically figure out the max number of subfeatures */
 	if (!max_subfeatures)
-		max_subfeatures = sensors_compute_max();
+		max_subfeatures = sensors_compute_max_sf();
 
 	/* We use a large sparse table at first to store all found
 	   subfeatures, so that we can store them sorted at type and index
