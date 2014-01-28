@@ -206,6 +206,65 @@ function ValidateDevices()
 	return $outdated
 }
 
+function FixupDeviceFiles
+{
+	local DEVICE="$1"
+	local fcvcount pwmo tsen fan
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
+	do
+		pwmo=${AFCPWM[$fcvcount]}
+		AFCPWM[$fcvcount]=${pwmo//$DEVICE\/device/$DEVICE}
+		if [ "${AFCPWM[$fcvcount]}" != "$pwmo" ]
+		then
+			echo "Adjusing $pwmo -> ${AFCPWM[$fcvcount]}"
+		fi
+		let fcvcount=$fcvcount+1
+	done
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCTEMP[@]} )) # go through all temp inputs
+	do
+		tsen=${AFCTEMP[$fcvcount]}
+		AFCTEMP[$fcvcount]=${tsen//$DEVICE\/device/$DEVICE}
+		if [ "${AFCTEMP[$fcvcount]}" != "$tsen" ]
+		then
+			echo "Adjusing $tsen -> ${AFCTEMP[$fcvcount]}"
+		fi
+		let fcvcount=$fcvcount+1
+	done
+
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCFAN[@]} )) # go through all fan inputs
+	do
+		fan=${AFCFAN[$fcvcount]}
+		AFCFAN[$fcvcount]=${fan//$DEVICE\/device/$DEVICE}
+		if [ "${AFCFAN[$fcvcount]}" != "$fan" ]
+		then
+			echo "Adjusing $fan -> ${AFCFAN[$fcvcount]}"
+		fi
+		let fcvcount=$fcvcount+1
+	done
+}
+
+# Some drivers moved their attributes from hard device to class device
+function FixupFiles
+{
+	local DEVPATH="$1"
+	local entry device
+
+	for entry in $DEVPATH
+	do
+		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
+
+		if [ -e "$device/name" ]
+		then
+			FixupDeviceFiles "$device"
+		fi
+	done
+}
+
 # Check that all referenced sysfs files exist
 function CheckFiles
 {
@@ -305,6 +364,10 @@ if ! ValidateDevices "$DEVPATH" "$DEVNAME"
 then
 	echo "Configuration appears to be outdated, please run pwmconfig again" >&2
 	exit 1
+fi
+if [ "$DIR" = "/sys/class/hwmon" ]
+then
+	FixupFiles "$DEVPATH"
 fi
 CheckFiles || exit 1
 

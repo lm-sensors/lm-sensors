@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  fancontrol: Deal with moving hwmon attributes
   sensors-detect: Add detection of ADC128D818
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
