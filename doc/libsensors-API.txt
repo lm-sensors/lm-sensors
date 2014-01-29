@@ -6,6 +6,10 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x440	lm-sensors 3.4.0
+* Defined SENSORS_FEATURE_MAX
+  enum sensors_feature_type SENSORS_FEATURE_MAX
+
 0x432	lm-sensors 3.3.2 to 3.3.5
 * Added support for new sysfs attributes
   enum sensors_subfeature_type SENSORS_SUBFEATURE_IN_AVERAGE
@@ -19,6 +23,7 @@ given new feature.
   enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MAX
   enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MIN_ALARM
   enum sensors_subfeature_type SENSORS_SUBFEATURE_FAN_MAX_ALARM
+
 0x431	lm-sensors 3.3.0 to 3.3.1
 * Added support for intrusion detection
   enum sensors_feature_type SENSORS_FEATURE_INTRUSION

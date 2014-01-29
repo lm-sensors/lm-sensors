@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  libsensors: Get rid of arbitrary limit on per-type sensor count
   fancontrol: Deal with moving hwmon attributes
   sensors-detect: Add detection of ADC128D818
 
