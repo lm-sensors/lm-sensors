@@ -480,9 +480,11 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		/* (Re-)allocate memory if needed */
 		if (all_types[ftype].count < nr + 1) {
 			int old_count = all_types[ftype].count;
+			int step = ftype < SENSORS_FEATURE_VID ? 8 :
+				   ftype < SENSORS_FEATURE_BEEP_ENABLE ? 2 : 1;
 
 			while (all_types[ftype].count < nr + 1)
-				all_types[ftype].count += 8;
+				all_types[ftype].count += step;
 
 			all_types[ftype].sf = realloc(all_types[ftype].sf,
 						all_types[ftype].count *
