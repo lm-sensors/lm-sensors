@@ -1,7 +1,7 @@
 /*
     sysfs.c - Part of libsensors, a library for reading Linux sensor data
     Copyright (c) 2005 Mark M. Hoffman <mhoffman@lightlink.com>
-    Copyright (C) 2007-2010 Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2014 Jean Delvare <khali@linux-fr.org>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -468,8 +468,9 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 			break;
 		}
 
-		/* Skip invalid entries */
-		if (nr < 0) {
+		/* Skip invalid entries. The high limit is arbitrary, we just
+		   don't want to allocate an insane amount of memory. */
+		if (nr < 0 || nr >= 1024) {
 #ifdef DEBUG
 			sensors_fatal_error(__func__,
 					    "Invalid channel number!");
