@@ -2415,6 +2415,10 @@ use vars qw(@cpu_ids);
 		driver => "k10temp",
 		detect => sub { amd_pci_detect('1603', '1403', '141d') },
 	}, {
+		name => "AMD Family 16h thermal sensors",
+		driver => "k10temp",
+		detect => sub { amd_pci_detect('1533', '1583') },
+	}, {
 		name => "AMD Family 15h power sensors",
 		driver => "fam15h_power",
 		detect => sub { amd_pci_detect('1604') },

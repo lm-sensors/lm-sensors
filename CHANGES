@@ -6,6 +6,7 @@ SVN HEAD
   libsensors: Get rid of arbitrary limit on per-type sensor count
   fancontrol: Deal with moving hwmon attributes
   sensors-detect: Add detection of ADC128D818
+                  Add detection of AMD family 16h Kabini and Mullins
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
