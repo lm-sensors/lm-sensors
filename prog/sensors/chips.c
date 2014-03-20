@@ -2,7 +2,7 @@
     chips.c - Part of sensors, a user-space program for hardware monitoring
     Copyright (C) 1998-2003  Frodo Looijaard <frodol@dds.nl> and
                              Mark D. Studebaker <mdsxyz123@yahoo.com>
-    Copyright (C) 2007-2010  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2007-2012  Jean Delvare <jdelvare@suse.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

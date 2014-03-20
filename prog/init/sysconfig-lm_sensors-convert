@@ -3,7 +3,7 @@
 # Convert an lm_sensors service configuration file from the old convention
 # (MODULE_0, MODULE_1...) to the new convention (HWMON_MODULES).
 #
-# Copyright (C) 2009  Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2009  Jean Delvare <jdelvare@suse.de>
 #
 # Released without a license on purpose. This is public domain code, so
 # that package maintainers can include it in their post-install script.

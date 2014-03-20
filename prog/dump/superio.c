@@ -1,7 +1,7 @@
 /*
     superio: Handle special I/O operations needed by most Super-I/O chips
    
-    Copyright (C) 2005  Jean Delvare <khali@linux-fr.org>
+    Copyright (C) 2005-2008  Jean Delvare <jdelvare@suse.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

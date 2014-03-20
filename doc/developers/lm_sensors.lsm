@@ -8,8 +8,8 @@ Description: Hardware health monitoring package for Linux. It consists of
              Also included is a fan speed control script.
              http://www.lm-sensors.org/
 Keywords: sensors health hardware-monitoring fan-speed
-Author: khali@linux-fr.org (Jean Delvare)
-Maintained-by: khali@linux-fr.org (Jean Delvare)
+Author: jdelvare@suse.de (Jean Delvare)
+Maintained-by: jdelvare@suse.de (Jean Delvare)
 Primary-site: http://dl.lm-sensors.org /lm-sensors/releases/
               lm_sensors-3.3.5.tar.bz2
               lm_sensors-3.3.5.tar.bz2.sig

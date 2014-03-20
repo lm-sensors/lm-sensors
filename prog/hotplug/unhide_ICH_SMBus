@@ -1,6 +1,6 @@
 #!/bin/bash
 # (C) Rudolf Marek <r.marek@assembler.cz>,
-#     Jean Delvare <khali@linux-fr.org>
+# Copyright (C) 2007-2011 Jean Delvare <jdelvare@suse.de>
 #
 #    Thanks Jean Delvare and Oliver Dreier <oliver@dinux.de> for testing.
 #
