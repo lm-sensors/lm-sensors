@@ -9,6 +9,9 @@ given new feature.
 0x440	lm-sensors 3.4.0
 * Defined SENSORS_FEATURE_MAX
   enum sensors_feature_type SENSORS_FEATURE_MAX
+* Added support for temp min and temp critical min hysteresis
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_MIN_HYST
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_TEMP_LCRIT_HYST
 
 0x432	lm-sensors 3.3.2 to 3.3.5
 * Added support for new sysfs attributes
