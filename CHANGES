@@ -5,6 +5,7 @@ SVN HEAD
   sensors.conf.default: Add support for NCT6779 and NCT6791
   libsensors: Get rid of arbitrary limit on per-type sensor count
               Add support for temperature min and critical min hysteresis
+  sensors: Add support for temperature min and critical min hysteresis
   fancontrol: Deal with moving hwmon attributes
   sensors-detect: Add detection of ADC128D818
                   Add detection of AMD family 16h Kabini and Mullins
