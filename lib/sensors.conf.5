@@ -356,7 +356,7 @@ statements are needed.
 
 On top of the usual features, temperatures can have two specific
 sub\-features: temperature sensor type (tempX_type) and hysteresis
-values (tempX_max_hyst and tempX_crit_hyst).
+values (tempX_max_hyst, tempX_crit_hyst etc.).
 
 .SS THERMAL SENSOR TYPES
 
@@ -407,6 +407,8 @@ again immediately.
 
 So, in addition to tempX_max, many chips have a tempX_max_hyst
 sub-feature. Likewise, tempX_crit often comes with tempX_crit_hyst.
+tempX_emerg_hyst, tempX_min_hyst and tempX_lcrit_hyst exist too but
+aren't as common.
 Example:
 
 .RS
@@ -418,6 +420,11 @@ set temp1_max_hyst 56
 
 The hysteresis mechanism can be disabled by giving both limits the same
 value.
+
+Note that it is strongly recommended to set the hysteresis value after
+the limit value it relates to in the configuration file. Implementation
+details on the hardware or driver side may cause unexpected results if
+the hysteresis value is set first.
 
 .SH BEEPS
 
