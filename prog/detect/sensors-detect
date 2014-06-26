@@ -1033,6 +1033,16 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x4c, 0x4d],
 		i2c_detect => sub { lm90_detect(@_, 17); },
 	}, {
+		name => "Texas Instruments TMP441",
+		driver => "tmp421",
+		i2c_addrs => [0x1c..0x1f, 0x2a, 0x4c..0x4f],
+		i2c_detect => sub { tmp42x_detect(@_, 3); },
+	}, {
+		name => "Texas Instruments TMP442",
+		driver => "tmp421",
+		i2c_addrs => [0x4c, 0x4d],
+		i2c_detect => sub { tmp42x_detect(@_, 4); },
+	}, {
 		name => "Texas Instruments TMP451",
 		driver => "lm90",
 		i2c_addrs => [0x4c],
@@ -1048,10 +1058,20 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2b, 0x19, 0x2a],
 		i2c_detect => sub { lm95231_detect(@_, 0); },
 	}, {
+		name => "National Semiconductor LM95233",
+		driver => "lm95234",
+		i2c_addrs => [0x18, 0x2a, 0x2b],
+		i2c_detect => sub { lm95231_detect(@_, 5); },
+	}, {
 		name => "National Semiconductor LM95234",
-		driver => "to-be-written",		# lm95234
+		driver => "lm95234",
 		i2c_addrs => [0x18, 0x4d, 0x4e],
 		i2c_detect => sub { lm95231_detect(@_, 3); },
+	}, {
+		name => "National Semiconductor LM95235",
+		driver => "lm95245",
+		i2c_addrs => [0x18, 0x29, 0x4c],
+		i2c_detect => sub { lm95231_detect(@_, 4); },
 	}, {
 		name => "National Semiconductor LM95241",
 		driver => "lm95241",
@@ -4765,9 +4785,11 @@ sub lm90_detect
 	return;
 }
 
-# Chip to detect: 0 = TMP421, 1 = TMP422, 2 = TMP423
+# Chip to detect: 0 = TMP421, 1 = TMP422, 2 = TMP423, 3 = TMP441, 4 = TMP442
 # Registers used:
-#   0xfe: Manufactorer ID
+#   0x08: Status (7 unused bits)
+#   0x0b: Conversion rate (value 0x07 or lower)
+#   0xfe: Manufacturer ID
 #   0xff: Device ID
 sub tmp42x_detect()
 {
@@ -4775,12 +4797,18 @@ sub tmp42x_detect()
 
 	my $mid = i2c_smbus_read_byte_data($file, 0xfe);
 	my $cid = i2c_smbus_read_byte_data($file, 0xff);
+	my $status = i2c_smbus_read_byte_data($file, 0x08);
+	my $rate = i2c_smbus_read_byte_data($file, 0x0b);
 
 	return if ($mid != 0x55);
+	return if ($status & 0x7f);
+	return if ($rate > 0x07);
 
 	return 6 if ($chip == 0 && $cid == 0x21); # TMP421
 	return 6 if ($chip == 1 && $cid == 0x22); # TMP422
 	return 6 if ($chip == 2 && $cid == 0x23); # TMP423
+	return 6 if ($chip == 3 && $cid == 0x41); # TMP441
+	return 6 if ($chip == 4 && $cid == 0x42); # TMP442
 
 	return;
 }
@@ -4833,7 +4861,8 @@ sub max6657_detect
 	return 5;
 }
 
-# Chip to detect: 0 = LM95231, 1 = LM95241, 2 = LM95245, 3 = LM95234
+# Chip to detect: 0 = LM95231, 1 = LM95241, 2 = LM95245, 3 = LM95234,
+#		  4 = LM95235, 5 = LM95233
 # Registers used:
 #   0x02: Status (3 unused bits)
 #   0x03: Configuration (3 unused bits)
@@ -4861,8 +4890,9 @@ sub lm95231_detect
 		return if i2c_smbus_read_byte_data($file, 0x03) & 0x89;
 		return if i2c_smbus_read_byte_data($file, 0x06) & 0xfa;
 		return if i2c_smbus_read_byte_data($file, 0x30) & 0xfa;
-	} elsif ($chip == 2) {
-		return if $cid != 0xb3;			# LM95245
+	} elsif ($chip == 2 || $chip == 4) {
+		return if $chip == 4 && $cid != 0xb1;	# LM95235
+		return if $chip == 2 && $cid != 0xb3;	# LM95245
 		return if i2c_smbus_read_byte_data($file, 0x02) & 0x68;
 		return if i2c_smbus_read_byte_data($file, 0x03) & 0xa1;
 		return if i2c_smbus_read_byte_data($file, 0x30) & 0x1f;
@@ -4874,6 +4904,13 @@ sub lm95231_detect
 		return if i2c_smbus_read_byte_data($file, 0x04) & 0xfc;
 		return if i2c_smbus_read_byte_data($file, 0x30) & 0xe1;
 		return if i2c_smbus_read_byte_data($file, 0x38) & 0xe1;
+	} elsif ($chip == 5) {
+		return if $cid != 0x89;			# LM95233
+		return if i2c_smbus_read_byte_data($file, 0x02) & 0x30;
+		return if i2c_smbus_read_byte_data($file, 0x03) & 0xbf;
+		return if i2c_smbus_read_byte_data($file, 0x04) & 0xfc;
+		return if i2c_smbus_read_byte_data($file, 0x30) & 0xf9;
+		return if i2c_smbus_read_byte_data($file, 0x38) & 0xf9;
 	}
 
 	return 6;

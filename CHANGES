@@ -11,6 +11,8 @@ SVN HEAD
   sensors-detect: Add detection of ADC128D818
                   Add detection of AMD family 16h Kabini and Mullins
                   Add detection of ITE IT8620E and IT8623E
+                  Add detection of TMP441, TMP442, LM95233, LM95234,
+                  and LM95235
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
