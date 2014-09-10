@@ -2731,6 +2731,11 @@ sub initialize_kernel_version
 	}
 }
 
+sub print_kernel_version
+{
+	printf "# Kernel: \%d.\%d.\%d\%s \%s\n", @kernel_version, $kernel_arch;
+}
+
 sub kernel_version_at_least
 {
 	my ($vers, $plvl, $slvl) = @_;
@@ -2773,6 +2778,12 @@ sub initialize_cpu_list
 	}
 	close(INPUTFILE);
 	push @cpu, $entry if scalar keys(%{$entry}); # Last entry
+}
+
+sub print_cpu_info
+{
+	my $cpu = $cpu[0];
+	print "# Processor: $cpu->{'model name'} ($cpu->{'cpu family'}/$cpu->{model}/$cpu->{stepping})\n";
 }
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
@@ -7027,6 +7038,8 @@ sub main
 	print "# sensors-detect revision $revision\n";
 	initialize_dmi_data();
 	print_dmi_summary();
+	print_kernel_version();
+	print_cpu_info();
 	print "\n";
 
 	if ($opt{auto}) {

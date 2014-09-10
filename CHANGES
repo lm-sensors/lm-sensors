@@ -14,6 +14,7 @@ SVN HEAD
                   Add detection of TMP441, TMP442, LM95233, LM95234,
                   and LM95235
                   Add detection of NCT7802Y
+                  Print kernel version and processor information
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
