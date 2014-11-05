@@ -8,6 +8,7 @@ SVN HEAD
               Add support for temperature min and critical min hysteresis
   sensors: Add support for temperature min and critical min hysteresis
   fancontrol: Deal with moving hwmon attributes
+              Fix shell error when FCFANS is not set
   sensors-detect: Add detection of ADC128D818
                   Add detection of AMD family 16h Kabini and Mullins
                   Add detection of ITE IT8620E and IT8623E

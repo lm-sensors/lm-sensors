@@ -3,7 +3,7 @@
 # Simple script implementing a temperature dependent fan speed control
 # Supported Linux kernel versions: 2.6.5 and later
 #
-# Version 0.70
+# Version 0.71
 #
 # Usage: fancontrol [CONFIGFILE]
 #
@@ -513,7 +513,7 @@ function UpdateFanSpeeds
 				fi
 			done
 		else
-			fanval=1  # set it to a non zero value, so the rest of the script still works
+			min_fanval=1  # set it to a non zero value, so the rest of the script still works
 		fi
 
 		# debug info
