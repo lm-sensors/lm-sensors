@@ -16,6 +16,7 @@ SVN HEAD
                   and LM95235
                   Add detection of NCT7802Y
                   Print kernel version and processor information
+                  Add detection of NCT6792D 
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
