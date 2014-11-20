@@ -20,6 +20,9 @@ SVN HEAD
                   Add reference to nct6683 driver
                   Show that NCT6102D/6104D/6106D are supported by nct6775 driver
                   Show NCT5573D as compatible to NCT6776F with same chip ID
+                  Document support for EMC1402, EMC1404, and EMC1424
+                  Detect new revisions of EMC14xx
+                  Add detection of EMC1422
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
