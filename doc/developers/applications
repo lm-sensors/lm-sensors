@@ -49,11 +49,10 @@ Details:
    configuration file format is documented in the sensors.conf(5) manual
    page.
 
-   Note that libsensors falls under the GPL, not the LGPL.
-   In more human language, that means it is FORBIDDEN to link any application
-   to the library, even to the shared version, if the application itself
-   does not fall under the GPL. This may or may not be changed in the future.
-   Contact us if you wish to discuss your application.
+   Note that since version 3.2.0, libsensors falls under the LGPL, not the
+   GPL as it used to. In more human language, that means it is now ALLOWED
+   to link any application to the library, even to the shared version,
+   regardless of the application's license.
 
    For examples of programs using libsensors accesses, see prog/sensors and
    prog/sensord.
