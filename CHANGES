@@ -24,6 +24,8 @@ SVN HEAD
                   Document support for EMC1402, EMC1404, and EMC1424
                   Detect new revisions of EMC14xx
                   Add detection of EMC1422
+                  Document driver support for TMP431 and TMP432
+                  Add detection of TMP400 and TMP435
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
