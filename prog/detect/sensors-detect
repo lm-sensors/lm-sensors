@@ -2353,6 +2353,18 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
+		name => "ITE IT8731F Super IO Sensors",
+		driver => "to-be-written",	# it87
+		devid => 0x8731,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "ITE IT8732F Super IO Sensors",
+		driver => "to-be-written",	# it87
+		devid => 0x8732,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "ITE IT8752F Super IO Sensors",
 		driver => "to-be-written",	# it87
 		devid => 0x8752,

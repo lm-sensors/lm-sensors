@@ -28,6 +28,7 @@ SVN HEAD
                   Add detection of TMP400 and TMP435
                   Add detection of IT8786E
                   Add detection of IT8780F
+                  Add detection of IT8731F and IT8732F
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
