@@ -26,6 +26,7 @@ SVN HEAD
                   Add detection of EMC1422
                   Document driver support for TMP431 and TMP432
                   Add detection of TMP400 and TMP435
+                  Add detection of IT8786E
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
