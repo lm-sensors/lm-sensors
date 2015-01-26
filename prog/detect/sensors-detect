@@ -2528,6 +2528,10 @@ use vars qw(@cpu_ids);
 		driver => "i5k_amb",
 		detect => \&intel_amb_detect,
 	}, {
+		name => "Intel 5500/5520/X58 thermal sensor",
+		driver => "i5500_temp",
+		detect => \&intel_5500_detect,
+	}, {
 		name => "VIA C7 thermal sensor",
 		driver => "via-cputemp",
 		detect => \&via_c7_detect,
@@ -6736,6 +6740,12 @@ sub intel_amb_detect
 		return 9;
 	}
 	return;
+}
+
+sub intel_5500_detect
+{
+	return unless exists $pci_list{'8086:3438'};
+	return 5;
 }
 
 sub cpuid
