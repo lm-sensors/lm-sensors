@@ -25,7 +25,8 @@ PATH="/bin:/usr/bin:/usr/local/bin:${PATH}"
 
 ADMIN_EMAIL="root@localhost"
 
-if [ -n "`sensors | grep ALARM`" ]
+sensors_state=$(sensors)
+if [[ "$sensors_state" =~ 'ALARM' ]]
 then
         echo "Pending Alarms on start up!  Exiting!"
         exit
@@ -33,10 +34,11 @@ fi
 
 while true
 do
- sleep 15
- if [ -n "`sensors | grep ALARM`" ]
+ read -t 15 -N 0
+ sensors_state=$(sensors)
+ if [[ "$sensors_state" =~ 'ALARM' ]]
  then
-        sensors | mail -s "**** Hardware Health Warning ****"  $ADMIN_EMAIL
-        sleep 600
+        echo "$sensors_state" | mail -s '**** Hardware Health Warning ****' $ADMIN_EMAIL
+        read -t 600 -N 0 
  fi
 done
