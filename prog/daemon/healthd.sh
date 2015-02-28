@@ -18,7 +18,7 @@
 #
 # Written & Copyrighten by Philip Edelbrock, 1999.
 #
-# Version: 1.0.0
+# Version: 1.1
 #
 
 PATH="/bin:/usr/bin:/usr/local/bin:${PATH}"
