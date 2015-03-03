@@ -14,14 +14,11 @@
 #		   get something better written. :')
 #
 # Requirements -- mail, sensors, bash, sleep
-#		  (You may need to alter the PATH, but probably not.)
 #
 # Written & Copyrighten by Philip Edelbrock, 1999.
 #
 # Version: 1.1
 #
-
-PATH="/bin:/usr/bin:/usr/local/bin:${PATH}"
 
 ADMIN_EMAIL="root@localhost"
 
