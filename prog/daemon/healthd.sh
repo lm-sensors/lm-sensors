@@ -13,7 +13,7 @@
 #		   This is just an example.  It works, but hopefully we can
 #		   get something better written. :')
 #
-# Requirements -- grep, mail, sensors, bash
+# Requirements -- mail, sensors, bash, sleep
 #		  (You may need to alter the PATH, but probably not.)
 #
 # Written & Copyrighten by Philip Edelbrock, 1999.
@@ -25,6 +25,10 @@ PATH="/bin:/usr/bin:/usr/local/bin:${PATH}"
 
 ADMIN_EMAIL="root@localhost"
 
+# Try loading the built-in sleep implementation to avoid spawning a
+# new process every 15 seconds
+enable -f sleep.so sleep >/dev/null 2>&1
+
 sensors_state=$(sensors)
 if [[ "$sensors_state" =~ 'ALARM' ]]
 then
@@ -34,11 +38,11 @@ fi
 
 while true
 do
- read -t 15 -N 0
+ sleep 15
  sensors_state=$(sensors)
  if [[ "$sensors_state" =~ 'ALARM' ]]
  then
         echo "$sensors_state" | mail -s '**** Hardware Health Warning ****' $ADMIN_EMAIL
-        read -t 600 -N 0 
+        sleep 600
  fi
 done
