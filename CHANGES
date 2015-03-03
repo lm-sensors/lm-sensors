@@ -33,6 +33,8 @@ SVN HEAD
                   Add detection of Intel 5500/5520/X58
                   Loosen detection rules for TS3000/TSE2002
                   Add detection of TSE2004 and TS3001
+                  Document driver support for NCT7802Y
+                  Add detection of NCT7904D
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions

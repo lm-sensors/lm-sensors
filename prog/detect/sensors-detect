@@ -734,9 +734,14 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { w83795_detect(@_); },
 	}, {
 		name => "Nuvoton NCT7802Y",
-		driver => "to-be-written",
+		driver => "nct7802",
 		i2c_addrs => [0x28..0x2f],
 		i2c_detect => sub { nct7802_detect(@_); },
+	}, {
+		name => "Nuvoton NCT7904D",
+		driver => "nct7904",
+		i2c_addrs => [0x2d..0x2e],
+		i2c_detect => sub { nct7904_detect(@_); },
 	}, {
 		name => "Winbond W83627HF",
 		driver => "use-isa-instead",
@@ -5630,6 +5635,32 @@ sub nct7802_detect
 
 	$reg = i2c_smbus_read_byte_data($file, 0x0f);
 	return unless ($reg & 0x3f) == 0x00;
+
+	return 8;
+}
+
+# Registers used:
+#   0x7a: Vendor ID
+#   0x7b: Chip ID
+#   0x7c: Device ID
+#   0xff: Bank Select
+#
+sub nct7904_detect
+{
+	my ($reg);
+	my ($file, $addr) = @_;
+
+	$reg = i2c_smbus_read_byte_data($file, 0x7a);
+	return unless $reg == 0x50;
+
+	$reg = i2c_smbus_read_byte_data($file, 0x7b);
+	return unless $reg == 0xc5;
+
+	$reg = i2c_smbus_read_byte_data($file, 0x7c);
+	return unless ($reg & 0xf0) == 0x50;
+
+	$reg = i2c_smbus_read_byte_data($file, 0xff);
+	return unless ($reg & 0xf8) == 0x00;
 
 	return 8;
 }
