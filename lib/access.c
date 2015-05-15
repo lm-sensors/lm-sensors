@@ -435,9 +435,9 @@ sensors_get_subfeature(const sensors_chip_name *name,
 }
 
 /* Evaluate an expression */
-int sensors_eval_expr(const sensors_chip_features *chip_features,
-		      const sensors_expr *expr,
-		      double val, int depth, double *result)
+static int sensors_eval_expr(const sensors_chip_features *chip_features,
+			     const sensors_expr *expr,
+			     double val, int depth, double *result)
 {
 	double res1, res2;
 	int res;
