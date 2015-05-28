@@ -2,7 +2,7 @@
 #
 #    sensors-detect - Detect hardware monitoring chips
 #    Copyright (C) 1998 - 2002  Frodo Looijaard <frodol@dds.nl>
-#    Copyright (C) 2004 - 2014  Jean Delvare <jdelvare@suse.de>
+#    Copyright (C) 2004 - 2015  Jean Delvare <jdelvare@suse.de>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -1060,7 +1060,7 @@ use vars qw(@i2c_adapter_names);
 	}, {
 		name => "Texas Instruments TMP435",
 		driver => "tmp401",
-		i2c_addrs => [0x37, 0x48..0x4f],
+		i2c_addrs => [0x48..0x4f], # 0x37 not probed
 		i2c_detect => sub { tmp401_detect(@_, 7); },
 	}, {
 		name => "Texas Instruments TMP441",
