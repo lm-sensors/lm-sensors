@@ -38,6 +38,7 @@ SVN HEAD
                   Add detection of NCT7904D
                   Add detection of IT8790E
                   Fix graphics cards detection (#2386, #2392)
+                  Skip more addresses on graphics card I2C bus (#2392)
 
 3.3.5 "Happy Birthday Beddy" (2014-01-22)
   libsensors: Improve documentation of two functions
