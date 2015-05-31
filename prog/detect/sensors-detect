@@ -3897,7 +3897,9 @@ sub get_pci_class
 	my ($subsystem, $class);
 
 	$subsystem = sysfs_device_subsystem($device);
-	return 0 unless defined $subsystem && $subsystem eq "pci";
+	return 0 unless defined $subsystem;
+	return 0x0300 if $subsystem eq "drm";	# Graphics card
+	return 0 unless $subsystem eq "pci";
 
 	$class = sysfs_device_attribute($device, "class");
 	return 0 unless defined $class;
