@@ -2598,7 +2598,7 @@ sub valid_address
 sub parse_not_to_scan
 {
 	my ($min, $max, $to_parse) = @_;
-	my @ranges = split /\s*, \s*/, $to_parse;
+	my @ranges = split /\s*,\s*/, $to_parse;
 	my @res;
 	my $range;
 
