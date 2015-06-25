@@ -546,7 +546,7 @@ function UpdateFanSpeeds
 		  	echo $minsa > $pwmo
 			# Sleep while still handling signals
 			sleep 1 &
-			wait $!
+			wait
 		  fi
 		fi
 		echo $pwmval > $pwmo # write new value to pwm output
@@ -585,5 +585,5 @@ do
 	UpdateFanSpeeds
 	# Sleep while still handling signals
 	sleep $INTERVAL &
-	wait $!
+	wait
 done

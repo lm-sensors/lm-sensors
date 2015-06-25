@@ -11,6 +11,7 @@ SVN HEAD
   sensors: Add support for temperature min and critical min hysteresis
   fancontrol: Deal with moving hwmon attributes
               Fix shell error when FCFANS is not set
+              Reduce memory consumption (#2391)
   healthd: Avoid using external commands
   sensors-detect: Add detection of ADC128D818
                   Add detection of AMD family 16h Kabini and Mullins
