@@ -1,6 +1,9 @@
 lm-sensors CHANGES file
 -----------------------
 
+SVN HEAD
+  sensors-detect: Fix systemd paths
+
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
   sensors.conf.5: Enhance the hysteresis documentation
