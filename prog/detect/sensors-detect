@@ -2264,6 +2264,12 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		driver => "not-a-sensor",
 		devid => 0x0206,
 	}, {
+		name => "Fintek F81768 Super IO Sensors",
+		driver => "to-be-written",
+		devid => 0x1210, # To be confirmed
+		logdev => 0x04, # To be confirmed
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
 		name => "Fintek F81865F Super IO Sensors",
 		driver => "f71882fg",
 		devid => 0x0704,
