@@ -10,9 +10,9 @@ Description: Hardware health monitoring package for Linux. It consists of
 Keywords: sensors health hardware-monitoring fan-speed
 Author: jdelvare@suse.de (Jean Delvare)
 Maintained-by: jdelvare@suse.de (Jean Delvare)
-Primary-site: http://dl.lm-sensors.org /lm-sensors/releases/
+Primary-site: http://dl.lm-sensors.org/lm-sensors/releases/
               lm_sensors-3.4.0.tar.bz2
               lm_sensors-3.4.0.tar.bz2.sig
-Alternate-site: ftp.netroedge.com /pub/lm-sensors/
+Alternate-site: ftp://ftp.netroedge.com/pub/lm-sensors/
 Copying-policy: GPL/LGPL
 End
