@@ -7240,9 +7240,9 @@ sub main
 	print "\n";
 
 	$superio_features = 0;
-	# Skip "random" I/O port probing on PPC
-	if ($kernel_arch ne 'ppc'
-	 && $kernel_arch ne 'ppc64') {
+	# Skip "random" I/O port probing on non-x86 machines
+	if ($kernel_arch =~ m/^i[3456]86$/
+	 || $kernel_arch eq 'x86_64') {
 		print "Some Super I/O chips contain embedded sensors. We have to write to\n".
 		      "standard I/O ports to probe them. This is usually safe.\n";
 		print "Do you want to scan for Super I/O sensors? (YES/no): ";
