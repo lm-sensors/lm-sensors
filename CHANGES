@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 SVN HEAD
+  sensors.1: Add reference to sensors-detect
   sensors-detect: Fix systemd paths
                   Add detection of Fintek F81768
 
