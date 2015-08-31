@@ -19,14 +19,8 @@
     MA 02110-1301 USA.
 */
 
-#include <stdlib.h>
-
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
 #include <sys/io.h>
-#else
-#include <asm/io.h>
-#endif
-
+#include <stdlib.h>
 #include "superio.h"
 
 int superio_parse_key(unsigned char *key, const char *s)

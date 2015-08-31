@@ -8,15 +8,9 @@
     (at your option) any later version.
 */
 
+#include <sys/io.h>
 #include <stdio.h>
 #include "util.h"
-
-/* To keep glibc2 happy */
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
-#include <sys/io.h>
-#else
-#include <asm/io.h>
-#endif
 
 /* Return 1 if we should continue, 0 if we should abort */
 int user_ack(int def)

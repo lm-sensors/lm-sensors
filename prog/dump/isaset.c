@@ -26,19 +26,12 @@
 	isaset -f 0x5010 0x12		Write 0x12 to location 0x5010
 */
 
+#include <sys/io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include "util.h"
-
-
-/* To keep glibc2 happy */
-#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ >= 0
-#include <sys/io.h>
-#else
-#include <asm/io.h>
-#endif
 
 #ifdef __powerpc__
 unsigned long isa_io_base = 0; /* XXX for now */
