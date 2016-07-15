@@ -1480,6 +1480,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 13); },
 	}, {
+		name => "Microchip MCP9808",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 18); },
+	},{
 		name => "Microchip MCP98242",
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
@@ -6448,7 +6453,7 @@ sub max6655_detect
 #                 7 = MCP98243, 8 = MCP9843, 9 = CAT6095 / CAT34TS02,
 #                 10 = STTS424E, 11 = STTS2002, 12 = STTS3000
 #                 13 = MCP9804, 14 = AT30TS00, 15 = MCP98244,
-#                 16 = TSE2004, 17 = TS3001
+#                 16 = TSE2004, 17 = TS3001, 18 = MCP9808
 # Registers used:
 #   0x00: Capabilities
 #   0x01: Configuration
@@ -6520,6 +6525,9 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 15) {
 		return unless $manid == 0x00;		# MCP
 		return unless $devid == 0x22;		# MCP98244
+	} elseif ($chip == 18) {
+		return unless $manid == 0x00;		# MCP
+		return unless $devid == 04;		# MCP9808
 	}
 
 	# Now, do it all again with words. Note that we get
@@ -6586,6 +6594,9 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 17) {
 		return unless $manid == 0xb300;		# IDT
 		return unless ($devid & 0x00ff) == 0x0030; # TS3001
+	} elsif ($chip == 18) {
+		return unless $manid == 0x5400;		# MCP
+		return unless ($devid & 0xfcff) == 0x0004; # MCP9808
 	}
 
 	return 5;
