@@ -2178,7 +2178,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 	}, {
 		name => "Nuvoton NCT6793D Super IO Sensors",
 		driver => "nct6775",
-		devid => 0xD110,
+		devid => 0xD120,
 		devid_mask => 0xFFF0,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
