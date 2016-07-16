@@ -7,6 +7,7 @@ SVN HEAD
                   Add detection of Fintek F81768
                   Only probe I/O ports on x86
                   Add detection of Nuvoton NCT6793D
+                  Add detection of Microchip MCP9808
                   Mark F71868A as supported by the f71882fg driver
                   Mark F81768D as supported by the f71882fg driver
                   Mark F81866D as supported by the f71882fg driver
