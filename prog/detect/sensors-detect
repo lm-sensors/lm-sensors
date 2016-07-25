@@ -6525,7 +6525,7 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 15) {
 		return unless $manid == 0x00;		# MCP
 		return unless $devid == 0x22;		# MCP98244
-	} elseif ($chip == 18) {
+	} elsif ($chip == 18) {
 		return unless $manid == 0x00;		# MCP
 		return unless $devid == 04;		# MCP9808
 	}
