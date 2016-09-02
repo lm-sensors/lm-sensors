@@ -1270,6 +1270,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x73],
 		i2c_detect => sub { fsc_detect(@_, 7); },
 	}, {
+		name => "FSC Teutates",
+		driver => "ftsteutates",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fts_detect(@_, 1); },
+	}, {
 		name => "ALi M5879",
 		driver => "to-be-written",
 		i2c_addrs => [0x2c..0x2d],
@@ -6105,6 +6110,20 @@ sub fsc_detect
 	return if $chip == 7 and $id ne 'SYL';	# Syleus
 
 	return 8;
+}
+
+# ChipID to detect: 1 = Teutates
+# Registers used:
+#   0x00: Identification (0x1X => X needs to be ID)
+sub fts_detect
+{
+	my ($file, $addr, $chip) = @_;
+	my $id;
+
+	$id = chr(i2c_smbus_read_byte_data($file, 0x00));
+
+	return if $id eq 0x11; # Teutates
+	return 2;
 }
 
 # Chip to detect: 0 = LM93, 1 = LM94
