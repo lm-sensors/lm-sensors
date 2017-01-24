@@ -19,8 +19,8 @@
     MA 02110-1301 USA.
 */
 
-#ifndef SENSORS_LIB_SYSFS_H
-#define SENSORS_LIB_SYSFS_H
+#ifndef LIB_SENSORS_SYSFS_H
+#define LIB_SENSORS_SYSFS_H
 
 extern char sensors_sysfs_mount[];
 
@@ -40,4 +40,4 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name,
 			     const sensors_subfeature *subfeature,
 			     double value);
 
-#endif /* !SENSORS_LIB_SYSFS_H */
+#endif /* def LIB_SENSORS_SYSFS_H */

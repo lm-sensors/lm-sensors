@@ -307,4 +307,4 @@ sensors_get_subfeature(const sensors_chip_name *name,
 }
 #endif /* __cplusplus */
 
-#endif /* def LIB_SENSORS_ERROR_H */
+#endif /* def LIB_SENSORS_SENSORS_H */

@@ -31,4 +31,4 @@ extern FILE *sensors_yyin;
 /* This is defined in conf-parse.y */
 int sensors_yyparse(void);
 
-#endif /* LIB_SENSORS_CONF_H */
+#endif /* def LIB_SENSORS_CONF_H */
