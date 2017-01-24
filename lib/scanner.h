@@ -24,5 +24,5 @@
 int sensors_scanner_init(FILE *input, const char *filename);
 void sensors_scanner_exit(void);
 
-#endif
+#endif /* def LIB_SENSORS_SCANNER_H */
 

@@ -18,8 +18,8 @@
     MA 02110-1301 USA.
 */
 
-#ifndef LIB_SENSORS_GENERAL
-#define LIB_SENSORS_GENERAL
+#ifndef LIB_SENSORS_GENERAL_H
+#define LIB_SENSORS_GENERAL_H
 
 /* These are general purpose functions. They allow you to use variable-
    length arrays, which are extended automatically. A distinction is
@@ -36,4 +36,4 @@ void sensors_add_array_els(const void *els, int nr_els, void *list,
 
 #define ARRAY_SIZE(arr)	(int)(sizeof(arr) / sizeof((arr)[0]))
 
-#endif /* LIB_SENSORS_GENERAL */
+#endif /* def LIB_SENSORS_GENERAL_H */
