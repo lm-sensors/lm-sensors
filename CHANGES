@@ -12,6 +12,7 @@ SVN HEAD
                   Mark F81768D as supported by the f71882fg driver
                   Mark F81866D as supported by the f71882fg driver
                   Add detection of various ITE chips
+                  Add detection of Nuvoton NCT6795D
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
