@@ -41,7 +41,7 @@
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
 
-static int do_sets, do_raw, hide_adapter;
+static int do_sets, do_raw, do_json, hide_adapter;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
@@ -61,6 +61,7 @@ static void print_long_help(void)
 	     "  -A, --no-adapter      Do not show adapter for each chip\n"
 	     "      --bus-list        Generate bus statements for sensors.conf\n"
 	     "  -u                    Raw output\n"
+	     "  -j                    Json output\n"
 	     "  -v, --version         Display the program version\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
@@ -173,6 +174,20 @@ static void do_a_print(const sensors_chip_name *name)
 	printf("\n");
 }
 
+static void do_a_json_print(const sensors_chip_name *name)
+{
+	printf("   \"%s\":{\n", sprintf_chip_name(name));
+	if (!hide_adapter) {
+		const char *adap = sensors_get_adapter_name(&name->bus);
+		if (adap)
+			printf("      \"Adapter\": \"%s\",\n", adap);
+		else
+			fprintf(stderr, "Can't get adapter name\n");
+	}
+	print_chip_json(name);
+	printf("   }");
+}
+
 /* returns 1 on error */
 static int do_a_set(const sensors_chip_name *name)
 {
@@ -204,15 +219,26 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 	int chip_nr;
 	int cnt = 0;
 
+	if (do_json)
+		printf("{\n");
 	chip_nr = 0;
 	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
 		if (do_sets) {
 			if (do_a_set(chip))
 				*err = 1;
-		} else
-			do_a_print(chip);
+		} else {
+			if (do_json) {
+				if (cnt > 0)
+					printf(",\n");
+				do_a_json_print(chip);
+			} else {
+				do_a_print(chip);
+			}
+		}
 		cnt++;
 	}
+	if (do_json)
+		printf("\n}\n");
 	return cnt;
 }
 
@@ -261,11 +287,12 @@ int main(int argc, char *argv[])
 	setlocale(LC_CTYPE, "");
 
 	do_raw = 0;
+	do_json = 0;
 	do_sets = 0;
 	do_bus_list = 0;
 	hide_adapter = 0;
 	while (1) {
-		c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
+		c = getopt_long(argc, argv, "hsvfAc:uj", long_opts, NULL);
 		if (c == EOF)
 			break;
 		switch(c) {
@@ -293,6 +320,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'u':
 			do_raw = 1;
+			break;
+		case 'j':
+			do_json = 1;
 			break;
 		case 'B':
 			do_bus_list = 1;
