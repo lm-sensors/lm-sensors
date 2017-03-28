@@ -69,23 +69,27 @@ void print_chip_raw(const sensors_chip_name *name)
 
 void print_chip_json(const sensors_chip_name *name)
 {
-	int a, b, err;
+	int a, b, cnt, subCnt, err;
 	const sensors_feature *feature;
 	const sensors_subfeature *sub;
 	char *label;
 	double val;
 
 	a = 0;
+	cnt = 0;
 	while ((feature = sensors_get_features(name, &a))) {
 		if (!(label = sensors_get_label(name, feature))) {
 			fprintf(stderr, "ERROR: Can't get label of feature "
 				"%s!\n", feature->name);
 			continue;
 		}
-		printf("%s:json\n", label);
+		if (cnt > 0)
+			printf(",\n", label);
+		printf("      \"%s\":{\n", label);
 		free(label);
 
 		b = 0;
+		subCnt = 0;
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
 			if (sub->flags & SENSORS_MODE_R) {
 				if ((err = sensors_get_value(name, sub->number,
@@ -94,12 +98,20 @@ void print_chip_json(const sensors_chip_name *name)
 						"value of subfeature %s: %s\n",
 						sub->name,
 						sensors_strerror(err));
-				else
-					printf("  %s: %.3f\n", sub->name, val);
+				else {
+					if (subCnt > 0)
+						printf(",\n", label);
+					printf("         \"%s\": %.3f", sub->name, val);
+				}
+
 			} else
-				printf("(%s)\n", label);
+			printf("(%s)", label);
+			subCnt++;
 		}
+		printf("\n      }", label);
+		cnt++;
 	}
+	printf("\n", label);
 }
 
 static const char hyst_str[] = "hyst";

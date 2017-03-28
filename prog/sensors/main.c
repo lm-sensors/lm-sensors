@@ -169,11 +169,23 @@ static void do_a_print(const sensors_chip_name *name)
 	}
 	if (do_raw)
 		print_chip_raw(name);
-	else if (do_json)
-		print_chip_json(name);
 	else
 		print_chip(name);
 	printf("\n");
+}
+
+static void do_a_json_print(const sensors_chip_name *name)
+{
+	printf("   \"%s\":{\n", sprintf_chip_name(name));
+	if (!hide_adapter) {
+		const char *adap = sensors_get_adapter_name(&name->bus);
+		if (adap)
+			printf("      \"Adapter\": \"%s\",\n", adap);
+		else
+			fprintf(stderr, "Can't get adapter name\n");
+	}
+	print_chip_json(name);
+	printf("   }");
 }
 
 /* returns 1 on error */
@@ -207,15 +219,25 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 	int chip_nr;
 	int cnt = 0;
 
+	if (do_json)
+		printf("{\n");
 	chip_nr = 0;
 	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
 		if (do_sets) {
 			if (do_a_set(chip))
 				*err = 1;
 		} else
-			do_a_print(chip);
+			if (do_json) {
+				if (cnt > 0)
+					printf(",\n");
+				do_a_json_print(chip);
+			}
+			else
+				do_a_print(chip);
 		cnt++;
 	}
+	if (do_json)
+		printf("\n}\n");
 	return cnt;
 }
 
@@ -269,7 +291,7 @@ int main(int argc, char *argv[])
 	do_bus_list = 0;
 	hide_adapter = 0;
 	while (1) {
-		c = getopt_long(argc, argv, "hsvfAc:u", long_opts, NULL);
+		c = getopt_long(argc, argv, "hsvfAc:uj", long_opts, NULL);
 		if (c == EOF)
 			break;
 		switch(c) {
