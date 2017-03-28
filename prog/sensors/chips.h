@@ -48,6 +48,7 @@ struct sensor_subfeature_list {
 };
 
 void print_chip_raw(const sensors_chip_name *name);
+void print_chip_json(const sensors_chip_name *name);
 void print_chip(const sensors_chip_name *name);
 
 #endif /* def PROG_SENSORS_CHIPS_H */
