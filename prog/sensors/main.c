@@ -41,7 +41,7 @@
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
 
-static int do_sets, do_raw, hide_adapter;
+static int do_sets, do_raw, do_json, hide_adapter;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
@@ -61,6 +61,7 @@ static void print_long_help(void)
 	     "  -A, --no-adapter      Do not show adapter for each chip\n"
 	     "      --bus-list        Generate bus statements for sensors.conf\n"
 	     "  -u                    Raw output\n"
+			 "  -j                    Json output\n"
 	     "  -v, --version         Display the program version\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
@@ -168,6 +169,8 @@ static void do_a_print(const sensors_chip_name *name)
 	}
 	if (do_raw)
 		print_chip_raw(name);
+	else if (do_json)
+		print_chip_json(name);
 	else
 		print_chip(name);
 	printf("\n");
@@ -261,6 +264,7 @@ int main(int argc, char *argv[])
 	setlocale(LC_CTYPE, "");
 
 	do_raw = 0;
+	do_json = 0;
 	do_sets = 0;
 	do_bus_list = 0;
 	hide_adapter = 0;
@@ -293,6 +297,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'u':
 			do_raw = 1;
+			break;
+		case 'j':
+			do_json = 1;
 			break;
 		case 'B':
 			do_bus_list = 1;
