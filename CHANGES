@@ -3,6 +3,8 @@ lm-sensors CHANGES file
 
 SVN HEAD
   sensors.1: Add reference to sensors-detect
+             Document -j option (json output)
+  sensors: Add support for json output
   sensors-detect: Fix systemd paths
                   Add detection of Fintek F81768
                   Only probe I/O ports on x86
