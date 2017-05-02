@@ -6105,7 +6105,7 @@ sub eeprom_detect
 		$checksum &= 0xff;
 
 		return 8 if $checksum == i2c_smbus_read_byte_data($file, 63);
-	} elsif ($device_type >= 9 && $device_type <= 11) {
+	} elsif ($device_type >= 9 && $device_type <= 12) {
 		# see JEDEC 21-C 4.1.2.11 2.4
 		my $crc_coverage = i2c_smbus_read_byte_data($file, 0);
 		$crc_coverage = ($crc_coverage & 0x80) ? 117 : 126;
