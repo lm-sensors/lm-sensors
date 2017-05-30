@@ -2518,6 +2518,12 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		devid => 0x8733,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "ITE IT8987D Embedded Controller",
+		driver => "to-be-written",
+		devid => 0x8987,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}
 );
 
