@@ -123,6 +123,8 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 		res->bus.type = SENSORS_BUS_TYPE_ACPI;
 	else if (!strncmp(name, "hid", dash - name))
 		res->bus.type = SENSORS_BUS_TYPE_HID;
+	else if (!strncmp(name, "mdio", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_MDIO;
 	else
 		goto ERROR;
 	name = dash + 1;
@@ -193,6 +195,9 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 	case SENSORS_BUS_TYPE_HID:
 		return snprintf(str, size, "%s-hid-%hd-%x", chip->prefix,
 				chip->bus.nr, chip->addr);
+	case SENSORS_BUS_TYPE_MDIO:
+		return snprintf(str, size, "%s-mdio-%x", chip->prefix,
+				chip->addr);
 	}
 
 	return -SENSORS_ERR_CHIP_NAME;

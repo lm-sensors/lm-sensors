@@ -717,6 +717,12 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		/* As of kernel 2.6.32, the hid device names don't look good */
 		entry.chip.bus.nr = bus;
 		entry.chip.addr = id;
+	} else
+	if (subsys && !strcmp(subsys, "mdio_bus")) {
+		if (sscanf(dev_name, "%*[^:]:%d", &entry.chip.addr) != 1)
+			entry.chip.addr = 0;
+		entry.chip.bus.type = SENSORS_BUS_TYPE_MDIO;
+		entry.chip.bus.nr = 0;
 	} else {
 		/* Ignore unknown device */
 		err = 0;
