@@ -479,6 +479,19 @@ chip "f71858fg-*" "f8000-*"
     compute in2  @*2, @/2
 
 
+chip "f71868a-*"
+
+    label in0 "+3.3V"
+    label in7 "3VSB"
+    label in8 "Vbat"
+    label in9 "5VSB"
+
+    compute in0  @*2, @/2
+    compute in7  @*2, @/2
+    compute in8  @*2, @/2
+    compute in9  @*3, @/3
+
+
 chip "f81865f-*"
 
     label in0 "+3.3V"
