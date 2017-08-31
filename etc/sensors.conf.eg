@@ -6,6 +6,9 @@
 # and writing improper limits may have all sorts of weird effects,
 # from beeping to CPU throttling to instant reboot. If you want to
 # actually set the limits, remove the comment marks, then run "sensors -s".
+#
+# This is a legacy example file. In general, configurations for new boards
+# should be placed in custom configuration files located in /etc/sensors.d.
 
 chip "lm78-*" "lm79-*" "w83781d-*"
 

@@ -17,6 +17,7 @@ SVN HEAD
                   Add detection of Nuvoton NCT6795D
                   Add detection of DDR4 SPD
                   Add detection of ITE IT8987D
+  configs: Add sample configuration files.
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
