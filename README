@@ -22,7 +22,16 @@ The directories within this package:
     sensor limits.
   - sensord: A daemon to watch sensor values and log problems. It
     includes RRD support.
+* configs
+  This directory contains sample configurations of various boards,
+  contributed by users of lm-sensors.
 
+  Older sample configurations can be found on an old lm-sensors wiki
+  archived here:
+  http://web.archive.org/web/20150901092438/http://www.lm-sensors.org:80/wiki/Configurations
+
+  Please contribute back a configuration of your board so other users with
+  the same hardware won't need to recreate it again and again.
 
 INSTALLING LM-SENSORS
 ---------------------

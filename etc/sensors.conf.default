@@ -9,8 +9,11 @@
 # placed in custom configuration files located in /etc/sensors.d. This
 # approach makes further updates much easier.
 #
-# Such custom configuration files for specific mainboards can be found at
-# http://www.lm-sensors.org/wiki/Configurations
+# Such custom configuration files for specific mainboards can be found in
+# "configs" directory of lm-sensors package.
+#
+# Please contribute back a configuration of your board so other users with
+# the same hardware won't need to recreate it again and again.
 
 chip "lm78-*" "lm79-*" "lm80-*" "lm96080-*"
 
