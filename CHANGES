@@ -17,6 +17,8 @@ SVN HEAD
                   Add detection of Nuvoton NCT6795D
                   Add detection of DDR4 SPD
                   Add detection of ITE IT8987D
+                  Add detection of AMD Family 17h temperature sensors
+                  Add detection of AMD KERNCZ SMBus controller
   configs: Add sample configuration files.
 
 3.4.0 (2015-06-25)

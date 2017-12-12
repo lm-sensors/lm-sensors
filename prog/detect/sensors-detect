@@ -428,6 +428,11 @@ $revision =~ s/ \([^()]*\)//;
 		procid	=> "AMD Hudson-2 SMBus",
 		driver	=> "i2c-piix4",
 	}, {
+		vendid	=> 0x1022,
+		devid	=> 0x790b,
+		procid	=> "AMD KERNCZ SMBus",
+		driver	=> "i2c-piix4",
+	}, {
 		vendid	=> 0x100B,
 		devid	=> 0x0500,
 		procid	=> "SCx200 Bridge",
@@ -2185,7 +2190,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 	}, {
 		name => "Nuvoton NCT6795D Super IO Sensors",
 		driver => "nct6775",
-		devid => 0xD352,
+		devid => 0xD350,
 		devid_mask => 0xFFF0,
 		logdev => 0x0b,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
@@ -2623,6 +2628,10 @@ use vars qw(@cpu_ids);
 		name => "AMD Family 16h thermal sensors",
 		driver => "k10temp",
 		detect => sub { amd_pci_detect('1533', '1583') },
+	}, {
+		name => "AMD Family 17h thermal sensors",
+		driver => "k10temp",
+		detect => sub { amd_pci_detect('1463') },
 	}, {
 		name => "AMD Family 15h power sensors",
 		driver => "fam15h_power",
