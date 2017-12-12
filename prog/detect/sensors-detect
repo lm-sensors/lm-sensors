@@ -158,6 +158,21 @@ $revision =~ s/ \([^()]*\)//;
 		driver	=> "i2c-i801",
 	}, {
 		vendid	=> 0x8086,
+		devid	=> 0x1D70,
+		procid	=> "Intel Patsburg (PCH) IDF",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x1D71,
+		procid	=> "Intel Patsburg (PCH) IDF",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x1D72,
+		procid	=> "Intel Patsburg (PCH) IDF",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
 		devid	=> 0x2330,
 		procid	=> "Intel DH89xxCC (PCH)",
 		driver	=> "i2c-i801",
@@ -170,6 +185,111 @@ $revision =~ s/ \([^()]*\)//;
 		vendid	=> 0x8086,
 		devid	=> 0x8C22,
 		procid	=> "Intel Lynx Point (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x9C22,
+		procid	=> "Intel Lynx Point-LP (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x1F3C,
+		procid	=> "Avoton (SOC)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8D22,
+		procid	=> "Wellsburg (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8D7D,
+		procid	=> "Wellsburg (PCH) MS",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8D7E,
+		procid	=> "Wellsburg (PCH) MS",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8D7F,
+		procid	=> "Wellsburg (PCH) MS",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x23B0,
+		procid	=> "Coleto Creek (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x8CA2,
+		procid	=> "Wildcat Point (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x9CA2,
+		procid	=> "Wildcat Point-LP (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x0F12,
+		procid	=> "BayTrail (SOC)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0xA123,
+		procid	=> "Sunrise Point-H (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x9D23,
+		procid	=> "Sunrise Point-LP (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x19DF,
+		procid	=> "DNV (SOC)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x5AD4,
+		procid	=> "Broxton (SOC)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0xA1A3,
+		procid	=> "Lewisburg (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0xA223,
+		procid	=> "Lewisburg Supersku (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0xA2A3,
+		procid	=> "Kaby Lake (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x31D4,
+		procid	=> "Gemini Lake (SOC)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0xA323,
+		procid	=> "Cannon Lake-H (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x9DA3,
+		procid	=> "Cannon Lake-LP (PCH)",
+		driver	=> "i2c-i801",
+	}, {
+		vendid	=> 0x8086,
+		devid	=> 0x18DF,
+		procid	=> "Cedar Fork (PCH)",
 		driver	=> "i2c-i801",
 	}, {
 		vendid	=> 0x8086,

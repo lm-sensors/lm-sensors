@@ -19,6 +19,7 @@ SVN HEAD
                   Add detection of ITE IT8987D
                   Add detection of AMD Family 17h temperature sensors
                   Add detection of AMD KERNCZ SMBus controller
+                  Add detection of various Intel SMBus controllers
   configs: Add sample configuration files.
 
 3.4.0 (2015-06-25)
