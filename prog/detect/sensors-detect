@@ -1635,10 +1635,25 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 9); },
 	}, {
+		name => "ON CAT34TS02C",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 19); },
+	}, {
+		name => "ON CAT34TS04",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 21); },
+	}, {
 		name => "Atmel AT30TS00",
 		driver => "jc42",
 		i2c_addrs => [0x18..0x1f],
 		i2c_detect => sub { jedec_JC42_4_detect(@_, 14); },
+	}, {
+		name => "Giantec GT30TS00",
+		driver => "jc42",
+		i2c_addrs => [0x18..0x1f],
+		i2c_detect => sub { jedec_JC42_4_detect(@_, 20); },
 	}
 );
 
@@ -6655,7 +6670,9 @@ sub max6655_detect
 #                 7 = MCP98243, 8 = MCP9843, 9 = CAT6095 / CAT34TS02,
 #                 10 = STTS424E, 11 = STTS2002, 12 = STTS3000
 #                 13 = MCP9804, 14 = AT30TS00, 15 = MCP98244,
-#                 16 = TSE2004, 17 = TS3001, 18 = MCP9808
+#                 16 = TSE2004, 17 = TS3001, 18 = MCP9808,
+#                 19 = CAT34TS02C, 20 = Giantec GT30TS00,
+#                 21 = CAT34TS04
 # Registers used:
 #   0x00: Capabilities
 #   0x01: Configuration
@@ -6729,7 +6746,16 @@ sub jedec_JC42_4_detect
 		return unless $devid == 0x22;		# MCP98244
 	} elsif ($chip == 18) {
 		return unless $manid == 0x00;		# MCP
-		return unless $devid == 04;		# MCP9808
+		return unless $devid == 0x04;		# MCP9808
+	} elsif ($chip == 19) {
+		return unless $manid == 0x1b;		# ON
+		return unless $devid == 0x0a;		# CAT34TS02C
+	} elsif ($chip == 20) {
+		return unless $manid == 0x1c || $manid == 0x13;	# Giantec
+		return unless $devid == 0x22;		# GT30TS00
+	} elsif ($chip == 21) {
+		return unless $manid == 0x1b;		# ONS
+		return unless $devid == 0x22;		# CAT34TS04
 	}
 
 	# Now, do it all again with words. Note that we get
@@ -6799,6 +6825,15 @@ sub jedec_JC42_4_detect
 	} elsif ($chip == 18) {
 		return unless $manid == 0x5400;		# MCP
 		return unless ($devid & 0xfcff) == 0x0004; # MCP9808
+	} elsif ($chip == 19) {
+		return unless $manid == 0x091b;		# ONS
+		return unless ($devid & 0xf0ff) == 0x000a; # CAT34TS02C
+	} elsif ($chip == 20) {
+		return unless $manid == 0x681c || $manid == 0x2d13; # Giantec
+		return unless ($devid & 0x00ff) == 0x0022; # GT30TS00
+	} elsif ($chip == 21) {
+		return unless $manid == 0x091b;		# ONS
+		return unless ($devid & 0xf0ff) == 0x0022; # CAT34TS04
 	}
 
 	return 5;

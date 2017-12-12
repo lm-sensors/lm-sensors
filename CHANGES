@@ -20,6 +20,8 @@ SVN HEAD
                   Add detection of AMD Family 17h temperature sensors
                   Add detection of AMD KERNCZ SMBus controller
                   Add detection of various Intel SMBus controllers
+                  Add detection of Giantec GT30TS00
+                  Add detection of ONS CAT34TS02C and CAT34TS04
   configs: Add sample configuration files.
 
 3.4.0 (2015-06-25)
