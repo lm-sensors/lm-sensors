@@ -22,6 +22,7 @@ SVN HEAD
                   Add detection of various Intel SMBus controllers
                   Add detection of Giantec GT30TS00
                   Add detection of ONS CAT34TS02C and CAT34TS04
+                  Add detection of AMD Family 15h Model 60+ temperature sensors
   configs: Add sample configuration files.
 
 3.4.0 (2015-06-25)
