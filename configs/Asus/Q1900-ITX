@@ -1,0 +1,38 @@
+# Q1900 ITX Motherboard with a intel DTS Sensor, ITX format
+# 2018, by J. Schwender
+# dmi: Q1900-ITX
+# driver: nct6775
+#
+chip "soc_dts0-virtual-*"
+	label temp1 "DTS 1"
+
+chip "soc_dts1-virtual-*"
+	label temp1 "DTS 2"
+
+# ACPI thermal zone: 
+chip "acpitz-virtual-*"
+	label temp1 "CPU Socket"
+
+# ADC has 8 mV conversion steps
+chip "nct6776-isa-*"
+    label fan1 "System fan"
+    ignore fan2
+    ignore fan3
+    ignore in4  # not shown in BIOS
+    ignore in6  # not shown in BIOS
+    ignore intrusion0
+    ignore intrusion1
+    ignore PCH_CHIP_TEMP
+# BIOS shows 24 mV steps in Readout for +5 V
+    label in5 "+5 V"
+    set in5_min 5 * 0.95
+    set in5_max 5 * 1.05
+    compute in5 @*3.00,@/3.00
+# BIOS shows 53 mV steps for 12 V
+    label in1 "+12 V"
+    set in1_min 12 * 0.95
+    set in1_max 12 * 1.05
+    compute in1 @*6.625,@/6.625
+
+    set in2_min 3.3 * 0.95
+    set in2_max 3.3 * 1.05
