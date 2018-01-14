@@ -1,0 +1,59 @@
+# Gigabyte H170+D3 Motherboard, see $(dmidecode -s baseboard-product-name)
+# dmi: H170-PLUS D3
+# 2018, by J. Schwender
+# driver: nct6775
+#
+chip "nct6793-isa-*"
+	ignore fan1
+	label fan2 "CPU fan"   # CPU_FAN
+	#label fan3 "Chassis1"
+	#label fan4 "Chassis2"
+	ignore fan3
+	ignore fan4
+	ignore fan5
+	ignore fan6
+	ignore intrusion0
+	ignore intrusion1
+	ignore temp1   #SYSTIN
+	ignore temp3   #AUXTIN
+	ignore temp4   #AUXTIN1
+	ignore temp5   #AUXTIN2
+	ignore temp6   #AUXTIN3
+	ignore temp9   #PCH_CPU
+	ignore temp10  #PCH_CHIP_TEMP
+	label in0 "Vcore"
+	    set in0_min  1 * 0.80
+	    set in0_max  1 * 1.35
+	label in1 "+12V"
+	    compute in1 @ * 12, @ / 12
+	    set in1_min  12 * 0.90
+	    set in1_max  12 * 1.10
+	label in2 "AVCC"
+	    set in2_min  3.3 * 0.90
+	    set in2_max  3.3 * 1.10
+	label in3 "+3.3V"
+	    set in3_min  3.3 * 0.90
+	    set in3_max  3.3 * 1.10
+	label in4 "+5V"
+	    compute in4 @ * 5, @ / 5
+	    set in4_min  5 * 0.90
+	    set in4_max  5 * 1.10
+	label in7 "3VSB"
+	    set in7_min  3.3 * 0.90
+	    set in7_max  3.3 * 1.10
+	label in8 "Vbat"
+	    set in8_min  3.3 * 0.90
+	    set in8_max  3.3 * 1.10
+	ignore in5
+	ignore in6
+	ignore in9
+	ignore in10
+	ignore in11
+	ignore in12
+	ignore in13
+	ignore in14
+
+chip "acpitz-*"
+    label temp1 "Motherboard"
+    label temp2 "Unknown"
+
