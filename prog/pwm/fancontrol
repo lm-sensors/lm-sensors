@@ -540,7 +540,8 @@ function UpdateFanSpeeds
 		  then pwmval=$maxpwm # over max temp, use defined max pwm
 		else
 		  # calculate the new value from temperature and settings
-		  pwmval="(${tval}-${mint})*(${maxpwm}-${minso})/(${maxt}-${mint})+${minso}"
+		  # pwmval="(${tval}-${mint})*(${maxpwm}-${minso})/(${maxt}-${mint})+${minso}"
+		  pwmval=$(echo "scale=0; $minsa + ( $tval - $mint ) * ( $minso - $minsa )/( $maxt - $mint )"|bc)
 		  if [ $pwmpval -eq 0 -o $min_fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
 		  	echo $minsa > $pwmo
