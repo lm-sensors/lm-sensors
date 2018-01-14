@@ -378,6 +378,11 @@ then
 fi
 echo $$ > "$PIDFILE"
 
+# associative arrays to hold pwmN device name as key, and as value the
+# pwmN_enable and pwmN values as they were before fancontrol was started
+declare -A PWM_ENABLE_ORIG_STATE
+declare -A PWM_ORIG_STATE
+
 # $1 = pwm file name
 function pwmdisable()
 {
@@ -388,6 +393,43 @@ function pwmdisable()
 	then
 		echo $MAX > $1
 		return 0
+	fi
+
+	# Try to restore pwmN and pwmN_enable value to the same state as before
+	# fancontrol start. Restoring the pwmN value is tried first, before the
+	# pwmN_enable mode switch.
+	# Some chips seem to need this to properly restore fan operation,
+	# when activating automatic (2) mode.
+	if [ ${PWM_ENABLE_ORIG_STATE[${1}]} ]
+	then
+		#restore the pwmN value
+		if [ "$DEBUG" != "" ]
+		then
+			echo "Restoring ${1} original value of ${PWM_ORIG_STATE[${1}]}"
+		fi
+		echo ${PWM_ORIG_STATE[${1}]} > ${1} 2> /dev/null
+		# restore the pwmN_enable value, if it is not 1.
+		# 1 is already set through fancontrol and setting it again might just
+		# reset the pwmN value.
+		if [ ${PWM_ENABLE_ORIG_STATE[${1}]} != 1 ]
+		then
+			if [ "$DEBUG" != "" ]
+			then
+				echo "Restoring $ENABLE original value of ${PWM_ENABLE_ORIG_STATE[${1}]}"
+			fi
+			echo ${PWM_ENABLE_ORIG_STATE[${1}]} > $ENABLE 2> /dev/null
+			# check if setting pwmN_enable value was successful. Checking the
+			# pwmN value makes no sense, as it might already have been altered
+			# by the chip.
+			if [ `cat $ENABLE` = ${PWM_ENABLE_ORIG_STATE[${1}]} ]
+			then
+				return 0
+			fi
+		# if pwmN_enable is manual (1), check if restoring the pwmN value worked
+		elif [ `cat ${1}` = ${PWM_ORIG_STATE[${1}]} ]
+		then
+			return 0
+		fi
 	fi
 
 	# Try pwmN_enable=0
@@ -419,6 +461,22 @@ function pwmenable()
 
 	if [ -f $ENABLE ]
 	then
+		# save the original pwmN_control state, e.g. 1 for manual or 2 for auto,
+		# and the value from pwmN
+		local PWM_CONTROL_ORIG=`cat $ENABLE`
+		local PWM_ORIG=`cat ${1}`
+		if [ "$DEBUG" != "" ]
+		then
+			echo "Saving $ENABLE original value as $PWM_CONTROL_ORIG"
+			echo "Saving ${1} original value as $PWM_ORIG"
+		fi
+		#check for degenerate case where these values might be empty
+		if [ $PWM_CONTROL_ORIG ] && [ $PWM_ORIG ]
+		then
+			PWM_ENABLE_ORIG_STATE[${1}]=$PWM_CONTROL_ORIG
+			PWM_ORIG_STATE[${1}]=$PWM_ORIG
+		fi
+		# enable manual control by fancontrol
 		echo 1 > $ENABLE 2> /dev/null
 		if [ $? -ne 0 ]
 		then
