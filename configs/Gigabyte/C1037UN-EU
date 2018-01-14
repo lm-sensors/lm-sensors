@@ -1,0 +1,50 @@
+# Motherboard Gigabyte C1037UN-EU  see $(dmidecode|grep -s baseboard-product-name)
+# driver: coretemp
+# driver: it87
+# IT8728F: 0…3,06V corresponds 0…255, 1 bit = 12 mV
+chip "it8728-isa-*"
+    label in0 "Vcore"
+    set in0_min 0.500
+    set in0_max 0.992
+    compute in0 1.0*@,@/1.0
+
+    ignore in1        # in1 is permanantly 2232
+
+    label in2 "+12V"
+    compute in2 6.0*@,@/6.0
+    set in2_min 12 / 1.05
+    set in2_max 12 * 1.05
+
+    label in3 "+5V"
+    set in3_min 5 / 1.05
+    set in3_max 5 * 1.05
+    compute in3 2.5*@,@/2.5
+
+    ignore in4    # in4 is permanantly 2232
+
+    label in5 "CPU VTT"
+
+    label in8 "Battery"
+
+    label in6 "V DRAM"
+    set in6_min 0.9
+    set in6_max 1.56
+
+#    label in7 3VBattery
+    set in7_min 2.8
+    set in7_max 3.8
+
+    label temp1 "System temperature"
+    set temp1_min 1.000
+
+    label temp3 "CPU"
+    set temp3_min 1.000
+
+    label fan1 "CPU fan"
+
+    label fan2 "Sys fan"
+
+    # Those are not valid, not connected
+    ignore fan3
+    ignore intrusion0
+    ignore temp2
