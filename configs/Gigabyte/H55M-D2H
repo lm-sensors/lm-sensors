@@ -1,0 +1,37 @@
+# Machine:  Device: desktop, Mobo: Gigabyte model: H55M-D2H BIOS: Award v: F4 date: 02/06/2012
+# dmi: H55M-D2H
+# driver: coretemp
+# driver: it87
+chip "it8720-isa-0290"
+    label in0 "Vcore"
+    set in0_min 0.5   # This depends on the Processor!!!
+    set in0_max 2.15  # This depends on the Processor!!!
+
+    label in1 "RAM"
+    set in1_min 1.5*0.95
+    set in1_max 1.5*1.15
+    label in2 "3,3V"
+    set in2_min 3.3*0.95
+    set in2_max 3.3*1.15
+
+    ignore in4   # no idea what that is
+
+    compute in3 1.7*@,@/1.7
+    set in3_min 5*0.95
+    set in3_max 5*1.15
+
+    label in5 "+12V"
+    compute in5 3.89*@,@/3.89
+    set in5_min 12*0.95
+    set in5_max 12*1.05
+
+    ignore in6   # no idea what that might be
+
+    label temp1 "System Temp"
+    label temp2 "unknown"
+    label temp3 "CPU Temp"
+
+    label fan1 "CPU fan"
+    ignore fan2  # comment out if you have one conected
+    ignore intrusion0  # in out case there is nothing conneted
+    
