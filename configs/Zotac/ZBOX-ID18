@@ -1,0 +1,36 @@
+# Zotac Zbox ID18 Celeron 1007U @ 1,5 GHz, ITX format
+# J. Schwender
+# dmi: ZBOX-ID18
+# driver: coretemp
+# driver: nct6775, 8 mV / LSB, 0…2.048 V
+chip "nct6776-isa-0a30"
+    label in1 "RAM"
+    set in1_min 0.5
+    set in1_max 2.0      # limiits depend on the RAM type in use
+
+    label in4 "+12 V"
+    set in4_min 12*0.95
+    set in4_max 12*1.05
+    compute in4 11.5*@,@/11.5  # guess 1.05 V
+
+    label in6 "+5 V"
+    set in6_min 5*0.95
+    set in6_max 5*1.05
+    compute in6 7.4*@,@/7.4    # guess 0.69
+
+    ignore in5     # shows always zero
+
+    ignore fan1    # ZBox id18 has no other fan
+    label fan2 "CPU fan"     # verified
+
+    ignore intrusion0
+    ignore intrusion1
+    ignore beep_enable
+
+    set temp1_max 90
+    set temp1_max_hyst 30
+    ignore temp2     # shows alwasy 123.5°
+    label temp7 "CPU socket"
+    ignore temp8     # PCH_CHIP_TEMP shows 0
+    ignore temp9     # PCH_CPU_TEMP shows 0
+    ignore temp10    # PCH_MCH_TEMP shows 0
