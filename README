@@ -91,23 +91,24 @@ daemon watching for sensor values, logging alarms and feeding an RRD
 database with the sensor measurements.
 
 This package does not contain a nice graphical monitor. See
-http://www.lm-sensors.org/wiki/UsefulLinks for pointers to such programs.
+http://sensors-applet.sourceforge.net/
+https://01.org/powertop/
+https://wpitchoune.net/psensor/
+https://amanusk.github.io/s-tui/
+for such programs.
 
 
 OTHER INFORMATION
 -----------------
 
-The developers of this package can be reached through a mailing-list
-(see http://www.lm-sensors.org/wiki/AuthorsAndContributors). Do not hesitate
-to mail us if you have questions, suggestions, problems, want to
-contribute, or just want to report it works for you. But please try to
+The developers of this package can be reached through github.
+(see https://github.com/groeck/lm-sensors). Do not hesitate to contact
+us if you have questions, suggestions, problems, want to contribute,
+or just want to report it works for you. But please try to
 read the documentation before you ask any questions! It's all under doc/.
-Also make sure you read the FAQ at http://www.lm-sensors.org/wiki/FAQ.
 
 The latest version of this package can always be found at:
-http://www.lm-sensors.org/wiki/Download. Pre-release versions can be
-retrieved through anonymous SVN; see doc/svn for details.
-
+https://github.com/groeck/lm-sensors.
 
 LICENSE
 -------
