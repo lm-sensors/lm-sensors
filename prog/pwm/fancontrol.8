@@ -1,15 +1,20 @@
-.TH FANCONTROL 8 "September 2009" "lm-sensors 3"
+.TH FANCONTROL 8 "January 2018" "lm-sensors 3"
 .SH NAME
-fancontrol \- automated software based fan speed regulation
+fancontrol \- automated software based fan speed regulation to lower fan noise
 
 .SH SYNOPSIS
 .B fancontrol
 .I [configfile]
 
 .SH DESCRIPTION
+The purpose of \fBfancontrol\fP is to lower the noise level of the cooling fans
+by tolerating higher temperature, but only for periods width lower heat generation.
+For periods with high heat generation there will be no advantage in terms of noise,
+because at the end exceeding certain temperature levels in not tolerable and this
+requires certain cooling power.
 \fBfancontrol\fP is a shell script for use with lm_sensors. It reads its
 configuration from a file, then calculates fan speeds from temperatures and
-sets the corresponding PWM outputs to the computed values.
+sets the corresponding PWM outputs to the computed values. 
 
 .SH WARNING
 Please be careful when using the fan control features of your mainboard, in
@@ -109,12 +114,17 @@ loaded kernel drivers.
 .SH THE ALGORITHM
 
 \fBfancontrol\fP first reads its configuration, writes it to arrays and loops its
-main function.  This function gets the temperatures and fanspeeds from
+main function. This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
-new values are written to the PWM outputs. Currently the speed increases
-quadratically with rising temperature. This way you won't hear your fans most
-of the time at best.
+new values are written to the PWM outputs. The fan speed increases
+linearly with rising temperature. Optional configuration enables quadratic
+increase. 
+.IP
+FCCHARCUR=hwmon0/device/pwm1=SQR
+.PP
+Quadratic curve may bring the sound level further down, with accepting higher temperature.
+It may  make sense in systems with predominatly very low thermal load.
 
 .SH SEE ALSO
 pwmconfig(8), sensors(1).
