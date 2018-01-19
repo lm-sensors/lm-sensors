@@ -1,16 +1,12 @@
 .TH FANCONTROL 8 "January 2018" "lm-sensors 3"
 .SH NAME
-fancontrol \- automated software based fan speed regulation to lower fan noise
+fancontrol \- automated software based fan speed regulation
 
 .SH SYNOPSIS
 .B fancontrol
 .I [configfile]
 
 .SH DESCRIPTION
-The purpose of \fBfancontrol\fP is to lower the noise level of the cooling fans.
-This is achieved by reducing fan speed and therefore accepting higher temperature
-while still controlling the temperature in order to exceed a limit. Therefore 
-the noise reduction is only effective for low thermal load periods.
 \fBfancontrol\fP is a shell script for use with lm_sensors. It reads its
 configuration from a file, then calculates fan speeds from temperatures and
 sets the corresponding PWM outputs to the computed values. 
@@ -122,8 +118,8 @@ increase.
 .IP
 FCCHARCUR=hwmon0/device/pwm1=SQR
 .PP
-Quadratic curve may bring the sound level further down, with accepting higher temperature.
-It may make sense in systems with predominatly very low thermal load.
+In systems with predominatly very low thermal load a quadratic curve results in lower
+fan speed with tradeoff of higher temperature.
 
 .SH SEE ALSO
 pwmconfig(8), sensors(1).
