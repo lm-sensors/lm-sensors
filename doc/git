@@ -1,0 +1,22 @@
+Git Repository 
+
+Anonymous access to our git repository is available. This means
+that users can have direct access to up-to-the-minute code.
+
+Driver development for kernel version 3 is taking place directly in the kernel
+using git. The git repository is only used for user-space tools.
+
+We presume that you have git installed on your machine. To check out a
+working copy of the code for this project use the following command:
+
+git clone https://github.com/groeck/lm-sensors.git
+
+To update the code, do a git pull from within the lm-sensors directory.
+Please read the README and INSTALL files of your working copy for how
+to build the code. Also read the related files in the 'doc' directory
+for info regarding the different bus and chip drivers. Lastly, you can use
+the regular git commands on the files (like git log [filename]) to see the
+comments made by the developers as changes were made.
+
+If you're not familiar with the use of we recommend the excellent
+online git documentation at https://git-scm.com/doc.
