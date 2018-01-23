@@ -142,7 +142,18 @@ function LoadConfig
 			echo "MINPWM must be at least 0" >&2
 			exit 1
 		fi
-
+		if [ "${AFCSQUARE[$fcvcount]}" -lt 0 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "SQUARE must be 0 or 1" >&2
+			exit 1
+		fi
+		if [ "${AFCSQUARE[$fcvcount]}" -gt 1 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "SQUARE must be 1 or 0" >&2
+			exit 1
+		fi
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
 		echo "  Depends on ${AFCTEMP[$fcvcount]}"
@@ -546,11 +557,14 @@ function UpdateFanSpeeds
 		  then pwmval=$maxpwm # over max temp, use defined max pwm
 		else
 		  # calculate the new value from temperature and settings
+		  deltaT=(( tval-mint ))
+		  rangeT=(( maxt-mint ))
+		  rangePWM=(( maxpwm-minso ))
 		  if (( fcsquare == 0 ))
 		  then        # linear transfer function
-		     pwmval=$(( (tval-mint)*(maxpwm-minso) / (maxt-mint) + minso))
+		     pwmval=$(( deltaT*rangePWM / rangeT + minso))
 		  else        # optional square transfer function
-		     pwmval=$(( (tval-mint)*(tval-mint)*(maxpwm-minso) / (maxt-mint) / (maxt-mint) + minso))
+		     pwmval=$(( deltaT*deltaT*rangePWM / rangeT / rangeT + minso))
 		  fi
 		  if [ $pwmpval -eq 0 -o $min_fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
