@@ -537,7 +537,7 @@ function UpdateFanSpeeds
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"
 			echo "min_fanval=$min_fanval"
-			echo "characteristic=$fcsquare
+			echo "characteristic=$fcsquare"
 		fi
 
 		if (( $tval <= $mint ))
