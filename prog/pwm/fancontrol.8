@@ -1,4 +1,4 @@
-.TH FANCONTROL 8 "September 2009" "lm-sensors 3"
+.TH FANCONTROL 8 "January 2018" "lm-sensors 3"
 .SH NAME
 fancontrol \- automated software based fan speed regulation
 
@@ -109,12 +109,17 @@ loaded kernel drivers.
 .SH THE ALGORITHM
 
 \fBfancontrol\fP first reads its configuration, writes it to arrays and loops its
-main function.  This function gets the temperatures and fanspeeds from
+main function. This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
-new values are written to the PWM outputs. Currently the speed increases
-quadratically with rising temperature. This way you won't hear your fans most
-of the time at best.
+new values are written to the PWM outputs. The fan speed increases
+linearly with rising temperature. Optional configuration enables quadratic
+increase. 
+.IP
+FCSQUARE=hwmon0/device/pwm1=1
+.PP
+In systems with predominantly very low thermal load a quadratic curve results in lower
+fan speed with tradeoff of higher temperature.
 
 .SH SEE ALSO
 pwmconfig(8), sensors(1).
