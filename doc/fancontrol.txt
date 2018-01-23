@@ -72,9 +72,10 @@ MINPWM
 MAXPWM
 	The PWM value to use when the temperature is over MAXTEMP.
 	If this value isn't defined, it defaults to 255 (full speed).
-FCCHARCUR
+FCSQUARE
         Specifies the characteristic of the curve for the control route.
-	It is optinal and defaults to LIN and may manually changed to SQR
+	It is optinal and defaults to 0 (linear) and may manually
+	changed to 1 for square.
 
 A graph might help you understand how the different values relate
 to each other:
@@ -128,7 +129,7 @@ main function. This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the pwm outputs. The pwm value increases
-linearly with rising temperature unless FCCHARCUR is set to SQR, then it is quadratic.
+linearly with rising temperature unless FCSQUARE is set to 1, then it is quadratic.
 
 Control route theory
 
