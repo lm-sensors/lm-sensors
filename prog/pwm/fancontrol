@@ -484,7 +484,7 @@ function UpdateFanSpeeds
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
 		maxpwm=${AFCMAXPWM[$fcvcount]}
-		fccharcur=${AFCSQUARE[fcvcount]}
+		fcsquare=${AFCSQUARE[fcvcount]}
 
 		read tval < ${tsens}
 		if [ $? -ne 0 ]
