@@ -109,7 +109,7 @@ function LoadConfig
 		AFCMAXPWM[$fcvcount]=`echo $MAXPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
 		AFCSQUARE[$fcvcount]=$(${FCSQUARE// /\n} |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
-		[ -z "${AFCSQUARE[$fcvcount]}" ] && AFCSQUARE[$fcvcount]=LIN    # Defauts to linear characteristic curve
+		[ -z "${AFCSQUARE[$fcvcount]}" ] && AFCSQUARE[$fcvcount]=0    # Defauts to linear characteristic curve
 
 		# verify the validity of the settings
 		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
