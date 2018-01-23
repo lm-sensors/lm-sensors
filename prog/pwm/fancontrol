@@ -67,7 +67,7 @@ function LoadConfig
 	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
 	MINPWM=`egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g'`
 	MAXPWM=`egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g'`
-	FCCHARCUR=$(grep -E '^FCCHARCUR=.*$' $1 | sed -e 's/FCCHARCUR=//g')
+	FCSQUARE=$(grep -E '^FCSQUARE=.*$' $1 | sed -e 's/FCSQUARE=//g')
 
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
@@ -108,8 +108,8 @@ function LoadConfig
 		[ -z "${AFCMINPWM[$fcvcount]}" ] && AFCMINPWM[$fcvcount]=0
 		AFCMAXPWM[$fcvcount]=`echo $MAXPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
 		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
-		AFCCHARCUR[$fcvcount]=$(${FCCHARCUR// /\n} |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
-		[ -z "${AFCCHARCUR[$fcvcount]}" ] && AFCCHARCUR[$fcvcount]=LIN    # Defauts to linear characteristic curve
+		AFCSQUARE[$fcvcount]=$(${FCSQUARE// /\n} |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		[ -z "${AFCSQUARE[$fcvcount]}" ] && AFCSQUARE[$fcvcount]=LIN    # Defauts to linear characteristic curve
 
 		# verify the validity of the settings
 		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
@@ -153,7 +153,7 @@ function LoadConfig
 		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
 		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
 		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
-		echo "  FCCHARCUR=${AFCCHARCUR[$fcvcount]}"
+		echo "  FCSQUARE=${AFCSQUARE[$fcvcount]}"
 		let fcvcount=fcvcount+1
 	done
 	echo
@@ -473,7 +473,7 @@ function UpdateFanSpeeds
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
 		maxpwm=${AFCMAXPWM[$fcvcount]}
-		fccharcur=${AFCCHARCUR[fcvcount]}
+		fccharcur=${AFCSQUARE[fcvcount]}
 
 		read tval < ${tsens}
 		if [ $? -ne 0 ]
@@ -537,7 +537,7 @@ function UpdateFanSpeeds
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"
 			echo "min_fanval=$min_fanval"
-			echo "characteristic=$fccharcur
+			echo "characteristic=$fcsquare
 		fi
 
 		if (( $tval <= $mint ))
@@ -546,11 +546,11 @@ function UpdateFanSpeeds
 		  then pwmval=$maxpwm # over max temp, use defined max pwm
 		else
 		  # calculate the new value from temperature and settings
-		  if "$fccharcur" = "LIN"
+		  if (( fcsquare == 0 ))
 		  then        # linear transfer function
-		     pwmval=$(( (${tval}-${mint})*(${maxpwm}-${minso}) / (${maxt}-${mint}) + ${minso}))
+		     pwmval=$(( (tval-mint)*(maxpwm-minso) / (maxt-mint) + minso))
 		  else        # optional square transfer function
-		     pwmval=$(( (${tval}-${mint})*(${tval}-${mint})*(${maxpwm}-${minso}) / (${maxt}-${mint}) / (${maxt}-${mint}) + ${minso}))
+		     pwmval=$(( (tval-mint)*(tval-mint)*(maxpwm-minso) / (maxt-mint) / (maxt-mint) + minso))
 		  fi
 		  if [ $pwmpval -eq 0 -o $min_fanval -eq 0 ]
 		  then # if fan was stopped start it using a safe value
