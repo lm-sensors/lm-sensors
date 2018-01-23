@@ -557,9 +557,9 @@ function UpdateFanSpeeds
 		  then pwmval=$maxpwm # over max temp, use defined max pwm
 		else
 		  # calculate the new value from temperature and settings
-		  deltaT=(( tval-mint ))
-		  rangeT=(( maxt-mint ))
-		  rangePWM=(( maxpwm-minso ))
+		  deltaT=$(( tval-mint ))
+		  rangeT=$(( maxt-mint ))
+		  rangePWM=$(( maxpwm-minso ))
 		  if (( fcsquare == 0 ))
 		  then        # linear transfer function
 		     pwmval=$(( deltaT*rangePWM / rangeT + minso))
