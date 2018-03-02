@@ -148,7 +148,7 @@ function print_devices()
 
 	for device in $DEVICES
 	do
-		name=`cat $device/name 2> /dev/null`
+		name=$(cat "$device"/name 2> /dev/null)
 		[ -z "$name" ] && name="unknown (no name attribute)"
 		echo "$1$device is $name"
 	done
@@ -161,7 +161,7 @@ function is_pwm_auto()
 
 	if [ -f $ENABLE ]
 	then
-		if [ "`cat $ENABLE`" -gt 1 ]
+		if [ "$(cat "$ENABLE")" -gt 1 ]
 		then
 			return 0
 		fi
@@ -184,7 +184,7 @@ function pwmdisable()
 
 	# Try pwmN_enable=0
 	echo 0 2>/dev/null > $ENABLE
-	if [ "`cat $ENABLE`" -eq 0 ]
+	if [ "$(cat "$ENABLE")" -eq 0 ]
 	then
 		# Success
 		return 0
@@ -192,21 +192,21 @@ function pwmdisable()
 
 	# It didn't work, try pwmN_enable=1 pwmN=255
 	echo 1 2>/dev/null > $ENABLE
-	if [ "`cat $ENABLE`" -ne 1 ]
+	if [ "$(cat "$ENABLE")" -ne 1 ]
 	then
-		echo "$ENABLE stuck to `cat $ENABLE`" >&2
+		echo "$ENABLE stuck to $(cat "$ENABLE")" >&2
 		return 1
 	fi
 
 	echo $MAX > $1
-	if [ "`cat $1`" -ge 190 ]
+	if [ "$(cat "$1")" -ge 190 ]
 	then
 		# Success
 		return 0
 	fi
 
 	# Nothing worked
-	echo "$1 stuck to `cat $1`" >&2
+	echo "$1 stuck to $(cat "$1")" >&2
 	return 1
 }
 
@@ -239,7 +239,7 @@ echo
 echo 'Found the following PWM controls:'
 for i in $PWM
 do
-	P=`cat $i`
+	P=$(cat "$i")
 	echo "   $i           current value: $P"
 	if [ -w $i ]
 	then
@@ -284,7 +284,7 @@ sleep $DELAY
 echo 'Found the following fan sensors:'
 for i in $FAN
 do
-	S=`cat $i`
+	S=$(cat "$i")
 	if [ "$S" = "0" -o "$S" = "-1" ]
 	then
 		echo "   $i     current speed: 0 ... skipping!"
@@ -375,7 +375,7 @@ function pwmdetail()
 			rm -f $TMP1 $TMP2
 			exit 1
 		fi
-		S=`cat $F`
+		S=$(cat "$F")
 		# Fan speed should never increase significantly
 		if [ $S -gt $threshold ]
 		then
@@ -441,7 +441,7 @@ do
 
 	# Sample all current fan speeds at once, so that we can quickly
 	# disable PWM and return all fans to full speed
-	CURRENT_SPEEDS="`cat $GOODFAN`"
+	CURRENT_SPEEDS="$(cat "$GOODFAN")"
 	pwmdisable $i
 
 	let pwmactivecount=0
@@ -483,7 +483,7 @@ do
 				S_MIN=$S
 			fi
 
-			S=`cat $j`
+			S=$(cat "$j")
 			if [ $S -lt $threshold ]
 			then
 				echo "    Fan $j has not returned to speed, please investigate!"
@@ -712,7 +712,7 @@ function TestMinStop()
 	do
 		pwmset $pwms $fanval
 		sleep $PDELAY
-		fanspeed=`cat $faninput`
+		fanspeed=$(cat "$faninput")
 		if [ $fanspeed -gt $threshold ]
 		then
 			echo "    PWM $fanval -> $fanspeed RPM (probably incorrect)"
@@ -888,7 +888,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		echo 'Current temperature readings are as follows:'
 		for j in $TEMPS
 		do
-			S=`cat $j`
+			S=$(cat "$j")
 			let S="$S / 1000"
 			echo "$j	$S"
 		done
