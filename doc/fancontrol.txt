@@ -3,6 +3,11 @@ fancontrol - automated software based fan speed regulation
 
 
 Introduction
+The purpose of fancontrol is to lower the noise level of the cooling fans
+by tolerating higher temperature, but only for periods width lower heat generation.
+For periods with high heat generation there will be no advantage in terms of noise,
+because at the end exceeding certain temperature levels in not tolerable and this
+requires certain cooling power.
 
 fancontrol is a shellscript for use with lm_sensors. It reads its
 configuration from a file, then calculates fan speeds from temperatures and
@@ -67,6 +72,10 @@ MINPWM
 MAXPWM
 	The PWM value to use when the temperature is over MAXTEMP.
 	If this value isn't defined, it defaults to 255 (full speed).
+FCSQUARE
+        Specifies the characteristic of the curve for the control route.
+	It is optinal and defaults to 0 (linear) and may manually
+	changed to 1 for square.
 
 A graph might help you understand how the different values relate
 to each other:
@@ -116,12 +125,37 @@ editing the config file directly following the rules above.
 The algorithm
 
 fancontrol first reads its configuration, writes it to arrays and loops its
-main function.  This function gets the temperatures and fanspeeds from
+main function. This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
-new values are written to the pwm outputs.  The pwm value increases
-linearly with rising temperature.
+new values are written to the pwm outputs. The pwm value increases
+linearly with rising temperature unless FCSQUARE is set to 1, then it is quadratic.
 
+Control route theory
+
+The temperature increase ΔT depends on the generated power P
+and the fan speed, which corresponds to PWM:
+    ΔT ~ P / PWM
+this shows: as long as you compensate a power increase by the same corresponding
+increase in PWM value, the temperature remains constant. This is approximately 
+done by fancontrol algorithm. In perfect theory, this could be done in a closed loop
+with a fixed set point for temperature and control the fan speed in order to exactly
+keep the temperature to the set point. This way the fan noise would be perfectly
+minimize. In practice this is not feasible, as the control route has discrete input
+values, temperatures are in many cases in steps of 1 °C, this is generally bad for 
+a control loop. Also bad is that a time delay of higher order exists between power
+increase and temperature rise, which is a nightmare in control engineering.
+Therefore fancontrol is not a closed control loop. Nevertheless, even that simple
+route can get instable if you choose a too steep proportional factor m between
+temperature and PWM, then you will get an oscillating system.
+The fan speed runs up and dow, up and down - even with a constant power.
+This may be disturbing.
+       MAXTEMP - MINTEMP
+  m = -------------------
+        MAXPWM - MINSTOP
+
+Wheather a quadratic characteristic works depends very much on
+the specific fan and is hard to predict. You may try.
 
 Planned features
 
