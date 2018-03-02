@@ -65,7 +65,7 @@ Vt = kT/q where k = Boltzman's constant 1.38 e-23;
                 T = temp in kelvin.
 		Is is reverse saturation current.
 
-(more math and greek letters I don't understand completely)
+(more math and Greek letters I don't understand completely)
 
 dVd/dT works out to, at room temperature, about 2.1 mV/degree
 or a temperature coefficient of about 0.32%/degree.

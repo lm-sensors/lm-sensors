@@ -366,7 +366,7 @@ SVN HEAD
                   Skip ISA detection by default if a Super I/O was found (#2322)
                   Do not scan I2C adapters on multimedia cards by default
                   Skip SMBus probing by default if a Super I/O was found (#2322)
-                  Display I2C address statictics with --stat
+                  Display I2C address statistics with --stat
                   Document the new detection order and rules
                   Gather DMI data and print it at start-up
                   Always probe the SMBus on Asus, Tyan and Supermicro boards
