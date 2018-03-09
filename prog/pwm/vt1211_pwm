@@ -49,7 +49,7 @@ function set_attr
 }
 
 # check if we have the right permissions to run
-if [ `whoami` != "root" ] ; then
+if [ $(whoami) != "root" ] ; then
     echo "You must be root to run this script."
     exit 1
 fi
@@ -83,7 +83,7 @@ done
 [ $val -lt 0 -o $val -gt 255 ] && usage
 
 # check hwmon device
-dev=`ls -d /sys/devices/platform/vt1211.*`
+dev=$(ls -d /sys/devices/platform/vt1211.*)
 if [ -z "$dev" ] ; then
     echo "Platform device vt1211 not found. Did you load the vt1211 module?"
     exit 1
