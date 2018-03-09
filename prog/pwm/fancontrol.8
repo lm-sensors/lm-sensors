@@ -113,7 +113,7 @@ main function.  This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the PWM outputs. Currently the speed increases
-quadratically with rising temperature. This way you won't hear your fans most
+linearly with rising temperature. This way you won't hear your fans most
 of the time at best.
 
 .SH SEE ALSO
