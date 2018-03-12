@@ -86,7 +86,7 @@ function LoadConfig
 	echo "Common settings:"
 	echo "  INTERVAL=$INTERVAL"
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	for fcv in $FCTEMPS
 	do
 		if ! echo $fcv | grep -E -q '='
@@ -150,7 +150,7 @@ function LoadConfig
 		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
 		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
 		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
-		let fcvcount=fcvcount+1
+		(( fcvcount++ ))
 	done
 	echo
 }
@@ -211,7 +211,7 @@ function FixupDeviceFiles
 	local DEVICE="$1"
 	local fcvcount pwmo tsen fan
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do
 		pwmo=${AFCPWM[$fcvcount]}
@@ -220,10 +220,10 @@ function FixupDeviceFiles
 		then
 			echo "Adjusing $pwmo -> ${AFCPWM[$fcvcount]}"
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCTEMP[@]} )) # go through all temp inputs
 	do
 		tsen=${AFCTEMP[$fcvcount]}
@@ -232,10 +232,10 @@ function FixupDeviceFiles
 		then
 			echo "Adjusing $tsen -> ${AFCTEMP[$fcvcount]}"
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCFAN[@]} )) # go through all fan inputs
 	do
 		fan=${AFCFAN[$fcvcount]}
@@ -244,7 +244,7 @@ function FixupDeviceFiles
 		then
 			echo "Adjusing $fan -> ${AFCFAN[$fcvcount]}"
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 }
 
@@ -270,7 +270,7 @@ function CheckFiles
 {
 	local outdated=0 fcvcount pwmo tsen fan
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do
 		pwmo=${AFCPWM[$fcvcount]}
@@ -279,10 +279,10 @@ function CheckFiles
 			echo "Error: file $pwmo doesn't exist" >&2
 			outdated=1
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCTEMP[@]} )) # go through all temp inputs
 	do
 		tsen=${AFCTEMP[$fcvcount]}
@@ -291,10 +291,10 @@ function CheckFiles
 			echo "Error: file $tsen doesn't exist" >&2
 			outdated=1
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCFAN[@]} )) # go through all fan inputs
 	do
 		# A given PWM output can control several fans
@@ -306,7 +306,7 @@ function CheckFiles
 				outdated=1
 			fi
 		done
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 
 	if [ $outdated -eq 1 ]
@@ -491,12 +491,12 @@ function restorefans()
 	local status=$1 fcvcount pwmo
 
 	echo 'Aborting, restoring fans...'
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do
 		pwmo=${AFCPWM[$fcvcount]}
 		pwmdisable $pwmo
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 	echo 'Verify fans have returned to full speed'
 	rm -f "$PIDFILE"
@@ -514,15 +514,15 @@ function UpdateFanSpeeds
 	local tval pwmpval fanval min_fanval one_fan one_fanval
 	local -i pwmval
 
-	let fcvcount=0
+	(( fcvcount=0 ))
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 	do
 		#hopefully shorter vars will improve readability:
 		pwmo=${AFCPWM[$fcvcount]}
 		tsens=${AFCTEMP[$fcvcount]}
 		fan=${AFCFAN[$fcvcount]}
-		let mint="${AFCMINTEMP[$fcvcount]}*1000"
-		let maxt="${AFCMAXTEMP[$fcvcount]}*1000"
+		(( mint="${AFCMINTEMP[$fcvcount]}*1000" ))
+		(( maxt="${AFCMAXTEMP[$fcvcount]}*1000" ))
 		minsa=${AFCMINSTART[$fcvcount]}
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
@@ -617,12 +617,12 @@ function UpdateFanSpeeds
 		then
 			echo "new pwmval=$pwmval"
 		fi
-		let fcvcount=$fcvcount+1
+		(( fcvcount++ ))
 	done
 }
 
 echo 'Enabling PWM on fans...'
-let fcvcount=0
+(( fcvcount=0 ))
 while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
 do
 	pwmo=${AFCPWM[$fcvcount]}
@@ -632,7 +632,7 @@ do
 		echo "Error enabling PWM on $DIR/$pwmo" >&2
 		restorefans 1
 	fi
-	let fcvcount=$fcvcount+1
+	(( fcvcount++ ))
 done
 
 echo 'Starting automatic fan control...'
