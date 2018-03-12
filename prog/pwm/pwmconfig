@@ -642,17 +642,17 @@ function LoadConfig()
 	fi
 
 	echo "Loading configuration from $1 ..."
-	INTERVAL=$(egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL= *//g')
-	OLD_DEVPATH=$(egrep '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
-	OLD_DEVNAME=$(egrep '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
-	FCTEMPS=$(egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS= *//g')
-	FCFANS=$(egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS= *//g')
-	MINTEMP=$(egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP= *//g')
-	MAXTEMP=$(egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g')
-	MINSTART=$(egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g')
-	MINSTOP=$(egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g')
-	MINPWM=$(egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM= *//g')
-	MAXPWM=$(egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM= *//g')
+	INTERVAL=$(grep -E '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL= *//g')
+	OLD_DEVPATH=$(grep -E '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
+	OLD_DEVNAME=$(grep -E '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
+	FCTEMPS=$(grep -E '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS= *//g')
+	FCFANS=$(grep -E '^FCFANS=.*$' $1 | sed -e 's/FCFANS= *//g')
+	MINTEMP=$(grep -E '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP= *//g')
+	MAXTEMP=$(grep -E '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g')
+	MINSTART=$(grep -E '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g')
+	MINSTOP=$(grep -E '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g')
+	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM= *//g')
+	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM= *//g')
 
 	# Check for configuration change
 	if ! ValidateDevices "$OLD_DEVPATH" "$OLD_DEVNAME"
@@ -831,7 +831,7 @@ DEFMINSTOP=100
 function filter_cfgvar()
 {
 	echo "$1" | sed -e 's/ /\n/g' \
-		  | egrep "$2" \
+		  | grep -E "$2" \
 		  | sed -e 's/.*=//g'
 }
 
@@ -877,7 +877,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		echo
 		break ;;
 
-	"$(echo ${pwmactive} |sed -e 's/ /\n/g' | egrep "${pwms}")" )
+	"$(echo ${pwmactive} |sed -e 's/ /\n/g' | grep -E "${pwms}")" )
 		pwmsed=$(echo ${pwms} | sed -e 's/\//\\\\\//g') #escape / for sed
 		echo
 
