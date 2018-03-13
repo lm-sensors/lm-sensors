@@ -894,7 +894,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		done
 		FAN=$(echo $fanactive|cut -d' ' -f$REPLY)
 		FAN_MIN=$(echo $fanactive_min|cut -d' ' -f$REPLY)
-	       	FCFANS=$(echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g") ${pwms}=$FAN"
+	       	FCFANS="$(echo $FCFANS | sed -e "s/${pwmsed}[^ ]* *//g") ${pwms}=$FAN"
 		echo
 		echo "Select a temperature sensor as source for ${pwms}:"
 		select tempss in $TEMPS "None (Do not affect this PWM output)"; do
