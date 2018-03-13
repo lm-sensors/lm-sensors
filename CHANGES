@@ -25,6 +25,10 @@ SVN HEAD
                   Add detection of AMD Family 15h Model 60+ temperature sensors
                   Add detection of Nuvoton NCT6796D
   configs: Add sample configuration files.
+  vt1211_pwm: replaced deprecated sub shell syntax
+  pwmconfig: replaced deprecated sub shell syntax
+  fancontrol: replaced deprecated sub shell syntax
+  fancontrol.8: replaced deprecated sub shell syntax
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
