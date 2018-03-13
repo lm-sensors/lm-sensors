@@ -362,7 +362,7 @@ function pwmdetail()
 		> $TMP2
 	fi
 
-	let pwm=$MAX
+	(( pwm=MAX ))
 	pwmenable $P
 	while [ $pwm -ge 0 ]
 	do
@@ -382,7 +382,7 @@ function pwmdetail()
 			echo "    PWM $pwm FAN $S (probably incorrect)"
 		else
 			echo "    PWM $pwm FAN $S"
-			let threshold=S*6/5
+			(( threshold=S*6/5 ))
 		fi
 
 		if [ "$PLOT" = "y" ]
@@ -407,9 +407,9 @@ function pwmdetail()
 		fi
 		if [ $pwm -lt $STEP2_BELOW ]
 		then
-			let pwm=$pwm-$STEP2
+			(( pwm=pwm-STEP2 ))
 		else
-			let pwm=$pwm-$STEP
+			(( pwm=pwm-STEP ))
 		fi
 	done
 	pwmdisable $P
@@ -444,15 +444,15 @@ do
 	CURRENT_SPEEDS="$(cat $GOODFAN)"
 	pwmdisable $i
 
-	let pwmactivecount=0
-	let count=1
+	(( pwmactivecount=0 ))
+	(( count=1 ))
 	S_MIN=
 	for j in $GOODFAN
 	do
 		OS=$(echo $SPEEDS | cut -d' ' -f$count)
 		S=$(echo $CURRENT_SPEEDS | cut -d' ' -f$count)
 		echo "  $j ... speed was $OS now $S"
-		let threshold=3*$OS/4
+		(( threshold=3*OS/4 ))
 		if [ $S -lt $threshold ]
 		then
 			echo "    It appears that fan $j"
@@ -462,7 +462,7 @@ do
 #
 			if [ $pwmactivecount -eq 0 ]
 			then
-				let pwmactivecount=1
+				(( pwmactivecount=1 ))
 				pwmactive="$i ${pwmactive}"
 				fanactive="$j ${fanactive}"
 
@@ -498,7 +498,7 @@ do
 		else
 			echo "    no correlation"
 		fi
-		let count=count+1
+		(( count++ ))
 	done
 	echo
 	if [ "$pwmactivecount" = "0" ]
@@ -642,17 +642,17 @@ function LoadConfig()
 	fi
 
 	echo "Loading configuration from $1 ..."
-	INTERVAL=$(egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL= *//g')
-	OLD_DEVPATH=$(egrep '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
-	OLD_DEVNAME=$(egrep '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
-	FCTEMPS=$(egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS= *//g')
-	FCFANS=$(egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS= *//g')
-	MINTEMP=$(egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP= *//g')
-	MAXTEMP=$(egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g')
-	MINSTART=$(egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g')
-	MINSTOP=$(egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g')
-	MINPWM=$(egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM= *//g')
-	MAXPWM=$(egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM= *//g')
+	INTERVAL=$(grep -E '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL= *//g')
+	OLD_DEVPATH=$(grep -E '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
+	OLD_DEVNAME=$(grep -E '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
+	FCTEMPS=$(grep -E '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS= *//g')
+	FCFANS=$(grep -E '^FCFANS=.*$' $1 | sed -e 's/FCFANS= *//g')
+	MINTEMP=$(grep -E '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP= *//g')
+	MAXTEMP=$(grep -E '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP= *//g')
+	MINSTART=$(grep -E '^MINSTART=.*$' $1 | sed -e 's/MINSTART= *//g')
+	MINSTOP=$(grep -E '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP= *//g')
+	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM= *//g')
+	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM= *//g')
 
 	# Check for configuration change
 	if ! ValidateDevices "$OLD_DEVPATH" "$OLD_DEVNAME"
@@ -675,23 +675,23 @@ function TestMinStart()
 	echo 'Let the fan stop completely, then press return until the'
 	echo "fan starts spinning. Then enter 'y'."
 	echo 'We will use this value +20 as the starting speed.'
-	let fanok=0
-	let fanval="$1"
+	(( fanok=0 ))
+	(( fanval="$1" ))
 
 	pwmenable $pwms
 	until [ "$fanok" = "1" ]
 	do
-		if [ $fanval -gt 240 ] ; then let fanval=$MAX ; let fanok=1 ; fi
+		if [ $fanval -gt 240 ] ; then (( fanval=MAX )) ; (( fanok=1 )); fi
 		echo -n "Setting $pwms to $fanval..."
 		pwmset $pwms $fanval
 		read FANTEST
-		if [ "$FANTEST" != "" ] ; then let fanok=1 ; fi
-		let fanval=fanval+10
+		if [ "$FANTEST" != "" ] ; then (( fanok=1 )); fi
+		(( fanval=fanval+10 ))
 	done
 	pwmdisable $pwms
 
-	let fanval=fanval+20
-	if [ $fanval -gt 240 ] ; then let fanval=$MAX ; fi
+	(( fanval=fanval+20 ))
+	if [ $fanval -gt 240 ] ; then (( fanval=MAX )); fi
 	echo "OK, using $fanval"
 }
 
@@ -705,7 +705,7 @@ function TestMinStop()
 	echo
 	echo 'Now we decrease the PWM value to figure out the lowest usable value.'
 	echo 'We will use a slightly greater value as the minimum speed.'
-	let fanval=$MAX
+	(( fanval=MAX ))
 
 	pwmenable $pwms
 	while [ $fanval -ge 0 ]
@@ -723,22 +723,22 @@ function TestMinStop()
 			then
 				break
 			fi
-			let threshold=fanspeed*6/5
+			(( threshold=fanspeed*6/5 ))
 		fi
 		if [ $fanval -lt $STEP2_BELOW ]
 		then
-			let fanval=$fanval-$STEP2
+			(( fanval=fanval-STEP2 ))
 		else
-			let fanval=$fanval-$STEP
+			(( fanval=fanval-STEP ))
 		fi
 	done
 	pwmdisable $pwms
 
 	if [ $fanval -lt $STEP2_BELOW ]
 	then
-		let 'fanval=fanval+2*STEP2'
+		(( fanval=fanval+2*STEP2 ))
 	else
-		let 'fanval=fanval+STEP'
+		(( fanval=fanval+STEP ))
 	fi
 	echo "OK, using $fanval"
 }
@@ -831,7 +831,7 @@ DEFMINSTOP=100
 function filter_cfgvar()
 {
 	echo "$1" | sed -e 's/ /\n/g' \
-		  | egrep "$2" \
+		  | grep -E "$2" \
 		  | sed -e 's/.*=//g'
 }
 
@@ -877,7 +877,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		echo
 		break ;;
 
-	"$(echo ${pwmactive} |sed -e 's/ /\n/g' | egrep "${pwms}")" )
+	"$(echo ${pwmactive} |sed -e 's/ /\n/g' | grep -E "${pwms}")" )
 		pwmsed=$(echo ${pwms} | sed -e 's/\//\\\\\//g') #escape / for sed
 		echo
 
@@ -889,7 +889,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		for j in $TEMPS
 		do
 			S=$(cat $j)
-			let S="$S / 1000"
+			(( S="$S / 1000" ))
 			echo "$j	$S"
 		done
 		FAN=$(echo $fanactive|cut -d' ' -f$REPLY)
