@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # vt1211_pwm - Manually control the PWM outputs of the VIA vt1211 Super-I/O
 #
