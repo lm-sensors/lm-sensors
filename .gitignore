@@ -1,0 +1,29 @@
+# .gitignore for lm-sensors git tree
+#
+# NB: Please use the 'git ls-files -i --exclude-standard'
+# command after changing this file, to see if there are
+# any tracked files which get ignored after the change.
+
+# Generated executables
+prog/dump/isadump
+prog/dump/isaset
+prog/sensord/sensord
+prog/sensors/sensors
+lib/test/test-scanner
+
+# Generated shared objects
+*.a
+*.so*
+
+# Intermediate objects
+*.r[do]
+*.a[do]
+*.l[do]
+
+# Generated source code
+lib/conf-lex.c
+lib/conf-parse.c
+lib/conf-parse.h
+
+# Patching artifacts
+*.orig
