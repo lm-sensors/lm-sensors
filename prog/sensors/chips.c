@@ -48,7 +48,6 @@ void print_chip_raw(const sensors_chip_name *name)
 			continue;
 		}
 		printf("%s:\n", label);
-		free(label);
 
 		b = 0;
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
@@ -64,6 +63,7 @@ void print_chip_raw(const sensors_chip_name *name)
 			} else
 				printf("(%s)\n", label);
 		}
+		free(label);
 	}
 }
 
@@ -86,7 +86,6 @@ void print_chip_json(const sensors_chip_name *name)
 		if (cnt > 0)
 			printf(",\n");
 		printf("      \"%s\":{\n", label);
-		free(label);
 
 		b = 0;
 		subCnt = 0;
@@ -109,6 +108,7 @@ void print_chip_json(const sensors_chip_name *name)
 			}
 			subCnt++;
 		}
+		free(label);
 		printf("\n      }");
 		cnt++;
 	}
