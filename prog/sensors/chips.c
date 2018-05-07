@@ -364,7 +364,6 @@ static void print_chip_temp(const sensors_chip_name *name,
 		sf = sensors_get_subfeature(name, feature,
 					    SENSORS_SUBFEATURE_TEMP_INPUT);
 		if (sf && get_input_value(name, sf, &val) == 0) {
-			get_input_value(name, sf, &val);
 			if (fahrenheit)
 				val = deg_ctof(val);
 			printf("%+6.1f%s  ", val, degstr);
