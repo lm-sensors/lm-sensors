@@ -421,12 +421,12 @@ function pwmdisable()
 			# check if setting pwmN_enable value was successful. Checking the
 			# pwmN value makes no sense, as it might already have been altered
 			# by the chip.
-			if [ $(cat $ENABLE) = ${PWM_ENABLE_ORIG_STATE[${1}]} ]
+			if [ "$(cat $ENABLE)" = ${PWM_ENABLE_ORIG_STATE[${1}]} ]
 			then
 				return 0
 			fi
 		# if pwmN_enable is manual (1), check if restoring the pwmN value worked
-		elif [ $(cat ${1}) = ${PWM_ORIG_STATE[${1}]} ]
+		elif [ "$(cat ${1})" = ${PWM_ORIG_STATE[${1}]} ]
 		then
 			return 0
 		fi
@@ -434,7 +434,7 @@ function pwmdisable()
 
 	# Try pwmN_enable=0
 	echo 0 > $ENABLE 2> /dev/null
-	if [ $(cat $ENABLE) -eq 0 ]
+	if [ "$(cat $ENABLE)" -eq 0 ]
 	then
 		# Success
 		return 0
@@ -443,14 +443,14 @@ function pwmdisable()
 	# It didn't work, try pwmN_enable=1 pwmN=255
 	echo 1 > $ENABLE 2> /dev/null
 	echo $MAX > $1
-	if [ $(cat $ENABLE) -eq 1 -a $(cat $1) -ge 190 ]
+	if [ "$(cat $ENABLE)" -eq 1 -a "$(cat $1)" -ge 190 ]
 	then
 		# Success
 		return 0
 	fi
 
 	# Nothing worked
-	echo "$ENABLE stuck to" $(cat $ENABLE) >&2
+	echo "$ENABLE stuck to" "$(cat $ENABLE)" >&2
 	return 1
 }
 
