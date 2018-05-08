@@ -330,7 +330,8 @@ STEP2_BELOW=31
 function pwmdetail()
 {
 	local P=$1 F=$2
-	local X PLOT= TMP1 TMP2
+	local X PLOT=
+	local TMP1 TMP2
 	local threshold=100000 pwm S
 
 	type $PLOTTER > /dev/null 2>&1
