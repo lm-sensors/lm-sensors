@@ -562,10 +562,14 @@ static void scale_value(double *value, const char **prefixstr)
 
 static const struct sensor_subfeature_list power_common_sensors[] = {
 	{ SENSORS_SUBFEATURE_POWER_ALARM, NULL, 1, NULL },
+	{ SENSORS_SUBFEATURE_POWER_MAX_ALARM, NULL, 1, "MIN" },
 	{ SENSORS_SUBFEATURE_POWER_MAX_ALARM, NULL, 1, "MAX" },
+	{ SENSORS_SUBFEATURE_POWER_LCRIT_ALARM, NULL, 1, "LCRIT" },
 	{ SENSORS_SUBFEATURE_POWER_CRIT_ALARM, NULL, 1, "CRIT" },
 	{ SENSORS_SUBFEATURE_POWER_CAP_ALARM, NULL, 1, "CAP" },
 	{ SENSORS_SUBFEATURE_POWER_MAX, NULL, 0, "max" },
+	{ SENSORS_SUBFEATURE_POWER_MIN, NULL, 0, "min" },
+	{ SENSORS_SUBFEATURE_POWER_LCRIT, NULL, 0, "lcrit" },
 	{ SENSORS_SUBFEATURE_POWER_CRIT, NULL, 0, "crit" },
 	{ SENSORS_SUBFEATURE_POWER_CAP, NULL, 0, "cap" },
 	{ -1, NULL, 0, NULL }
@@ -590,7 +594,7 @@ static const struct sensor_subfeature_list power_avg_sensors[] = {
 	{ -1, NULL, 0, NULL }
 };
 
-#define NUM_POWER_ALARMS	4
+#define NUM_POWER_ALARMS	6
 #define NUM_POWER_SENSORS	(ARRAY_SIZE(power_common_sensors) \
 				 + ARRAY_SIZE(power_inst_sensors) \
 				 - NUM_POWER_ALARMS - 2)
