@@ -280,9 +280,13 @@ static const struct subfeature_type_match power_matches[] = {
 	{ "cap_alarm", SENSORS_SUBFEATURE_POWER_CAP_ALARM },
 	{ "alarm", SENSORS_SUBFEATURE_POWER_ALARM },
 	{ "max", SENSORS_SUBFEATURE_POWER_MAX },
+	{ "min", SENSORS_SUBFEATURE_POWER_MIN },
+	{ "min_alarm", SENSORS_SUBFEATURE_POWER_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_POWER_MAX_ALARM },
 	{ "crit", SENSORS_SUBFEATURE_POWER_CRIT },
+	{ "lcrit", SENSORS_SUBFEATURE_POWER_LCRIT },
 	{ "crit_alarm", SENSORS_SUBFEATURE_POWER_CRIT_ALARM },
+	{ "lcrit_alarm", SENSORS_SUBFEATURE_POWER_LCRIT_ALARM },
 	{ "average_interval", SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL },
 	{ NULL, 0 }
 };

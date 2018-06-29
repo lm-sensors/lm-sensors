@@ -6,6 +6,13 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x4??   lm-sensors 3.?.?
+* Added support for power min, lcrit, min_alarm and lcrit_alarm
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MIN
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_LCRIT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MIN_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_LCRIT_ALARM
+
 0x440	lm-sensors 3.4.0
 * Defined SENSORS_FEATURE_MAX
   enum sensors_feature_type SENSORS_FEATURE_MAX
