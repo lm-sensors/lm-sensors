@@ -31,6 +31,7 @@ SVN HEAD
   pwmconfig: replaced deprecated sub shell syntax
   fancontrol: replaced deprecated sub shell syntax
   fancontrol.8: replaced deprecated sub shell syntax
+  libsensors: Add support for SENSORS_BUS_TYPE_SCSI
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license

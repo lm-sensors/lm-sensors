@@ -727,6 +727,13 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 			entry.chip.addr = 0;
 		entry.chip.bus.type = SENSORS_BUS_TYPE_MDIO;
 		entry.chip.bus.nr = 0;
+	} else
+	if (subsys && !strcmp(subsys, "scsi") &&
+	    sscanf(dev_name, "%d:%d:%d:%x", &domain, &bus, &slot, &fn) == 4) {
+		/* adapter(host), channel(bus), id(target), lun */
+		entry.chip.addr = (bus << 8) + (slot << 4) + fn;
+		entry.chip.bus.type = SENSORS_BUS_TYPE_SCSI;
+		entry.chip.bus.nr = domain;
 	} else {
 		/* Ignore unknown device */
 		err = 0;
