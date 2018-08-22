@@ -112,7 +112,9 @@ void print_chip_json(const sensors_chip_name *name)
 		printf("\n      }");
 		cnt++;
 	}
-	printf("\n");
+  if (0 != cnt) {
+    printf("\n");
+  }
 }
 
 static const char hyst_str[] = "hyst";
