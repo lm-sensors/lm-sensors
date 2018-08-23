@@ -13,6 +13,7 @@ struct sensord_arguments {
 	const char *cgiDir;
 	int scanTime;
 	int logTime;
+	int logOneline;
 	int rrdTime;
 	int rrdNoAverage;
 	int syslogFacility;
