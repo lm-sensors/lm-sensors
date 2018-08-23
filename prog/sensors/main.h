@@ -23,5 +23,6 @@
 
 extern int fahrenheit;
 extern char degstr[5];
+extern int err_code;
 
 #endif /* PROG_SENSORS_MAIN_H */

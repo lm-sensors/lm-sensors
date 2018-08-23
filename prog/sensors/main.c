@@ -45,6 +45,7 @@ static int do_sets, do_raw, do_json, hide_adapter;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
+int err_code = 0;
 
 static void print_short_help(void)
 {
@@ -164,8 +165,10 @@ static void do_a_print(const sensors_chip_name *name)
 		const char *adap = sensors_get_adapter_name(&name->bus);
 		if (adap)
 			printf("Adapter: %s\n", adap);
-		else
+		else {
 			fprintf(stderr, "Can't get adapter name\n");
+			err_code = 1;
+    }
 	}
 	if (do_raw)
 		print_chip_raw(name);
@@ -181,8 +184,10 @@ static void do_a_json_print(const sensors_chip_name *name)
 		const char *adap = sensors_get_adapter_name(&name->bus);
 		if (adap)
 			printf("      \"Adapter\": \"%s\",\n", adap);
-		else
+		else {
 			fprintf(stderr, "Can't get adapter name\n");
+			err_code = 1;
+    }
 	}
 	print_chip_json(name);
 	printf("   }");
@@ -199,14 +204,17 @@ static int do_a_set(const sensors_chip_name *name)
 				sprintf_chip_name(name),
 				sensors_strerror(err));
 			fprintf(stderr, "Run as root?\n");
+			err_code = 1;
 			return 1;
 		} else if (err == -SENSORS_ERR_ACCESS_W) {
 			fprintf(stderr,
 				"%s: At least one \"set\" statement failed\n",
 				sprintf_chip_name(name));
+			err_code = 1;
 		} else {
 			fprintf(stderr, "%s: %s\n", sprintf_chip_name(name),
 				sensors_strerror(err));
+			err_code = 1;
 		}
 	}
 	return 0;
@@ -349,7 +357,7 @@ int main(int argc, char *argv[])
 				"No sensors found!\n"
 				"Make sure you loaded all the kernel drivers you need.\n"
 				"Try sensors-detect to find out which these are.\n");
-			err = 1;
+			err_code = 1;
 		}
 	} else {
 		int cnt = 0;
@@ -361,8 +369,8 @@ int main(int argc, char *argv[])
 					"Parse error in chip name `%s'\n",
 					argv[i]);
 				print_short_help();
-				err = 1;
-				goto exit;
+				err_code = 1;
+				goto error_exit;
 			}
 			cnt += do_the_real_work(&chip, &err);
 			sensors_free_chip_name(&chip);
@@ -370,11 +378,11 @@ int main(int argc, char *argv[])
 
 		if (!cnt) {
 			fprintf(stderr, "Specified sensor(s) not found!\n");
-			err = 1;
+			err_code = 1;
 		}
 	}
 
-exit:
+error_exit:
 	sensors_cleanup();
-	exit(err);
+	exit(err_code);
 }

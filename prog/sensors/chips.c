@@ -45,6 +45,7 @@ void print_chip_raw(const sensors_chip_name *name)
 		if (!(label = sensors_get_label(name, feature))) {
 			fprintf(stderr, "ERROR: Can't get label of feature "
 				"%s!\n", feature->name);
+			err_code = 1;
 			continue;
 		}
 		printf("%s:\n", label);
@@ -53,12 +54,13 @@ void print_chip_raw(const sensors_chip_name *name)
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
 			if (sub->flags & SENSORS_MODE_R) {
 				if ((err = sensors_get_value(name, sub->number,
-							     &val)))
+							     &val))) {
 					fprintf(stderr, "ERROR: Can't get "
 						"value of subfeature %s: %s\n",
 						sub->name,
 						sensors_strerror(err));
-				else
+					err_code = 1;
+        } else
 					printf("  %s: %.3f\n", sub->name, val);
 			} else
 				printf("(%s)\n", label);
@@ -81,6 +83,7 @@ void print_chip_json(const sensors_chip_name *name)
 		if (!(label = sensors_get_label(name, feature))) {
 			fprintf(stderr, "ERROR: Can't get label of feature "
 				"%s!\n", feature->name);
+			err_code = 1;
 			continue;
 		}
 		if (cnt > 0)
@@ -97,6 +100,7 @@ void print_chip_json(const sensors_chip_name *name)
 						"value of subfeature %s: %s\n",
 						sub->name,
 						sensors_strerror(err));
+					err_code = 1;
 				} else {
 					if (subCnt > 0)
 						printf(",\n");
@@ -140,6 +144,7 @@ static double get_value(const sensors_chip_name *name,
 	if (err) {
 		fprintf(stderr, "ERROR: Can't get value of subfeature %s: %s\n",
 			sub->name, sensors_strerror(err));
+		err_code = 1;
 		val = 0;
 	}
 	return val;
@@ -156,6 +161,7 @@ static int get_input_value(const sensors_chip_name *name,
 	if (err && err != -SENSORS_ERR_ACCESS_R) {
 		fprintf(stderr, "ERROR: Can't get value of subfeature %s: %s\n",
 			sub->name, sensors_strerror(err));
+		err_code = 1;
 	}
 	return err;
 }
@@ -353,6 +359,7 @@ static void print_chip_temp(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
@@ -441,6 +448,7 @@ static void print_chip_in(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
@@ -474,6 +482,7 @@ static void print_chip_fan(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
@@ -617,6 +626,7 @@ static void print_chip_power(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
@@ -684,6 +694,7 @@ static void print_chip_energy(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
@@ -796,6 +807,7 @@ static void print_chip_curr(const sensors_chip_name *name,
 	if (!(label = sensors_get_label(name, feature))) {
 		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
 			feature->name);
+		err_code = 1;
 		return;
 	}
 	print_label(label, label_size);
