@@ -168,7 +168,7 @@ static void do_a_print(const sensors_chip_name *name)
 		else {
 			fprintf(stderr, "Can't get adapter name\n");
 			err_code = 1;
-                }
+		}
 	}
 	if (do_raw)
 		print_chip_raw(name);
@@ -187,7 +187,7 @@ static void do_a_json_print(const sensors_chip_name *name)
 		else {
 			fprintf(stderr, "Can't get adapter name\n");
 			err_code = 1;
-                }
+		}
 	}
 	print_chip_json(name);
 	printf("   }");
