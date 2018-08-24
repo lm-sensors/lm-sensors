@@ -142,6 +142,27 @@ static int sensord(void)
 
 static void openLog(void)
 {
+	struct stat fileStat;
+	int ret;
+
+	// Linux log
+	ret = stat("/dev/log", &fileStat);
+	if (ret == 0)
+		goto found;
+
+	// BSD log
+	ret = stat("/var/run/log", &fileStat);
+	if (ret == 0)
+		goto found;
+
+	// systemd log
+	ret = stat("/run/systemd/journal/syslog", &fileStat);
+	if (ret == 0)
+		goto found;
+
+	return;
+
+found:
 	openlog("sensord", 0, sensord_args.syslogFacility);
 	logOpened = 1;
 }
