@@ -110,6 +110,7 @@ void print_chip_json(const sensors_chip_name *name)
 
 			} else {
 				printf("(%s)", label);
+				subCnt++;
 			}
 		}
 		free(label);
