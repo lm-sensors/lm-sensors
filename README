@@ -26,8 +26,9 @@ The directories within this package:
   This directory contains sample configurations of various boards,
   contributed by users of lm-sensors.
 
-  Older sample configurations can be found on an old lm-sensors wiki
-  archived here:
+  All configuration files should now be imported from the old
+  www.lm-sensors.org website, however additional information about
+  the origin of the configuration files can be found on the old site:
   http://web.archive.org/web/20150901092438/http://www.lm-sensors.org:80/wiki/Configurations
 
   Please contribute back a configuration of your board so other users with
