@@ -127,10 +127,14 @@ the following tests are recommended.
 OTHER INFORMATION
 -----------------
 
-The developers of this package can be reached through GitHub
-(see https://github.com/lm-sensors/lm-sensors). Do not hesitate to contact
-us if you have questions, suggestions, problems, want to contribute,
-or just want to report it works for you. But please try to
+The developers of this package can be reached using
+* a mailing list lm-sensors <at> vger <dot> kernel <dot> org
+  (you can subscribe at http://vger.kernel.org/vger-lists.html#lm-sensors,
+  however you do not need to be subscribed to post to the list)
+* GitHub (see https://github.com/lm-sensors/lm-sensors)
+
+Do not hesitate to contact us if you have questions, suggestions, problems,
+want to contribute, or just want to report it works for you. But please try to
 read the documentation before you ask any questions! It's all under doc/.
 
 The latest version of this package can always be found at:
