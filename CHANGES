@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 git HEAD
+  Development version string now contains "+git" instead of "+SVN"
   Updated links in documentation to reflect the new home of lm_sensors
   sensors.1: Add reference to sensors-detect
              Document -j option (json output)
