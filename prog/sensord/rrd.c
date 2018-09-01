@@ -498,7 +498,8 @@ int rrdCGI(void)
 	printf("<p>\n<small><b>sensord</b> by "
 	       "<a href=\"mailto:merlin@merlin.org\">Merlin Hughes</a>"
 	       ", all credit to the "
-	       "<a href=\"http://www.lm-sensors.org/\">lm_sensors</a> "
+	       "<a href=\"https://hwmon.wiki.kernel.org/lm_sensors/\">"
+	       "lm_sensors</a> "
 	       "crew.</small>\n</p>\n");
 
 	printf("</body>\n</html>\n");

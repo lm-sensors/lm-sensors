@@ -226,7 +226,7 @@ manhtml:
 	cp $(MANPAGES) html
 	cd html ; \
 	export LOGNAME=sensors ; \
-	export HOSTNAME=www.lm-sensors.org ; \
+	export HOSTNAME=hwmon.wiki.kernel.org ; \
 	man2html *.[1-8] ; \
 	$(RM) *.[1-8]
 

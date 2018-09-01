@@ -7285,7 +7285,7 @@ sub generate_modprobes
 		next if not @{$chips_detected{$driver}};
 		if ($driver eq "to-be-written") {
 			print "Note: there is no driver for ${$chips_detected{$driver}}[0]{chipname} yet.\n".
-			      "Check http://www.lm-sensors.org/wiki/Devices for updates.\n\n";
+			      "Check https://hwmon.wiki.kernel.org/device_support_status for updates.\n\n";
 		} elsif (!is_module_builtin($driver)) {
 			open(local *INPUTFILE, "modprobe -l $driver 2>/dev/null |");
 			local $_;
@@ -7301,7 +7301,7 @@ sub generate_modprobes
 			# isn't supported
 			if ((($? >> 8) == 0) && ! $modulefound) {
 				print "Warning: the required module $driver is not currently installed\n".
-				      "on your system. Check http://www.lm-sensors.org/wiki/Devices for\n".
+				      "on your system. Check https://hwmon.wiki.kernel.org/device_support_status for\n".
 				      "driver availability.\n\n";
 			} else {
 				$hwmon_modules{$driver}++
@@ -7591,7 +7591,7 @@ sub main
 			print "Either your system has no sensors, or they are not supported, or\n".
 			      "they are connected to an I2C or SMBus adapter that is not\n".
 			      "supported. If you find out what chips are on your board, check\n".
-			      "http://www.lm-sensors.org/wiki/Devices for driver status.\n";
+			      "https://hwmon.wiki.kernel.org/device_support_status for driver status.\n";
 		}
 		exit;
 	}

@@ -40,7 +40,7 @@ These plots were generated <!--#echo var="LAST_MODIFIED" -->
 </table><p>
 
 This page generated with drivers and the tellerstats scripts from
-<a href="http://www.lm-sensors.org/">The lm_sensors drivers</a>.
+<a href="https://hwmon.wiki.kernel.org/lm_sensors">The lm_sensors drivers</a>.
 
 <p>
 

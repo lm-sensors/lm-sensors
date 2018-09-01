@@ -127,14 +127,14 @@ the following tests are recommended.
 OTHER INFORMATION
 -----------------
 
-The developers of this package can be reached through github.
-(see https://github.com/groeck/lm-sensors). Do not hesitate to contact
+The developers of this package can be reached through GitHub
+(see https://github.com/lm-sensors/lm-sensors). Do not hesitate to contact
 us if you have questions, suggestions, problems, want to contribute,
 or just want to report it works for you. But please try to
 read the documentation before you ask any questions! It's all under doc/.
 
 The latest version of this package can always be found at:
-https://github.com/groeck/lm-sensors.
+https://github.com/lm-sensors/lm-sensors.
 
 LICENSE
 -------

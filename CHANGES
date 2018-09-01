@@ -1,7 +1,8 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+git HEAD
+  Updated links in documentation to reflect the new home of lm_sensors
   sensors.1: Add reference to sensors-detect
              Document -j option (json output)
   sensors: Add support for json output
