@@ -311,7 +311,8 @@ chip "w83627thf-*"
 #    set in8_max  3.0 * 1.10
 
 
-chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*" "nct6775-*" "nct6776-*" "nct6779-*" "nct6791-*" "nct6795-*"
+chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*" "nct6775-*" "nct6776-*" \
+     "nct6779-*" "nct6791-*" "nct6795-*" "nct6796-*"
 
     label in0 "Vcore"
     label in2 "AVCC"
