@@ -879,7 +879,7 @@ select pwms in $pwmactive "Change INTERVAL" "Just quit" "Save and quit" "Show co
 		break ;;
 
 	"$(echo ${pwmactive} |sed -e 's/ /\n/g' | egrep "${pwms}")" )
-		pwmsed=$(echo ${pwms} | sed -e 's/\//\\\\\//g') #escape / for sed
+		pwmsed=$(echo ${pwms} | sed -e 's/\//\\\//g') #escape / for sed
 		echo
 
 		echo 'Devices:'
