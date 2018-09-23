@@ -130,8 +130,9 @@ OTHER INFORMATION
 
 The developers of this package can be reached using
 * a mailing list lm-sensors <at> vger <dot> kernel <dot> org
-  (you can subscribe at http://vger.kernel.org/vger-lists.html#lm-sensors,
-  however you do not need to be subscribed to post to the list)
+  (you can get information on how to subscribe, unsubscribe, and the list
+  of archives at http://vger.kernel.org/vger-lists.html#lm-sensors;
+  you do not need to be subscribed to post to the list)
 * GitHub (see https://github.com/lm-sensors/lm-sensors)
 
 Do not hesitate to contact us if you have questions, suggestions, problems,
