@@ -1,0 +1,25 @@
+This directory contains tools which may help with debugging lm_sensors.
+
+find-driver
+===========
+If the 'sensors' program does not report useful values for certain hardware
+monitoring inputs, the problem in most cases is not in lm_sensors. lm_sensors
+only reads values exported by the Linux kernel. Finding the driver responsible
+for exporting the particular hardware monitoring chip may help to diagnose
+the problem further. It is possible that there is a bug in the driver, however
+it is even more likely that the input is simply not used on your board.
+Nonetheless, identifying the driver may help you identify the piece of hardware
+that reports the bogus value.
+
+This script finds the driver and kernel module responsible for exporting
+a hardware monitoring chip in sysfs. It should be given the chip name (as
+reported by the 'sensors' program) as argument. For example:
+
+$ sensors
+thinkpad-isa-0000
+Adapter: ISA adapter
+fan1:           0 RPM
+
+$ ./find-driver thinkpad-isa-0000
+Driver: thinkpad_hwmon
+Module: thinkpad_acpi

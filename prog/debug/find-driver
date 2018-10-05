@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# find-driver - find the driver exporting a chip as reported by 'sensors'
+# Copyright (C) 2018  Ondřej Lysoněk
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+shopt -s nullglob
+
+function usage() {
+	echo "Usage: $0 <chip name>" >&2
+	echo >&2
+	echo 'Chip name is a string in the format <chip>-<bus>-<address>' >&2 
+	echo 'as reported by the "sensors" program. For example the chip' >&2
+	echo 'name can be "coretemp-isa-0000" or "acpitz-virtual-0".' >&2
+}
+
+function get_chip() {
+	echo "$1" | sed -r -e 's/^(.+)-[^-]+-[^-]+$/\1/'
+}
+
+if [ "$#" -lt 1 ]; then
+	usage
+	exit 1
+fi
+ARG=$1; shift
+if [ "$ARG" = "-h" ] || [ "$ARG" = "--help" ]; then
+	usage
+	test "$#" -eq 0
+	exit
+elif [ "$ARG" = "-d" ] || [ "$ARG" = "--debug" ]; then
+	test "$#" -eq 1 || { usage; exit 1; }
+	set -x
+	CHIP=$(get_chip "$1")
+else
+	test "$#" -eq 0 || { usage; exit 1; }
+	CHIP=$(get_chip "$ARG")
+fi
+
+DEVICE=
+for i in /sys/class/hwmon/hwmon*; do
+	NAME=
+	if [ -f "$i/name" ]; then
+		NAME=$(cat "$i/name")
+	elif [ -L "$i/device" ]; then
+		TARGET=$(readlink -f "$i/device")
+		if [ -f "$TARGET/name" ]; then
+			NAME=$(cat "$TARGET/name")
+		fi
+	fi
+	if [ "$NAME" = "$CHIP" ]; then
+		DEVICE="$i"
+		break
+	fi
+done
+test -n "$DEVICE" || { echo 'Chip not found.' >&2; exit 1; }
+
+DRIVER=unknown
+MODULE=unknown
+while true; do
+	if [ -L "$DEVICE/driver" ]; then
+		DRIVER_DIR=$(readlink -f "$DEVICE/driver")
+		DRIVER=$(basename "$DRIVER_DIR")
+		if [ -L "$DRIVER_DIR/module" ]; then
+			MODULE=$(basename $(readlink "$DRIVER_DIR/module"))
+		fi
+		break
+	elif [ -L "$DEVICE/device" ]; then
+		DEVICE=$(readlink -f "$DEVICE/device")
+	else
+		break
+	fi
+done
+
+echo "Driver: $DRIVER"
+echo "Module: $MODULE"
