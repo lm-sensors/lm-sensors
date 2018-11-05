@@ -562,7 +562,7 @@ static void scale_value(double *value, const char **prefixstr)
 
 static const struct sensor_subfeature_list power_common_sensors[] = {
 	{ SENSORS_SUBFEATURE_POWER_ALARM, NULL, 1, NULL },
-	{ SENSORS_SUBFEATURE_POWER_MAX_ALARM, NULL, 1, "MIN" },
+	{ SENSORS_SUBFEATURE_POWER_MIN_ALARM, NULL, 1, "MIN" },
 	{ SENSORS_SUBFEATURE_POWER_MAX_ALARM, NULL, 1, "MAX" },
 	{ SENSORS_SUBFEATURE_POWER_LCRIT_ALARM, NULL, 1, "LCRIT" },
 	{ SENSORS_SUBFEATURE_POWER_CRIT_ALARM, NULL, 1, "CRIT" },
