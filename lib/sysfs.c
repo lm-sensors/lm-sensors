@@ -707,28 +707,50 @@ static int find_bus_type(const char *dev_path,
 	char linkpath[NAME_MAX];
 	char subsys_path[NAME_MAX], *subsys;
 	int sub_len;
+	char *my_dev_path = NULL;
+	int ret = 0;
+
+	my_dev_path = strdup(dev_path);
+	if (my_dev_path == NULL)
+		sensors_fatal_error(__func__, "Out of memory");
 
 	/* Find bus type */
-	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
-	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	if (sub_len < 0 && errno == ENOENT) {
-		/* Fallback to "bus" link for kernels <= 2.6.17 */
-		snprintf(linkpath, NAME_MAX, "%s/bus", dev_path);
+	while (!ret && my_dev_path != NULL) {
+		snprintf(linkpath, NAME_MAX, "%s/subsystem", my_dev_path);
 		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	}
-	if (sub_len < 0) {
-		/* Older kernels (<= 2.6.11) have neither the subsystem
-		   symlink nor the bus symlink */
-		if (errno == ENOENT)
-			subsys = NULL;
-		else
-			return -SENSORS_ERR_KERNEL;
-	} else {
-		subsys_path[sub_len] = '\0';
-		subsys = strrchr(subsys_path, '/') + 1;
+		if (sub_len < 0 && errno == ENOENT) {
+			/* Fallback to "bus" link for kernels <= 2.6.17 */
+			snprintf(linkpath, NAME_MAX, "%s/bus", my_dev_path);
+			sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+		}
+		if (sub_len < 0) {
+			/* Older kernels (<= 2.6.11) have neither the subsystem
+			   symlink nor the bus symlink */
+			if (errno == ENOENT) {
+				subsys = NULL;
+			} else {
+				ret = -SENSORS_ERR_KERNEL;
+				break;
+			}
+		} else {
+			subsys_path[sub_len] = '\0';
+			subsys = strrchr(subsys_path, '/') + 1;
+		}
+		ret = classify_device(dev_name, subsys, entry);
+		if (!ret) {
+			snprintf(linkpath, NAME_MAX, "%s/device", my_dev_path);
+			free(my_dev_path);
+			my_dev_path = realpath(linkpath, NULL);
+			if (my_dev_path != NULL)
+				dev_name = strrchr(my_dev_path, '/') + 1;
+			else if (errno == ENOMEM)
+				sensors_fatal_error(__func__, "Out of memory");
+		}
 	}
 
-	return classify_device(dev_name, subsys, entry);
+	if (my_dev_path != NULL)
+		free(my_dev_path);
+	return ret;
 }
 
 /* returns: number of devices added (0 or 1) if successful, <0 otherwise */
