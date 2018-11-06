@@ -803,25 +803,29 @@ static int sensors_read_sysfs_chips_compat(void)
 static int sensors_add_hwmon_device(const char *path, const char *classdev)
 {
 	char linkpath[NAME_MAX];
-	char device[NAME_MAX], *dev_name;
-	int dev_len, err;
+	char *dev_path, *dev_name;
+	int err = 0;
 	(void)classdev; /* hide warning */
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
-	dev_len = readlink(linkpath, device, NAME_MAX - 1);
-	if (dev_len < 0) {
-		/* No device link? Treat as virtual */
-		err = sensors_read_one_sysfs_chip(NULL, NULL, path);
+	dev_path = realpath(linkpath, NULL);
+	if (dev_path == NULL) {
+		if (errno == ENOMEM) {
+			sensors_fatal_error(__func__, "Out of memory");
+		} else {
+			/* No device link? Treat as virtual */
+			err = sensors_read_one_sysfs_chip(NULL, NULL, path);
+		}
 	} else {
-		device[dev_len] = '\0';
-		dev_name = strrchr(device, '/') + 1;
+		dev_name = strrchr(dev_path, '/') + 1;
 
 		/* The attributes we want might be those of the hwmon class
 		   device, or those of the device itself. */
-		err = sensors_read_one_sysfs_chip(linkpath, dev_name, path);
+		err = sensors_read_one_sysfs_chip(dev_path, dev_name, path);
 		if (err == 0)
-			err = sensors_read_one_sysfs_chip(linkpath, dev_name,
-							  linkpath);
+			err = sensors_read_one_sysfs_chip(dev_path, dev_name,
+							  dev_path);
+		free(dev_path);
 	}
 	if (err < 0)
 		return err;
