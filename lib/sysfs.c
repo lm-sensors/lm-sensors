@@ -803,7 +803,7 @@ static int sensors_read_sysfs_chips_compat(void)
 static int sensors_add_hwmon_device(const char *path, const char *classdev)
 {
 	char linkpath[NAME_MAX];
-	char device[NAME_MAX], *device_p;
+	char device[NAME_MAX], *dev_name;
 	int dev_len, err;
 	(void)classdev; /* hide warning */
 
@@ -814,13 +814,13 @@ static int sensors_add_hwmon_device(const char *path, const char *classdev)
 		err = sensors_read_one_sysfs_chip(NULL, NULL, path);
 	} else {
 		device[dev_len] = '\0';
-		device_p = strrchr(device, '/') + 1;
+		dev_name = strrchr(device, '/') + 1;
 
 		/* The attributes we want might be those of the hwmon class
 		   device, or those of the device itself. */
-		err = sensors_read_one_sysfs_chip(linkpath, device_p, path);
+		err = sensors_read_one_sysfs_chip(linkpath, dev_name, path);
 		if (err == 0)
-			err = sensors_read_one_sysfs_chip(linkpath, device_p,
+			err = sensors_read_one_sysfs_chip(linkpath, dev_name,
 							  linkpath);
 	}
 	if (err < 0)
