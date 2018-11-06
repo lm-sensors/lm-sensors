@@ -700,15 +700,43 @@ static int classify_device(const char *dev_name,
 	return ret;
 }
 
+static int find_bus_type(const char *dev_path,
+                         const char *dev_name,
+                         sensors_chip_features *entry)
+{
+	char linkpath[NAME_MAX];
+	char subsys_path[NAME_MAX], *subsys;
+	int sub_len;
+
+	/* Find bus type */
+	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
+	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+	if (sub_len < 0 && errno == ENOENT) {
+		/* Fallback to "bus" link for kernels <= 2.6.17 */
+		snprintf(linkpath, NAME_MAX, "%s/bus", dev_path);
+		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+	}
+	if (sub_len < 0) {
+		/* Older kernels (<= 2.6.11) have neither the subsystem
+		   symlink nor the bus symlink */
+		if (errno == ENOENT)
+			subsys = NULL;
+		else
+			return -SENSORS_ERR_KERNEL;
+	} else {
+		subsys_path[sub_len] = '\0';
+		subsys = strrchr(subsys_path, '/') + 1;
+	}
+
+	return classify_device(dev_name, subsys, entry);
+}
+
 /* returns: number of devices added (0 or 1) if successful, <0 otherwise */
 static int sensors_read_one_sysfs_chip(const char *dev_path,
 				       const char *dev_name,
 				       const char *hwmon_path)
 {
-	int err = -SENSORS_ERR_KERNEL;
-	char linkpath[NAME_MAX];
-	char subsys_path[NAME_MAX], *subsys;
-	int sub_len;
+	int ret = 1;
 	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
@@ -725,50 +753,28 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		entry.chip.bus.nr = 0;
 		/* For now we assume that virtual devices are unique */
 		entry.chip.addr = 0;
-		goto done;
-	}
-
-	/* Find bus type */
-	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
-	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	if (sub_len < 0 && errno == ENOENT) {
-		/* Fallback to "bus" link for kernels <= 2.6.17 */
-		snprintf(linkpath, NAME_MAX, "%s/bus", dev_path);
-		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	}
-	if (sub_len < 0) {
-		/* Older kernels (<= 2.6.11) have neither the subsystem
-		   symlink nor the bus symlink */
-		if (errno == ENOENT)
-			subsys = NULL;
-		else
-			goto exit_free;
 	} else {
-		subsys_path[sub_len] = '\0';
-		subsys = strrchr(subsys_path, '/') + 1;
+		ret = find_bus_type(dev_path, dev_name, &entry);
+		if (ret <= 0)
+			goto exit_free;
 	}
 
-	if (!classify_device(dev_name, subsys, &entry)) {
-		/* Ignore unknown device */
-		err = 0;
+	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0) {
+		ret = -SENSORS_ERR_KERNEL;
 		goto exit_free;
 	}
-
-done:
-	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0)
-		goto exit_free;
 	if (!entry.subfeature) { /* No subfeature, discard chip */
-		err = 0;
+		ret = 0;
 		goto exit_free;
 	}
 	sensors_add_proc_chips(&entry);
 
-	return 1;
+	return ret;
 
 exit_free:
 	free(entry.chip.prefix);
 	free(entry.chip.path);
-	return err;
+	return ret;
 }
 
 static int sensors_add_hwmon_device_compat(const char *path,
