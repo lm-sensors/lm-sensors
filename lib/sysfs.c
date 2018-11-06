@@ -759,6 +759,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 				       const char *hwmon_path)
 {
 	int ret = 1;
+	int virtual = 0;
 	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
@@ -770,15 +771,22 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		sensors_fatal_error(__func__, "Out of memory");
 
 	if (dev_path == NULL) {
+		virtual = 1;
+	} else {
+		ret = find_bus_type(dev_path, dev_name, &entry);
+		if (ret == 0) {
+			virtual = 1;
+			ret = 1;
+		} else if (ret < 0) {
+			goto exit_free;
+		}
+	}
+	if (virtual) {
 		/* Virtual device */
 		entry.chip.bus.type = SENSORS_BUS_TYPE_VIRTUAL;
 		entry.chip.bus.nr = 0;
 		/* For now we assume that virtual devices are unique */
 		entry.chip.addr = 0;
-	} else {
-		ret = find_bus_type(dev_path, dev_name, &entry);
-		if (ret <= 0)
-			goto exit_free;
 	}
 
 	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0) {
