@@ -2,11 +2,16 @@ lm-sensors CHANGES file
 -----------------------
 
 git HEAD
+  Add the find-driver script for debugging
+  Various documentation and man page improvements
+  Fix various issues found by Coverity Scan
+  Fix compilation with the musl C library
   Development version string now contains "+git" instead of "+SVN"
   Updated links in documentation to reflect the new home of lm_sensors
   sensors.1: Add reference to sensors-detect
              Document -j option (json output)
   sensors: Add support for json output
+           Add support for power min, lcrit, min_alarm, lcrit_alarm
   sensors-detect: Fix systemd paths
                   Add detection of Fintek F81768
                   Only probe I/O ports on x86
@@ -29,11 +34,16 @@ git HEAD
                   Add detection of AMD Family 15h Model 70+ temperature sensors
   configs: Add sample configuration files.
   sensors.conf.default: Add hardwired inputs of NCT6795D
+                        Add hardwired inputs of F71868A
+                        Add hardwired NCT6796D inputs
   vt1211_pwm: replaced deprecated sub shell syntax
+              run with bash instead of sh
   pwmconfig: replaced deprecated sub shell syntax
   fancontrol: replaced deprecated sub shell syntax
+              save original pwm values
   fancontrol.8: replaced deprecated sub shell syntax
   libsensors: Add support for SENSORS_BUS_TYPE_SCSI
+              Add support for power min, lcrit, min_alarm, lcrit_alarm
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
