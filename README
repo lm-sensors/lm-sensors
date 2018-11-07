@@ -128,6 +128,9 @@ the following tests are recommended.
 OTHER INFORMATION
 -----------------
 
+The lm_sensors website can be found at
+https://hwmon.wiki.kernel.org/lm_sensors
+
 The developers of this package can be reached using
 * a mailing list lm-sensors <at> vger <dot> kernel <dot> org
   (you can get information on how to subscribe, unsubscribe, and the list
