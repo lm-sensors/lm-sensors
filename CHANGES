@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 git HEAD
+  Fixed disappearance of certain hwmon chips with 4.19+ kernels
   Add the find-driver script for debugging
   Various documentation and man page improvements
   Fix various issues found by Coverity Scan
