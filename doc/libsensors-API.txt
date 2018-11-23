@@ -6,7 +6,7 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
-0x4??   lm-sensors 3.?.?
+0x500   lm-sensors 3.5.0
 * Added support for power min, lcrit, min_alarm and lcrit_alarm
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MIN
   enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_LCRIT

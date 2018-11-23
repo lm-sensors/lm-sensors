@@ -2,6 +2,8 @@ lm-sensors CHANGES file
 -----------------------
 
 git HEAD
+
+3.5.0 (2018-11-23)
   Fixed disappearance of certain hwmon chips with 4.19+ kernels
   Add the find-driver script for debugging
   Various documentation and man page improvements
