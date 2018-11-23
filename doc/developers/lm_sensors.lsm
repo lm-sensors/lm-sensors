@@ -9,7 +9,7 @@ Description: Hardware health monitoring package for Linux. It consists of
              https://hwmon.wiki.kernel.org/lm_sensors
 Keywords: sensors health hardware-monitoring fan-speed
 Author: jdelvare@suse.de (Jean Delvare)
-Maintained-by: jdelvare@suse.de (Jean Delvare)
+Maintained-by: olysonek@redhat.com (Ondřej Lysoněk)
 Primary-site: https://github.com
               /lm-sensors/lm-sensors/archive/V3-5-0/lm-sensors-3-5-0.tar.gz
 Copying-policy: GPL/LGPL
