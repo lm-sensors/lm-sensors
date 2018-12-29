@@ -815,6 +815,10 @@ function SaveConfig()
 	echo "MINSTOP=$MINSTOP" >>$tmpfile
 	[ -n "$MINPWM" ] && echo "MINPWM=$MINPWM" >>$tmpfile
 	[ -n "$MAXPWM" ] && echo "MAXPWM=$MAXPWM" >>$tmpfile
+	#set to default if path is blank or defined to 'y' by mistake
+	if [ -z "$var" ] || [ $FCCONFIG="y" ]; then
+		FCONFIG="/etc/fancontrol"
+	fi
 	mv $tmpfile $FCCONFIG
 	chmod +r $FCCONFIG
 	#check if file was written correctly
