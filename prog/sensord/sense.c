@@ -53,13 +53,15 @@ static int idChip(const sensors_chip_name *chip)
 		return -1;
 	}
 
-	sensorLog(LOG_INFO, "Chip: %s", name);
+	if (!sensord_args.logOneline)
+		sensorLog(LOG_INFO, "Chip: %s", name);
 
 	adapter = sensors_get_adapter_name(&chip->bus);
 	if (!adapter)
 		sensorLog(LOG_INFO, "Error getting adapter name");
 	else
-		sensorLog(LOG_INFO, "Adapter: %s", adapter);
+		if (!sensord_args.logOneline)
+			sensorLog(LOG_INFO, "Adapter: %s", adapter);
 
 	return 0;
 }
@@ -142,9 +144,15 @@ static int do_features(const sensors_chip_name *chip,
 		return -1;
 	}
 
-	if (action == DO_READ)
-		sensorLog(LOG_INFO, "  %s: %s", label, formatted);
-	else
+	if (action == DO_READ) {
+		if (sensord_args.logOneline)
+			sensorLog(LOG_INFO, "Chip: %s Adapter: %s  %s: %s",
+				  chipName(chip),
+				  sensors_get_adapter_name(&chip->bus),
+				  label, formatted);
+		else
+			sensorLog(LOG_INFO, "  %s: %s", label, formatted);
+	} else
 		sensorLog(LOG_ALERT, "Sensor alarm: Chip %s: %s: %s",
 			  chipName(chip), label, formatted);
 
