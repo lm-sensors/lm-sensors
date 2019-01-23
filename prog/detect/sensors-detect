@@ -2777,7 +2777,9 @@ use vars qw(@cpu_ids);
 	}, {
 		name => "AMD Family 15h power sensors",
 		driver => "fam15h_power",
-		detect => sub { amd_pci_detect('1604') },
+		detect => sub {
+			amd_pci_detect('1604', '141e', '1574', '15b4')
+		},
 	}, {
 		name => "AMD Family 16h power sensors",
 		driver => "fam15h_power",
