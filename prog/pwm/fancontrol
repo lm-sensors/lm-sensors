@@ -67,6 +67,7 @@ function LoadConfig
 	FCFANS=$(grep -E '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g')
 	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g')
 	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g')
+	AVERAGE=$(grep -E '^AVERAGE=.*$' $1 | sed -e 's/AVERAGE=//g')
 
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
@@ -107,6 +108,8 @@ function LoadConfig
 		[ -z "${AFCMINPWM[$fcvcount]}" ] && AFCMINPWM[$fcvcount]=0
 		AFCMAXPWM[$fcvcount]=$(echo $MAXPWM |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
 		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
+		AFCAVERAGE[$fcvcount]=$(echo $AVERAGE |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		[ -z "${AFCAVERAGE[$fcvcount]}" ] && AFCAVERAGE[$fcvcount]=1
 
 		# verify the validity of the settings
 		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
@@ -139,6 +142,13 @@ function LoadConfig
 			echo "MINPWM must be at least 0" >&2
 			exit 1
 		fi
+		if [ "${AFCAVERAGE[$fcvcount]}" -lt 1 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "AVERAGE must be at least 1" >&2
+			exit 1
+		fi
+		declare -a PREVIOUSTEMP_$fcvcount
 
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
@@ -150,6 +160,7 @@ function LoadConfig
 		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
 		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
 		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
+		echo "  AVERAGE=${AFCAVERAGE[$fcvcount]}"
 		let fcvcount=fcvcount+1
 	done
 	echo
@@ -511,7 +522,7 @@ function UpdateFanSpeeds
 {
 	local fcvcount
 	local pwmo tsens fan mint maxt minsa minso minpwm maxpwm
-	local tval pwmpval fanval min_fanval one_fan one_fanval
+	local tval tlastval pwmpval fanval min_fanval one_fan one_fanval
 	local -i pwmval
 
 	let fcvcount=0
@@ -527,8 +538,9 @@ function UpdateFanSpeeds
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
 		maxpwm=${AFCMAXPWM[$fcvcount]}
+		avg=${AFCAVERAGE[$fcvcount]}
 
-		read tval < ${tsens}
+		read tlastval < ${tsens}
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading temperature from $DIR/$tsens"
@@ -541,6 +553,20 @@ function UpdateFanSpeeds
 			echo "Error reading PWM value from $DIR/$pwmo"
 			restorefans 1
 		fi
+
+		# copy PREVIOUSTEMP_$fcvcount array to prevtemp
+		declare -a 'prevtemp=(${'"PREVIOUSTEMP_$fcvcount"'[@]})'
+		# add new element to the end of the array
+		prevtemp+=($tlastval)
+		# if needed, remove the first element of the array
+		if [ "${#prevtemp[@]}" -gt $avg ]
+		then
+			prevtemp=("${prevtemp[@]:1}")
+		fi
+		# calculate the average value of all elements
+		tval=$(( ( ${prevtemp[@]/%/+}0 ) / ${#prevtemp[@]} ))
+		# copy prevtemp back to PREVIOUSTEMP_$fcvcount
+		eval "PREVIOUSTEMP_$fcvcount=(\"${prevtemp[@]}\")"
 
 		# If fanspeed-sensor output shall be used, do it
 		if [[ -n ${fan} ]]
@@ -586,6 +612,8 @@ function UpdateFanSpeeds
 			echo "minso=$minso"
 			echo "minpwm=$minpwm"
 			echo "maxpwm=$maxpwm"
+			echo "tlastval=$tlastval"
+			echo "prevtemp=${prevtemp[@]}"
 			echo "tval=$tval"
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"

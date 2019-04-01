@@ -68,6 +68,11 @@ MAXPWM
 	The PWM value to use when the temperature is over MAXTEMP.
 	If this value isn't defined, it defaults to 255 (full speed).
 
+AVERAGE
+	How many last temperature readings are used to average the temperature.
+	It can be used to smoothen short temperature peaks.
+	If this value isn't defined, it defaults to 1 (no averaging).
+
 A graph might help you understand how the different values relate
 to each other:
 
@@ -126,7 +131,6 @@ linearly with rising temperature.
 Planned features
 
 rc-scripts for some gnu/linux-distributions
-smoother regulation (temp interpolation)
 gui for configuration
 
 If you have other wishes or want to contribute something, please let me know:

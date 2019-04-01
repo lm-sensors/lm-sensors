@@ -80,6 +80,11 @@ If this value isn't defined, it defaults to 0 (stopped fan).
 .B MAXPWM
 The PWM value to use when the temperature is over MAXTEMP.
 If this value isn't defined, it defaults to 255 (full speed).
+.TP
+.B AVERAGE
+How many last temperature readings are used to average the temperature.
+It can be used to smoothen short temperature peaks.
+If this value isn't defined, it defaults to 1 (no averaging).
 .PP
 The configuration file format is a bit strange:
 .IP
