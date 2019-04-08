@@ -2785,6 +2785,10 @@ use vars qw(@cpu_ids);
 		driver => "fam15h_power",
 		detect => sub { amd_pci_detect('1534', '1584') },
 	}, {
+		name => "Hygon Family 18h thermal sensors",
+		driver => "k10temp",
+		detect => sub { hygon_pci_detect('1463') },
+	}, {
 		name => "Intel digital thermal sensor",
 		driver => "coretemp",
 		detect => \&coretemp_detect,
@@ -7044,6 +7048,15 @@ sub amd_pci_detect
 	my $dev_id;
 	while (defined($dev_id = shift)) {
 		return 9 if exists $pci_list{"1022:$dev_id"};
+	}
+	return undef;
+}
+
+sub hygon_pci_detect
+{
+	my $dev_id;
+	while (defined($dev_id = shift)) {
+		return 9 if exists $pci_list{"1d94:$dev_id"};
 	}
 	return undef;
 }
