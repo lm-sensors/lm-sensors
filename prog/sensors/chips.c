@@ -101,12 +101,13 @@ void print_chip_json(const sensors_chip_name *name)
 					if (subCnt > 0)
 						printf(",\n");
 					printf("         \"%s\": %.3f", sub->name, val);
+					subCnt++;
 				}
 
 			} else {
 				printf("(%s)", label);
+				subCnt++;
 			}
-			subCnt++;
 		}
 		free(label);
 		printf("\n      }");
