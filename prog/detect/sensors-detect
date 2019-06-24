@@ -1441,7 +1441,7 @@ use vars qw(@i2c_adapter_names);
 		i2c_detect => sub { fintek_detect(@_, 4); },
 	}, {
 		name => "Fintek F75387SG/RG",
-		driver => "to-be-written",
+		driver => "f75375s",
 		i2c_addrs => [0x2d..0x2e],
 		i2c_detect => sub { fintek_detect(@_, 5); },
 	}, {
