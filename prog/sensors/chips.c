@@ -454,8 +454,9 @@ static void print_chip_in(const sensors_chip_name *name,
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sV%*s", val, unit, 2 - (int)strlen(unit), "");
-	} else
+	} else {
 		printf("     N/A  ");
+	}
 
 	sensor_count = alarm_count = 0;
 	get_sensor_limit_data(name, feature, voltage_sensors,
@@ -650,8 +651,9 @@ static void print_chip_power(const sensors_chip_name *name,
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sW%*s", val, unit, 2 - (int)strlen(unit), "");
-	} else
+	} else {
 		printf("     N/A  ");
+	}
 
 	for (i = 0; i < sensor_count; i++) {
 		/*
@@ -698,8 +700,9 @@ static void print_chip_energy(const sensors_chip_name *name,
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sJ", val, unit);
-	} else
+	} else {
 		printf("     N/A");
+	}
 
 	printf("\n");
 }
@@ -811,8 +814,9 @@ static void print_chip_curr(const sensors_chip_name *name,
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
 		printf("%6.2f %sA%*s", val, unit, 2 - (int)strlen(unit), "");
-	} else
+	} else {
 		printf("     N/A  ");
+	}
 
 	sensor_count = alarm_count = 0;
 	get_sensor_limit_data(name, feature, current_sensors,
