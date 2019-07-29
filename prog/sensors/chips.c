@@ -32,6 +32,8 @@
 
 #define ARRAY_SIZE(arr) (int)(sizeof(arr) / sizeof((arr)[0]))
 
+static void scale_value(double *value, const char **prefixstr);
+
 void print_chip_raw(const sensors_chip_name *name)
 {
 	int a, b, err;
@@ -433,6 +435,7 @@ static void print_chip_in(const sensors_chip_name *name,
 {
 	const sensors_subfeature *sf;
 	char *label;
+	const char *unit;
 	struct sensor_subfeature_data sensors[NUM_IN_SENSORS];
 	struct sensor_subfeature_data alarms[NUM_IN_ALARMS];
 	int sensor_count, alarm_count;
@@ -448,9 +451,10 @@ static void print_chip_in(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_IN_INPUT);
-	if (sf && get_input_value(name, sf, &val) == 0)
-		printf("%+6.2f V  ", val);
-	else
+	if (sf && get_input_value(name, sf, &val) == 0) {
+		scale_value(&val, &unit);
+		printf("%6.2f %sV%*s", val, unit, 2 - (int)strlen(unit), "");
+	} else
 		printf("     N/A  ");
 
 	sensor_count = alarm_count = 0;
@@ -789,6 +793,7 @@ static void print_chip_curr(const sensors_chip_name *name,
 	const sensors_subfeature *sf;
 	double val;
 	char *label;
+	const char *unit;
 	struct sensor_subfeature_data sensors[NUM_CURR_SENSORS];
 	struct sensor_subfeature_data alarms[NUM_CURR_ALARMS];
 	int sensor_count, alarm_count;
@@ -803,9 +808,10 @@ static void print_chip_curr(const sensors_chip_name *name,
 
 	sf = sensors_get_subfeature(name, feature,
 				    SENSORS_SUBFEATURE_CURR_INPUT);
-	if (sf && get_input_value(name, sf, &val) == 0)
-		printf("%+6.2f A  ", val);
-	else
+	if (sf && get_input_value(name, sf, &val) == 0) {
+		scale_value(&val, &unit);
+		printf("%6.2f %sA%*s", val, unit, 2 - (int)strlen(unit), "");
+	} else
 		printf("     N/A  ");
 
 	sensor_count = alarm_count = 0;
