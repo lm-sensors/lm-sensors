@@ -77,7 +77,7 @@ LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
 # manual pages will be installed.
 MANDIR := $(PREFIX)/man
 
-MACHINE := $(shell uname -m)
+ARCH := $(firstword $(subst -, ,$(shell $(CC) -dumpmachine)))
 
 # Extra non-default programs to build; e.g., sensord
 #PROG_EXTRA := sensord
@@ -109,7 +109,7 @@ BUILD_STATIC_LIB := 1
 SRCDIRS := lib prog/detect prog/pwm \
            prog/sensors ${PROG_EXTRA:%=prog/%} etc
 # Only build isadump and isaset on x86 machines.
-ifneq (,$(findstring $(MACHINE), i386 i486 i586 i686 x86_64))
+ifneq (,$(findstring $(ARCH), i386 i486 i586 i686 x86_64))
 SRCDIRS += prog/dump
 endif
 SRCDIRS += lib/test
