@@ -34,6 +34,11 @@
 
 static void scale_value(double *value, const char **prefixstr);
 
+static inline double deg_ctof(double cel)
+{
+	return cel * (9.0F / 5.0F) + 32.0F;
+}
+
 void print_chip_raw(const sensors_chip_name *name)
 {
 	int a, b, err;
@@ -60,8 +65,11 @@ void print_chip_raw(const sensors_chip_name *name)
 						"value of subfeature %s: %s\n",
 						sub->name,
 						sensors_strerror(err));
-				else
+				else {
+					if (fahrenheit)
+						val = deg_ctof(val);
 					printf("  %s: %.3f\n", sub->name, val);
+				}
 			} else
 				printf("(%s)\n", label);
 		}
@@ -102,6 +110,8 @@ void print_chip_json(const sensors_chip_name *name)
 				} else {
 					if (subCnt > 0)
 						printf(",\n");
+					if (fahrenheit)
+						val = deg_ctof(val);
 					printf("         \"%s\": %.3f", sub->name, val);
 					subCnt++;
 				}
@@ -120,11 +130,6 @@ void print_chip_json(const sensors_chip_name *name)
 }
 
 static const char hyst_str[] = "hyst";
-
-static inline double deg_ctof(double cel)
-{
-	return cel * (9.0F / 5.0F) + 32.0F;
-}
 
 static void print_label(const char *label, int space)
 {
