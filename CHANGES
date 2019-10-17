@@ -3,6 +3,25 @@ lm-sensors CHANGES file
 
 git HEAD
 
+3.6.0 (2019-10-18)
+  configs: Added a number of new configuration files
+  fancontrol: AVERAGE env variable can be used to set the number of previous readings to average
+  Makefile: The MACHINE variable has been renamed to ARCH
+  sensord: Add an option -1/--oneline to print chip and adapter on the same line
+  sensors: Fixed a stray comma bug in the JSON output
+           Fixed Fahrenheit conversion with raw and JSON output
+           Scale voltage and current values in the default output format
+  sensors-detect: Add detection of AMD Family 17h, models 30h, 70h
+                  Add detection of some AMD Family 15h models
+                  Add detection of AMD Family 16h model 30h power sensors
+                  Add detection of Hygon Family 18h thermal sensors
+                  Add detection of Nuvoton NCT6797D
+                  Add detection of Nuvoton NCT6798D
+                  Add detection of Nuvoton NCT6112D/NCT6114D/NCT6116D
+                  Fix printing CPU info on non-x86 arches
+                  Fix printing lm_sensors version
+                  Mark Fintek F75387SG/RG as supported by the f75375s driver
+
 3.5.0 (2018-11-23)
   Fixed disappearance of certain hwmon chips with 4.19+ kernels
   Add the find-driver script for debugging
