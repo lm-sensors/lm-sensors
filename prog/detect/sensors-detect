@@ -3130,7 +3130,7 @@ sub initialize_cpu_list
 			};
 			next;
 		}
-		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level)\s*:\s*(.+)$/) {
+		if (m/^(vendor_id|cpu family|model|model name|stepping|cpuid level|cpu|revision)\s*:\s*(.+)$/) {
 			my $k = $1;
 			my $v = $2;
 			$v =~ s/\s+/ /g;	# Merge multiple spaces
@@ -3146,7 +3146,16 @@ sub initialize_cpu_list
 sub print_cpu_info
 {
 	my $cpu = $cpu[0];
-	print "# Processor: $cpu->{'model name'} ($cpu->{'cpu family'}/$cpu->{model}/$cpu->{stepping})\n";
+	if ($kernel_arch =~ m/^ppc(64(le)?)?$/) {
+		print "# Processor: $cpu->{cpu} ($cpu->{revision})\n";
+	} elsif ($kernel_arch =~ m/^arm/) {
+		print "# Processor: $cpu->{'model name'}\n";
+	} elsif (exists $cpu->{'model name'} && exists $cpu->{'cpu family'}
+	         && exists $cpu->{'model'} && exists $cpu->{'stepping'}) {
+		print "# Processor: $cpu->{'model name'} ($cpu->{'cpu family'}/$cpu->{model}/$cpu->{stepping})\n";
+	} else {
+		print "# Cannot show processor info on $kernel_arch architecture.\n";
+	}
 }
 
 # @i2c_adapters is a list of references to hashes, one hash per I2C/SMBus
