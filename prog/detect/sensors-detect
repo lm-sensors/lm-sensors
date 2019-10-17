@@ -38,12 +38,9 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 #########################
 
 use constant NO_CACHE => 1;
+use constant LM_SENSORS_VER => '3.5.0';
 use vars qw(@pci_adapters @chip_ids @ipmi_ifs @non_hwmon_chip_ids
-	    $i2c_addresses_to_scan $revision @i2c_byte_cache %opt);
-
-$revision = '$Revision$ ($Date$)';
-$revision =~ s/\$\w+: (.*?) \$/$1/g;
-$revision =~ s/ \([^()]*\)//;
+	    $i2c_addresses_to_scan @i2c_byte_cache %opt);
 
 # This is the list of SMBus or I2C adapters we recognize by their PCI
 # signature. This is an easy and fast way to determine which SMBus or I2C
@@ -7511,7 +7508,7 @@ sub main
 		system("/sbin/service", "lm_sensors", "stop");
 	}
 
-	print "# sensors-detect revision $revision\n";
+	print "# sensors-detect version ".LM_SENSORS_VER."\n";
 	initialize_dmi_data();
 	print_dmi_summary();
 	print_kernel_version();

@@ -11,6 +11,7 @@ Release steps:
 - Update doc/developers/lm_sensors.lsm (Version, Entered-date and Primary-site)
 - Update doc/libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
 - Update version.h
+- grep for LM_SENSORS_VER and update values of the constant
 - Commit
 - Tag the release using git:
   git tag V3-x-x
