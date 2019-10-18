@@ -38,7 +38,7 @@ foreach ('/usr/sbin', '/usr/local/sbin', '/sbin') {
 #########################
 
 use constant NO_CACHE => 1;
-use constant LM_VERSION => '3.6.0';
+use constant LM_VERSION => '3.6.0+git';
 use vars qw(@pci_adapters @chip_ids @ipmi_ifs @non_hwmon_chip_ids
 	    $i2c_addresses_to_scan @i2c_byte_cache %opt);
 

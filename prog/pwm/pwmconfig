@@ -29,7 +29,7 @@
 #
 #
 
-LM_VERSION='3.6.0'
+LM_VERSION='3.6.0+git'
 PIDFILE="/var/run/fancontrol.pid"
 
 if [ -f "$PIDFILE" ]
