@@ -1392,6 +1392,11 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x73],
 		i2c_detect => sub { fsc_detect(@_, 7); },
 	}, {
+		name => "FTS Teutates",
+		driver => "ftsteutates",
+		i2c_addrs => [0x73],
+		i2c_detect => sub { fts_detect(@_); },
+	}, {
 		name => "ALi M5879",
 		driver => "to-be-written",
 		i2c_addrs => [0x2c..0x2d],
@@ -6360,6 +6365,33 @@ sub fsc_detect
 	return if $chip == 5 and $id ne 'HRC';	# Heracles
 	return if $chip == 6 and $id ne 'HDS';	# Hades
 	return if $chip == 7 and $id ne 'SYL';	# Syleus
+
+	return 8;
+}
+
+# Chip to detect: FTS Teutates
+# Registers used:
+#   0x00: Device ID
+#   0x01: Revision
+#   0x0C: Device Detection Register 1
+#   0x0D: Device Detection Register 2
+#   0x0E: Device Detection Register 3
+sub fts_detect
+{
+	my ($file) = @_;
+
+	# Device ID must be 0x11
+	# 0x10 == Baseboard Management Controller
+	# 0x01 == Teutates
+	return unless i2c_smbus_read_byte_data($file, 0x00) == 0x11;
+
+	# Revision must be greater or equal 0x2b to use device detection
+	return unless i2c_smbus_read_byte_data($file, 0x01) >= 0x2b;
+
+	# Device Detection Registers must be 0x17, 0x34, 0x54
+	return unless i2c_smbus_read_byte_data($file, 0x0C) == 0x17
+	          and i2c_smbus_read_byte_data($file, 0x0D) == 0x34
+	          and i2c_smbus_read_byte_data($file, 0x0E) == 0x54;
 
 	return 8;
 }
