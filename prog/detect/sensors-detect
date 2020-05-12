@@ -2273,7 +2273,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "Nuvoton W83677HG-I (NCT5572D/NCT6771F/NCT6772F/NCT6775F) Super IO Sensors",
-		driver => "w83627ehf",
+		driver => sub { kernel_version_at_least(3, 10, 0) ? "nct6775" : "w83627ehf" },
 		devid => 0xB470,
 		devid_mask => 0xFFF0,
 		logdev => 0x0b,
@@ -4574,7 +4574,9 @@ sub scan_cpu
 sub chip_special_cases
 {
 	# Some chip to driver mappings depend on the environment
-	foreach my $chip (@chip_ids) {
+	foreach my $chip (@chip_ids, @superio_ids_natsemi, @superio_ids_smsc,
+			  @superio_ids_smsc_ns, @superio_ids_winbond,
+			  @superio_ids_ite) {
 		if (ref($chip->{driver}) eq 'CODE') {
 			$chip->{driver} = $chip->{driver}->();
 		}
