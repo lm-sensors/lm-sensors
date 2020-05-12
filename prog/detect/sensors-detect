@@ -719,11 +719,6 @@ use vars qw(@i2c_adapter_names);
 		i2c_addrs => [0x2c..0x2e],
 		i2c_detect => sub { emc6w201_detect(@_); },
 	}, {
-		name => "Winbond WPCD377I",
-		driver => "not-a-sensor",
-		i2c_addrs => [0x2c..0x2e],
-		i2c_detect => sub { lm85_detect(@_, 7); },
-	}, {
 		name => "Analog Devices ADT7462",
 		driver => "adt7462",
 		i2c_addrs => [0x5c, 0x58],
@@ -1683,6 +1678,10 @@ use vars qw(@i2c_adapter_names);
 		name => "Winbond W83791SD",
 		i2c_addrs => [0x2c..0x2f],
 		i2c_detect => sub { w83791sd_detect(@_); },
+	}, {
+		name => "Winbond WPCD377I",
+		i2c_addrs => [0x2c..0x2e],
+		i2c_detect => sub { lm85_detect(@_, 7); },
 	}, {
 		name => "Fintek F75111R/RG/N (GPIO)",
 		i2c_addrs => [0x37, 0x4e],
