@@ -85,6 +85,9 @@ ARCH := $(firstword $(subst -, ,$(shell $(CC) -dumpmachine)))
 # Build and install static library
 BUILD_STATIC_LIB := 1
 
+# Build and install shared library
+BUILD_SHARED_LIB := 1
+
 # Set these to add preprocessor or compiler flags, or use
 # environment variables
 # CFLAGS :=
