@@ -2003,7 +2003,7 @@ chip "f71805f-*" "f71872f-*"
 # The configuration below is for the Kv8Pro and AV8 this is the default as this
 # driver is developed and tested on a Kv8Pro.
 # Configurations for many other Abit boards can be found at:
-# http://www.lm-sensors.org/trac/wiki/Configurations/Abit
+# https://github.com/lm-sensors/lm-sensors/tree/master/configs/Abit
 # If your motherboard isn't listed there and you create a configuration for it
 # please add it there.
 
@@ -2111,7 +2111,7 @@ chip "dme1737-*"
 # driver is developed and tested on an Epox EP-9U1697 GLI board.
 #
 # Premade configurations for other boards can be found at:
-# http://www.lm-sensors.org/trac/wiki/Configurations/
+# https://github.com/lm-sensors/lm-sensors/tree/master/configs
 # If your motherboard isn't listed there and you create a configuration for it
 # please add it there.
 #

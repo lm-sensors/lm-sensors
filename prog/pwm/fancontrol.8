@@ -80,6 +80,11 @@ If this value isn't defined, it defaults to 0 (stopped fan).
 .B MAXPWM
 The PWM value to use when the temperature is over MAXTEMP.
 If this value isn't defined, it defaults to 255 (full speed).
+.TP
+.B AVERAGE
+How many last temperature readings are used to average the temperature.
+It can be used to smoothen short temperature peaks.
+If this value isn't defined, it defaults to 1 (no averaging).
 .PP
 The configuration file format is a bit strange:
 .IP
@@ -113,7 +118,7 @@ main function.  This function gets the temperatures and fanspeeds from
 kernel driver files and calculates new speeds depending on temperature
 changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the PWM outputs. Currently the speed increases
-quadratically with rising temperature. This way you won't hear your fans most
+linearly with rising temperature. This way you won't hear your fans most
 of the time at best.
 
 .SH SEE ALSO

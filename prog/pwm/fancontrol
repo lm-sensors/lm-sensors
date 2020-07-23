@@ -8,7 +8,7 @@
 # Usage: fancontrol [CONFIGFILE]
 #
 # Dependencies:
-#   bash, egrep, sed, cut, sleep, readlink, lm_sensors :)
+#   bash, grep, sed, cut, sleep, readlink, lm_sensors :)
 #
 # Please send any questions, comments or success stories to
 # marius.reiner@hdev.de
@@ -55,18 +55,19 @@ function LoadConfig
 	fi
 
 	# grep configuration from file
-	INTERVAL=`egrep '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g'`
-	DEVPATH=`egrep '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g'`
-	DEVNAME=`egrep '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g'`
-	FCTEMPS=`egrep '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g'`
-	MINTEMP=`egrep '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g'`
-	MAXTEMP=`egrep '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g'`
-	MINSTART=`egrep '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g'`
-	MINSTOP=`egrep '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g'`
+	INTERVAL=$(grep -E '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g')
+	DEVPATH=$(grep -E '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
+	DEVNAME=$(grep -E '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
+	FCTEMPS=$(grep -E '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g')
+	MINTEMP=$(grep -E '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g')
+	MAXTEMP=$(grep -E '^MAXTEMP=.*$' $1 | sed -e 's/MAXTEMP=//g')
+	MINSTART=$(grep -E '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g')
+	MINSTOP=$(grep -E '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g')
 	# optional settings:
-	FCFANS=`egrep '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g'`
-	MINPWM=`egrep '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g'`
-	MAXPWM=`egrep '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g'`
+	FCFANS=$(grep -E '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g')
+	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g')
+	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g')
+	AVERAGE=$(grep -E '^AVERAGE=.*$' $1 | sed -e 's/AVERAGE=//g')
 
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
@@ -89,24 +90,26 @@ function LoadConfig
 	let fcvcount=0
 	for fcv in $FCTEMPS
 	do
-		if ! echo $fcv | egrep -q '='
+		if ! echo $fcv | grep -E -q '='
 		then
 			echo "Error in configuration file:" >&2
 			echo "FCTEMPS value is improperly formatted" >&2
 			exit 1
 		fi
 
-		AFCPWM[$fcvcount]=`echo $fcv |cut -d'=' -f1`
-		AFCTEMP[$fcvcount]=`echo $fcv |cut -d'=' -f2`
-		AFCFAN[$fcvcount]=`echo $FCFANS |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINTEMP[$fcvcount]=`echo $MINTEMP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMAXTEMP[$fcvcount]=`echo $MAXTEMP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINSTART[$fcvcount]=`echo $MINSTART |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINSTOP[$fcvcount]=`echo $MINSTOP |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
-		AFCMINPWM[$fcvcount]=`echo $MINPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCPWM[$fcvcount]=$(echo $fcv |cut -d'=' -f1)
+		AFCTEMP[$fcvcount]=$(echo $fcv |cut -d'=' -f2)
+		AFCFAN[$fcvcount]=$(echo $FCFANS |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		AFCMINTEMP[$fcvcount]=$(echo $MINTEMP |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		AFCMAXTEMP[$fcvcount]=$(echo $MAXTEMP |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		AFCMINSTART[$fcvcount]=$(echo $MINSTART |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		AFCMINSTOP[$fcvcount]=$(echo $MINSTOP |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		AFCMINPWM[$fcvcount]=$(echo $MINPWM |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
 		[ -z "${AFCMINPWM[$fcvcount]}" ] && AFCMINPWM[$fcvcount]=0
-		AFCMAXPWM[$fcvcount]=`echo $MAXPWM |sed -e 's/ /\n/g' |egrep "${AFCPWM[$fcvcount]}" |cut -d'=' -f2`
+		AFCMAXPWM[$fcvcount]=$(echo $MAXPWM |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
 		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
+		AFCAVERAGE[$fcvcount]=$(echo $AVERAGE |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		[ -z "${AFCAVERAGE[$fcvcount]}" ] && AFCAVERAGE[$fcvcount]=1
 
 		# verify the validity of the settings
 		if [ "${AFCMINTEMP[$fcvcount]}" -ge "${AFCMAXTEMP[$fcvcount]}" ]
@@ -139,6 +142,13 @@ function LoadConfig
 			echo "MINPWM must be at least 0" >&2
 			exit 1
 		fi
+		if [ "${AFCAVERAGE[$fcvcount]}" -lt 1 ]
+		then
+			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			echo "AVERAGE must be at least 1" >&2
+			exit 1
+		fi
+		declare -a PREVIOUSTEMP_$fcvcount
 
 		echo
 		echo "Settings for ${AFCPWM[$fcvcount]}:"
@@ -150,6 +160,7 @@ function LoadConfig
 		echo "  MINSTOP=${AFCMINSTOP[$fcvcount]}"
 		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
 		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
+		echo "  AVERAGE=${AFCAVERAGE[$fcvcount]}"
 		let fcvcount=fcvcount+1
 	done
 	echo
@@ -181,10 +192,10 @@ function ValidateDevices()
 
 	for entry in $OLD_DEVPATH
 	do
-		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
-		path=`echo "$entry" | sed -e 's/^[^=]*=//'`
+		device=$(echo "$entry" | sed -e 's/=[^=]*$//')
+		path=$(echo "$entry" | sed -e 's/^[^=]*=//')
 
-		if [ "`DevicePath "$device"`" != "$path" ]
+		if [ "$(DevicePath "$device")" != "$path" ]
 		then
 			echo "Device path of $device has changed" >&2
 			outdated=1
@@ -193,10 +204,10 @@ function ValidateDevices()
 
 	for entry in $OLD_DEVNAME
 	do
-		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
-		name=`echo "$entry" | sed -e 's/^[^=]*=//'`
+		device=$(echo "$entry" | sed -e 's/=[^=]*$//')
+		name=$(echo "$entry" | sed -e 's/^[^=]*=//')
 
-		if [ "`DeviceName "$device"`" != "$name" ]
+		if [ "$(DeviceName "$device")" != "$name" ]
 		then
 			echo "Device name of $device has changed" >&2
 			outdated=1
@@ -256,7 +267,7 @@ function FixupFiles
 
 	for entry in $DEVPATH
 	do
-		device=`echo "$entry" | sed -e 's/=[^=]*$//'`
+		device=$(echo "$entry" | sed -e 's/=[^=]*$//')
 
 		if [ -e "$device/name" ]
 		then
@@ -328,13 +339,13 @@ else
 fi
 
 # Detect path to sensors
-if echo "${AFCPWM[0]}" | egrep -q '^/'
+if echo "${AFCPWM[0]}" | grep -E -q '^/'
 then
 	DIR=/
-elif echo "${AFCPWM[0]}" | egrep -q '^hwmon[0-9]'
+elif echo "${AFCPWM[0]}" | grep -E -q '^hwmon[0-9]'
 then
 	DIR=/sys/class/hwmon
-elif echo "${AFCPWM[0]}" | egrep -q '^[1-9]*[0-9]-[0-9abcdef]{4}'
+elif echo "${AFCPWM[0]}" | grep -E -q '^[1-9]*[0-9]-[0-9abcdef]{4}'
 then
 	DIR=/sys/bus/i2c/devices
 else
@@ -421,12 +432,12 @@ function pwmdisable()
 			# check if setting pwmN_enable value was successful. Checking the
 			# pwmN value makes no sense, as it might already have been altered
 			# by the chip.
-			if [ `cat $ENABLE` = ${PWM_ENABLE_ORIG_STATE[${1}]} ]
+			if [ "$(cat $ENABLE)" = ${PWM_ENABLE_ORIG_STATE[${1}]} ]
 			then
 				return 0
 			fi
 		# if pwmN_enable is manual (1), check if restoring the pwmN value worked
-		elif [ `cat ${1}` = ${PWM_ORIG_STATE[${1}]} ]
+		elif [ "$(cat ${1})" = ${PWM_ORIG_STATE[${1}]} ]
 		then
 			return 0
 		fi
@@ -434,7 +445,7 @@ function pwmdisable()
 
 	# Try pwmN_enable=0
 	echo 0 > $ENABLE 2> /dev/null
-	if [ `cat $ENABLE` -eq 0 ]
+	if [ "$(cat $ENABLE)" -eq 0 ]
 	then
 		# Success
 		return 0
@@ -443,14 +454,14 @@ function pwmdisable()
 	# It didn't work, try pwmN_enable=1 pwmN=255
 	echo 1 > $ENABLE 2> /dev/null
 	echo $MAX > $1
-	if [ `cat $ENABLE` -eq 1 -a `cat $1` -ge 190 ]
+	if [ "$(cat $ENABLE)" -eq 1 -a "$(cat $1)" -ge 190 ]
 	then
 		# Success
 		return 0
 	fi
 
 	# Nothing worked
-	echo "$ENABLE stuck to" `cat $ENABLE` >&2
+	echo "$ENABLE stuck to" "$(cat $ENABLE)" >&2
 	return 1
 }
 
@@ -463,8 +474,8 @@ function pwmenable()
 	then
 		# save the original pwmN_control state, e.g. 1 for manual or 2 for auto,
 		# and the value from pwmN
-		local PWM_CONTROL_ORIG=`cat $ENABLE`
-		local PWM_ORIG=`cat ${1}`
+		local PWM_CONTROL_ORIG=$(cat $ENABLE)
+		local PWM_ORIG=$(cat ${1})
 		if [ "$DEBUG" != "" ]
 		then
 			echo "Saving $ENABLE original value as $PWM_CONTROL_ORIG"
@@ -511,7 +522,7 @@ function UpdateFanSpeeds
 {
 	local fcvcount
 	local pwmo tsens fan mint maxt minsa minso minpwm maxpwm
-	local tval pwmpval fanval min_fanval one_fan one_fanval
+	local tval tlastval pwmpval fanval min_fanval one_fan one_fanval
 	local -i pwmval
 
 	let fcvcount=0
@@ -527,8 +538,9 @@ function UpdateFanSpeeds
 		minso=${AFCMINSTOP[$fcvcount]}
 		minpwm=${AFCMINPWM[$fcvcount]}
 		maxpwm=${AFCMAXPWM[$fcvcount]}
+		avg=${AFCAVERAGE[$fcvcount]}
 
-		read tval < ${tsens}
+		read tlastval < ${tsens}
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading temperature from $DIR/$tsens"
@@ -541,6 +553,20 @@ function UpdateFanSpeeds
 			echo "Error reading PWM value from $DIR/$pwmo"
 			restorefans 1
 		fi
+
+		# copy PREVIOUSTEMP_$fcvcount array to prevtemp
+		declare -a 'prevtemp=(${'"PREVIOUSTEMP_$fcvcount"'[@]})'
+		# add new element to the end of the array
+		prevtemp+=($tlastval)
+		# if needed, remove the first element of the array
+		if [ "${#prevtemp[@]}" -gt $avg ]
+		then
+			prevtemp=("${prevtemp[@]:1}")
+		fi
+		# calculate the average value of all elements
+		tval=$(( ( ${prevtemp[@]/%/+}0 ) / ${#prevtemp[@]} ))
+		# copy prevtemp back to PREVIOUSTEMP_$fcvcount
+		eval "PREVIOUSTEMP_$fcvcount=(\"${prevtemp[@]}\")"
 
 		# If fanspeed-sensor output shall be used, do it
 		if [[ -n ${fan} ]]
@@ -586,6 +612,8 @@ function UpdateFanSpeeds
 			echo "minso=$minso"
 			echo "minpwm=$minpwm"
 			echo "maxpwm=$maxpwm"
+			echo "tlastval=$tlastval"
+			echo "prevtemp=${prevtemp[@]}"
 			echo "tval=$tval"
 			echo "pwmpval=$pwmpval"
 			echo "fanval=$fanval"

@@ -21,7 +21,7 @@ are 1 or 2. This option also writes the original vt1211 register values to
 ~/.vt1211_pwm\fB<pwm>\fP which is used for restoring the original settings.
 .TP
 .B -r <pwm>
-Restore PWM \fB<pwm>\fP to the orignal settings. Valid numbers for \fB<pwm>\fP
+Restore PWM \fB<pwm>\fP to the original settings. Valid numbers for \fB<pwm>\fP
 are 1 or 2. This options reads the original settings from
 ~/.vt1211_pwm\fB<pwm>\fP and writes them to the vt1211.
 .TP
@@ -38,7 +38,7 @@ PWM outputs of the vt1211 :-)
 
 .SH WARNING
 This script puts the PWM controller of the vt1211 into automatic mode and
-toggles the thermal thresholds between extrem values to fool the chip into
+toggles the thermal thresholds between extreme values to fool the chip into
 believing that there is a temperature change and thus forcing the PWM outputs
 to change to the specified values. Since there is only a single PWM controller
 that controls both PWM outputs, setting the duty-cycle of one PWM output could

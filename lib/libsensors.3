@@ -212,6 +212,18 @@ the program). Never let it return!
 
 .SH DATA STRUCTURES
 
+Structure \fBsensors_chip_name\fR contains information related to a
+specific chip.
+
+\fBtypedef struct sensors_chip_name {
+.br
+	sensors_bus_id bus;
+.br
+} sensors_chip_name;\fP
+
+There are other members not documented here, which are only meant for
+libsensors internal use.
+
 Structure \fBsensors_feature\fR contains information related to a given
 feature of a specific chip:
 
@@ -274,5 +286,4 @@ sensors.conf(5)
 
 .SH AUTHOR
 Frodo Looijaard, Jean Delvare and others
-http://www.lm-sensors.org/
-
+https://hwmon.wiki.kernel.org/lm_sensors

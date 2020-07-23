@@ -1,10 +1,39 @@
 lm-sensors CHANGES file
 -----------------------
 
-SVN HEAD
+git HEAD
+
+3.6.0 (2019-10-18)
+  configs: Added a number of new configuration files
+  fancontrol: AVERAGE env variable can be used to set the number of previous readings to average
+  Makefile: The MACHINE variable has been renamed to ARCH
+  sensord: Add an option -1/--oneline to print chip and adapter on the same line
+  sensors: Fixed a stray comma bug in the JSON output
+           Fixed Fahrenheit conversion with raw and JSON output
+           Scale voltage and current values in the default output format
+  sensors-detect: Add detection of AMD Family 17h, models 30h, 70h
+                  Add detection of some AMD Family 15h models
+                  Add detection of AMD Family 16h model 30h power sensors
+                  Add detection of Hygon Family 18h thermal sensors
+                  Add detection of Nuvoton NCT6797D
+                  Add detection of Nuvoton NCT6798D
+                  Add detection of Nuvoton NCT6112D/NCT6114D/NCT6116D
+                  Fix printing CPU info on non-x86 arches
+                  Fix printing lm_sensors version
+                  Mark Fintek F75387SG/RG as supported by the f75375s driver
+
+3.5.0 (2018-11-23)
+  Fixed disappearance of certain hwmon chips with 4.19+ kernels
+  Add the find-driver script for debugging
+  Various documentation and man page improvements
+  Fix various issues found by Coverity Scan
+  Fix compilation with the musl C library
+  Development version string now contains "+git" instead of "+SVN"
+  Updated links in documentation to reflect the new home of lm_sensors
   sensors.1: Add reference to sensors-detect
              Document -j option (json output)
   sensors: Add support for json output
+           Add support for power min, lcrit, min_alarm, lcrit_alarm
   sensors-detect: Fix systemd paths
                   Add detection of Fintek F81768
                   Only probe I/O ports on x86
@@ -23,7 +52,20 @@ SVN HEAD
                   Add detection of Giantec GT30TS00
                   Add detection of ONS CAT34TS02C and CAT34TS04
                   Add detection of AMD Family 15h Model 60+ temperature sensors
+                  Add detection of Nuvoton NCT6796D
+                  Add detection of AMD Family 15h Model 70+ temperature sensors
   configs: Add sample configuration files.
+  sensors.conf.default: Add hardwired inputs of NCT6795D
+                        Add hardwired inputs of F71868A
+                        Add hardwired NCT6796D inputs
+  vt1211_pwm: replaced deprecated sub shell syntax
+              run with bash instead of sh
+  pwmconfig: replaced deprecated sub shell syntax
+  fancontrol: replaced deprecated sub shell syntax
+              save original pwm values
+  fancontrol.8: replaced deprecated sub shell syntax
+  libsensors: Add support for SENSORS_BUS_TYPE_SCSI
+              Add support for power min, lcrit, min_alarm, lcrit_alarm
 
 3.4.0 (2015-06-25)
   documentation: Update the note about libsensors license
@@ -365,7 +407,7 @@ SVN HEAD
                   Skip ISA detection by default if a Super I/O was found (#2322)
                   Do not scan I2C adapters on multimedia cards by default
                   Skip SMBus probing by default if a Super I/O was found (#2322)
-                  Display I2C address statictics with --stat
+                  Display I2C address statistics with --stat
                   Document the new detection order and rules
                   Gather DMI data and print it at start-up
                   Always probe the SMBus on Asus, Tyan and Supermicro boards

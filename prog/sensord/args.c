@@ -93,6 +93,7 @@ static const char *daemonSyntax =
 	"  -i, --interval <time>     -- interval between scanning alarms (default 60s)\n"
 	"  -l, --log-interval <time> -- interval between logging sensors (default 30m)\n"
 	"  -t, --rrd-interval <time> -- interval between updating RRD file (default 5m)\n"
+	"  -1, --oneline             -- log chip, adapter, and sensor data on one line\n"
 	"  -T, --rrd-no-average      -- switch RRD in non-average mode\n"
 	"  -r, --rrd-file <file>     -- RRD file (default <none>)\n"
 	"  -c, --config-file <file>  -- configuration file\n"
@@ -116,12 +117,13 @@ static const char *daemonSyntax =
 	"the RRD file configuration must EXACTLY match the sensors that are used. If\n"
 	"your configuration changes, delete the old RRD file and restart sensord.\n";
 
-static const char *shortOptions = "i:l:t:Tf:r:c:p:advhg:";
+static const char *shortOptions = "i:l:t:1Tf:r:c:p:advhg:";
 
 static const struct option longOptions[] = {
 	{ "interval", required_argument, NULL, 'i' },
 	{ "log-interval", required_argument, NULL, 'l' },
 	{ "rrd-interval", required_argument, NULL, 't' },
+	{ "oneline", no_argument, NULL, '1' },
 	{ "rrd-no-average", no_argument, NULL, 'T' },
 	{ "syslog-facility", required_argument, NULL, 'f' },
 	{ "rrd-file", required_argument, NULL, 'r' },
@@ -160,6 +162,9 @@ int parseArgs(int argc, char **argv)
 		case 't':
 			if ((sensord_args.rrdTime = parseTime(optarg)) < 0)
 				return -1;
+			break;
+		case '1':
+			sensord_args.logOneline = 1;
 			break;
 		case 'T':
 			sensord_args.rrdNoAverage = 1;

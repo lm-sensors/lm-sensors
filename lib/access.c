@@ -369,6 +369,8 @@ const char *sensors_get_adapter_name(const sensors_bus_id *bus)
 		return "HID adapter";
 	case SENSORS_BUS_TYPE_MDIO:
 		return "MDIO adapter";
+	case SENSORS_BUS_TYPE_SCSI:
+		return "SCSI adapter";
 	}
 
 	/* bus types with several instances */

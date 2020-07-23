@@ -6,7 +6,7 @@ These programs are generally small utilities used for debugging,
 and installation of the lm_sensors package, and for demonstrating
 the use of the drivers and libraries in this package.
 For more elaborate programs (for example, GUI sensor displays),
-see https://github.com/groeck/lm-sensors/
+see https://github.com/lm-sensors/lm-sensors/
     http://sensors-applet.sourceforge.net/
     https://01.org/powertop/
     https://wpitchoune.net/psensor/

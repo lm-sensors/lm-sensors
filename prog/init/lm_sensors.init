@@ -20,7 +20,7 @@
 #    MA 02110-1301 USA.
 
 # See also the lm_sensors homepage at:
-#     http://www.lm-sensors.org
+#     https://hwmon.wiki.kernel.org/lm_sensors
 
 # It uses a config file /etc/sysconfig/lm_sensors that contains the modules
 # to be loaded/unloaded. That file is sourced into this one.

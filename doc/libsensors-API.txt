@@ -6,6 +6,15 @@ over time. This document summarizes these evolutions so that application
 authors can quickly figure out how to test for the availability of a
 given new feature.
 
+0x500   lm-sensors 3.5.0
+* Added support for power min, lcrit, min_alarm and lcrit_alarm
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MIN
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_LCRIT
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_MIN_ALARM
+  enum sensors_subfeature_type SENSORS_SUBFEATURE_POWER_LCRIT_ALARM
+* Added bus type "scsi":
+  #define SENSORS_BUS_TYPE_SCSI
+
 0x440	lm-sensors 3.4.0
 * Defined SENSORS_FEATURE_MAX
   enum sensors_feature_type SENSORS_FEATURE_MAX

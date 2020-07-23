@@ -280,9 +280,13 @@ static const struct subfeature_type_match power_matches[] = {
 	{ "cap_alarm", SENSORS_SUBFEATURE_POWER_CAP_ALARM },
 	{ "alarm", SENSORS_SUBFEATURE_POWER_ALARM },
 	{ "max", SENSORS_SUBFEATURE_POWER_MAX },
+	{ "min", SENSORS_SUBFEATURE_POWER_MIN },
+	{ "min_alarm", SENSORS_SUBFEATURE_POWER_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_POWER_MAX_ALARM },
 	{ "crit", SENSORS_SUBFEATURE_POWER_CRIT },
+	{ "lcrit", SENSORS_SUBFEATURE_POWER_LCRIT },
 	{ "crit_alarm", SENSORS_SUBFEATURE_POWER_CRIT_ALARM },
+	{ "lcrit_alarm", SENSORS_SUBFEATURE_POWER_LCRIT_ALARM },
 	{ "average_interval", SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL },
 	{ NULL, 0 }
 };
@@ -611,18 +615,151 @@ int sensors_init_sysfs(void)
 	return 1;
 }
 
+static int classify_device(const char *dev_name,
+                           const char *subsys,
+                           sensors_chip_features *entry)
+{
+	int domain, bus, slot, fn, vendor, product, id;
+	char bus_path[NAME_MAX];
+	char *bus_attr;
+	int ret = 1;
+
+	if ((!subsys || !strcmp(subsys, "i2c")) &&
+	    sscanf(dev_name, "%hd-%x", &entry->chip.bus.nr,
+		   &entry->chip.addr) == 2) {
+		/* find out if legacy ISA or not */
+		if (entry->chip.bus.nr == 9191) {
+			entry->chip.bus.type = SENSORS_BUS_TYPE_ISA;
+			entry->chip.bus.nr = 0;
+		} else {
+			entry->chip.bus.type = SENSORS_BUS_TYPE_I2C;
+			snprintf(bus_path, sizeof(bus_path),
+				"%s/class/i2c-adapter/i2c-%d/device",
+				sensors_sysfs_mount, entry->chip.bus.nr);
+
+			if ((bus_attr = sysfs_read_attr(bus_path, "name"))) {
+				if (!strncmp(bus_attr, "ISA ", 4)) {
+					entry->chip.bus.type = SENSORS_BUS_TYPE_ISA;
+					entry->chip.bus.nr = 0;
+				}
+
+				free(bus_attr);
+			}
+		}
+	} else
+	if ((!subsys || !strcmp(subsys, "spi")) &&
+	    sscanf(dev_name, "spi%hd.%d", &entry->chip.bus.nr,
+		   &entry->chip.addr) == 2) {
+		/* SPI */
+		entry->chip.bus.type = SENSORS_BUS_TYPE_SPI;
+	} else
+	if ((!subsys || !strcmp(subsys, "pci")) &&
+	    sscanf(dev_name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
+		/* PCI */
+		entry->chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_PCI;
+		entry->chip.bus.nr = 0;
+	} else
+	if ((!subsys || !strcmp(subsys, "platform") ||
+			!strcmp(subsys, "of_platform"))) {
+		/* must be new ISA (platform driver) */
+		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry->chip.addr) != 1)
+			entry->chip.addr = 0;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_ISA;
+		entry->chip.bus.nr = 0;
+	} else if (subsys && !strcmp(subsys, "acpi")) {
+		entry->chip.bus.type = SENSORS_BUS_TYPE_ACPI;
+		/* For now we assume that acpi devices are unique */
+		entry->chip.bus.nr = 0;
+		entry->chip.addr = 0;
+	} else
+	if (subsys && !strcmp(subsys, "hid") &&
+	    sscanf(dev_name, "%x:%x:%x.%x", &bus, &vendor, &product, &id) == 4) {
+		entry->chip.bus.type = SENSORS_BUS_TYPE_HID;
+		/* As of kernel 2.6.32, the hid device names don't look good */
+		entry->chip.bus.nr = bus;
+		entry->chip.addr = id;
+	} else
+	if (subsys && !strcmp(subsys, "mdio_bus")) {
+		if (sscanf(dev_name, "%*[^:]:%d", &entry->chip.addr) != 1)
+			entry->chip.addr = 0;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_MDIO;
+		entry->chip.bus.nr = 0;
+	} else
+	if (subsys && !strcmp(subsys, "scsi") &&
+	    sscanf(dev_name, "%d:%d:%d:%x", &domain, &bus, &slot, &fn) == 4) {
+		/* adapter(host), channel(bus), id(target), lun */
+		entry->chip.addr = (bus << 8) + (slot << 4) + fn;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_SCSI;
+		entry->chip.bus.nr = domain;
+	} else {
+		/* Unknown device */
+		ret = 0;
+	}
+
+	return ret;
+}
+
+static int find_bus_type(const char *dev_path,
+                         const char *dev_name,
+                         sensors_chip_features *entry)
+{
+	char linkpath[NAME_MAX];
+	char subsys_path[NAME_MAX], *subsys;
+	int sub_len;
+	char *my_dev_path = NULL;
+	int ret = 0;
+
+	my_dev_path = strdup(dev_path);
+	if (my_dev_path == NULL)
+		sensors_fatal_error(__func__, "Out of memory");
+
+	/* Find bus type */
+	while (!ret && my_dev_path != NULL) {
+		snprintf(linkpath, NAME_MAX, "%s/subsystem", my_dev_path);
+		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+		if (sub_len < 0 && errno == ENOENT) {
+			/* Fallback to "bus" link for kernels <= 2.6.17 */
+			snprintf(linkpath, NAME_MAX, "%s/bus", my_dev_path);
+			sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
+		}
+		if (sub_len < 0) {
+			/* Older kernels (<= 2.6.11) have neither the subsystem
+			   symlink nor the bus symlink */
+			if (errno == ENOENT) {
+				subsys = NULL;
+			} else {
+				ret = -SENSORS_ERR_KERNEL;
+				break;
+			}
+		} else {
+			subsys_path[sub_len] = '\0';
+			subsys = strrchr(subsys_path, '/') + 1;
+		}
+		ret = classify_device(dev_name, subsys, entry);
+		if (!ret) {
+			snprintf(linkpath, NAME_MAX, "%s/device", my_dev_path);
+			free(my_dev_path);
+			my_dev_path = realpath(linkpath, NULL);
+			if (my_dev_path != NULL)
+				dev_name = strrchr(my_dev_path, '/') + 1;
+			else if (errno == ENOMEM)
+				sensors_fatal_error(__func__, "Out of memory");
+		}
+	}
+
+	if (my_dev_path != NULL)
+		free(my_dev_path);
+	return ret;
+}
+
 /* returns: number of devices added (0 or 1) if successful, <0 otherwise */
 static int sensors_read_one_sysfs_chip(const char *dev_path,
 				       const char *dev_name,
 				       const char *hwmon_path)
 {
-	int domain, bus, slot, fn, vendor, product, id;
-	int err = -SENSORS_ERR_KERNEL;
-	char *bus_attr;
-	char bus_path[NAME_MAX];
-	char linkpath[NAME_MAX];
-	char subsys_path[NAME_MAX], *subsys;
-	int sub_len;
+	int ret = 1;
+	int virtual = 0;
 	sensors_chip_features entry;
 
 	/* ignore any device without name attribute */
@@ -634,116 +771,40 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 		sensors_fatal_error(__func__, "Out of memory");
 
 	if (dev_path == NULL) {
+		virtual = 1;
+	} else {
+		ret = find_bus_type(dev_path, dev_name, &entry);
+		if (ret == 0) {
+			virtual = 1;
+			ret = 1;
+		} else if (ret < 0) {
+			goto exit_free;
+		}
+	}
+	if (virtual) {
 		/* Virtual device */
 		entry.chip.bus.type = SENSORS_BUS_TYPE_VIRTUAL;
 		entry.chip.bus.nr = 0;
 		/* For now we assume that virtual devices are unique */
 		entry.chip.addr = 0;
-		goto done;
 	}
 
-	/* Find bus type */
-	snprintf(linkpath, NAME_MAX, "%s/subsystem", dev_path);
-	sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	if (sub_len < 0 && errno == ENOENT) {
-		/* Fallback to "bus" link for kernels <= 2.6.17 */
-		snprintf(linkpath, NAME_MAX, "%s/bus", dev_path);
-		sub_len = readlink(linkpath, subsys_path, NAME_MAX - 1);
-	}
-	if (sub_len < 0) {
-		/* Older kernels (<= 2.6.11) have neither the subsystem
-		   symlink nor the bus symlink */
-		if (errno == ENOENT)
-			subsys = NULL;
-		else
-			goto exit_free;
-	} else {
-		subsys_path[sub_len] = '\0';
-		subsys = strrchr(subsys_path, '/') + 1;
-	}
-
-	if ((!subsys || !strcmp(subsys, "i2c")) &&
-	    sscanf(dev_name, "%hd-%x", &entry.chip.bus.nr,
-		   &entry.chip.addr) == 2) {
-		/* find out if legacy ISA or not */
-		if (entry.chip.bus.nr == 9191) {
-			entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
-			entry.chip.bus.nr = 0;
-		} else {
-			entry.chip.bus.type = SENSORS_BUS_TYPE_I2C;
-			snprintf(bus_path, sizeof(bus_path),
-				"%s/class/i2c-adapter/i2c-%d/device",
-				sensors_sysfs_mount, entry.chip.bus.nr);
-
-			if ((bus_attr = sysfs_read_attr(bus_path, "name"))) {
-				if (!strncmp(bus_attr, "ISA ", 4)) {
-					entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
-					entry.chip.bus.nr = 0;
-				}
-
-				free(bus_attr);
-			}
-		}
-	} else
-	if ((!subsys || !strcmp(subsys, "spi")) &&
-	    sscanf(dev_name, "spi%hd.%d", &entry.chip.bus.nr,
-		   &entry.chip.addr) == 2) {
-		/* SPI */
-		entry.chip.bus.type = SENSORS_BUS_TYPE_SPI;
-	} else
-	if ((!subsys || !strcmp(subsys, "pci")) &&
-	    sscanf(dev_name, "%x:%x:%x.%x", &domain, &bus, &slot, &fn) == 4) {
-		/* PCI */
-		entry.chip.addr = (domain << 16) + (bus << 8) + (slot << 3) + fn;
-		entry.chip.bus.type = SENSORS_BUS_TYPE_PCI;
-		entry.chip.bus.nr = 0;
-	} else
-	if ((!subsys || !strcmp(subsys, "platform") ||
-			!strcmp(subsys, "of_platform"))) {
-		/* must be new ISA (platform driver) */
-		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry.chip.addr) != 1)
-			entry.chip.addr = 0;
-		entry.chip.bus.type = SENSORS_BUS_TYPE_ISA;
-		entry.chip.bus.nr = 0;
-	} else if (subsys && !strcmp(subsys, "acpi")) {
-		entry.chip.bus.type = SENSORS_BUS_TYPE_ACPI;
-		/* For now we assume that acpi devices are unique */
-		entry.chip.bus.nr = 0;
-		entry.chip.addr = 0;
-	} else
-	if (subsys && !strcmp(subsys, "hid") &&
-	    sscanf(dev_name, "%x:%x:%x.%x", &bus, &vendor, &product, &id) == 4) {
-		entry.chip.bus.type = SENSORS_BUS_TYPE_HID;
-		/* As of kernel 2.6.32, the hid device names don't look good */
-		entry.chip.bus.nr = bus;
-		entry.chip.addr = id;
-	} else
-	if (subsys && !strcmp(subsys, "mdio_bus")) {
-		if (sscanf(dev_name, "%*[^:]:%d", &entry.chip.addr) != 1)
-			entry.chip.addr = 0;
-		entry.chip.bus.type = SENSORS_BUS_TYPE_MDIO;
-		entry.chip.bus.nr = 0;
-	} else {
-		/* Ignore unknown device */
-		err = 0;
+	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0) {
+		ret = -SENSORS_ERR_KERNEL;
 		goto exit_free;
 	}
-
-done:
-	if (sensors_read_dynamic_chip(&entry, hwmon_path) < 0)
-		goto exit_free;
 	if (!entry.subfeature) { /* No subfeature, discard chip */
-		err = 0;
+		ret = 0;
 		goto exit_free;
 	}
 	sensors_add_proc_chips(&entry);
 
-	return 1;
+	return ret;
 
 exit_free:
 	free(entry.chip.prefix);
 	free(entry.chip.path);
-	return err;
+	return ret;
 }
 
 static int sensors_add_hwmon_device_compat(const char *path,
@@ -772,25 +833,29 @@ static int sensors_read_sysfs_chips_compat(void)
 static int sensors_add_hwmon_device(const char *path, const char *classdev)
 {
 	char linkpath[NAME_MAX];
-	char device[NAME_MAX], *device_p;
-	int dev_len, err;
+	char *dev_path, *dev_name;
+	int err = 0;
 	(void)classdev; /* hide warning */
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
-	dev_len = readlink(linkpath, device, NAME_MAX - 1);
-	if (dev_len < 0) {
-		/* No device link? Treat as virtual */
-		err = sensors_read_one_sysfs_chip(NULL, NULL, path);
+	dev_path = realpath(linkpath, NULL);
+	if (dev_path == NULL) {
+		if (errno == ENOMEM) {
+			sensors_fatal_error(__func__, "Out of memory");
+		} else {
+			/* No device link? Treat as virtual */
+			err = sensors_read_one_sysfs_chip(NULL, NULL, path);
+		}
 	} else {
-		device[dev_len] = '\0';
-		device_p = strrchr(device, '/') + 1;
+		dev_name = strrchr(dev_path, '/') + 1;
 
 		/* The attributes we want might be those of the hwmon class
 		   device, or those of the device itself. */
-		err = sensors_read_one_sysfs_chip(linkpath, device_p, path);
+		err = sensors_read_one_sysfs_chip(dev_path, dev_name, path);
 		if (err == 0)
-			err = sensors_read_one_sysfs_chip(linkpath, device_p,
-							  linkpath);
+			err = sensors_read_one_sysfs_chip(dev_path, dev_name,
+							  dev_path);
+		free(dev_path);
 	}
 	if (err < 0)
 		return err;

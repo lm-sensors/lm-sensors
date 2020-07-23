@@ -26,8 +26,9 @@ The directories within this package:
   This directory contains sample configurations of various boards,
   contributed by users of lm-sensors.
 
-  Older sample configurations can be found on an old lm-sensors wiki
-  archived here:
+  All configuration files should now be imported from the old
+  www.lm-sensors.org website, however additional information about
+  the origin of the configuration files can be found on the old site:
   http://web.archive.org/web/20150901092438/http://www.lm-sensors.org:80/wiki/Configurations
 
   Please contribute back a configuration of your board so other users with
@@ -98,17 +99,51 @@ https://amanusk.github.io/s-tui/
 for such programs.
 
 
+TROUBLESHOOTING
+---------------
+
+lm-sensors is blamed for all kinds of problems on a regular basis.
+While it is always possible that lm-sensors does in fact have a problem,
+almost everytime the problem will be elsewhere. The most likely culprit
+for a problem is one of the kernel drivers prividing data to lm-sensors
+or, rather, the sensors command (and libsensors). If you encounter problems,
+the following tests are recommended.
+
+- Check enabled sensors with the 'sensors' command. Observe and, if there
+  are errors, write down your test steps and report.
+- If any problems are observed while running the 'sensors' command, disable
+  (unload) kernel drivers one after another. After unloading a driver, run
+  the 'sensors' command again and observe if the error is gone. If it is,
+  you found the problematic driver. Record your tests and report to the driver
+  maintainer.
+- If problems are observed while using libsensors from another application,
+  the same procedure applies (though it is recommended to perform the test
+  with the sensors command first). Again, after identifying the offending
+  driver, record and report your results to the driver maintainer.
+- If this does not help, try to run ptrace on the sensors command and/or
+  the application using libsensors. If you find any anormalies, record
+  your results and report.
+
+
 OTHER INFORMATION
 -----------------
 
-The developers of this package can be reached through github.
-(see https://github.com/groeck/lm-sensors). Do not hesitate to contact
-us if you have questions, suggestions, problems, want to contribute,
-or just want to report it works for you. But please try to
+The lm_sensors website can be found at
+https://hwmon.wiki.kernel.org/lm_sensors
+
+The developers of this package can be reached using
+* a mailing list lm-sensors <at> vger <dot> kernel <dot> org
+  (you can get information on how to subscribe, unsubscribe, and the list
+  of archives at http://vger.kernel.org/vger-lists.html#lm-sensors;
+  you do not need to be subscribed to post to the list)
+* GitHub (see https://github.com/lm-sensors/lm-sensors)
+
+Do not hesitate to contact us if you have questions, suggestions, problems,
+want to contribute, or just want to report it works for you. But please try to
 read the documentation before you ask any questions! It's all under doc/.
 
 The latest version of this package can always be found at:
-https://github.com/groeck/lm-sensors.
+https://github.com/lm-sensors/lm-sensors.
 
 LICENSE
 -------

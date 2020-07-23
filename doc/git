@@ -9,7 +9,7 @@ using git. The git repository is only used for user-space tools.
 We presume that you have git installed on your machine. To check out a
 working copy of the code for this project use the following command:
 
-git clone https://github.com/groeck/lm-sensors.git
+git clone https://github.com/lm-sensors/lm-sensors.git
 
 To update the code, do a git pull from within the lm-sensors directory.
 Please read the README and INSTALL files of your working copy for how
