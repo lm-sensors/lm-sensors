@@ -61,10 +61,8 @@ void print_chip_raw(const sensors_chip_name *name)
 			if (sub->flags & SENSORS_MODE_R) {
 				if ((err = sensors_get_value(name, sub->number,
 							     &val)))
-					fprintf(stderr, "ERROR: Can't get "
-						"value of subfeature %s: %s\n",
-						sub->name,
-						sensors_strerror(err));
+					printf("  %s: ERR: $s\n", sub->name,
+					       sensors_strerror(err));
 				else {
 					if (fahrenheit)
 						val = deg_ctof(val);
