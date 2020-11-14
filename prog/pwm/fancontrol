@@ -287,7 +287,7 @@ function CheckFiles
 		pwmo=${AFCPWM[$fcvcount]}
 		if [ ! -w $pwmo ]
 		then
-			echo "Error: file $pwmo doesn't exist" >&2
+			echo "Error: file $pwmo doesn't exist or isn't writable" >&2
 			outdated=1
 		fi
 		let fcvcount=$fcvcount+1
