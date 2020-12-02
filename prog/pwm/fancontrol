@@ -287,7 +287,7 @@ function CheckFiles
 		pwmo=${AFCPWM[$fcvcount]}
 		if [ ! -w $pwmo ]
 		then
-			echo "Error: file $pwmo doesn't exist" >&2
+			echo "Error: file $pwmo doesn't exist or isn't writable" >&2
 			outdated=1
 		fi
 		let fcvcount=$fcvcount+1
@@ -299,7 +299,7 @@ function CheckFiles
 		tsen=${AFCTEMP[$fcvcount]}
 		if [ ! -r $tsen ]
 		then
-			echo "Error: file $tsen doesn't exist" >&2
+			echo "Error: file $tsen doesn't exist or isn't readable" >&2
 			outdated=1
 		fi
 		let fcvcount=$fcvcount+1
@@ -313,7 +313,7 @@ function CheckFiles
 		do
 			if [ ! -r $fan ]
 			then
-				echo "Error: file $fan doesn't exist" >&2
+				echo "Error: file $fan doesn't exist or isn't readable" >&2
 				outdated=1
 			fi
 		done
@@ -323,7 +323,8 @@ function CheckFiles
 	if [ $outdated -eq 1 ]
 	then
 		echo >&2
-		echo "At least one referenced file is missing. Either some required kernel" >&2
+		echo "At least one referenced file is missing or doesn't have" >&2
+		echo "correct privileges. Either some required kernel" >&2
 		echo "modules haven't been loaded, or your configuration file is outdated." >&2
 		echo "In the latter case, you should run pwmconfig again." >&2
 	fi
