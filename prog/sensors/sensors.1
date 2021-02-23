@@ -78,6 +78,8 @@ are only needed if you have several chips sharing the same address on different
 buses of the same type. As bus numbers are usually not guaranteed to be stable
 over reboots, these statements let you refer to each bus by its name rather
 than numbers.
+.IP "-n, --allow-no-sensors"
+Do not fail if no sensors found. The error message will be printed in the log.
 .SH FILES
 .I /etc/sensors3.conf
 .br
