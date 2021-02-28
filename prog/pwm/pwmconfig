@@ -284,7 +284,7 @@ echo 'Found the following fan sensors:'
 for i in $FAN
 do
 	S=$(cat $i)
-	if [ "$S" = "0" -o "$S" = "-1" ]
+	if [ "$S" = "0" -o "$S" = "-1" -o "$S" = ""  ]
 	then
 		echo "   $i     current speed: 0 ... skipping!"
 	else
