@@ -43,8 +43,14 @@ LIBSHLIBNAME := libsensors.so.$(LIBVER)
 LIBSTLIBNAME := libsensors.a
 LIBSHSONAME := libsensors.so.$(LIBMAINVER)
 
+ifeq ($(BUILD_SHARED_LIB),1)
 LIBTARGETS := $(MODULE_DIR)/$(LIBSHLIBNAME) \
               $(MODULE_DIR)/$(LIBSHSONAME) $(MODULE_DIR)/$(LIBSHBASENAME)
+LIBDEP_FOR_PROGS := $(LIBSHBASENAME)
+else
+LIBDEP_FOR_PROGS := $(LIBSTLIBNAME)
+endif
+
 ifeq ($(BUILD_STATIC_LIB),1)
 LIBTARGETS += $(MODULE_DIR)/$(LIBSTLIBNAME)
 endif
@@ -131,9 +137,11 @@ install-lib: all-lib
 ifeq ($(BUILD_STATIC_LIB),1)
 	$(INSTALL) -m 644 $(LIB_DIR)/$(LIBSTLIBNAME) $(DESTDIR)$(LIBDIR)
 endif
+ifeq ($(BUILD_SHARED_LIB),1)
 	$(INSTALL) -m 755 $(LIB_DIR)/$(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)
 	$(LN) $(LIBSHLIBNAME) $(DESTDIR)$(LIBDIR)/$(LIBSHSONAME)
 	$(LN) $(LIBSHSONAME) $(DESTDIR)$(LIBDIR)/$(LIBSHBASENAME)
+endif
 	@if [ -z "$(DESTDIR)" -a "$(LIBDIR)" != "/usr/lib" -a "$(LIBDIR)" != "/lib" ] ; then \
 	   if [ -e "/usr/lib/$(LIBSHSONAME)" -o -e "/usr/lib/$(LIBSHBASENAME)" ] ; then \
 	     echo '******************************************************************************' ; \
