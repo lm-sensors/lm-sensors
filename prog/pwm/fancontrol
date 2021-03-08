@@ -57,6 +57,7 @@ function LoadConfig
 	# grep configuration from file
 	INTERVAL=$(grep -E '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g')
 	DEVPATH=$(grep -E '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
+	ROOTDIR=$(grep -E '^ROOTDIR=.*$' $1 | sed -e 's/ROOTDIR= *//g')
 	DEVNAME=$(grep -E '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
 	FCTEMPS=$(grep -E '^FCTEMPS=.*$' $1 | sed -e 's/FCTEMPS=//g')
 	MINTEMP=$(grep -E '^MINTEMP=.*$' $1 | sed -e 's/MINTEMP=//g')
@@ -340,7 +341,9 @@ else
 fi
 
 # Detect path to sensors
-if echo "${AFCPWM[0]}" | grep -E -q '^/'
+if [ -n "$ROOTDIR" ]; then
+	DIR="$ROOTDIR"
+elif echo "${AFCPWM[0]}" | grep -E -q '^/'
 then
 	DIR=/
 elif echo "${AFCPWM[0]}" | grep -E -q '^hwmon[0-9]'
@@ -377,7 +380,7 @@ then
 	echo "Configuration appears to be outdated, please run pwmconfig again" >&2
 	exit 1
 fi
-if [ "$DIR" = "/sys/class/hwmon" ]
+if [ "$DIR" = "/sys/class/hwmon" -o -n "$ROOTDIR" ]
 then
 	FixupFiles "$DEVPATH"
 fi
