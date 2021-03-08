@@ -34,6 +34,10 @@ file syntax will be discussed last. First I'm going to describe the various
 variables available for changing \fBfancontrol\fP's behaviour:
 
 .TP
+.B ROOTDIR
+An alternate directory of where to find device names. The default is
+\fB/sys/class/hwmon\fP.
+.TP
 .B INTERVAL
 This variable defines at which interval in seconds the main loop of
 \fBfancontrol\fP will be executed
