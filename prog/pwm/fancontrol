@@ -42,6 +42,7 @@ PIDFILE="/var/run/fancontrol.pid"
 
 #DEBUG=1
 MAX=255
+LAST_CHANGE=
 
 function LoadConfig
 {
@@ -64,6 +65,7 @@ function LoadConfig
 	MINSTART=$(grep -E '^MINSTART=.*$' $1 | sed -e 's/MINSTART=//g')
 	MINSTOP=$(grep -E '^MINSTOP=.*$' $1 | sed -e 's/MINSTOP=//g')
 	# optional settings:
+	DELAY=$(grep -E '^DELAY=.*$' $1 | sed -e 's/DELAY=//g')
 	FCFANS=$(grep -E '^FCFANS=.*$' $1 | sed -e 's/FCFANS=//g')
 	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g')
 	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g')
@@ -86,6 +88,7 @@ function LoadConfig
 	echo
 	echo "Common settings:"
 	echo "  INTERVAL=$INTERVAL"
+	echo "  DELAY=$DELAY"
 
 	let fcvcount=0
 	for fcv in $FCTEMPS
@@ -518,6 +521,52 @@ function restorefans()
 trap 'restorefans 0' SIGQUIT SIGTERM
 trap 'restorefans 1' SIGHUP SIGINT
 
+function checkCurrentPWMValues
+{
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} ))
+	do
+		pwmo=${AFCPWM[$fcvcount]}
+		read pwmpval < ${pwmo}
+		if [ $? -ne 0 ]
+		then
+			echo "Error reading PWM value from $DIR/$pwmo"
+			break;
+		fi
+		[ -n "$DEBUG" ] && echo "[$fcvcount] Read PWM value $pwmpval from $pwmo"
+		LASTPWMVAL[$fcvcount]=$pwmpval
+		let fcvcount=$fcvcount+1
+	done
+}
+
+function checkChangedPWMValues
+{
+	if [ -z "$DELAY" ]
+	then
+		return # use step delays only if DELAY is set
+	fi
+	
+	let fcvcount=0
+	while (( $fcvcount < ${#AFCPWM[@]} ))
+	do
+		pwmo=${AFCPWM[$fcvcount]}
+		read pwmpval < ${pwmo}
+		if [ $? -ne 0 ]
+		then
+			echo "Error reading PWM value from $DIR/$pwmo"
+			break;
+		fi
+		if [ "$pwmpval" -ne "${LASTPWMVAL[$fcvcount]}" ]; then
+			[ -n "$DEBUG" ] && echo "[$fcvcount] Updated pwmval to $pwmpval (was ${LASTPWMVAL[$fcvcount]})"
+			LAST_CHANGE=$(date +'%s')
+			LASTPWMVAL[$fcvcount]=$pwmpval
+		else
+			[ -n "$DEBUG" ] && echo "[$fcvcount] No update to pwmval: $pwmpval == ${LASTPWMVAL[$fcvcount]}"
+		fi
+		let fcvcount=$fcvcount+1
+	done
+}
+
 # main function
 function UpdateFanSpeeds
 {
@@ -525,6 +574,13 @@ function UpdateFanSpeeds
 	local pwmo tsens fan mint maxt minsa minso minpwm maxpwm
 	local tval tlastval pwmpval fanval min_fanval one_fan one_fanval
 	local -i pwmval
+
+	if [ -n "$LAST_CHANGE" ] && [ "$LAST_CHANGE" -ge $(( $(date +'%s') - $DELAY )) ]; then
+		[ -n "$DEBUG" ] && echo "Delaying fan speed update until $(date +%T --date @$(($LAST_CHANGE + $DELAY)))"
+		return
+	else
+		[ -n "$DEBUG" ] && echo "Not delaying run because '$LAST_CHANGE' < '$(date +'%s')'"
+	fi
 
 	let fcvcount=0
 	while (( $fcvcount < ${#AFCPWM[@]} )) # go through all pwm outputs
@@ -669,8 +725,14 @@ echo 'Starting automatic fan control...'
 # main loop calling the main function at specified intervals
 while true
 do
+	let wakeup=$(date +'%s')+$INTERVAL
+	checkCurrentPWMValues
 	UpdateFanSpeeds
+	while (( $(date +'%s') < $wakeup ))
+	do
+		checkChangedPWMValues
 	# Sleep while still handling signals
-	sleep $INTERVAL &
+		sleep 1 &
 	wait
+	done
 done

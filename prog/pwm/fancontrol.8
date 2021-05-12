@@ -38,6 +38,10 @@ variables available for changing \fBfancontrol\fP's behaviour:
 This variable defines at which interval in seconds the main loop of
 \fBfancontrol\fP will be executed
 .TP
+.B DELAY
+When set, this variable enables "stepped fans" behaviour (see below) with
+the step delay set to the number of seconds specified by this variable.
+.TP
 .B DEVPATH
 Maps hwmon class devices to physical devices. This lets \fBfancontrol\fP
 check that the configuration file is still up-to-date.
@@ -120,6 +124,23 @@ changes, but only if the temp is between MINTEMP and MAXTEMP. After that, the
 new values are written to the PWM outputs. Currently the speed increases
 linearly with rising temperature. This way you won't hear your fans most
 of the time at best.
+
+.SH STEPPED FANS BEHAVIOR
+
+Some devices that export PWM outputs only support a limited set of speeds, such
+that when \fBfancontrol\fP calculats a PWM speed value, the value will be
+normalized to one of the supported speed values that can be read back from the
+PWM device. When used with such a device, the \fBfancontrol\fP might cause the
+fan to flactutate between low speed and high speed back and forth every
+INTERVAL, which might be a jarring user experience. On the other hand,
+increasing INTERVAL will result in a undesired increase in response time to
+temperatures spikes.
+
+The stepped fans behavior may be enabled by setting the DELAY varaible. When
+set \fBfancontrol\fP will monitor the real PWM value for changes, and when a
+speed step is observed, \fBfancontrol\fP will suspend monitoring for the
+specified time - letting the system stick with the new fan speed for a while
+before checking if it needs to step back.
 
 .SH SEE ALSO
 pwmconfig(8), sensors(1).
