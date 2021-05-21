@@ -221,7 +221,9 @@ static void fillChipTemperature(FeatureDescriptor *temperature,
 	if ((sf = sensors_get_subfeature(name, feature,
 					 SENSORS_SUBFEATURE_TEMP_ALARM)) ||
 	    (sf = sensors_get_subfeature(name, feature,
-					 SENSORS_SUBFEATURE_TEMP_MAX_ALARM))) {
+					 SENSORS_SUBFEATURE_TEMP_MAX_ALARM)) ||
+	    (sf = sensors_get_subfeature(name, feature,
+					 SENSORS_SUBFEATURE_TEMP_EMERGENCY_ALARM))) {
 		temperature->alarmNumber = sf->number;
 	} else {
 		temperature->alarmNumber = -1;
