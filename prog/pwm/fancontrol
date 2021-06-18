@@ -489,8 +489,8 @@ function pwmenable()
 			PWM_ORIG_STATE[${1}]=$PWM_ORIG
 		fi
 		# enable manual control by fancontrol
-		echo 1 > $ENABLE 2> /dev/null
-		if [ $? -ne 0 ]
+		(echo 1 > $ENABLE) 2> /dev/null
+		if [ "$(cat $ENABLE)" -ne 1 ]
 		then
 			return 1
 		fi
