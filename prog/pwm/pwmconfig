@@ -214,14 +214,12 @@ function pwmenable()
 {
 	local ENABLE=${1}_enable
 
-	if [ -w $ENABLE ]
+	(echo 1 > $ENABLE) 2>/dev/null
+	if [ "$(cat $ENABLE)" -ne 1 ]
 	then
-		echo 1 2>/dev/null > $ENABLE
-		if [ $? -ne 0 ]
-		then
-			return 1
-		fi
+		return 1
 	fi
+
 	echo $MAX > $1
 }
 
