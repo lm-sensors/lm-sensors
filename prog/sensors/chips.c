@@ -833,6 +833,33 @@ static void print_chip_curr(const sensors_chip_name *name,
 	printf("\n");
 }
 
+static void print_chip_freq(const sensors_chip_name *name,
+			    const sensors_feature *feature,
+			    int label_size)
+{
+	const sensors_subfeature *sf;
+	double val;
+	char *label;
+
+	if (!(label = sensors_get_label(name, feature))) {
+		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
+			feature->name);
+		return;
+	}
+	print_label(label, label_size);
+	free(label);
+
+	sf = sensors_get_subfeature(name, feature,
+				    SENSORS_SUBFEATURE_FREQ_INPUT);
+	if (sf && get_input_value(name, sf, &val) == 0) {
+		printf("%4.0f %s", val, "MHz");
+	} else {
+		printf("     N/A  ");
+	}
+
+	printf("\n");
+}
+
 static void print_chip_intrusion(const sensors_chip_name *name,
 				 const sensors_feature *feature,
 				 int label_size)
@@ -893,6 +920,9 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_HUMIDITY:
 			print_chip_humidity(name, feature, label_size);
+			break;
+		case SENSORS_FEATURE_FREQ:
+			print_chip_freq(name, feature, label_size);
 			break;
 		default:
 			continue;

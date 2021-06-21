@@ -152,6 +152,7 @@ int get_type_scaling(sensors_subfeature_type type)
 		return 1;
 	case SENSORS_SUBFEATURE_POWER_AVERAGE:
 	case SENSORS_SUBFEATURE_ENERGY_INPUT:
+	case SENSORS_SUBFEATURE_FREQ_INPUT:
 		return 1000000;
 	}
 
@@ -181,6 +182,7 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_CURR:
 	case SENSORS_FEATURE_HUMIDITY:
 	case SENSORS_FEATURE_INTRUSION:
+	case SENSORS_FEATURE_FREQ:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
 		if (!name)
@@ -329,6 +331,11 @@ static const struct subfeature_type_match intrusion_matches[] = {
 	{ "beep", SENSORS_SUBFEATURE_INTRUSION_BEEP },
 	{ NULL, 0 }
 };
+
+static const struct subfeature_type_match freq_matches[] = {
+	{ "input", SENSORS_SUBFEATURE_FREQ_INPUT },
+	{ NULL, 0 }
+};
 static struct feature_type_match matches[] = {
 	{ "temp%d%c", temp_matches },
 	{ "in%d%c", in_matches },
@@ -339,6 +346,7 @@ static struct feature_type_match matches[] = {
 	{ "energy%d%c", energy_matches },
 	{ "intrusion%d%c", intrusion_matches },
 	{ "humidity%d%c", humidity_matches },
+	{ "freq%d%c", freq_matches },
 };
 
 /* Return the subfeature type and channel number based on the subfeature
