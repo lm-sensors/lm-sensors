@@ -428,6 +428,8 @@ static const struct sensor_subfeature_list voltage_sensors[] = {
 	{ SENSORS_SUBFEATURE_IN_AVERAGE, NULL, 0, "avg" },
 	{ SENSORS_SUBFEATURE_IN_LOWEST, NULL, 0, "lowest" },
 	{ SENSORS_SUBFEATURE_IN_HIGHEST, NULL, 0, "highest" },
+	{ SENSORS_SUBFEATURE_IN_RATED_MIN, NULL, 0, "rated min" },
+	{ SENSORS_SUBFEATURE_IN_RATED_MAX, NULL, 0, "rated max" },
 	{ -1, NULL, 0, NULL }
 };
 
@@ -584,6 +586,8 @@ static const struct sensor_subfeature_list power_common_sensors[] = {
 	{ SENSORS_SUBFEATURE_POWER_LCRIT, NULL, 0, "lcrit" },
 	{ SENSORS_SUBFEATURE_POWER_CRIT, NULL, 0, "crit" },
 	{ SENSORS_SUBFEATURE_POWER_CAP, NULL, 0, "cap" },
+	{ SENSORS_SUBFEATURE_POWER_RATED_MIN, NULL, 0, "rated min" },
+	{ SENSORS_SUBFEATURE_POWER_RATED_MAX, NULL, 0, "rated max" },
 	{ -1, NULL, 0, NULL }
 };
 
@@ -788,6 +792,8 @@ static const struct sensor_subfeature_list current_sensors[] = {
 	{ SENSORS_SUBFEATURE_CURR_AVERAGE, NULL, 0, "avg" },
 	{ SENSORS_SUBFEATURE_CURR_LOWEST, NULL, 0, "lowest" },
 	{ SENSORS_SUBFEATURE_CURR_HIGHEST, NULL, 0, "highest" },
+	{ SENSORS_SUBFEATURE_CURR_RATED_MIN, NULL, 0, "rated min" },
+	{ SENSORS_SUBFEATURE_CURR_RATED_MAX, NULL, 0, "rated max" },
 	{ -1, NULL, 0, NULL }
 };
 

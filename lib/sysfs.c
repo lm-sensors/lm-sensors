@@ -251,6 +251,8 @@ static const struct subfeature_type_match in_matches[] = {
 	{ "lcrit_alarm", SENSORS_SUBFEATURE_IN_LCRIT_ALARM },
 	{ "crit_alarm", SENSORS_SUBFEATURE_IN_CRIT_ALARM },
 	{ "beep", SENSORS_SUBFEATURE_IN_BEEP },
+	{ "rated_min", SENSORS_SUBFEATURE_IN_RATED_MIN },
+	{ "rated_max", SENSORS_SUBFEATURE_IN_RATED_MAX },
 	{ NULL, 0 }
 };
 
@@ -288,6 +290,8 @@ static const struct subfeature_type_match power_matches[] = {
 	{ "crit_alarm", SENSORS_SUBFEATURE_POWER_CRIT_ALARM },
 	{ "lcrit_alarm", SENSORS_SUBFEATURE_POWER_LCRIT_ALARM },
 	{ "average_interval", SENSORS_SUBFEATURE_POWER_AVERAGE_INTERVAL },
+	{ "rated_min", SENSORS_SUBFEATURE_POWER_RATED_MIN },
+	{ "rated_max", SENSORS_SUBFEATURE_POWER_RATED_MAX },
 	{ NULL, 0 }
 };
 
@@ -311,6 +315,8 @@ static const struct subfeature_type_match curr_matches[] = {
 	{ "lcrit_alarm", SENSORS_SUBFEATURE_CURR_LCRIT_ALARM },
 	{ "crit_alarm", SENSORS_SUBFEATURE_CURR_CRIT_ALARM },
 	{ "beep", SENSORS_SUBFEATURE_CURR_BEEP },
+	{ "rated_min", SENSORS_SUBFEATURE_CURR_RATED_MIN },
+	{ "rated_max", SENSORS_SUBFEATURE_CURR_RATED_MAX },
 	{ NULL, 0 }
 };
 
