@@ -46,6 +46,7 @@ void print_chip_raw(const sensors_chip_name *name)
 	const sensors_subfeature *sub;
 	char *label;
 	double val;
+	int is_temp;
 
 	a = 0;
 	while ((feature = sensors_get_features(name, &a))) {
@@ -59,6 +60,8 @@ void print_chip_raw(const sensors_chip_name *name)
 		b = 0;
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
 			if (sub->flags & SENSORS_MODE_R) {
+				is_temp = feature->type == SENSORS_FEATURE_TEMP;
+
 				if ((err = sensors_get_value(name, sub->number,
 							     &val)))
 					fprintf(stderr, "ERROR: Can't get "
@@ -66,7 +69,7 @@ void print_chip_raw(const sensors_chip_name *name)
 						sub->name,
 						sensors_strerror(err));
 				else {
-					if (fahrenheit)
+					if (is_temp && fahrenheit)
 						val = deg_ctof(val);
 					printf("  %s: %.3f\n", sub->name, val);
 				}
@@ -84,6 +87,7 @@ void print_chip_json(const sensors_chip_name *name)
 	const sensors_subfeature *sub;
 	char *label;
 	double val;
+	int is_temp;
 
 	a = 0;
 	cnt = 0;
@@ -101,6 +105,8 @@ void print_chip_json(const sensors_chip_name *name)
 		subCnt = 0;
 		while ((sub = sensors_get_all_subfeatures(name, feature, &b))) {
 			if (sub->flags & SENSORS_MODE_R) {
+				is_temp = feature->type == SENSORS_FEATURE_TEMP;
+
 				if ((err = sensors_get_value(name, sub->number,
 							     &val))) {
 					fprintf(stderr, "ERROR: Can't get "
@@ -110,7 +116,7 @@ void print_chip_json(const sensors_chip_name *name)
 				} else {
 					if (subCnt > 0)
 						printf(",\n");
-					if (fahrenheit)
+					if (is_temp && fahrenheit)
 						val = deg_ctof(val);
 					printf("         \"%s\": %.3f", sub->name, val);
 					subCnt++;
