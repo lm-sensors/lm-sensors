@@ -1,0 +1,170 @@
+# ASRock Rack X470D4U
+# made in 021
+# inspiration  from the "ASRock AB350 Pro4" file   
+# UEFI: P4.20; BMC:1.60.00
+# "validated" against BMC
+#
+chip "nct6779-isa-0290"
+##voltage section
+#	BMC label "VCPU"
+	label	in0	"Vcore"
+	compute	in0	@*1.55, @/1.55
+	set	in0_min	0.10
+#	from the BMC "upper critical"
+	set	in0_max	1.65
+
+#	BMC label "5V"
+	label	in1	"+5V"
+	compute	in1	@*4, @/4
+#	from the BMC "lower critical"
+	set	in1_min 4.5
+#	from the BMC "upper critical" 
+	set	in1_max	5.4
+
+	label	in2	"AVCC"
+	set	in2_min	3.30 * 0.98
+	set	in2_max	3.30 * 1.10
+
+#	BMC label "3V"
+	label	in3	"+3.3V"
+#	from the BMC "lower critical"
+	set	in3_min	2.98
+#	from the BMC "upper critical" 
+	set	in4_max	3.62
+
+#	BMC label "12V"
+	label	in4	"+12V"
+	compute	in4	@*6.49, @/6.49
+#	from the BMC "lower critical"
+	set	in4_min	10.8
+#	from the BMC "upper critical" 
+	set	in4_max	13.2
+
+#	BMC label "VSOC"
+	label	in5	"VDDCR_SOC"
+#	from the BMC "lower critical"
+	set	in5_min	0.36
+#	from the BMC "upper critical" 
+	set	in5_max	1.54
+
+#	BMC label "VCCM"
+	label	in6	"DRAMV"
+#	from the BMC "lower critical"
+	set	in6_min	1.08
+#	from the BMC "upper critical" 
+	set	in6_max	1.32
+
+#	BMC label "3VSB"
+	label	in7	"3VSB"
+#	from the BMC "lower critical"
+	set	in7_min	2.88
+#	from the BMC "upper critical" 
+	set	in7_max	3.7
+
+#	BMC label "BAT"
+	label	in8	"VBAT"
+#	from the BMC "lower critical"
+	set	in8_min	2.7
+#	from the BMC "upper critical" 
+	set	in8_max	3.4
+
+#	seems to be unused
+	ignore in9
+
+#	BMC label "APU_VDDP"
+	label	in10	"VDDP"
+#	from the BMC "lower critical"
+	set	in10_min	0.81
+#	from the BMC "upper critical" 
+	set	in10_max	1.16
+
+#	BMC label "1.05V_PROM_RUN"? or 1.05V_PROM_S5 
+	label	in11	"+1.05V"
+#	from the BMC "lower critical"
+	set	in11_min	0.95
+#	from the BMC "upper critical" 
+	set	in11_max	1.16
+
+#	BMC label "1.05V_PROM_RUN"? or 1.05V_PROM_S5 
+	label	in11	"+1.05V"
+#	from the BMC "lower critical"
+	set	in11_min	0.95
+#	from the BMC "upper critical" 
+	set	in11_max	1.16
+
+#	no idea what this is used for
+	#ignore in12
+
+#	no idea what this is used for
+	#ignore in13
+
+#	BMC label "" from the AB350_Pro4 conf
+	label	in14	"+1.8V"
+#	from the BMC "lower critical"
+	set	in14_min	1.8 * 0.9
+#	from the BMC "upper critical" 
+	set	in14_max	1.8 * 1.1
+
+##fan section
+
+	#lanel fan1 ""
+	ignore fan1
+	#label fan2 ""
+	ignore fan2
+# fan3 has no input in hwmon
+	#label fan3 ""
+	ignore fan3
+	#label fan4
+	ignore fan4
+	#label fan5
+	ignore fan5
+	#fan6
+
+##temperature section
+
+#	BMC label "MB Temp"
+	label	temp1	"MB temp"
+	set	temp1_type	1
+#	from the BMC "lower critical"
+	#set     temp1_min
+#	from the BMC "upper critical" 
+	set     temp1_max	55.0
+#	for good measure
+	set	temp1_max_hyst	50.0
+
+#	no idea	
+	set	temp2_type	4	
+
+#	no idea
+	set	temp3_type	4	
+
+#	BMC label "Card side Temp
+	label	temp4	"Card side Temp"
+	set	temp4_type	4
+#	from the BMC "lower critical"
+	#set     temp4_min
+#	from the BMC "upper critical" 
+	#set     temp4_max	68.0#not enablen in hwmon
+#	for good measure
+	#set	temp4_max_hyst	72.0#not enablen in hwmon
+
+#	no idea
+	set	temp5_type	4
+
+#	temp6 shares the settings with temp1, so
+	ignore temp6
+
+#no PCH in the system
+	ignore temp7
+	ignore temp8
+	ignore temp9
+	ignore temp10
+
+
+##intrusion section
+#	instrusion header pins are available on the motherboard
+	label	intrusion0	"chassis closed"
+	ignore	intrusion1
+	
+#	beeper is available on the motherboard
+	set	beep_enable	1
