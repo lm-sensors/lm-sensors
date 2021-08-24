@@ -425,7 +425,7 @@ if (m/^([\s#]*bus\s+"?i2c-\d+"?\s+"([^"]+)")\s+"[^"]*"/) {
 	print STDERR "Processing bus statement: $2\n" if $debug;
 
 	if ($2 eq "ISA main adapter") {
-		$_ = '';	# Drop entirely 
+		$_ = '';	# Drop entirely
 	} else {
 		$_ = "$1\n";	# Drop algorithm name
 	}

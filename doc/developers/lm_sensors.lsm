@@ -2,7 +2,7 @@ Begin4
 Title: lm_sensors
 Version: 3.6.0
 Entered-date: 2019-10-18
-Description: Hardware health monitoring package for Linux. It consists of 
+Description: Hardware health monitoring package for Linux. It consists of
              a library to allow applications to read sensors data more
              easily, and of an example program to pretty print this data.
              Also included is a fan speed control script.
