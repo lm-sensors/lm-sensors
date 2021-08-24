@@ -20,7 +20,7 @@ Does my monitoring chip use fan divisors?
   16 bits, so divisors are no longer required. In that case, you won't
   see "div" values in the output of sensors, and nothing needs to be
   configured:
-  
+
   CPU1 Fan:    2160 RPM  (min =  800 RPM)
   CPU2 Fan:       0 RPM  (min =  799 RPM)  ALARM
   Front3 Fan:     0 RPM  (min =    0 RPM)

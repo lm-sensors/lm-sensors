@@ -68,7 +68,7 @@ BINDIR := $(PREFIX)/bin
 SBINDIR := $(PREFIX)/sbin
 
 # You should not need to change this. It is the basic directory into which
-# include files will be installed. The actual directory will be 
+# include files will be installed. The actual directory will be
 # $(INCLUDEDIR)/sensors for library include files.
 INCLUDEDIR := $(PREFIX)/include
 LIBINCLUDEDIR := $(INCLUDEDIR)/sensors
@@ -103,9 +103,9 @@ BUILD_STATIC_LIB := 1
 
 # Within each Module.mk, rules and dependencies can be added to targets
 # all, install and clean. Use double colons instead of single ones
-# to do this. 
+# to do this.
 
-# The subdirectories we need to build things in 
+# The subdirectories we need to build things in
 SRCDIRS := lib prog/detect prog/pwm \
            prog/sensors ${PROG_EXTRA:%=prog/%} etc
 # Only build isadump and isaset on x86 machines.
@@ -166,7 +166,7 @@ LIBCFLAGS := -fpic -D_REENTRANT $(ALL_CFLAGS)
 all::
 
 # Include all makefiles for sub-modules
-INCLUDEFILES := 
+INCLUDEFILES :=
 include $(patsubst %,%/Module.mk,$(SRCDIRS))
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),uninstall)

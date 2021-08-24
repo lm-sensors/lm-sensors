@@ -86,7 +86,7 @@ git HEAD
                   and LM95235
                   Add detection of NCT7802Y
                   Print kernel version and processor information
-                  Add detection of NCT6792D 
+                  Add detection of NCT6792D
                   Add reference to nct6683 driver
                   Show that NCT6102D/6104D/6106D are supported by nct6775 driver
                   Show NCT5573D as compatible to NCT6776F with same chip ID
@@ -379,7 +379,7 @@ git HEAD
                    Move help section to sensors.conf.5
                    Add a section for the Asus/Fintek F8000
   sensors-detect: Fix detection of ADT7463 and LM96000
-                  Add VIA VX800/VX820 SMBus support 
+                  Add VIA VX800/VX820 SMBus support
                   Fix detection of Intel 5000 series FB-DIMM AMB
                   Fix detection of ADT7462
                   Fix detection of SMSC LPC47M292
@@ -529,7 +529,7 @@ git HEAD
                   Mention the f75375s driver
                   Add SMSC LPC47B367-NC detection (no sensors)
                   Reduce w83781d/lm78 I2C address probing range
-                  Add Intel Celeron 4xx and Penryn (CPU on 45nm) detection 
+                  Add Intel Celeron 4xx and Penryn (CPU on 45nm) detection
 
 3.0.0-rc3 (2007-10-28)
   libsensors: Add a default configuration file
@@ -562,7 +562,7 @@ git HEAD
            Better handling of the fault flags
   sensors-conf-convert: Add a short help text
   sensors-detect: Fix SMSC SCH311x detection
-                  Add AMD K10 CPU sensor detection 
+                  Add AMD K10 CPU sensor detection
 
 3.0.0-rc1 (2007-09-25)
   Initial release

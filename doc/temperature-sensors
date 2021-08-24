@@ -77,7 +77,7 @@ For diodes, voltage is linear with temperature.
 Winbond W83782D and W83783S
 ---------------------------
 These chips default to thermistors with Beta = 3435.
-Each sensor on the chip can be individually set to be 
+Each sensor on the chip can be individually set to be
 a diode, transistor, or thermistor.
 If the temperature reading changes much less than expected,
 the sensor type probably needs to be changed to a diode.

@@ -1,4 +1,3 @@
-
 fancontrol - automated software based fan speed regulation
 
 

@@ -49,44 +49,44 @@ int main(void)
 			case NEG:
 				printf("NEG\n");
 				break;
-	
+
 			case EOL:
 				printf("EOL\n");
 				break;
-	
+
 			case BUS:
 				printf("BUS\n");
 				break;
-	
+
 			case LABEL:
 				printf("LABEL\n");
 				break;
-	
+
 			case SET:
 				printf("SET\n");
 				break;
-	
+
 			case CHIP:
 				printf("CHIP\n");
 				break;
-	
+
 			case COMPUTE:
 				printf("COMPUTE\n");
 				break;
-	
+
 			case IGNORE:
 				printf("IGNORE\n");
 				break;
-	
+
 			case FLOAT:
 				printf("FLOAT: %f\n", sensors_yylval.value);
 				break;
-	
+
 			case NAME:
 				printf("NAME: %s\n", sensors_yylval.name);
 				free(sensors_yylval.name);
 				break;
-	
+
 			case ERROR:
 				printf("ERROR\n");
 				break;
@@ -103,4 +103,3 @@ int main(void)
 
 	return 0;
 }
-

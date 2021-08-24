@@ -105,7 +105,7 @@ TROUBLESHOOTING
 lm-sensors is blamed for all kinds of problems on a regular basis.
 While it is always possible that lm-sensors does in fact have a problem,
 almost everytime the problem will be elsewhere. The most likely culprit
-for a problem is one of the kernel drivers prividing data to lm-sensors
+for a problem is one of the kernel drivers providing data to lm-sensors
 or, rather, the sensors command (and libsensors). If you encounter problems,
 the following tests are recommended.
 
@@ -121,7 +121,7 @@ the following tests are recommended.
   with the sensors command first). Again, after identifying the offending
   driver, record and report your results to the driver maintainer.
 - If this does not help, try to run ptrace on the sensors command and/or
-  the application using libsensors. If you find any anormalies, record
+  the application using libsensors. If you find any anomalies, record
   your results and report.
 
 

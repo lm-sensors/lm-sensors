@@ -19,6 +19,6 @@ user :: all-lib-test
 $(LIB_TEST_DIR)/test-scanner.ro: $(LIB_DIR)/data.h $(LIB_DIR)/conf.h $(LIB_DIR)/conf-parse.h $(LIB_DIR)/scanner.h
 
 clean-lib-test:
-	$(RM) $(LIB_TEST_DIR)/*.rd $(LIB_TEST_DIR)/*.ro 
+	$(RM) $(LIB_TEST_DIR)/*.rd $(LIB_TEST_DIR)/*.ro
 	$(RM) $(LIB_TEST_TARGETS)
 clean :: clean-lib-test

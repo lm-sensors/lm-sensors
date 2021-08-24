@@ -98,4 +98,3 @@ foreach $scenario (@scenarios) {
 	ok($test->diff_exact(\@stderr, \@experr, \@diff),
 		"stderr: " . $scenario->{"desc"}) or print @diff;
 }
-
