@@ -40,6 +40,7 @@
 
 PIDFILE="/var/run/fancontrol.pid"
 
+DEBUG_SAVE_RESTORE=1
 #DEBUG=1
 MAX=255
 
@@ -415,7 +416,7 @@ function pwmdisable()
 	if [ ${PWM_ENABLE_ORIG_STATE[${1}]} ]
 	then
 		#restore the pwmN value
-		if [ "$DEBUG" != "" ]
+		if [ "$DEBUG_SAVE_RESTORE" != "" ]
 		then
 			echo "Restoring ${1} original value of ${PWM_ORIG_STATE[${1}]}"
 		fi
@@ -425,7 +426,7 @@ function pwmdisable()
 		# reset the pwmN value.
 		if [ ${PWM_ENABLE_ORIG_STATE[${1}]} != 1 ]
 		then
-			if [ "$DEBUG" != "" ]
+			if [ "$DEBUG_SAVE_RESTORE" != "" ]
 			then
 				echo "Restoring $ENABLE original value of ${PWM_ENABLE_ORIG_STATE[${1}]}"
 			fi
@@ -457,6 +458,10 @@ function pwmdisable()
 	echo $MAX > $1
 	if [ "$(cat $ENABLE)" -eq 1 -a "$(cat $1)" -ge 190 ]
 	then
+		if [ "$DEBUG_SAVE_RESTORE" != "" ]
+		then
+			echo "Set $ENABLE to 1 and $1 to $MAX"
+		fi
 		# Success
 		return 0
 	fi
@@ -477,7 +482,7 @@ function pwmenable()
 		# and the value from pwmN
 		local PWM_CONTROL_ORIG=$(cat $ENABLE)
 		local PWM_ORIG=$(cat ${1})
-		if [ "$DEBUG" != "" ]
+		if [ "$DEBUG_SAVE_RESTORE" != "" ]
 		then
 			echo "Saving $ENABLE original value as $PWM_CONTROL_ORIG"
 			echo "Saving ${1} original value as $PWM_ORIG"
