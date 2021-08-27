@@ -2,6 +2,7 @@ lm-sensors CHANGES file
 -----------------------
 
 git HEAD
+  Add PWM sensor support
 
 3.6.0 (2019-10-18)
   configs: Added a number of new configuration files
