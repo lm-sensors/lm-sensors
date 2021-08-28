@@ -149,6 +149,7 @@ int get_type_scaling(sensors_subfeature_type type)
 	case SENSORS_SUBFEATURE_HUMIDITY_INPUT:
 		return 1000;
 	case SENSORS_SUBFEATURE_FAN_INPUT:
+	case SENSORS_SUBFEATURE_PWM_IO:
 		return 1;
 	case SENSORS_SUBFEATURE_POWER_AVERAGE:
 	case SENSORS_SUBFEATURE_ENERGY_INPUT:
@@ -183,6 +184,13 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 	case SENSORS_FEATURE_INTRUSION:
 		underscore = strchr(sfname, '_');
 		name = strndup(sfname, underscore - sfname);
+		if (!name)
+			sensors_fatal_error(__func__, "Out of memory");
+
+		break;
+	case SENSORS_FEATURE_PWM:
+		/* Not all pwm subfeatures have a underscore in there name */
+		name = strndup(sfname, 4);
 		if (!name)
 			sensors_fatal_error(__func__, "Out of memory");
 
@@ -319,6 +327,13 @@ static const struct subfeature_type_match humidity_matches[] = {
 	{ NULL, 0 }
 };
 
+static const struct subfeature_type_match pwm_matches[] = {
+	{ "enable", SENSORS_SUBFEATURE_PWM_ENABLE },
+	{ "mode", SENSORS_SUBFEATURE_PWM_MODE },
+	{ "freq", SENSORS_SUBFEATURE_PWM_FREQ },
+	{ NULL, 0 }
+};
+
 static const struct subfeature_type_match cpu_matches[] = {
 	{ "vid", SENSORS_SUBFEATURE_VID },
 	{ NULL, 0 }
@@ -339,6 +354,7 @@ static struct feature_type_match matches[] = {
 	{ "energy%d%c", energy_matches },
 	{ "intrusion%d%c", intrusion_matches },
 	{ "humidity%d%c", humidity_matches },
+	{ "pwm%d%c", pwm_matches },
 };
 
 /* Return the subfeature type and channel number based on the subfeature
@@ -356,9 +372,15 @@ sensors_subfeature_type sensors_subfeature_get_type(const char *name, int *nr)
 		return SENSORS_SUBFEATURE_BEEP_ENABLE;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(matches); i++)
-		if ((count = sscanf(name, matches[i].name, nr, &c)))
+	for (i = 0; i < ARRAY_SIZE(matches); i++) {
+		if ((count = sscanf(name, matches[i].name, nr, &c))) {
+			/* Needed for matching pwm[1-*] */
+			if (count == 1 && matches[i].submatches == pwm_matches)
+				return SENSORS_SUBFEATURE_PWM_IO;
+
 			break;
+		}
+	}
 
 	if (i == ARRAY_SIZE(matches) || count != 2 || c != '_')
 		return SENSORS_SUBFEATURE_UNKNOWN;  /* no match */
@@ -468,6 +490,7 @@ static int sensors_read_dynamic_chip(sensors_chip_features *chip,
 		case SENSORS_FEATURE_ENERGY:
 		case SENSORS_FEATURE_CURR:
 		case SENSORS_FEATURE_HUMIDITY:
+		case SENSORS_FEATURE_PWM:
 			nr--;
 			break;
 		default:

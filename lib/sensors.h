@@ -31,7 +31,7 @@
    when the API or ABI breaks), the third digit is incremented to track small
    API additions like new flags / enum values. The second digit is for tracking
    larger additions like new methods. */
-#define SENSORS_API_VERSION		0x500
+#define SENSORS_API_VERSION		0x501
 
 #define SENSORS_CHIP_NAME_PREFIX_ANY	NULL
 #define SENSORS_CHIP_NAME_ADDR_ANY	(-1)
@@ -143,6 +143,7 @@ typedef enum sensors_feature_type {
 	SENSORS_FEATURE_ENERGY		= 0x04,
 	SENSORS_FEATURE_CURR		= 0x05,
 	SENSORS_FEATURE_HUMIDITY	= 0x06,
+	SENSORS_FEATURE_PWM		= 0x07,
 	SENSORS_FEATURE_MAX_MAIN,
 	SENSORS_FEATURE_VID		= 0x10,
 	SENSORS_FEATURE_INTRUSION	= 0x11,
@@ -243,6 +244,11 @@ typedef enum sensors_subfeature_type {
 	SENSORS_SUBFEATURE_CURR_CRIT_ALARM,
 
 	SENSORS_SUBFEATURE_HUMIDITY_INPUT = SENSORS_FEATURE_HUMIDITY << 8,
+
+	SENSORS_SUBFEATURE_PWM_IO = SENSORS_FEATURE_PWM << 8,
+	SENSORS_SUBFEATURE_PWM_FREQ,
+	SENSORS_SUBFEATURE_PWM_ENABLE = (SENSORS_FEATURE_PWM << 8) | 0x80,
+	SENSORS_SUBFEATURE_PWM_MODE,
 
 	SENSORS_SUBFEATURE_VID = SENSORS_FEATURE_VID << 8,
 

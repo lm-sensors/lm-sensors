@@ -754,6 +754,59 @@ static void print_chip_humidity(const sensors_chip_name *name,
 	free(label);
 }
 
+static void print_chip_pwm(const sensors_chip_name *name,
+			   const sensors_feature *feature,
+			   int label_size)
+{
+	const sensors_subfeature *sfio, *sffreq, *sfenable, *sfmode;
+	char *label;
+	double val;
+
+	if (!(label = sensors_get_label(name, feature))) {
+		fprintf(stderr, "ERROR: Can't get label of feature %s!\n",
+			feature->name);
+		return;
+	}
+	print_label(label, label_size);
+	free(label);
+
+	sfio = sensors_get_subfeature(name, feature,
+				      SENSORS_SUBFEATURE_PWM_IO);
+	if (sfio && !get_input_value(name, sfio, &val))
+		printf("    %3.0f%%", val / 2.55);
+	else
+		printf("     N/A");
+
+	sffreq = sensors_get_subfeature(name, feature,
+					SENSORS_SUBFEATURE_PWM_FREQ);
+	sfmode = sensors_get_subfeature(name, feature,
+					 SENSORS_SUBFEATURE_PWM_MODE);
+	if (sffreq || sfmode) {
+		printf("  (");
+		if (sffreq)
+			printf("freq = %.0f Hz", get_value(name, sffreq));
+
+		if (sfmode) {
+			if (!get_input_value(name, sfmode, &val))
+				printf("%smode = %s", sffreq ? ", " : "",
+				       (int) val ? "pwm" : "dc");
+			else
+				printf("%smode = N/A", sffreq ? ", " : "");
+		}
+
+		printf(")");
+	}
+
+	sfenable = sensors_get_subfeature(name, feature,
+					  SENSORS_SUBFEATURE_PWM_ENABLE);
+
+	if (sfenable && !get_input_value(name, sfenable, &val) &&
+	    (int) val == 1)
+		printf("  MANUAL CONTROL");
+
+	printf("\n");
+}
+
 static void print_chip_beep_enable(const sensors_chip_name *name,
 				   const sensors_feature *feature,
 				   int label_size)
@@ -893,6 +946,9 @@ void print_chip(const sensors_chip_name *name)
 			break;
 		case SENSORS_FEATURE_HUMIDITY:
 			print_chip_humidity(name, feature, label_size);
+			break;
+		case SENSORS_FEATURE_PWM:
+			print_chip_pwm(name, feature, label_size);
 			break;
 		default:
 			continue;
