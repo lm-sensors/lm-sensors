@@ -1,5 +1,6 @@
 [Unit]
 Description=Initialize hardware monitoring sensors
+ConditionVirtualization=no
 
 [Service]
 EnvironmentFile=/etc/sysconfig/lm_sensors
