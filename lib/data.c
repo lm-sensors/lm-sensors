@@ -224,8 +224,7 @@ int sensors_parse_bus_id(const char *name, sensors_bus_id *bus)
 	return 0;
 }
 
-static int sensors_substitute_chip(sensors_chip_name *name,
-				   const char *filename, int lineno)
+static int sensors_substitute_chip(sensors_chip_name *name)
 {
 	int i, j;
 	for (i = 0; i < sensors_config_busses_count; i++)
@@ -233,12 +232,10 @@ static int sensors_substitute_chip(sensors_chip_name *name,
 		    sensors_config_busses[i].bus.nr == name->bus.nr)
 			break;
 
-	if (i == sensors_config_busses_count) {
-		sensors_parse_error_wfn("Undeclared bus id referenced",
-					filename, lineno);
-		name->bus.nr = SENSORS_BUS_NR_IGNORE;
-		return -SENSORS_ERR_BUS_NAME;
-	}
+	/* If there is no corresponding bus directive, proceed with the bus
+	 * number as specified. */
+	if (i == sensors_config_busses_count)
+		return 0;
 
 	/* Compare the adapter names */
 	for (j = 0; j < sensors_proc_bus_count; j++) {
@@ -260,15 +257,12 @@ static int sensors_substitute_chip(sensors_chip_name *name,
    already substituted. */
 int sensors_substitute_busses(void)
 {
-	int err, i, j, lineno;
+	int err, i, j;
 	sensors_chip_name_list *chips;
-	const char *filename;
 	int res = 0;
 
 	for (i = sensors_config_chips_subst;
 	     i < sensors_config_chips_count; i++) {
-		filename = sensors_config_chips[i].line.filename;
-		lineno = sensors_config_chips[i].line.lineno;
 		chips = &sensors_config_chips[i].chips;
 		for (j = 0; j < chips->fits_count; j++) {
 			/* We can only substitute if a specific bus number
@@ -276,8 +270,7 @@ int sensors_substitute_busses(void)
 			if (chips->fits[j].bus.nr == SENSORS_BUS_NR_ANY)
 				continue;
 
-			err = sensors_substitute_chip(&chips->fits[j],
-						      filename, lineno);
+			err = sensors_substitute_chip(&chips->fits[j]);
 			if (err)
 				res = err;
 		}
