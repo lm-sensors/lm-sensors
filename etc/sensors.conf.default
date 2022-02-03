@@ -311,6 +311,17 @@ chip "w83627thf-*"
 #    set in8_max  3.0 * 1.10
 
 
+chip "nct6106-isa-*"
+
+    label in0 "Vcore"
+    label in2 "AVCC"
+    label in3 "+3.3V"
+    label in6 "3VSB"
+    label in7 "Vbat"
+
+    compute in6 @*2, @/2
+
+
 chip "w83627ehf-*" "w83627dhg-*" "w83667hg-*" "nct6775-*" "nct6776-*" \
      "nct6779-*" "nct6791-*" "nct6795-*" "nct6796-*"
 
