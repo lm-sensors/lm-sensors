@@ -55,7 +55,7 @@ function LoadConfig
 	fi
 
 	# grep configuration from file
-	IGNOREIOERRORS=$(grep -E '^IGNOREIOERRORS=.*$' $1 | sed -e 's/IGNOREIOERRORS=//g')
+	IGNOREREADERRORS=$(grep -E '^IGNOREREADERRORS=.*$' $1 | sed -e 's/IGNOREREADERRORS=//g')
 	INTERVAL=$(grep -E '^INTERVAL=.*$' $1 | sed -e 's/INTERVAL=//g')
 	DEVPATH=$(grep -E '^DEVPATH=.*$' $1 | sed -e 's/DEVPATH= *//g')
 	DEVNAME=$(grep -E '^DEVNAME=.*$' $1 | sed -e 's/DEVNAME= *//g')
@@ -111,8 +111,8 @@ function LoadConfig
 		[ -z "${AFCMAXPWM[$fcvcount]}" ] && AFCMAXPWM[$fcvcount]=255
 		AFCAVERAGE[$fcvcount]=$(echo $AVERAGE |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
 		[ -z "${AFCAVERAGE[$fcvcount]}" ] && AFCAVERAGE[$fcvcount]=1
-		AFCIGNOREIOERRORS[$fcvcount]=$(echo $IGNOREIOERRORS |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
-		[ -z "${AFCIGNOREIOERRORS[$fcvcount]}" ] && AFCIGNOREIOERRORS[$fcvcount]=0
+		AFCIGNOREREADERRORS[$fcvcount]=$(echo $IGNOREREADERRORS |sed -e 's/ /\n/g' |grep -E "${AFCPWM[$fcvcount]}" |cut -d'=' -f2)
+		[ -z "${AFCIGNOREREADERRORS[$fcvcount]}" ] && AFCIGNOREREADERRORS[$fcvcount]=0
 
 
 		# verify the validity of the settings
@@ -165,7 +165,7 @@ function LoadConfig
 		echo "  MINPWM=${AFCMINPWM[$fcvcount]}"
 		echo "  MAXPWM=${AFCMAXPWM[$fcvcount]}"
 		echo "  AVERAGE=${AFCAVERAGE[$fcvcount]}"
-		echo "  IGNOREIOERRORS=${AFCIGNOREIOERRORS[$fcvcount]}"
+		echo "  IGNOREREADERRORS=${AFCIGNOREREADERRORS[$fcvcount]}"
 		let fcvcount=fcvcount+1
 	done
 	echo
@@ -545,7 +545,7 @@ function UpdateFanSpeeds
 		minpwm=${AFCMINPWM[$fcvcount]}
 		maxpwm=${AFCMAXPWM[$fcvcount]}
 		avg=${AFCAVERAGE[$fcvcount]}
-		ignerrors=${AFCIGNOREIOERRORS[$fcvcount]}
+		ignerrors=${AFCIGNOREREADERRORS[$fcvcount]}
 
 		read tlastval < ${tsens}
 		if [ $? -ne 0 ]
@@ -649,17 +649,13 @@ function UpdateFanSpeeds
 		  fi
 		fi
 
-		if [ $ignerrors -eq 1 ]
+		echo $pwmval > $pwmo # write new value to pwm output
+		if [ $? -ne 0 ]
 		then
-			echo $pwmval > $pwmo 2>/dev/null # write new value to pwm output
-		else
-			echo $pwmval > $pwmo # write new value to pwm output
-			if [ $? -ne 0 ]
-			then
-				echo "Error writing PWM value to $DIR/$pwmo" >&2
-				restorefans 1
-			fi
+			echo "Error writing PWM value to $DIR/$pwmo" >&2
+			restorefans 1
 		fi
+			
 		if [ "$DEBUG" != "" ]
 		then
 			echo "new pwmval=$pwmval"
