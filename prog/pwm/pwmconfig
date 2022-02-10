@@ -617,7 +617,7 @@ function AskPath()
 	fi
 	if [ ${FCCONFIG::1} != "/" ]
 	then
-		FCCONFIG=$(readlink -f $USERDIR/$FCCONFIG)
+		FCCONFIG=$(readlink -f "$USERDIR"/"$FCCONFIG")
 	fi
 }
 
@@ -668,7 +668,7 @@ function LoadConfig()
 	fi
 }
 
-LoadConfig $FCCONFIG
+LoadConfig "$FCCONFIG"
 
 # $1 = pwm value below which the fan is stopped
 function TestMinStart()
@@ -820,8 +820,8 @@ function SaveConfig()
 	echo "MINSTOP=$MINSTOP" >>$tmpfile
 	[ -n "$MINPWM" ] && echo "MINPWM=$MINPWM" >>$tmpfile
 	[ -n "$MAXPWM" ] && echo "MAXPWM=$MAXPWM" >>$tmpfile
-	mv $tmpfile $FCCONFIG
-	chmod +r $FCCONFIG
+	mv $tmpfile "$FCCONFIG"
+	chmod +r "$FCCONFIG"
 	#check if file was written correctly
 	echo 'Configuration saved'
 }
