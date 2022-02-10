@@ -31,6 +31,7 @@
 
 LM_VERSION='3.6.0+git'
 PIDFILE="/var/run/fancontrol.pid"
+USERDIR=$(pwd)
 
 if [ -f "$PIDFILE" ]
 then
@@ -613,6 +614,10 @@ function AskPath()
 	if [ "$FCCONFIG" = "" ]
 	then
 		FCCONFIG="/etc/fancontrol"
+	fi
+	if [ ${FCCONFIG::1} != "/" ]
+	then
+		FCCONFIG=$(readlink -f $USERDIR/$FCCONFIG)
 	fi
 }
 
