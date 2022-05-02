@@ -567,7 +567,7 @@ function UpdateFanSpeeds
 		# calculate the average value of all elements
 		tval=$(( ( ${prevtemp[@]/%/+}0 ) / ${#prevtemp[@]} ))
 		# copy prevtemp back to PREVIOUSTEMP_$fcvcount
-		eval "PREVIOUSTEMP_$fcvcount=(\"${prevtemp[@]}\")"
+		declare -a "PREVIOUSTEMP_$fcvcount=(${prevtemp[@]})"	#395 issue fix
 
 		# If fanspeed-sensor output shall be used, do it
 		if [[ -n ${fan} ]]
