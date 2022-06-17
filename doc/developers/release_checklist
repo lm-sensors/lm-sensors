@@ -10,7 +10,7 @@ Release steps:
 - Update the CHANGES file (set version and release date)
 - Update doc/developers/lm_sensors.lsm (Version, Entered-date and Primary-site)
 - Update doc/libsensors-API.txt and SENSORS_API_VERSION in lib/sensors.h
-- Update version.h
+- grep for LM_VERSION and update values of the constants
 - Commit
 - Tag the release using git:
   git tag V3-x-x
@@ -22,6 +22,7 @@ After release, remember to:
   https://github.com/lm-sensors/lm-sensors/archive/V3-x-x/lm-sensors-3-x-x.tar.gz
 - Add a news item to https://hwmon.wiki.kernel.org/lm_sensors
 - Announce on the lm-sensors mailing list
-- Add "+git" to version.h and commit
+- grep for LM_VERSION and add "+git" to the values of the constants
+- Commit
 - Send lm_sensors.lsm to the LSM by mailing it to lsm@qqx.org with the
   subject `add' (no quotes)

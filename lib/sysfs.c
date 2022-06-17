@@ -663,7 +663,7 @@ static int classify_device(const char *dev_name,
 	if ((!subsys || !strcmp(subsys, "platform") ||
 			!strcmp(subsys, "of_platform"))) {
 		/* must be new ISA (platform driver) */
-		if (sscanf(dev_name, "%*[a-z0-9_].%d", &entry->chip.addr) != 1)
+		if (sscanf(dev_name, "%*[a-zA-Z0-9_]%*1[.:]%d", &entry->chip.addr) != 1)
 			entry->chip.addr = 0;
 		entry->chip.bus.type = SENSORS_BUS_TYPE_ISA;
 		entry->chip.bus.nr = 0;
@@ -938,7 +938,7 @@ int sensors_read_sysfs_attr(const sensors_chip_name *name,
 		if (res == EOF) {
 			if (errno == EIO)
 				return -SENSORS_ERR_IO;
-			else 
+			else
 				return -SENSORS_ERR_ACCESS_R;
 		}
 		*value /= get_type_scaling(subfeature->type);
@@ -972,7 +972,7 @@ int sensors_write_sysfs_attr(const sensors_chip_name *name,
 		if (res == EOF) {
 			if (errno == EIO)
 				return -SENSORS_ERR_IO;
-			else 
+			else
 				return -SENSORS_ERR_ACCESS_W;
 		}
 	} else

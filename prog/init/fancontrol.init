@@ -1,7 +1,5 @@
 #!/bin/sh
 #
-# $Id$
-#
 # fancontrol
 #
 # chkconfig: 2345 90 01

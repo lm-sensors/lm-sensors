@@ -5,7 +5,7 @@ After=lm_sensors.service
 
 [Service]
 Type=simple
-PIDFile=/var/run/fancontrol.pid
+PIDFile=/run/fancontrol.pid
 ExecStart=/usr/sbin/fancontrol
 
 [Install]

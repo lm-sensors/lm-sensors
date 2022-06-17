@@ -1,1 +1,1 @@
-#define LM_VERSION "3.5.0+git"
+#define LM_VERSION "3.6.0+git"

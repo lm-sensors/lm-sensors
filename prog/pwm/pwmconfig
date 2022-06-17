@@ -29,8 +29,7 @@
 #
 #
 
-REVISION=$(echo '$Revision$' | cut -d' ' -f2)
-REVDATE=$(echo '$Date$' | cut -d' ' -f2)
+LM_VERSION='3.6.0+git'
 PIDFILE="/var/run/fancontrol.pid"
 
 if [ -f "$PIDFILE" ]
@@ -48,7 +47,7 @@ then
 	exit 1
 fi
 
-echo "# pwmconfig revision $REVISION ($REVDATE)"
+echo "# pwmconfig version $LM_VERSION"
 echo 'This program will search your sensors for pulse width modulation (pwm)'
 echo 'controls, and test each one to see if it controls a fan on'
 echo 'your motherboard. Note that many motherboards do not have pwm'
