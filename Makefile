@@ -267,7 +267,7 @@ manhtml:
 
 # Flex and Bison
 %.c: %.y
-	@if ! which $(BISON) 2> /dev/null ; then \
+	@if ! command -v $(BISON) 2> /dev/null ; then \
 		echo "Please install $(BISON), then run \"make clean\" and try again" ; \
 		false ; \
 	fi
@@ -280,7 +280,7 @@ FLEX_FLAGS := -Psensors_yy -t -Cfe -8
 endif
 
 %.c: %.l
-	@if ! which $(FLEX) 2> /dev/null ; then \
+	@if ! command -v $(FLEX) 2> /dev/null ; then \
 		echo "Please install $(FLEX), then run \"make clean\" and try again" ; \
 		false ; \
 	fi
