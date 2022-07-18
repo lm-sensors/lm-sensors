@@ -55,6 +55,14 @@ ETCDIR := /etc
 # library files (both static and shared) will be installed.
 LIBDIR := $(PREFIX)/lib
 
+# You should not need to change this. It is the directory into which the
+# data files will be installed.
+DATADIR := $(PREFIX)/share
+
+# You should not need to change this. It is the directory into which the
+# ZSH completion files will be installed.
+ZSHCOMPDIR := $(DATADIR)/zsh/site-functions
+
 EXLDFLAGS := -Wl,-rpath,$(LIBDIR)
 
 # You should not need to change this. It is the directory into which the

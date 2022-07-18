@@ -1,0 +1,29 @@
+#compdef sensors
+
+# List of adapters. This depends on jq to parse the json output.
+_sensors_adapaters() {
+    declare -a adapters
+    eval set -A adapters "$(sensors -j | jq -r 'keys|@sh')" 
+    _values adapter $adapters
+}
+
+_sensors() {
+    typeset -a args
+
+    args=(
+        '--bus-list[generate bus statements for sensors.conf]'
+        '--no-adapter[do not show adapter for each chip]'
+        '-A[do not show adapter for each chip]'
+        '-j[json output]'
+        '-u[raw output]'
+        '(--allow-no-sensors -n)'{--allow-no-sensors,-n}'[do not fail if no sensors found]'
+        '(--config-file -c)'{--config-file,-c}'[specify a config file]:file:_files'
+        '(--fahrenheit -f)'{--fahrenheit,-f}'[show temperatures in degrees fahrenheit]'
+        '(--set -s)'{--set,-s}'[execute `set'\'' statements (root only)]'
+        '(-)'{--help,-h}'[display help text]'
+        '(-)'{--version,-v}'[display the program version]'
+        '*:chip:_sensors_adapaters'
+    )
+
+    _arguments $args
+}
