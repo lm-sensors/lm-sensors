@@ -24,6 +24,7 @@ PROGSENSORSDIR := $(MODULE_DIR)
 
 PROGSENSORSMAN1DIR := $(MANDIR)/man1
 PROGSENSORSMAN1FILES := $(MODULE_DIR)/sensors.1
+PROGSENSORSZSHCOMPFILES := $(MODULE_DIR)/_sensors
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -36,6 +37,7 @@ INCLUDEFILES += $(PROGSENSORSSOURCES:.c=.rd)
 
 REMOVESENSORSBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(BINDIR)/%,$(PROGSENSORSTARGETS))
 REMOVESENSORSMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGSENSORSMAN1DIR)/%,$(PROGSENSORSMAN1FILES))
+REMOVESENSORSZSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(ZSHCOMPDIR)/%,$(PROGSENSORSZSHCOMPFILES))
 
 LIBICONV := $(shell if /sbin/ldconfig -p | grep -q '/libiconv\.so$$' ; then echo \-liconv; else echo; fi)
 
@@ -46,14 +48,16 @@ all-prog-sensors: $(PROGSENSORSTARGETS)
 user :: all-prog-sensors
 
 install-prog-sensors: all-prog-sensors
-	$(MKDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(PROGSENSORSMAN1DIR)
+	$(MKDIR) $(DESTDIR)$(BINDIR) $(DESTDIR)$(PROGSENSORSMAN1DIR) $(DESTDIR)$(ZSHCOMPDIR)
 	$(INSTALL) -m 755 $(PROGSENSORSTARGETS) $(DESTDIR)$(BINDIR)
 	$(INSTALL) -m 644 $(PROGSENSORSMAN1FILES) $(DESTDIR)$(PROGSENSORSMAN1DIR)
+	$(INSTALL) -m 644 $(PROGSENSORSZSHCOMPFILES) $(DESTDIR)$(ZSHCOMPDIR)
 user_install :: install-prog-sensors
 
 user_uninstall::
 	$(RM) $(REMOVESENSORSBIN)
 	$(RM) $(REMOVESENSORSMAN)
+	$(RM) $(REMOVESENSORSZSH)
 
 clean-prog-sensors:
 	$(RM) $(PROGSENSORSDIR)/*.rd $(PROGSENSORSDIR)/*.ro 

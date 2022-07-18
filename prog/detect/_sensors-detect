@@ -1,0 +1,10 @@
+#compdef sensors-detect
+
+typeset -a args
+
+args=(
+    '--auto[run in automatic mode, assuming default answers to all questions (may not be safe)]'
+    '--stat[display i2c address statistics]'
+)
+
+_arguments $args

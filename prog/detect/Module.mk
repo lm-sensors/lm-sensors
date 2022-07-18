@@ -24,6 +24,7 @@ PROGDETECTDIR := $(MODULE_DIR)
 
 PROGDETECTMAN8DIR := $(MANDIR)/man8
 PROGDETECTMAN8FILES := $(MODULE_DIR)/sensors-detect.8
+PROGDETECTZSHCOMPFILES := $(MODULE_DIR)/_sensors-detect
 
 # Regrettably, even 'simply expanded variables' will not put their currently
 # defined value verbatim into the command-list of rules...
@@ -31,19 +32,22 @@ PROGDETECTSBININSTALL := $(MODULE_DIR)/sensors-detect
 
 REMOVEDETECTBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(SBINDIR)/%,$(PROGDETECTSBININSTALL))
 REMOVEDETECTMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGDETECTMAN8DIR)/%,$(PROGDETECTMAN8FILES))
+REMOVEDETECTZSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(ZSHCOMPDIR)/%,$(PROGDETECTZSHCOMPFILES))
 
 all-prog-detect:
 user :: all-prog-detect
 
 install-prog-detect: all-prog-detect
-	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGDETECTMAN8DIR)
+	$(MKDIR) $(DESTDIR)$(SBINDIR) $(DESTDIR)$(PROGDETECTMAN8DIR) $(DESTDIR)$(ZSHCOMPDIR)
 	$(INSTALL) -m 755 $(PROGDETECTSBININSTALL) $(DESTDIR)$(SBINDIR)
 	$(INSTALL) -m 644 $(PROGDETECTMAN8FILES) $(DESTDIR)$(PROGDETECTMAN8DIR)
+	$(INSTALL) -m 644 $(PROGDETECTZSHCOMPFILES) $(DESTDIR)$(ZSHCOMPDIR)
 user_install :: install-prog-detect
 
 user_uninstall::
 	$(RM) $(REMOVEDETECTBIN)
 	$(RM) $(REMOVEDETECTMAN)
+	$(RM) $(REMOVEDETECTZSH)
 
 clean-prog-detect:
 clean :: clean-prog-detect
