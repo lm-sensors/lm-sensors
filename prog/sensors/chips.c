@@ -335,6 +335,8 @@ static const struct sensor_subfeature_list temp_sensors[] = {
 	    "emerg" },
 	{ SENSORS_SUBFEATURE_TEMP_LOWEST, NULL, 0, "lowest" },
 	{ SENSORS_SUBFEATURE_TEMP_HIGHEST, NULL, 0, "highest" },
+	{ SENSORS_SUBFEATURE_TEMP_THROTTLE_LOW, NULL, 0, "throttle low" },
+	{ SENSORS_SUBFEATURE_TEMP_THROTTLE_HIGH, NULL, 0, "throttle high" },
 	{ -1, NULL, 0, NULL }
 };
 

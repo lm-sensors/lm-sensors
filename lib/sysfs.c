@@ -223,6 +223,8 @@ static const struct subfeature_type_match temp_matches[] = {
 	{ "emergency_hyst", SENSORS_SUBFEATURE_TEMP_EMERGENCY_HYST },
 	{ "lowest", SENSORS_SUBFEATURE_TEMP_LOWEST },
 	{ "highest", SENSORS_SUBFEATURE_TEMP_HIGHEST },
+	{ "throttle_high", SENSORS_SUBFEATURE_TEMP_THROTTLE_HIGH },
+	{ "throttle_low", SENSORS_SUBFEATURE_TEMP_THROTTLE_LOW },
 	{ "alarm", SENSORS_SUBFEATURE_TEMP_ALARM },
 	{ "min_alarm", SENSORS_SUBFEATURE_TEMP_MIN_ALARM },
 	{ "max_alarm", SENSORS_SUBFEATURE_TEMP_MAX_ALARM },
