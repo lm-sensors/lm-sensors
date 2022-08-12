@@ -83,53 +83,79 @@ void sensors_free_chip_name(sensors_chip_name *chip)
 int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 {
 	char *dash;
+	const char * prefix = name;
+	const char * bus_type;
 
 	/* First, the prefix. It's either "*" or a real chip name. */
-	if (!strncmp(name, "*-", 2)) {
-		res->prefix = SENSORS_CHIP_NAME_PREFIX_ANY;
-		name += 2;
+	if (!strncmp(prefix, "*-", 2)) {
+		bus_type = prefix + 2;
 	} else {
-		if (!(dash = strchr(name, '-')))
+		if (!(dash = strchr(prefix, '-')))
 			return -SENSORS_ERR_CHIP_NAME;
-		res->prefix = strndup(name, dash - name);
-		if (!res->prefix)
-			sensors_fatal_error(__func__,
-					    "Allocating name prefix");
-		name = dash + 1;
+		bus_type = dash + 1;
 	}
 
-	/* Then we have either a sole "*" (all chips with this name) or a bus
-	   type and an address. */
-	if (!strcmp(name, "*")) {
-		res->bus.type = SENSORS_BUS_TYPE_ANY;
-		res->bus.nr = SENSORS_BUS_NR_ANY;
-		res->addr = SENSORS_CHIP_NAME_ADDR_ANY;
-		return 0;
+	/* We go through the name until we find a valid bus type or "*"
+	   (all chips with this name). Dashes on the way are considered
+	   part of the prefix. */
+	while (1) {
+		if (!strcmp(bus_type, "*")) {
+			res->bus.type = SENSORS_BUS_TYPE_ANY;
+			break;
+		}
+
+		if (!(dash = strchr(bus_type, '-')))
+			return -SENSORS_ERR_CHIP_NAME;
+
+		if (!strncmp(bus_type, "i2c", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_I2C;
+			break;
+		}
+		else if (!strncmp(bus_type, "isa", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_ISA;
+			break;
+		}
+		else if (!strncmp(bus_type, "pci", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_PCI;
+			break;
+		}
+		else if (!strncmp(bus_type, "spi", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_SPI;
+			break;
+		}
+		else if (!strncmp(bus_type, "virtual", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_VIRTUAL;
+			break;
+		}
+		else if (!strncmp(bus_type, "acpi", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_ACPI;
+			break;
+		}
+		else if (!strncmp(bus_type, "hid", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_HID;
+			break;
+		}
+		else if (!strncmp(bus_type, "mdio", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_MDIO;
+			break;
+		}
+		else if (!strncmp(bus_type, "scsi", dash - bus_type)) {
+			res->bus.type = SENSORS_BUS_TYPE_SCSI;
+			break;
+		}
+		else {
+			/* Assume the prefix contains a dash */
+			bus_type = dash + 1;
+		}
 	}
 
-	if (!(dash = strchr(name, '-')))
-		goto ERROR;
-	if (!strncmp(name, "i2c", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_I2C;
-	else if (!strncmp(name, "isa", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_ISA;
-	else if (!strncmp(name, "pci", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_PCI;
-	else if (!strncmp(name, "spi", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_SPI;
-	else if (!strncmp(name, "virtual", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_VIRTUAL;
-	else if (!strncmp(name, "acpi", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_ACPI;
-	else if (!strncmp(name, "hid", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_HID;
-	else if (!strncmp(name, "mdio", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_MDIO;
-	else if (!strncmp(name, "scsi", dash - name))
-		res->bus.type = SENSORS_BUS_TYPE_SCSI;
-	else
-		goto ERROR;
 	name = dash + 1;
+
+	/* We can now properly set the prefix */
+	res->prefix = strndup(prefix, bus_type - prefix - 1);
+	if (!res->prefix)
+		sensors_fatal_error(__func__,
+				    "Allocating name prefix");
 
 	/* Some bus types (i2c, spi) have an additional bus number.
 	   For these, the next part is either a "*" (any bus of that type)
