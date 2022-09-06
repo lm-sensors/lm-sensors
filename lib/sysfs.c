@@ -663,8 +663,9 @@ static int classify_device(const char *dev_name,
 	if ((!subsys || !strcmp(subsys, "platform") ||
 			!strcmp(subsys, "of_platform"))) {
 		/* must be new ISA (platform driver) */
-		if (sscanf(dev_name, "%*[a-zA-Z0-9_]%*1[.:]%d", &entry->chip.addr) != 1)
-			entry->chip.addr = 0;
+		if (sscanf(dev_name, "%*[a-zA-Z0-9_]%*1[.:]%d", &entry->chip.addr) == 1);
+		else if (sscanf(dev_name, "%x.%*s", &entry->chip.addr) == 1);
+		else entry->chip.addr = 0;
 		entry->chip.bus.type = SENSORS_BUS_TYPE_ISA;
 		entry->chip.bus.nr = 0;
 	} else if (subsys && !strcmp(subsys, "acpi")) {
