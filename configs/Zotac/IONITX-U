@@ -1,0 +1,37 @@
+# libsensors configuration file for Zotac IONITX-U-E mainboard
+
+chip "w83667hg-*"
+
+    label in0 "Vcore"
+    label in1 "Memory Voltage"
+    label in2 "3VCC"
+    label in4 "V1.05"
+    label in5 "V1.50"
+    label in7 "3VSB"
+    label in8 "Vbat"
+    label fan1 "SYS Fan"
+    label fan2 "CPU Fan"
+    label temp1 "M/B Temp"
+    label temp2 "CPU Temp"
+    ignore in3
+    ignore fan3
+    ignore fan4
+    ignore fan5
+    ignore temp3
+    ignore intrusion0
+    ignore cpu0_vid
+
+    set in1_min  1.5 * 0.90
+    set in1_max  1.5 * 1.10
+    set in2_min  3.3 * 0.90
+    set in2_max  3.3 * 1.10
+    set in4_min  1.0 * 0.90
+    set in4_max  1.0 * 1.10
+    set in5_min  1.5 * 0.90
+    set in5_max  1.5 * 1.10
+    set in7_min  3.3 * 0.90
+    set in7_max  3.3 * 1.10
+    set in8_min  3.0 * 0.90
+    set in8_max  3.3 * 1.10
+    set temp1_max       55
+    set temp1_max_hyst  52
