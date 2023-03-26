@@ -118,30 +118,79 @@ function LoadConfig
 			echo "MINTEMP must be less than MAXTEMP" >&2
 			exit 1
 		fi
-		if [ "${AFCMAXPWM[$fcvcount]}" -gt 255 ]
-		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
-			echo "MAXPWM must be at most 255" >&2
-			exit 1
-		fi
-		if [ "${AFCMINSTOP[$fcvcount]}" -ge "${AFCMAXPWM[$fcvcount]}" ]
-		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
-			echo "MINSTOP must be less than MAXPWM" >&2
-			exit 1
-		fi
-		if [ "${AFCMINSTOP[$fcvcount]}" -lt "${AFCMINPWM[$fcvcount]}" ]
-		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
-			echo "MINSTOP must be greater than or equal to MINPWM" >&2
-			exit 1
-		fi
-		if [ "${AFCMINPWM[$fcvcount]}" -lt 0 ]
-		then
-			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
-			echo "MINPWM must be at least 0" >&2
-			exit 1
-		fi
+
+        if [ "${AFCMINPWM[$fvcount]}" -lt "${AFCMAXPWM[$fvcount]}" ]; then
+           # Normal drive:
+           # PWM value 0   -> Fan not spinning
+           # PWM value 255 -> Fan spinning at full speed
+
+		   if [ "${AFCMAXPWM[$fcvcount]}" -gt $MAX ]
+		   then
+			   echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			   echo "For normal drive MAXPWM must be at most $MAX" >&2
+		       exit 1
+		   fi
+
+		   if [ "${AFCMINSTOP[$fcvcount]}" -ge "${AFCMAXPWM[$fcvcount]}" ]
+		   then
+			   echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			   echo "For normal drive MINSTOP must be less than MAXPWM" >&2
+			   exit 1
+		   fi
+
+		   if [ "${AFCMINSTOP[$fcvcount]}" -lt "${AFCMINPWM[$fcvcount]}" ]
+		   then
+			   echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			   echo "For normal drive MINSTOP must be greater than or equal to MINPWM" >&2
+			   exit 1
+		   fi
+
+		   if [ "${AFCMINPWM[$fcvcount]}" -lt 0 ]
+		   then
+			   echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			   echo "For normal drive MINPWM must be at least 0" >&2
+			   exit 1
+		   fi
+
+        elif [ "${AFCMINPWM[$fvcount]}" -gt "${AFCMAXPWM[$fvcount]}" ]; then
+            # Inverted drive:
+            # PWM value 255   -> Fan not spinning
+            # PWM value 0 -> Fan spinning at full speed
+
+		    if [ "${AFCMINPWM[$fcvcount]}" -gt $MAX ]
+		    then
+			    echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			    echo "For inverted drive MINPWM must be at most $MAX" >&2
+		        exit 1
+		    fi
+
+		    if [ "${AFCMINSTOP[$fcvcount]}" -lt "${AFCMAXPWM[$fcvcount]}" ]
+		    then
+			    echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			    echo "For inverted drive MINSTOP must be larger than MAXPWM" >&2
+			    exit 1
+		    fi
+
+		    if [ "${AFCMINSTOP[$fcvcount]}" -ge "${AFCMINPWM[$fcvcount]}" ]
+		    then
+			    echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			    echo "For inverted drive MINSTOP must be less than MINPWM" >&2
+			    exit 1
+		    fi
+
+		    if [ "${AFCMAXPWM[$fcvcount]}" -lt 0 ]
+		    then
+			    echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+			    echo "For inverted drive MAXPWM must be at least 0" >&2
+			    exit 1
+		    fi
+
+        else
+            echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
+            echo "MINPWM and MAXPWM cannot be equal" >&2
+            exit 1
+        fi
+
 		if [ "${AFCAVERAGE[$fcvcount]}" -lt 1 ]
 		then
 			echo "Error in configuration file (${AFCPWM[$fcvcount]}):" >&2
