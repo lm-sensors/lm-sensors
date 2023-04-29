@@ -297,10 +297,19 @@ function CheckFiles
 	while (( $fcvcount < ${#AFCTEMP[@]} )) # go through all temp inputs
 	do
 		tsen=${AFCTEMP[$fcvcount]}
-		if [ ! -r $tsen ]
+		if [ ${tsen::1} == "!" ]
 		then
-			echo "Error: file $tsen doesn't exist or isn't readable" >&2
-			outdated=1
+			if ! [ -x ${tsen:1} ]
+			then
+				echo "Error: file ${tsen:1} doesn't exist or isn't executable" >&2
+				outdated=1
+			fi
+		else
+			if ! [ -r $tsen ]
+			then
+				echo "Error: file $tsen doesn't exist or isn't readable" >&2
+				outdated=1
+			fi
 		fi
 		let fcvcount=$fcvcount+1
 	done
@@ -541,7 +550,12 @@ function UpdateFanSpeeds
 		maxpwm=${AFCMAXPWM[$fcvcount]}
 		avg=${AFCAVERAGE[$fcvcount]}
 
-		read tlastval < ${tsens}
+		if [ ${tsens::1} == "!" ]
+		then
+			tlastval="$(${tsens:1})"
+		else
+			read tlastval < ${tsens}
+		fi
 		if [ $? -ne 0 ]
 		then
 			echo "Error reading temperature from $DIR/$tsens"
