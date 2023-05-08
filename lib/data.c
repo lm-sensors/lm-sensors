@@ -127,6 +127,8 @@ int sensors_parse_chip_name(const char *name, sensors_chip_name *res)
 		res->bus.type = SENSORS_BUS_TYPE_MDIO;
 	else if (!strncmp(name, "scsi", dash - name))
 		res->bus.type = SENSORS_BUS_TYPE_SCSI;
+	else if (!strncmp(name, "sdio", dash - name))
+		res->bus.type = SENSORS_BUS_TYPE_SDIO;
 	else
 		goto ERROR;
 	name = dash + 1;
@@ -204,6 +206,10 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 	case SENSORS_BUS_TYPE_SCSI:
 		return snprintf(str, size, "%s-scsi-%hd-%x", chip->prefix,
 				chip->bus.nr, chip->addr);
+	case SENSORS_BUS_TYPE_SDIO:
+		return snprintf(str, size, "%s-sdio-%x:%04x:%x", chip->prefix,
+				chip->bus.nr, (chip->addr >> 3),
+				(chip->addr & 0x7));
 	}
 
 	return -SENSORS_ERR_CHIP_NAME;

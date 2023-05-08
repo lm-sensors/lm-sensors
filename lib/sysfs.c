@@ -692,6 +692,13 @@ static int classify_device(const char *dev_name,
 		entry->chip.addr = (bus << 8) + (slot << 4) + fn;
 		entry->chip.bus.type = SENSORS_BUS_TYPE_SCSI;
 		entry->chip.bus.nr = domain;
+	} else
+	if (subsys && !strcmp(subsys, "sdio") &&
+	    sscanf(dev_name, "mmc%hx:%x:%x", &entry->chip.bus.nr, &slot, &fn) == 3) {
+		/* mmc host(bus), address, function */
+		/* adapter(host), channel(bus), id(target), lun */
+		entry->chip.addr = (slot << 3) + fn;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_SDIO;
 	} else {
 		/* Unknown device */
 		ret = 0;
