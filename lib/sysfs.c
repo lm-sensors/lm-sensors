@@ -700,6 +700,26 @@ static int classify_device(const char *dev_name,
 	return ret;
 }
 
+/* realpath(3) that returns NULL for a path that isn't a symlink.
+   This is needed to deal with devices that have a "device" sysfs
+   entry that has the device ID, such as SDIO devices. */
+static char* realpath_no_symlink(const char *restrict path,
+				 char *restrict resolved_path)
+{
+	struct stat st;
+	int ret;
+
+	if (lstat(path, &st) < 0)
+		return NULL;
+
+	if (!S_ISLNK(st.st_mode)) {
+		errno = -EINVAL;
+		return NULL;
+	}
+
+	return realpath(path, resolved_path);
+}
+
 static int find_bus_type(const char *dev_path,
                          const char *dev_name,
                          sensors_chip_features *entry)
@@ -740,7 +760,7 @@ static int find_bus_type(const char *dev_path,
 		if (!ret) {
 			snprintf(linkpath, NAME_MAX, "%s/device", my_dev_path);
 			free(my_dev_path);
-			my_dev_path = realpath(linkpath, NULL);
+			my_dev_path = realpath_no_symlink(linkpath, NULL);
 			if (my_dev_path != NULL)
 				dev_name = strrchr(my_dev_path, '/') + 1;
 			else if (errno == ENOMEM)
@@ -838,7 +858,7 @@ static int sensors_add_hwmon_device(const char *path, const char *classdev)
 	(void)classdev; /* hide warning */
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
-	dev_path = realpath(linkpath, NULL);
+	dev_path = realpath_no_symlink(linkpath, NULL);
 	if (dev_path == NULL) {
 		if (errno == ENOMEM) {
 			sensors_fatal_error(__func__, "Out of memory");
