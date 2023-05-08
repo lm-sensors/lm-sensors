@@ -692,12 +692,39 @@ static int classify_device(const char *dev_name,
 		entry->chip.addr = (bus << 8) + (slot << 4) + fn;
 		entry->chip.bus.type = SENSORS_BUS_TYPE_SCSI;
 		entry->chip.bus.nr = domain;
+	} else
+	if (subsys && !strcmp(subsys, "sdio") &&
+	    sscanf(dev_name, "mmc%hx:%x:%x", &entry->chip.bus.nr, &slot, &fn) == 3) {
+		/* mmc host(bus), address, function */
+		/* adapter(host), channel(bus), id(target), lun */
+		entry->chip.addr = (slot << 3) + fn;
+		entry->chip.bus.type = SENSORS_BUS_TYPE_SDIO;
 	} else {
 		/* Unknown device */
 		ret = 0;
 	}
 
 	return ret;
+}
+
+/* realpath(3) that returns NULL for a path that isn't a symlink.
+   This is needed to deal with devices that have a "device" sysfs
+   entry that has the device ID, such as SDIO devices. */
+static char* realpath_no_symlink(const char *restrict path,
+				 char *restrict resolved_path)
+{
+	struct stat st;
+	int ret;
+
+	if (lstat(path, &st) < 0)
+		return NULL;
+
+	if (!S_ISLNK(st.st_mode)) {
+		errno = -EINVAL;
+		return NULL;
+	}
+
+	return realpath(path, resolved_path);
 }
 
 static int find_bus_type(const char *dev_path,
@@ -740,7 +767,7 @@ static int find_bus_type(const char *dev_path,
 		if (!ret) {
 			snprintf(linkpath, NAME_MAX, "%s/device", my_dev_path);
 			free(my_dev_path);
-			my_dev_path = realpath(linkpath, NULL);
+			my_dev_path = realpath_no_symlink(linkpath, NULL);
 			if (my_dev_path != NULL)
 				dev_name = strrchr(my_dev_path, '/') + 1;
 			else if (errno == ENOMEM)
@@ -838,7 +865,7 @@ static int sensors_add_hwmon_device(const char *path, const char *classdev)
 	(void)classdev; /* hide warning */
 
 	snprintf(linkpath, NAME_MAX, "%s/device", path);
-	dev_path = realpath(linkpath, NULL);
+	dev_path = realpath_no_symlink(linkpath, NULL);
 	if (dev_path == NULL) {
 		if (errno == ENOMEM) {
 			sensors_fatal_error(__func__, "Out of memory");
