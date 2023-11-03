@@ -221,6 +221,21 @@ static int sensors_get_ignored(const sensors_chip_name *name,
 	return 0;
 }
 
+/* Looks up whether a sub-feature should be ignored. Returns
+   1 if it should be ignored, 0 if not. */
+static int subfeatures_get_ignored(const sensors_chip_name *name,
+                                   const sensors_subfeature *subfeature)
+{
+	const sensors_chip *chip;
+	int i;
+
+	for (chip = NULL; (chip = sensors_for_all_config_chips(name, chip));)
+		for (i = 0; i < chip->ignores_count; i++)
+			if (!strcmp(subfeature->name, chip->ignores[i].name))
+				return 1;
+	return 0;
+}
+
 /* Read the value of a subfeature of a certain chip. Note that chip should not
    contain wildcard values! This function will return 0 on success, and <0
    on failure. */
@@ -414,7 +429,8 @@ sensors_get_all_subfeatures(const sensors_chip_name *name,
 	if (*nr >= chip->subfeature_count)
 		return NULL;	/* end of list */
 	subfeature = &chip->subfeature[(*nr)++];
-	if (subfeature->mapping == feature->number)
+	if (!subfeatures_get_ignored(name, subfeature)
+            && (subfeature->mapping == feature->number))
 		return subfeature;
 	return NULL;	/* end of subfeature list */
 }
@@ -432,7 +448,8 @@ sensors_get_subfeature(const sensors_chip_name *name,
 
 	for (i = feature->first_subfeature; i < chip->subfeature_count &&
 	     chip->subfeature[i].mapping == feature->number; i++) {
-		if (chip->subfeature[i].type == type)
+		if (!subfeatures_get_ignored(name, &(chip->subfeature[i])) &&
+			    chip->subfeature[i].type == type)
 			return &chip->subfeature[i];
 	}
 	return NULL;	/* No such subfeature */
