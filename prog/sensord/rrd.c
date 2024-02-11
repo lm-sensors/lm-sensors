@@ -299,7 +299,7 @@ int rrdInit(void)
 		argv[argc++] = rraBuff;
 		argv[argc] = NULL;
 
-		ret = rrd_create(argc, (char**) argv);
+		ret = rrd_create(argc, argv);
 		if (ret == -1) {
 			sensorLog(LOG_ERR, "Error creating RRD file: %s: %s",
 				  sensord_args.rrdFile, rrd_get_error());
@@ -455,7 +455,7 @@ int rrdUpdate(void)
 		const char *argv[] = {
 			"sensord", sensord_args.rrdFile, rrdBuff, NULL
 		};
-		if ((ret = rrd_update(3, (char **) /* WEAK */ argv))) {
+		if ((ret = rrd_update(3, /* WEAK */ argv))) {
 			sensorLog(LOG_ERR, "Error updating RRD file: %s: %s",
 				  sensord_args.rrdFile, rrd_get_error());
 		}
