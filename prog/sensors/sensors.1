@@ -32,69 +32,77 @@ sensors \- print sensors information
 .I chips
 .B ]
 .br
-.B sensors -s [
+.B sensors \-s [
 .I chips
 .B ]
 .br
-.B sensors --bus-list
+.B sensors \-\-bus-list
 
 .SH DESCRIPTION
 .B sensors
 is used to show the current readings of all sensor chips.
 .br
-.B sensors -s
+.B sensors \-s
 is used to set all limits as specified in the configuration file.
 .br
-.B sensors --bus-list
+.B sensors \-\-bus-list
 is used to generate bus statements suitable for the configuration file.
 
 .SH OPTIONS
-.IP "-c, --config-file config-file"
-Specify a configuration file. If no file is specified, the libsensors
-default configuration file is used. Use `-c /dev/null' to temporarily
-disable this default configuration file.
-.IP "-h, --help"
+.IP "\-c, \-\-config-file config-file"
+Specify a configuration file.
+If no file is specified,
+the libsensors default configuration file is used.
+Use `\-c /dev/null' to temporarily disable this default configuration file.
+.IP "\-h, \-\-help"
 Print a help text and exit.
-.IP "-s, --set"
-Evaluate all `set' statements in the configuration file and exit. You must
-be `root' to do this. If this parameter is not specified, no `set' statement
-is evaluated.
-.IP "-A, --no-adapter"
+.IP "\-s, \-\-set"
+Evaluate all `set' statements in the configuration file and exit.
+You must be `root' to do this.
+If this parameter is not specified,
+no `set' statement is evaluated.
+.IP "\-A, \-\-no-adapter"
 Do not show the adapter for each chip.
-.IP -u
-Raw output. This mode is suitable for debugging and for post-processing
-of the output by scripts. It is also useful when writing a configuration
-file because it shows the raw input names which must be referenced in the
-configuration file.
-.IP -j
-Json output. This mode is suitable for post-processing of the output by scripts.
-.IP "-v, --version"
+.IP \-u
+Raw output.
+This mode is suitable for debugging and for post-processing of the
+output by scripts.
+It is also useful when writing a configuration file
+because it shows the raw input names
+which must be referenced in the configuration file.
+.IP \-j
+Json output.
+This mode is suitable for post-processing of the output by scripts.
+.IP "\-v, \-\-version"
 Print the program version and exit.
-.IP "-f, --fahrenheit"
+.IP "\-f, \-\-fahrenheit"
 Print the temperatures in degrees Fahrenheit instead of Celsius.
-.IP --bus-list
-Generate bus statements suitable for using in sensors.conf. Such bus statements
-are only needed if you have several chips sharing the same address on different
-buses of the same type. As bus numbers are usually not guaranteed to be stable
-over reboots, these statements let you refer to each bus by its name rather
-than numbers.
-.IP "-n, --allow-no-sensors"
-Do not fail if no sensors found. The error message will be printed in the log.
+.IP \-\-bus-list
+Generate bus statements suitable for using in sensors.conf.
+Such bus statements are only needed
+if you have several chips sharing the same address on different
+buses of the same type.
+As bus numbers are usually not guaranteed to be stable over reboots,
+these statements let you refer to each bus by its name rather than
+numbers.
+.IP "\-n, \-\-allow-no-sensors"
+Do not fail if no sensors found.
+The error message will be printed in the log.
 .SH FILES
 .I /etc/sensors3.conf
 .br
 .I /etc/sensors.conf
 .RS
-The system wide configuration file. See
+The system wide configuration file.
+See
 .BR sensors.conf (5)
 for further details.
 .RE
 
 .SH SEE ALSO
-sensors.conf(5), sensors-detect(8).
+.BR sensors.conf (5),
+.BR sensors-detect (8).
 
 .SH AUTHOR
 Frodo Looijaard and the lm_sensors group
 https://hwmon.wiki.kernel.org/lm_sensors
-
-
