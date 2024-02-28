@@ -34,8 +34,8 @@ translate the raw readings from the kernel modules to real\-world values.
 On a given system, there may be one or more hardware monitoring chips.
 Each chip may have several features. For example, the LM78 monitors 7
 voltage inputs, 3 fans and one temperature. Feature names are
-standardized. Typical feature names are in0, in1, in2... for voltage
-inputs, fan1, fan2, fan3... for fans and temp1, temp2, temp3... for
+standardized. Typical feature names are in0, in1, in2...\& for voltage
+inputs, fan1, fan2, fan3...\& for fans and temp1, temp2, temp3...\& for
 temperature inputs.
 
 Each feature may in turn have one or more sub\-features, each
@@ -79,14 +79,15 @@ configuration lines are examined for it, otherwise they are ignored.
 A chip description is built from several elements, separated by
 dashes. The first element is the chip type, the second element is
 the name of the bus, and the third element is the hexadecimal address
-of the chip. Such chip descriptions are printed by sensors(1) as the
-first line for every chip.
+of the chip. Such chip descriptions are printed by
+.BR sensors (1)
+as the first line for every chip.
 
 The name of the bus is either
 .IR isa ,
 .IR pci ,
 .IR virtual ,
-.I spi-*,
+.IR spi-* ,
 .I i2c-N
 or
 .I mdio
@@ -143,7 +144,7 @@ feature names. Same applies to all other statement types below.
 
 An
 .I ignore
-statement is a hint that a specific feature should be ignored - probably
+statement is a hint that a specific feature should be ignored \(en probably
 because it returns bogus values (for example, because a fan or temperature
 sensor is not connected). Example:
 
@@ -237,7 +238,9 @@ are substituted. You should be careful though to avoid circular references.
 
 Please note that
 .I set
-statements are only executed by sensors(1) when you use the
+statements are only executed by
+.BR sensors (1)
+when you use the
 .B \-s
 option. Typical graphical sensors applications do not care about these
 statements at all.
@@ -276,7 +279,7 @@ all
 statements together at the top of your configuration file.
 
 Running
-.B sensors --bus-list
+.B sensors \-\-bus\-list
 will generate these lines for you.
 
 In the case where multiple configuration files are used, the scope
@@ -297,11 +300,11 @@ the statements in this order to avoid accuracy loss.
 .SH VOLTAGE COMPUTATION DETAILS
 
 Most voltage sensors in sensor chips have a range of 0 to 4.08 V.
-This is generally sufficient for the +3.3V and CPU supply voltages, so
+This is generally sufficient for the +3.3 V and CPU supply voltages, so
 the sensor chip reading is the actual voltage.
 
 Other supply voltages must be scaled with an external resistor network.
-The driver reports the value at the chip's pin (0 \- 4.08 V), and the
+The driver reports the value at the chip's pin (0 to 4.08 V), and the
 userspace application must convert this raw value to an actual voltage.
 The
 .I compute
@@ -311,39 +314,59 @@ Unfortunately the resistor values vary among motherboard types.
 Therefore you have to figure out the correct resistor values for your
 own motherboard.
 
-For positive voltages (typically +5V and +12V), two resistors are used,
+For positive voltages (typically +5 V and +12 V), two resistors are used,
 with the following formula:
-        R1 = R2 * (Vs/Vin \- 1)
+.in +8n
+R1 = R2 * (Vs/Vin \- 1)
+.in
 
 where:
-        R1 and R2 are the resistor values
-        Vs is the actual voltage being monitored
-        Vin is the voltage at the pin
+.in +8n
+.nf
+R1 and R2 are the resistor values
+Vs is the actual voltage being monitored
+Vin is the voltage at the pin
+.fi
+.in
 
 This leads to the following compute formula:
-        compute inX @*((R1/R2)+1),  @/(((R1/R2)+1)
+.in +8n
+compute inX @*((R1/R2)+1),  @/(((R1/R2)+1)
+.in
 
-Real\-world formula for +5V and +12V would look like:
-        compute in3 @*((6.8/10)+1), @/((6.8/10)+1)
-        compute in4 @*((28/10)+1),  @/((28/10)+1)
+Real\-world formula for +5 V and +12 V would look like:
+.in +8n
+.nf
+compute in3 @*((6.8/10)+1), @/((6.8/10)+1)
+compute in4 @*((28/10)+1),  @/((28/10)+1)
+.fi
+.in
 
-For negative voltages (typically \-5V and \-12V), two resistors are used
+For negative voltages (typically \-5 V and \-12 V), two resistors are used
 as well, but different boards use different strategies to bring the
-voltage value into the 0 \- 4.08 V range. Some use an inverting
+voltage value into the 0 to 4.08 V range. Some use an inverting
 amplifier, others use a positive reference voltage. This leads to
 different computation formulas. Note that most users won't have to care
-because most modern motherboards make little use of \-12V and no use of
-\-5V so they do not bother monitoring these voltage inputs.
+because most modern motherboards make little use of \-12 V and no use of
+\-5 V so they do not bother monitoring these voltage inputs.
 
 Real\-world examples for the inverting amplifier case:
-        compute in5 \-@*(240/60), \-@/(240/60)
-        compute in6 \-@*(100/60), \-@/(100/60)
+.in +8n
+.nf
+compute in5 \-@*(240/60), \-@/(240/60)
+compute in6 \-@*(100/60), \-@/(100/60)
+.fi
+.in
 
 Real\-world examples for the positive voltage reference case:
-        compute in5 @*(1+232/56) \- 4.096*232/56, (@ + 4.096*232/56)/(1+232/56)
-        compute in6 @*(1+120/56) \- 4.096*120/56, (@ + 4.096*120/56)/(1+120/56)
+.in +8n
+.nf
+compute in5 @*(1+232/56) \- 4.096*232/56, (@ + 4.096*232/56)/(1+232/56)
+compute in6 @*(1+120/56) \- 4.096*120/56, (@ + 4.096*120/56)/(1+120/56)
+.fi
+.in
 
-Many recent monitoring chips have a 0 \- 2.04 V range, so scaling resistors
+Many recent monitoring chips have a 0 to 2.04 V range, so scaling resistors
 are even more needed, and resistor values are different.
 
 There are also a few chips out there which have internal scaling
@@ -563,7 +586,7 @@ ignored.
 .RE
 
 .SH SEE ALSO
-libsensors(3)
+.BR libsensors (3)
 
 .SH AUTHOR
 Frodo Looijaard and the lm_sensors group
