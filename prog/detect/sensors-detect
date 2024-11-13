@@ -7452,8 +7452,7 @@ sub write_config
 # BUS_MODULES for any required bus driver module (for example for I2C or SPI).
 
 EOT
-		print SYSCONFIG "BUS_MODULES=\"", join(" ", @{$bus_modules}), "\"\n"
-			if @{$bus_modules};
+		print SYSCONFIG "BUS_MODULES=\"", join(" ", @{$bus_modules}), "\"\n";
 		print SYSCONFIG "HWMON_MODULES=\"", join(" ", @{$hwmon_modules}), "\"\n";
 		close(SYSCONFIG);
 
