@@ -49,6 +49,8 @@
 #define SENSORS_BUS_NR_ANY		(-1)
 #define SENSORS_BUS_NR_IGNORE		(-2)
 
+#define SENSORS_POWER_METER_NAME	"power_meter"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -66,6 +68,7 @@ typedef struct sensors_chip_name {
 	sensors_bus_id bus;
 	int addr;
 	char *path;
+	char *oem_info;
 } sensors_chip_name;
 
 /* Load the configuration file and the detected chips list. If this

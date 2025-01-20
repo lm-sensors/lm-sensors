@@ -228,6 +228,7 @@ static void free_chip_name(sensors_chip_name *name)
 {
 	free(name->prefix);
 	free(name->path);
+	free(name->oem_info);
 }
 
 static void free_chip_features(sensors_chip_features *features)
