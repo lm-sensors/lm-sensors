@@ -2534,7 +2534,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8623E Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8623,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
@@ -2548,6 +2548,12 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		name => "ITE IT8626E Super IO Sensors",
 		driver => "to-be-written",	# it87
 		devid => 0x8626,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	}, {
+		name => "ITE IT8628E Super IO Sensors",
+		driver => "it87",
+		devid => 0x8628,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
@@ -2630,7 +2636,7 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
 	}, {
 		name => "ITE IT8732F Super IO Sensors",
-		driver => "to-be-written",	# it87
+		driver => "it87",
 		devid => 0x8732,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
@@ -2700,7 +2706,13 @@ use constant FEAT_SMBUS	=> (1 << 7);
 		devid => 0x8987,
 		logdev => 0x04,
 		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
-	}
+	}, {
+		name => "ITE IT87952E Super IO Sensors",
+		driver => "it87",
+		devid => 0x8695,
+		logdev => 0x04,
+		features => FEAT_IN | FEAT_FAN | FEAT_TEMP,
+	},
 );
 
 # Entries are grouped by family. Each family entry has the following fields:
