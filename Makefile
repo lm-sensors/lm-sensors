@@ -177,15 +177,13 @@ ifndef LIBICONV
   ICONV_TEST := $(shell printf '%s\n' \
     '#include <iconv.h>' \
     'int main() { iconv_t cd = iconv_open("UTF-8", "ASCII"); return 0; }' \
-    | $(CC) $(ALL_CPPFLAGS) -x c - -o /tmp/lm_sensors_iconv_test 2>/dev/null && echo "builtin" || echo "external")
+    | $(CC) $(ALL_CPPFLAGS) -x c - -o /dev/null 2>/dev/null && echo "builtin" || echo "external")
 
   ifeq ($(ICONV_TEST),builtin)
     LIBICONV :=
   else
     LIBICONV := -liconv
   endif
-
-  $(shell rm -f /tmp/lm_sensors_iconv_test)
 endif
 
 EXLDFLAGS := -Wl,-rpath,$(LIBDIR) $(ALL_LDFLAGS)
