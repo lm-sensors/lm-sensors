@@ -39,11 +39,6 @@ REMOVESENSORSBIN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(BINDIR)/%,$(PROGSENSO
 REMOVESENSORSMAN := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(PROGSENSORSMAN1DIR)/%,$(PROGSENSORSMAN1FILES))
 REMOVESENSORSZSH := $(patsubst $(MODULE_DIR)/%,$(DESTDIR)$(ZSHCOMPDIR)/%,$(PROGSENSORSZSHCOMPFILES))
 
-LIBICONV := $(shell printf '%s\n' \
-  '#include <iconv.h>' \
-  'int main() { iconv_t cd = iconv_open("UTF-8", "ASCII"); return 0; }' \
-  | $(CC) $(ALL_CPPFLAGS) -x c - 2>/dev/null && echo || echo \-liconv)
-
 $(PROGSENSORSTARGETS): $(PROGSENSORSSOURCES:.c=.ro) lib/$(LIBDEP_FOR_PROGS)
 	$(CC) -o $@ $(PROGSENSORSSOURCES:.c=.ro) $(LIBICONV) $(EXLDFLAGS) -Llib -lsensors -lm
 
