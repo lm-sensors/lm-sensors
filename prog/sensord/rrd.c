@@ -458,6 +458,7 @@ int rrdUpdate(void)
 		if ((ret = rrd_update(3, /* WEAK */ argv))) {
 			sensorLog(LOG_ERR, "Error updating RRD file: %s: %s",
 				  sensord_args.rrdFile, rrd_get_error());
+			rrd_clear_error();
 		}
 	}
 	sensorLog(LOG_DEBUG, "sensor rrd updated");
