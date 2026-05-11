@@ -774,6 +774,17 @@ int sensors_init_sysfs(void)
 	return 1;
 }
 
+static void replace_space_underscore(char *str)
+{
+	unsigned int i;
+
+	for (i=0; i < strlen(str); i++) {
+		if (str[i] == ' ') {
+			str[i] = '_';
+		}
+	}
+}
+
 static int classify_device(const char *dev_name,
                            const char *subsys,
                            sensors_chip_features *entry)
@@ -782,6 +793,7 @@ static int classify_device(const char *dev_name,
 	char bus_path[NAME_MAX];
 	char *bus_attr;
 	int ret = 1;
+	char *oem_info;
 
 	if ((!subsys || !strcmp(subsys, "i2c")) &&
 	    sscanf(dev_name, "%hd-%x", &entry->chip.bus.nr,
@@ -829,9 +841,16 @@ static int classify_device(const char *dev_name,
 		entry->chip.bus.nr = 0;
 	} else if (subsys && !strcmp(subsys, "acpi")) {
 		entry->chip.bus.type = SENSORS_BUS_TYPE_ACPI;
-		/* For now we assume that acpi devices are unique */
+		/* For ACPI power meter devices, use oem_info */
 		entry->chip.bus.nr = 0;
 		entry->chip.addr = 0;
+		if (!strcmp(entry->chip.prefix, SENSORS_POWER_METER_NAME)) {
+			oem_info = sysfs_read_attr(entry->chip.path, "power1_oem_info");
+			if (oem_info) {
+				replace_space_underscore(oem_info);
+				entry->chip.oem_info = oem_info;
+			}
+		}
 	} else
 	if (subsys && !strcmp(subsys, "hid") &&
 	    sscanf(dev_name, "%x:%x:%x.%x", &bus, &vendor, &product, &id) == 4) {
@@ -956,6 +975,9 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 	if (!entry.chip.path)
 		sensors_fatal_error(__func__, "Out of memory");
 
+	/* oem_info will set in classify_device */
+	entry.chip.oem_info = NULL;
+
 	if (dev_path == NULL) {
 		virtual = 1;
 	} else {
@@ -990,6 +1012,7 @@ static int sensors_read_one_sysfs_chip(const char *dev_path,
 exit_free:
 	free(entry.chip.prefix);
 	free(entry.chip.path);
+	free(entry.chip.oem_info);
 	return ret;
 }
 

@@ -196,8 +196,14 @@ int sensors_snprintf_chip_name(char *str, size_t size,
 		return snprintf(str, size, "%s-virtual-%x", chip->prefix,
 				chip->addr);
 	case SENSORS_BUS_TYPE_ACPI:
-		return snprintf(str, size, "%s-acpi-%x", chip->prefix,
-				chip->addr);
+		if (!strcmp(chip->prefix, SENSORS_POWER_METER_NAME) &&
+		    chip->oem_info) {
+			return snprintf(str, size, "%s-acpi-%s", chip->prefix,
+					chip->oem_info);
+		} else {
+			return snprintf(str, size, "%s-acpi-%x", chip->prefix,
+					chip->addr);
+		}
 	case SENSORS_BUS_TYPE_HID:
 		return snprintf(str, size, "%s-hid-%hd-%x", chip->prefix,
 				chip->bus.nr, chip->addr);
