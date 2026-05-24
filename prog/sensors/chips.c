@@ -963,9 +963,12 @@ static void print_chip_freq(const sensors_chip_name *name,
 				    SENSORS_SUBFEATURE_FREQ_INPUT);
 	if (sf && get_input_value(name, sf, &val) == 0) {
 		scale_value(&val, &unit);
-		printf("%4.0f %sHz%*s", val, unit, 2 - (int)strlen(unit), "");
+		if(strlen(unit))
+			printf("%6.2f %sHz%*s", val, unit, 2 - (int)strlen(unit), "");
+		else
+			printf("%4.0f %sHz%*s  ", val, unit, 2 - (int)strlen(unit), "");
 	} else {
-		printf("     N/A  ");
+		printf("     N/A    ");
 	}
 
 	printf("\n");
