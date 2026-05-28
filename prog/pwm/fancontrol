@@ -43,6 +43,73 @@ PIDFILE="/run/fancontrol.pid"
 #DEBUG=1
 MAX=255
 
+# File to cache lookup of hwmon Device Tree names
+ofnamecache=$(mktemp -u).ofnamecache
+
+# Lookup hwmon name from Device Tree name
+function DoOFLookup
+{
+    ofname=$1
+    if [ -f "$ofnamecache" ]
+    then
+      hwmonname=$(awk -F = '/^'$ofname'=/ {print $2}' "$ofnamecache")
+    else
+      for hwmonofnode in /sys/class/hwmon/hwmon*/of_node
+      do
+        hwmonname=$(basename $(dirname $hwmonofnode))
+        ofname=$(basename $(readlink $hwmonofnode))
+        echo $ofname=$hwmonname >> $ofnamecache
+      done
+    fi
+    if [ -z "$hwmonname" ]
+    then
+        echo "Unknown DT name \"$ofname\"" >&2
+        exit -1
+    fi
+    echo $hwmonname
+}
+
+# Process given string for any name lookups required.
+function ProcessLookup
+{
+    str=$1
+    if [[ "$str" == "OF@"* ]]
+    then
+      ofname=${str/OF@/}
+      if [[ "$ofname" == *"/"* ]]
+      then
+        argument=${ofname/*\//}
+        ofname=${ofname/\/*/}
+        hwmonname=$(DoOFLookup $ofname)
+        str="$hwmonname/$argument"
+      else
+        str=$(DoOFLookup $ofname)
+      fi
+    fi
+    echo $str
+}
+
+# Process given array for any name lookups required.
+function ProcessArrayLookups
+{
+    array_sub=($@)
+    for n in $(seq 0 ${#array_sub[@]})
+    do
+      entry=${array_sub[$n]}
+      if [[ "$entry" == *"="* ]]
+      then
+        key=$(echo "$entry" | sed -e 's/=[^=]*$//')
+        value=$(echo "$entry" | sed -e 's/^[^=]*=//')
+        entry="$(ProcessLookup $key)=$(ProcessLookup $value)"
+      else
+        entry="$(ProcessLookup $entry)"
+      fi
+      array_sub[$n]=$entry
+    done
+    echo ${array_sub[@]}
+}
+
+
 function LoadConfig
 {
 	local fcvcount fcv
@@ -68,6 +135,21 @@ function LoadConfig
 	MINPWM=$(grep -E '^MINPWM=.*$' $1 | sed -e 's/MINPWM=//g')
 	MAXPWM=$(grep -E '^MAXPWM=.*$' $1 | sed -e 's/MAXPWM=//g')
 	AVERAGE=$(grep -E '^AVERAGE=.*$' $1 | sed -e 's/AVERAGE=//g')
+
+	# Do any name lookups done to avoid hwmon hardcoding and nondeterministic hwmon names
+	DEVPATH=$(ProcessArrayLookups ${DEVPATH[@]})
+	DEVNAME=$(ProcessArrayLookups ${DEVNAME[@]})
+	FCTEMPS=$(ProcessArrayLookups ${FCTEMPS[@]})
+	MINTEMP=$(ProcessArrayLookups ${MINTEMP[@]})
+	MAXTEMP=$(ProcessArrayLookups ${MAXTEMP[@]})
+	MINSTART=$(ProcessArrayLookups ${MINSTART[@]})
+	MINSTOP=$(ProcessArrayLookups ${MINSTOP[@]})
+	FCFANS=$(ProcessArrayLookups ${FCFANS[@]})
+	MINPWM=$(ProcessArrayLookups ${MINPWM[@]})
+	MAXPWM=$(ProcessArrayLookups ${MAXPWM[@]})
+	AVERAGE=$(ProcessArrayLookups ${AVERAGE[@]})
+
+	rm -f $(ofnamecache)
 
 	# Check whether all mandatory settings are set
 	if [[ -z ${INTERVAL} || -z ${FCTEMPS} || -z ${MINTEMP} || -z ${MAXTEMP} || -z ${MINSTART} || -z ${MINSTOP} ]]
