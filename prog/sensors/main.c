@@ -19,6 +19,7 @@
     MA 02110-1301 USA.
 */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -43,6 +44,7 @@
 
 static int do_sets, do_raw, do_json, hide_adapter;
 int new_json;
+static int do_sort = 0;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
@@ -220,6 +222,22 @@ static int do_a_set(const sensors_chip_name *name)
 	return 0;
 }
 
+/* Comparison function for qsort() to sort chips by their name. */
+static int compare_chips(const void *a, const void *b)
+{
+	const sensors_chip_name *chip_a = *(const sensors_chip_name **)a;
+	const sensors_chip_name *chip_b = *(const sensors_chip_name **)b;
+	char buf_a[200];
+	char buf_b[200];
+
+	if (sensors_snprintf_chip_name(buf_a, sizeof(buf_a), chip_a) < 0)
+		buf_a[0] = '\0';
+	if (sensors_snprintf_chip_name(buf_b, sizeof(buf_b), chip_b) < 0)
+		buf_b[0] = '\0';
+
+	return strverscmp(buf_a, buf_b);
+}
+
 /* returns number of chips found */
 static int do_the_real_work(const sensors_chip_name *match, int *err)
 {
@@ -362,7 +380,41 @@ int main(int argc, char *argv[])
 	if (do_bus_list) {
 		print_bus_list();
 	} else if (optind == argc) { /* No chip name on command line */
-		if (!do_the_real_work(NULL, &err)) {
+		int cnt = 0;
+		if (do_sort) {
+			int alloc = 16, chip_nr = 0;
+			const sensors_chip_name *chip, **chips;
+
+			chips = malloc(alloc * sizeof(*chips));
+			if (!chips) {
+				fprintf(stderr, "Memory allocation failed\n");
+				exit(1);
+			}
+
+			while ((chip = sensors_get_detected_chips(NULL, &chip_nr))) {
+				if (cnt >= alloc) {
+					alloc *= 2;
+					const sensors_chip_name **new_chips = realloc(chips, alloc * sizeof(*chips));
+					if (!new_chips) {
+						fprintf(stderr, "Memory allocation failed\n");
+						free(chips);
+						exit(1);
+					}
+					chips = new_chips;
+				}
+				chips[cnt++] = chip;
+			}
+
+			if (cnt > 0) {
+				qsort(chips, cnt, sizeof(*chips), compare_chips);
+				for (i = 0; i < cnt; i++)
+					do_the_real_work(chips[i], &err);
+			}
+			free(chips);
+		} else {
+			cnt = do_the_real_work(NULL, &err);
+		}
+		if (cnt == 0) {
 			fprintf(stderr,
 				"No sensors found!\n"
 				"Make sure you loaded all the kernel drivers you need.\n"
