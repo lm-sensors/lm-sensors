@@ -19,6 +19,7 @@
     MA 02110-1301 USA.
 */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -41,7 +42,7 @@
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
 
-static int do_sets, do_raw, do_json, hide_adapter;
+static int do_sets, do_raw, do_json, hide_adapter, do_sort;
 int new_json;
 
 int fahrenheit;
@@ -65,6 +66,7 @@ static void print_long_help(void)
 	     "  -j                     Json output\n"
 	     "  -v, --version          Display the program version\n"
 	     "  -n, --allow-no-sensors Do not fail if no sensors found\n"
+	     "  -S, --sort             Sort printed output by chip name\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
 	     "If no chips are specified, all chip info will be printed.\n"
@@ -220,6 +222,22 @@ static int do_a_set(const sensors_chip_name *name)
 	return 0;
 }
 
+/* Comparison function for qsort() to sort chips by their name. */
+static int compare_chips(const void *a, const void *b)
+{
+	const sensors_chip_name *chip_a = *(const sensors_chip_name * const *)a;
+	const sensors_chip_name *chip_b = *(const sensors_chip_name * const *)b;
+	char buf_a[200];
+	char buf_b[200];
+
+	if (sensors_snprintf_chip_name(buf_a, sizeof(buf_a), chip_a) < 0)
+		buf_a[0] = '\0';
+	if (sensors_snprintf_chip_name(buf_b, sizeof(buf_b), chip_b) < 0)
+		buf_b[0] = '\0';
+
+	return strverscmp(buf_a, buf_b);
+}
+
 /* returns number of chips found */
 static int do_the_real_work(const sensors_chip_name *match, int *err)
 {
@@ -227,7 +245,7 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 	int chip_nr;
 	int cnt = 0;
 
-	if (do_json)
+	if (do_json && !do_sort)
 		printf("{");
 	chip_nr = 0;
 	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
@@ -245,7 +263,7 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 		}
 		cnt++;
 	}
-	if (do_json)
+	if (do_json && !do_sort)
 		printf("}\n");
 	return cnt;
 }
@@ -290,6 +308,7 @@ int main(int argc, char *argv[])
 		{ "config-file", required_argument, NULL, 'c' },
 		{ "bus-list", no_argument, NULL, 'B' },
 		{ "allow-no-sensors", no_argument, NULL, 'n' },
+		{ "sort", no_argument, NULL, 'S' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -302,8 +321,9 @@ int main(int argc, char *argv[])
 	do_bus_list = 0;
 	hide_adapter = 0;
 	allow_no_sensors = 0;
+	do_sort = 0;
 	while (1) {
-		c = getopt_long(argc, argv, "hsvfAc:ujJn", long_opts, NULL);
+		c = getopt_long(argc, argv, "hsvfAc:ujJnS", long_opts, NULL);
 		if (c == EOF)
 			break;
 		switch(c) {
@@ -345,6 +365,9 @@ int main(int argc, char *argv[])
 		case 'n':
 			allow_no_sensors = 1;
 			break;
+		case 'S':
+			do_sort = 1;
+			break;
 		default:
 			fprintf(stderr,
 				"Internal error while parsing options!\n");
@@ -362,7 +385,48 @@ int main(int argc, char *argv[])
 	if (do_bus_list) {
 		print_bus_list();
 	} else if (optind == argc) { /* No chip name on command line */
-		if (!do_the_real_work(NULL, &err)) {
+		int cnt = 0;
+		if (do_sort) {
+			int alloc = 16, chip_nr = 0;
+			const sensors_chip_name *chip, **chips;
+
+			chips = malloc(alloc * sizeof(*chips));
+			if (!chips) {
+				fprintf(stderr, "Memory allocation failed\n");
+				exit(1);
+			}
+
+			while ((chip = sensors_get_detected_chips(NULL, &chip_nr))) {
+				if (cnt >= alloc) {
+					alloc *= 2;
+					const sensors_chip_name **new_chips = realloc(chips, alloc * sizeof(*chips));
+					if (!new_chips) {
+						fprintf(stderr, "Memory allocation failed\n");
+						free(chips);
+						exit(1);
+					}
+					chips = new_chips;
+				}
+				chips[cnt++] = chip;
+			}
+
+			if (cnt > 0) {
+				qsort(chips, cnt, sizeof(*chips), compare_chips);
+				if (do_json)
+					printf("{");
+				for (i = 0; i < cnt; i++) {
+					if (i > 0 && do_json)
+						printf(",");
+					do_the_real_work(chips[i], &err);
+				}
+				if (do_json)
+					printf("}\n");
+			}
+			free(chips);
+		} else {
+			cnt = do_the_real_work(NULL, &err);
+		}
+		if (cnt == 0) {
 			fprintf(stderr,
 				"No sensors found!\n"
 				"Make sure you loaded all the kernel drivers you need.\n"
