@@ -44,7 +44,7 @@
 
 static int do_sets, do_raw, do_json, hide_adapter;
 int new_json;
-static int do_sort = 0;
+static int do_sort = 1;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
@@ -245,7 +245,7 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 	int chip_nr;
 	int cnt = 0;
 
-	if (do_json)
+	if (do_json && !do_sort)
 		printf("{");
 	chip_nr = 0;
 	while ((chip = sensors_get_detected_chips(match, &chip_nr))) {
@@ -263,7 +263,7 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 		}
 		cnt++;
 	}
-	if (do_json)
+	if (do_json && !do_sort)
 		printf("}\n");
 	return cnt;
 }
@@ -407,8 +407,15 @@ int main(int argc, char *argv[])
 
 			if (cnt > 0) {
 				qsort(chips, cnt, sizeof(*chips), compare_chips);
-				for (i = 0; i < cnt; i++)
+				if (do_json)
+					printf("{");
+				for (i = 0; i < cnt; i++) {
+					if (i > 0 && do_json)
+						printf(",");
 					do_the_real_work(chips[i], &err);
+				}
+				if (do_json)
+					printf("}\n");
 			}
 			free(chips);
 		} else {
