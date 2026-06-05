@@ -42,9 +42,8 @@
 #define PROGRAM			"sensors"
 #define VERSION			LM_VERSION
 
-static int do_sets, do_raw, do_json, hide_adapter;
+static int do_sets, do_raw, do_json, hide_adapter, do_sort;
 int new_json;
-static int do_sort = 1;
 
 int fahrenheit;
 char degstr[5]; /* store the correct string to print degrees */
@@ -67,6 +66,7 @@ static void print_long_help(void)
 	     "  -j                     Json output\n"
 	     "  -v, --version          Display the program version\n"
 	     "  -n, --allow-no-sensors Do not fail if no sensors found\n"
+	     "  -S, --sort             Sort printed output by chip name\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
 	     "If no chips are specified, all chip info will be printed.\n"
@@ -308,6 +308,7 @@ int main(int argc, char *argv[])
 		{ "config-file", required_argument, NULL, 'c' },
 		{ "bus-list", no_argument, NULL, 'B' },
 		{ "allow-no-sensors", no_argument, NULL, 'n' },
+		{ "sort", no_argument, NULL, 'S' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -320,8 +321,9 @@ int main(int argc, char *argv[])
 	do_bus_list = 0;
 	hide_adapter = 0;
 	allow_no_sensors = 0;
+	do_sort = 0;
 	while (1) {
-		c = getopt_long(argc, argv, "hsvfAc:ujJn", long_opts, NULL);
+		c = getopt_long(argc, argv, "hsvfAc:ujJnS", long_opts, NULL);
 		if (c == EOF)
 			break;
 		switch(c) {
@@ -362,6 +364,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			allow_no_sensors = 1;
+			break;
+		case 'S':
+			do_sort = 1;
 			break;
 		default:
 			fprintf(stderr,
