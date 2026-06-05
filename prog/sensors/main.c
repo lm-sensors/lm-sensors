@@ -225,8 +225,8 @@ static int do_a_set(const sensors_chip_name *name)
 /* Comparison function for qsort() to sort chips by their name. */
 static int compare_chips(const void *a, const void *b)
 {
-	const sensors_chip_name *chip_a = *(const sensors_chip_name **)a;
-	const sensors_chip_name *chip_b = *(const sensors_chip_name **)b;
+	const sensors_chip_name *chip_a = *(const sensors_chip_name * const *)a;
+	const sensors_chip_name *chip_b = *(const sensors_chip_name * const *)b;
 	char buf_a[200];
 	char buf_b[200];
 
