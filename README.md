@@ -146,9 +146,8 @@ Note that the connfig files (`/etc/sensors3.conf` `/etc/sensors.conf`
 uses a custom `ETCDIR`.
 
 ## Other Information
-
-The lm_sensors website can be found at
-<https://hwmon.wiki.kernel.org/lm_sensors>.
+The official home of the lm-sensors project can be found at:
+https://github.com/lm-sensors/lm-sensors.
 
 The developers of this package can be reached through:
 
