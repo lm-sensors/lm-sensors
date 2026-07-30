@@ -65,6 +65,7 @@ static void print_long_help(void)
 	     "  -j                     Json output\n"
 	     "  -v, --version          Display the program version\n"
 	     "  -n, --allow-no-sensors Do not fail if no sensors found\n"
+	     "  -l, --label-map        Reflect label configuration with mapping to hwmon sysfs\n"
 	     "\n"
 	     "Use `-' after `-c' to read the config file from stdin.\n"
 	     "If no chips are specified, all chip info will be printed.\n"
@@ -250,6 +251,31 @@ static int do_the_real_work(const sensors_chip_name *match, int *err)
 	return cnt;
 }
 
+/* Print the mapping between sensor labels and the corresponding hwmon
+ * devices.
+ *
+ * The output associates each detected chip's sysfs path with the labels
+ * assigned to its features after parsing the /etc/sensors3.conf file.
+ * This is intended for applications that consume the hwmon sysfs interface
+ * and need to associate configured labels with sysfs sensor attributes.
+ * Output format is a valid (but incomplete) sensors3.conf file, with
+ * mappings to /sys/class/hwmon/hwmonX as comments. */
+static void print_label_map(void)
+{
+	const sensors_chip_name *chip;
+	int chip_nr;
+	chip_nr = 0;
+	while ((chip = sensors_get_detected_chips(NULL, &chip_nr))) {
+		const sensors_feature *feature;
+		int i;
+		i = 0;
+		printf("chip \"%s\"  # %s\n", sprintf_chip_name(chip), chip->path);
+		while ((feature = sensors_get_features(chip, &i))) {
+			printf("  label %s \"%s\"\n", feature->name, sensors_get_label(chip, feature));
+		}
+	}
+}
+
 /* List the buses in a format suitable for sensors.conf. We only list
    bus types for which bus statements are actually useful and supported.
    Known bug: i2c buses with number >= 32 or 64 could be listed several
@@ -278,7 +304,7 @@ static void print_bus_list(void)
 
 int main(int argc, char *argv[])
 {
-	int c, i, err, do_bus_list, allow_no_sensors;
+	int c, i, err, do_bus_list, allow_no_sensors, do_label_map;
 	const char *config_file_name = NULL;
 
 	struct option long_opts[] =  {
@@ -290,6 +316,7 @@ int main(int argc, char *argv[])
 		{ "config-file", required_argument, NULL, 'c' },
 		{ "bus-list", no_argument, NULL, 'B' },
 		{ "allow-no-sensors", no_argument, NULL, 'n' },
+		{ "label-map", no_argument, NULL, 'l' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -302,8 +329,9 @@ int main(int argc, char *argv[])
 	do_bus_list = 0;
 	hide_adapter = 0;
 	allow_no_sensors = 0;
+	do_label_map = 0;
 	while (1) {
-		c = getopt_long(argc, argv, "hsvfAc:ujJn", long_opts, NULL);
+		c = getopt_long(argc, argv, "hsvfAc:ujJnl", long_opts, NULL);
 		if (c == EOF)
 			break;
 		switch(c) {
@@ -345,6 +373,9 @@ int main(int argc, char *argv[])
 		case 'n':
 			allow_no_sensors = 1;
 			break;
+		case 'l':
+			do_label_map = 1;
+			break;
 		default:
 			fprintf(stderr,
 				"Internal error while parsing options!\n");
@@ -358,6 +389,11 @@ int main(int argc, char *argv[])
 
 	/* build the degrees string */
 	set_degstr();
+
+	if (do_label_map) {
+		print_label_map();
+		exit(0);
+	}
 
 	if (do_bus_list) {
 		print_bus_list();
