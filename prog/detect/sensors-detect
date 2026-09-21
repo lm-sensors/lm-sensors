@@ -2844,7 +2844,11 @@ use vars qw(@cpu_ids);
 	}, {
 		name => "AMD Family 19h thermal sensors",
 		driver => "k10temp",
-		detect => sub { amd_pci_detect('1653') },
+		detect => sub { amd_pci_detect('1653', '14b0', '167c', '166d', '14e3', '14f3', '12fb') },
+	}, {
+		name => "AMD Family 1Ah thermal sensors",
+		driver => "k10temp",
+		detect => sub { amd_pci_detect('12c3', '16fb', '12cb', '124b', '12bb', '127b') },
 	}, {
 		name => "Intel digital thermal sensor",
 		driver => "coretemp",
