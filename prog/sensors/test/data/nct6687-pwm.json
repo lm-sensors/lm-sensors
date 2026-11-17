@@ -1,0 +1,85 @@
+{
+  "nct6687-isa-0a20": {
+    "Adapter": "ISA adapter",
+    "pwm1": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm1": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 48.62745098039216
+      }
+    },
+    "pwm13": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm13": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 40
+      }
+    },
+    "pwm14": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm14": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 29.80392156862745
+      }
+    },
+    "pwm15": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm15": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 42.35294117647059
+      }
+    },
+    "pwm16": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm16": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 38.43137254901961
+      }
+    },
+    "pwm2": {
+      "enable": {
+        "quantity": "boolean",
+        "value": 2
+      },
+      "pwm2": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 100
+      }
+    },
+    "pwm3": {
+      "pwm3": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 0
+      }
+    },
+    "pwm4": {
+      "pwm4": {
+        "quantity": "pwm",
+        "unit": "%",
+        "value": 60.00000000000001
+      }
+    }
+  }
+}

@@ -279,7 +279,7 @@ char *get_feature_name(sensors_feature_type ftype, char *sfname)
 		break;
 	case SENSORS_FEATURE_PWM:
 		/* Not all pwm subfeatures have a underscore in there name */
-		name = strndup(sfname, 4);
+		name = strndup(sfname, strcspn(sfname, "_"));
 		if (!name)
 			sensors_fatal_error(__func__, "Out of memory");
 
